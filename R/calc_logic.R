@@ -23,7 +23,7 @@ calc_skipped_exons <- function(gr) {
   if (length(candidates) == 0L) {
     return(
       candidates |>
-        plyranges::mutate(skipped_exon = FALSE)
+        plyranges::mutate(skipped_exon = NA)
     )
   }
   
