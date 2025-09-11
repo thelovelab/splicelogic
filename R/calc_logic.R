@@ -28,7 +28,6 @@ calc_skipped_exons <- function(gr) {
   }
   
   candidates <- candidates |>
-    plyranges::mutate(skipped_exon = TRUE) |>
     plyranges::filter(internal)
 
   # keys of exons to the left and right of candidates
