@@ -50,7 +50,7 @@ calc_skipped_exons <- function(gr) {
 
   gr |>
     mutate(
-      event = ifelse(key %in% candidates$key, "skipped_exon", NA)
+      event = ifelse(key %in% candidates$key, "skipped_exon", event)
     )
 
 }
