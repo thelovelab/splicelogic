@@ -4,12 +4,15 @@
 \alias{calc_skipped_exons}
 \title{Calculate skipped exons from a GRanges object}
 \usage{
-calc_skipped_exons(gr)
+calc_skipped_exons(gr, coef_col, type = c("in", "over", "boundary"))
 }
 \arguments{
-\item{gr}{A GRanges object with exon annotations, including 'txp', 'rank',
-and 'coef' metadata columns.
-The 'coef' column should contain 1 for upregulated exons and -1 for downregulated exons.}
+\item{gr}{A GRanges object with exon annotations, including 'tx_id', 'exon',
+and 'coef_col' metadata columns.}
+
+\item{coef_col}{The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.}
+
+\item{type}{The type of overlap to consider when identifying skipped exons.}
 }
 \value{
 A GRanges object with an additional 'event' metadata column indicating skipped exons.

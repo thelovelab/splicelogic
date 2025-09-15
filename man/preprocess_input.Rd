@@ -4,10 +4,10 @@
 \alias{preprocess_input}
 \title{Preprocess input GRanges object for splicing event calculation}
 \usage{
-preprocess_input(gr)
+preprocess_input(gr, coef_col)
 }
 \arguments{
-\item{gr}{A GRanges object with metadata columns: 'rank', 'gene', 'txp', 'coef'.}
+\item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.}
 }
 \value{
 A GRanges object with added 'key', 'nexons', 'internal', and 'event' columns.

@@ -4,7 +4,7 @@
 \alias{check_input}
 \title{Check that input is a valid GRanges object with required metadata columns}
 \usage{
-check_input(gr)
+check_input(gr, coef_col)
 }
 \arguments{
 \item{gr}{A GRanges object}
