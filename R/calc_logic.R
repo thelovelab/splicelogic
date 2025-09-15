@@ -1,5 +1,5 @@
 #' Calculate skipped exons from a GRanges object
-#' @param gr A GRanges object with exon annotations, including 'txp', 'rank',
+#' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
 #' and 'coef' metadata columns.
 #' The 'coef' column should contain 1 for upregulated exons and -1 for downregulated exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
@@ -8,37 +8,33 @@
 #' @importFrom plyranges filter_by_non_overlaps_directed
 #' @export          
 calc_skipped_exons <- function(gr) {
-
   # if preprocessing didn't happen
   if (!all(c("key","nexons","internal","event") %in% names(mcols(gr)))) {
-    gr <- gr | preprocess_input(gr)
+    gr <- gr |> preprocess_input()
   }
-  
-  pos_exons <- gr |> filter(coef == 1)
-  neg_exons <- gr |> filter(coef == -1)
+  # separate positive and negative exons
+  pos_exons <- gr |> filter(sign(coef) == 1)
+  neg_exons <- gr |> filter(sign(coef) == -1)
 
   candidates <- neg_exons |>
-    filter_by_non_overlaps_directed(pos_exons)
+    plyranges::filter_by_non_overlaps_directed(pos_exons)
   
   if (length(candidates) == 0L) {
-    return(
-      candidates |>
-        plyranges::mutate(skipped_exon = NA)
-    )
+    return(gr) #return unchanged if no candidates
   }
-  
+
   candidates <- candidates |>
     plyranges::filter(internal)
 
   # keys of exons to the left and right of candidates
-  left_keys  <- paste0(candidates$txp, "-", 
-                        candidates$rank - 1)
-  right_keys <- paste0(candidates$txp, "-", 
-                        candidates$rank + 1)
+  left_keys  <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank - 1)
+  right_keys <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank + 1)
 
   # get the actual exons for the candidates
-  left_exons  <- gr |> filter(key %in% left_keys)
-  right_exons <- gr |> filter(key %in% right_keys)
+  left_exons <- gr |> plyranges::slice(match(left_keys, key))
+  right_exons <- gr |> plyranges::slice(match(right_keys, key))
 
   # determine if the left and right exons of candidates
   # were somewhere in the positive exon set
@@ -49,7 +45,7 @@ calc_skipped_exons <- function(gr) {
     )
 
   gr |>
-    mutate(
+    plyranges::mutate(
       event = ifelse(key %in% candidates$key, "skipped_exon", event)
     )
 

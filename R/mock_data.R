@@ -17,9 +17,9 @@ get_mock_data <- function() {
     start = c(1, 11, 21, 31),
     width = 5,
     strand = "+",
-    rank = 1:4,
-    gene = rep(1, 4),
-    txp = rep(1, 4),
+    exon_rank = 1:4,
+    gene_id = rep(1, 4),
+    tx_id = rep(1, 4),
     coef = rep(-1, 4)
   )
   df2 <- data.frame(
@@ -27,16 +27,16 @@ get_mock_data <- function() {
     start = c(1, 11,  31),
     width = 5,
     strand = "+",
-    rank = 1:3,
-    gene = rep(1, 3),
-    txp = rep(1, 3),
+    exon_rank = 1:3,
+    gene_id = rep(1, 3),
+    tx_id = rep(1, 3),
     coef = rep(1, 3)
   )
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
   gr <- plyranges::bind_ranges(gr1, gr2) |>
       plyranges::mutate(
-      txp = c(rep(1, 4), rep(2, 3)))
+      tx_id = c(rep(1, 4), rep(2, 3)))
 
 return(gr)
 }

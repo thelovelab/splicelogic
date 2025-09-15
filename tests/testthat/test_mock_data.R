@@ -9,7 +9,7 @@ test_that("get_mock_data returns correct number of ranges", {
   expect_equal(length(gr), 7) # 4 from df1, 3 from df2
 })
 
-test_that("get_mock_data returns correct txp values", {
+test_that("get_mock_data returns correct tx_id values", {
   gr <- get_mock_data()
-  expect_equal(gr$txp, c(rep(1, 4), rep(2, 3)))
+  expect_equal(gr$tx_id, c(rep(1, 4), rep(2, 3)))
 })
