@@ -57,15 +57,15 @@ preprocess_input <- function(gr) {
 
   # include key nexons and internal columns
   gr <- gr |>
-    group_by(tx_id) |> 
-    mutate(
+    plyranges::group_by(tx_id) |> 
+    plyranges::mutate(
       key     = paste0(tx_id, "-", exon_rank),
       nexons  = length(exon_rank),
       internal = exon_rank > 1 & exon_rank < nexons
     ) |> 
-    ungroup()
+    plyranges::ungroup()
 
-  # initialize event column if needed 
+  # initialize event column if needed but dont wipe out existing annotations
   if (!"event" %in% colnames(mcols(gr))) {
     gr$event <- NA_character_
   }

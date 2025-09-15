@@ -13,8 +13,8 @@ calc_skipped_exons <- function(gr) {
     gr <- gr |> preprocess_input()
   }
   # separate positive and negative exons
-  pos_exons <- gr |> filter(sign(coef) == 1)
-  neg_exons <- gr |> filter(sign(coef) == -1)
+  pos_exons <- gr |> plyranges::filter(sign(coef) == 1)
+  neg_exons <- gr |> plyranges::filter(sign(coef) == -1)
 
   candidates <- neg_exons |>
     plyranges::filter_by_non_overlaps_directed(pos_exons)
@@ -39,7 +39,7 @@ calc_skipped_exons <- function(gr) {
   # determine if the left and right exons of candidates
   # were somewhere in the positive exon set
   candidates <- candidates |>
-    filter(
+    plyranges::filter(
         left_exons %in% pos_exons &
         right_exons %in% pos_exons
     )
