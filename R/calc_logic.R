@@ -1,20 +1,21 @@
 #' Calculate skipped exons from a GRanges object
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
-#' and 'coef' metadata columns.
-#' The 'coef' column should contain 1 for upregulated exons and -1 for downregulated exons.
+#' and 'coef_col' metadata columns.
+#' The 'coef_col' column should contain 1 for upregulated exons and -1 for downregulated exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
 #' @import GenomicRanges
 #' @importFrom dplyr group_by mutate ungroup filter
 #' @importFrom plyranges filter_by_non_overlaps_directed
 #' @export          
-calc_skipped_exons <- function(gr) {
+calc_skipped_exons <- function(gr, coef_col) {
   # if preprocessing didn't happen
   if (!all(c("key","nexons","internal","event") %in% names(mcols(gr)))) {
-    gr <- gr |> preprocess_input()
+    gr <- preprocess_input(gr, coef_col)
   }
   # separate positive and negative exons
-  pos_exons <- gr |> plyranges::filter(sign(coef) == 1)
-  neg_exons <- gr |> plyranges::filter(sign(coef) == -1)
+  var <- rlang::sym(coef_col)
+  pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
+  neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
 
   candidates <- neg_exons |>
     plyranges::filter_by_non_overlaps_directed(pos_exons)

@@ -5,25 +5,24 @@
 #' @importFrom GenomicRanges mcols
 #' @importFrom plyranges bind_ranges
 #' @export
-check_input <- function(gr) {
+check_input <- function(gr, coef_col) {
   if (!is(gr, "GRanges")) {
     stop("Input must be a GRanges object.")
   }
-  
-  required_cols <- c("exon_rank", "gene_id", "tx_id", "coef")
+  #check for required metadata columns
+  required_cols <- c("exon_rank", "gene_id", "tx_id", coef_col)
   missing_cols <- setdiff(required_cols, names(mcols(gr)))
-
+  if (length(missing_cols) > 0) {
+      stop(paste("Missing required metadata columns:", paste(missing_cols, collapse = ", ")))
+    }
   #check if coef column is present and valid
-  if ("coef" %in% names(mcols(gr))) {
-    if (any(!mcols(gr)$coef %in% c(1, -1))) {
-      stop("The 'coef' metadata column must contain only 1 (contrast) or -1 (reference) values.")
+  if (coef_col %in% names(mcols(gr))) {
+    vals <- mcols(gr)[[coef_col]]
+    if (any(vals < -1 | vals > 1)) {
+      stop(sprintf("The '%s' metadata column must contain values only in the range [-1, 1].", coef_col))
     }
   }
 
-  if (length(missing_cols) > 0) {
-    stop(paste("Missing required metadata columns:", paste(missing_cols, collapse = ", ")))
-  }
-  
   TRUE
 }
 
@@ -52,8 +51,8 @@ combine_gr_input <- function(gr1, gr2) {
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.
 #' @return A GRanges object with added 'key', 'nexons', 'internal', and 'event' columns.
 #' @importFrom plyranges group_by mutate ungroup
-preprocess_input <- function(gr) {
-  check_input(gr) # check metadata columns are present
+preprocess_input <- function(gr, coef_col) {
+  check_input(gr, coef_col) # check metadata columns are present
 
   # include key nexons and internal columns
   gr <- gr |>

@@ -20,7 +20,7 @@ get_mock_data <- function() {
     exon_rank = 1:4,
     gene_id = rep(1, 4),
     tx_id = rep(1, 4),
-    coef = rep(-1, 4)
+    coefs = runif(4, min = -1, max = 0)
   )
   df2 <- data.frame(
     seqnames = "chr1",
@@ -30,7 +30,7 @@ get_mock_data <- function() {
     exon_rank = 1:3,
     gene_id = rep(1, 3),
     tx_id = rep(1, 3),
-    coef = rep(1, 3)
+    coefs = runif(3, min = 0, max = 1)
   )
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
