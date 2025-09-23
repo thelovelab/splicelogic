@@ -7,11 +7,11 @@
 #' @import GenomicRanges
 #' @importFrom dplyr group_by mutate ungroup filter
 #' @importFrom plyranges filter_by_non_overlaps_directed
-#' @export          
-calc_skipped_exons <- function(gr, coef_col, type = c("in","over","boundary")) {
-  type <- match.arg(type) 
+#' @export
+calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary")) {
+  type <- match.arg(type)
   # if preprocessing didn't happen
-  if (!all(c("key","nexons","internal","event") %in% names(mcols(gr)))) {
+  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col)
   }
   # separate positive and negative exons
@@ -39,36 +39,43 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in","over","boundary")) {
   left_exons <- gr |> plyranges::slice(match(left_keys, key))
   right_exons <- gr |> plyranges::slice(match(right_keys, key))
 
-  candidates <- switch(
-    type,
-    "in" = {
-      # determine if the left and right exons of candidates are in the positive set
-      candidates <- candidates |>
-        plyranges::filter(
-            left_exons %in% pos_exons &
-            right_exons %in% pos_exons
-        )
-    },
-    "over" = {
-      candidates <- candidates |>
-        plyranges::filter(
-            left_exons %over% pos_exons &
-            right_exons %over% pos_exons
-        )
-    },
-    "boundary" = {
-      has_end_in   <- function(x, y) end(x)   %in% end(y)
-      has_start_in <- function(x, y) start(x) %in% start(y)
-      candidates <- candidates |>
-        plyranges::filter(
-          (left_exons  |> has_end_in(pos_exons)) &
-          (right_exons |> has_start_in(pos_exons))
-        )
-    }
-  )
-  gr |>
-    plyranges::mutate(
-      event = ifelse(key %in% candidates$key, "skipped_exon", event)
-    )
+  hits <- GRanges()
+  for (i in seq_along(candidates)) {
+    cand <- candidates[i]  # a length-1 GRanges
 
-}
+    # split by tx_id (as tibbles) and check each transcript separately
+    temp_pos <- get_matcher(
+      pos_exons,
+      left_exon  = left_exons[i],
+      right_exon = right_exons[i],
+      type = type
+    )
+    # dplyr::glimpse(temp_pos)  
+
+    # left/right exon ranks per tx
+    left_tbl <- temp_pos |>
+      dplyr::filter(match_left == TRUE) |>
+      dplyr::distinct(tx_id, exon_rank) |>
+      dplyr::rename(l = exon_rank)
+
+    right_tbl <- temp_pos |>
+      dplyr::filter(match_right == TRUE) |>
+      dplyr::distinct(tx_id, exon_rank) |>
+      dplyr::rename(r = exon_rank)
+
+    # join left and right by tx_id, filter for adjacent exons (l-r==1)
+    pairs <- dplyr::inner_join(left_tbl, right_tbl, by = "tx_id") |>
+        dplyr::filter(abs(l - r) == 1)
+
+    if (nrow(pairs) > 0) {
+      txs <- unique(pairs$tx_id)
+      cand_rep <- rep(cand, length(txs)) |>
+        plyranges::mutate(
+          event    = "skipped_exon",
+          tx_event = txs
+        )
+      hits <- c(hits, cand_rep)
+      }
+    }
+  hits
+  }
