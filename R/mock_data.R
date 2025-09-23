@@ -14,29 +14,43 @@ get_mock_data <- function() {
   
   df1 <- data.frame(
     seqnames = "chr1",
-    start = c(1, 11, 21, 31),
+    start = c(1, 11, 21, 31, 41, 51, 61),
     width = 5,
     strand = "+",
-    exon_rank = 1:4,
-    gene_id = rep(1, 4),
-    tx_id = rep(1, 4),
-    coefs = runif(4, min = -1, max = 0)
+    exon_rank = 1:7,
+    gene_id = rep(1, 7),
+    tx_id = rep(1, 7),
+    coefs = runif(7, min = -1, max = 0)
   )
   df2 <- data.frame(
     seqnames = "chr1",
-    start = c(1, 11,  31),
+    start = c(1, 11,  31, 41, 61, 71),
     width = 5,
     strand = "+",
-    exon_rank = 1:3,
-    gene_id = rep(1, 3),
-    tx_id = rep(1, 3),
-    coefs = runif(3, min = 0, max = 1)
+    exon_rank = 1:6,
+    gene_id = rep(1, 6),
+    tx_id = rep(1, 6),
+    coefs = runif(6, min = 0, max = 1)
   )
+
+    df3 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11,  31, 41, 61, 71),
+    width = 5,
+    strand = "+",
+    exon_rank = 1:6,
+    gene_id = rep(1, 6),
+    tx_id = rep(1, 6),
+    coefs = runif(6, min = 0, max = 1)
+  )
+
+
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
-  gr <- plyranges::bind_ranges(gr1, gr2) |>
+  gr3 <- plyranges::as_granges(df3)
+  gr <- plyranges::bind_ranges(gr1, gr2, gr3) |>
       plyranges::mutate(
-      tx_id = c(rep(1, 4), rep(2, 3)))
+      tx_id = c(rep(1, 7), rep(2, 6), rep(3, 6)))
 
 return(gr)
 }
