@@ -3,6 +3,7 @@ test_that("calc_skipped_exons works with get_mock_data and preprocess_input", {
   gr <- get_mock_data()
   gr <- preprocess_input(gr, coef_col = "coefs")
   result <- calc_skipped_exons(gr, coef_col = "coefs")
+  expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(mcols(result)))
   expect_true(any(result$event == "skipped_exon"))
 })

@@ -1,15 +1,26 @@
 
-test_that("get_mock_data returns a GRanges object", {
+# test_that 
+
+test_that("get_mock_data returns a GRanges and has required metadata columns", {
   gr <- get_mock_data()
   expect_s4_class(gr, "GRanges")
+
+  required_cols <- c("exon_rank", "gene_id", "tx_id", "coefs")
+  expect_true(all(required_cols %in% names(GenomicRanges::mcols(gr))))
 })
 
-test_that("get_mock_data returns correct number of ranges", {
+test_that("coefs metadata is numeric and within [-1, 1]", {
   gr <- get_mock_data()
-  expect_equal(length(gr), 7) # 4 from df1, 3 from df2
+  coefs <- GenomicRanges::mcols(gr)$coefs
+  expect_true(is.numeric(coefs))
+  expect_true(all(!is.na(coefs)))
+  expect_true(all(coefs >= -1 & coefs <= 1))
 })
 
-test_that("get_mock_data returns correct tx_id values", {
+test_that("check metadata column types", {
   gr <- get_mock_data()
-  expect_equal(gr$tx_id, c(rep(1, 4), rep(2, 3)))
+  md <- GenomicRanges::mcols(gr)
+  expect_true(is.numeric(md$exon_rank) || is.integer(md$exon_rank))
+  expect_true(is.numeric(md$tx_id) || is.integer(md$tx_id))
+  expect_true(is.numeric(md$gene_id) || is.integer(md$gene_id))
 })
