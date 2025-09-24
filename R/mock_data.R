@@ -1,8 +1,7 @@
 
-#' Create a sample GRanges with two transcripts per gene and candidate logic
-#' 
-#' @param ngenes Number of genes to include (default is 1)
-#' @param ntranscripts Number of transcripts per gene (default is 2)
+#' Create a sample GRanges with one negative coef transcript and two positive coef transcripts
+#' This dataset is designed to include a skipped exon event at exon_rank 3 and 5 of tx_id 1 
+#' happening between both tx_id 2 and tx_id 3
 #' 
 #' @return A GRanges object with two transcripts per gene and candidate logic
 #' @import GenomicRanges
@@ -10,7 +9,7 @@
 #' @importFrom dplyr mutate case_when
 #' @return A GRanges object with two transcripts per gene
 #' @export
-get_mock_data <- function() {
+se_mock_data <- function() {
   
   df1 <- data.frame(
     seqnames = "chr1",
