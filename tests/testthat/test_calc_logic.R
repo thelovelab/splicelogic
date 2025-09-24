@@ -7,11 +7,45 @@ test_that("calc_skipped_exons works with se_mock_data and preprocess_input", {
   expect_true("event" %in% names(mcols(result)))
   expect_true(any(result$event == "skipped_exon"))
 })
-# Test for invalid coef column input
+
+# Test for invalid coef column input in calc_skipped_exons
 test_that("calc_skipped_exons errors if coef_col is invalid", {
   gr <- se_mock_data()
   expect_error(
     calc_skipped_exons(gr, coef_col = "foo"),
     regexp = "Missing required metadata columns: foo"
   )
+})
+
+# Test for skipped exon detection in mx_mock_data
+test_that("calc_skipped_exons detects single skipped exon in mx_mock_data", {
+  gr <- mx_mock_data()
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  result <- calc_skipped_exons(gr, coef_col = "coefs")
+
+  expect_s4_class(result, "GRanges")
+  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+
+  # expect exactly one detected event on exon_rank = 5 of tx_id 1
+  expect_equal(length(result), 1L)
+  expect_equal(as.integer(GenomicRanges::mcols(result)$tx_id), 1L)
+  expect_equal(as.integer(GenomicRanges::mcols(result)$exon_rank), 5L)
+  expect_equal(as.character(GenomicRanges::mcols(result)$event), "skipped_exon")
+})
+
+
+# Test for mutually exclusive detection in mx_mock_data
+test_that("calc_mutually_exclusive detects mutually exclusive exons in mx_mock_data", {
+  gr <- mx_mock_data()
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  result <- calc_mutually_exclusive(gr, coef_col = "coefs")
+
+  expect_s4_class(result, "GRanges")
+  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+
+  # expect exactly one detected event on exon_rank = 5 of tx_id 1
+  expect_equal(length(result), 4L)
+  expect_equal(as.integer(GenomicRanges::mcols(result)$tx_id), c(1, 2, 1, 2))
+  expect_equal(as.integer(GenomicRanges::mcols(result)$exon_rank), c(3, 3, 8, 7))
+  expect_equal(as.character(GenomicRanges::mcols(result)$event), rep("mutually_exclusive", 4L))
 })

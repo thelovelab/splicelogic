@@ -3,6 +3,7 @@
 export(calc_skipped_exons)
 export(check_input)
 export(get_matcher)
+export(mx_mock_data)
 export(se_mock_data)
 import(GenomicRanges)
 importFrom(GenomicRanges,mcols)

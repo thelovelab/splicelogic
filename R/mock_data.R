@@ -10,7 +10,6 @@
 #' @return A GRanges object with two transcripts per gene
 #' @export
 se_mock_data <- function() {
-  
   df1 <- data.frame(
     seqnames = "chr1",
     start = c(1, 11, 21, 31, 41, 51, 61),
@@ -29,7 +28,6 @@ se_mock_data <- function() {
     gene_id = rep(1, 6),
     coefs = rep(runif(1, min = 0, max = 1), 6)
   )
-
     df3 <- data.frame(
     seqnames = "chr1",
     start = c(1, 11,  31, 41, 61, 71),
@@ -39,14 +37,50 @@ se_mock_data <- function() {
     gene_id = rep(1, 6),
     coefs = rep(runif(1, min = 0, max = 1), 6)
   )
-
-
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
   gr3 <- plyranges::as_granges(df3)
   gr <- plyranges::bind_ranges(gr1, gr2, gr3) |>
       plyranges::mutate(
       tx_id = c(rep(1, 7), rep(2, 6), rep(3, 6)))
+
+return(gr)
+}
+
+#' Create a sample GRanges with one negative coef transcript and one positive coef transcripts
+#' This dataset is designed to include a mutually exclusive exons between exon_rank 3 of tx_id 1
+#' and exon_rank 3 of tx_id 2. There is also a skipped exon event at exon_rank 5 of tx_id 1.
+#' 
+#' @return A GRanges object with two transcripts per gene and candidate logic
+#' @import GenomicRanges
+#' @importFrom plyranges as_granges bind_ranges
+#' @importFrom dplyr mutate case_when
+#' @return A GRanges object with two transcripts per gene
+#' @export
+mx_mock_data <- function() {
+  df1 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11, 21, 41, 51, 61, 71, 91, 101),
+    width = 5,
+    strand = "+",
+    exon_rank = 1:9,
+    gene_id = rep(1, 9),
+    coefs = rep(runif(1, min = -1, max = 0), 9)
+  )
+  df2 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11, 31, 41, 61, 71, 81, 101),
+    width = 5,
+    strand = "+",
+    exon_rank = 1:8,
+    gene_id = rep(1, 8),
+    coefs = rep(runif(1, min = 0, max = 1), 8)
+  )
+  gr1 <- plyranges::as_granges(df1)
+  gr2 <- plyranges::as_granges(df2)
+  gr <- plyranges::bind_ranges(gr1, gr2) |>
+      plyranges::mutate(
+      tx_id = c(rep(1, 9), rep(2, 8)))
 
 return(gr)
 }

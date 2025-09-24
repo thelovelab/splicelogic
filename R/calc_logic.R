@@ -50,8 +50,6 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
       right_exon = right_exons[i],
       type = type
     )
-    # dplyr::glimpse(temp_pos)  
-
     # left/right exon ranks per tx
     left_tbl <- temp_pos |>
       dplyr::filter(match_left == TRUE) |>
@@ -79,3 +77,84 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
     }
   hits
   }
+
+
+calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "boundary")) {
+  type <- match.arg(type)
+  # if preprocessing didn't happen
+  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+    gr <- preprocess_input(gr, coef_col)
+  }
+  # separate positive and negative exons
+  var <- rlang::sym(coef_col)
+  pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
+  neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
+
+  candidates <- neg_exons |>
+    plyranges::filter_by_non_overlaps_directed(pos_exons)
+  
+  if (length(candidates) == 0L) {
+    return(gr) #return unchanged if no candidates
+  }
+
+  candidates <- candidates |>
+    plyranges::filter(internal)
+
+  # keys of exons to the left and right of candidates
+  left_keys  <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank - 1)
+  right_keys <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank + 1)
+
+  # get the actual exons for the candidates
+  left_exons <- gr |> plyranges::slice(match(left_keys, key))
+  right_exons <- gr |> plyranges::slice(match(right_keys, key))
+
+  hits <- GRanges()
+  for (i in seq_along(candidates)) {
+    cand <- candidates[i]  # a length-1 GRanges
+
+    # split by tx_id (as tibbles) and check each transcript separately
+    temp_pos <- get_matcher(
+      pos_exons,
+      left_exon  = left_exons[i],
+      right_exon = right_exons[i],
+      type = type
+    )
+    # left/right exon ranks per tx
+    left_tbl <- temp_pos |>
+      dplyr::filter(match_left == TRUE) |>
+      dplyr::distinct(tx_id, exon_rank) |>
+      dplyr::rename(l = exon_rank)
+
+    right_tbl <- temp_pos |>
+      dplyr::filter(match_right == TRUE) |>
+      dplyr::distinct(tx_id, exon_rank) |>
+      dplyr::rename(r = exon_rank)
+
+    # join left and right by tx_id, filter for mx exons (l-r==2)
+    pairs <- dplyr::inner_join(left_tbl, right_tbl, by = "tx_id") |>
+        dplyr::filter(abs(l - r) == 2)
+
+    for (i in seq_along(pairs)) {
+      tx_event <- pairs$tx_id[i]
+      exon_rank_event <- pairs$r[i] - 1  # middle exon rank
+      mx_pos_exon <- pos_exons |>
+        plyranges::filter(tx_id == tx_event & exon_rank == exon_rank_event)
+      if (length(mx_pos_exon) == 1L) {
+        cand_hit <- cand |>
+          plyranges::mutate(
+            event    = "mutually_exclusive",
+            tx_event = tx_event
+          )
+        pos_hit <- mx_pos_exon |>
+          plyranges::mutate(
+            event    = "mutually_exclusive",
+            tx_event = cand_hit$tx_id
+          )
+        hits <- c(hits, cand_hit, pos_hit)
+      }
+    }
+  }
+  hits
+}
