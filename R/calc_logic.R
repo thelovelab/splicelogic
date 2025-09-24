@@ -32,23 +32,14 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
   for (i in seq_along(candidates)) {
     cand <- candidates[i]  # a length-1 GRanges
 
-    # split by tx_id (as tibbles) and check each transcript separately
-    temp_pos <- get_matcher(
+    matches <- match_left_right(
       pos_exons,
       left_exon  = left_exons[i],
       right_exon = right_exons[i],
       type = type
     )
-    # left/right exon ranks per tx
-    left_tbl <- temp_pos |>
-      dplyr::filter(match_left == TRUE) |>
-      dplyr::distinct(tx_id, exon_rank) |>
-      dplyr::rename(l = exon_rank)
-
-    right_tbl <- temp_pos |>
-      dplyr::filter(match_right == TRUE) |>
-      dplyr::distinct(tx_id, exon_rank) |>
-      dplyr::rename(r = exon_rank)
+    left_tbl <- matches$left_tbl
+    right_tbl <- matches$right_tbl
 
     # join left and right by tx_id, filter for adjacent exons (l-r==1)
     pairs <- dplyr::inner_join(left_tbl, right_tbl, by = "tx_id") |>
@@ -93,23 +84,14 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
   for (i in seq_along(candidates)) {
     cand <- candidates[i]  # a length-1 GRanges
 
-    # split by tx_id (as tibbles) and check each transcript separately
-    temp_pos <- get_matcher(
+    matches <- match_left_right(
       pos_exons,
       left_exon  = left_exons[i],
       right_exon = right_exons[i],
       type = type
     )
-    # left/right exon ranks per tx
-    left_tbl <- temp_pos |>
-      dplyr::filter(match_left == TRUE) |>
-      dplyr::distinct(tx_id, exon_rank) |>
-      dplyr::rename(l = exon_rank)
-
-    right_tbl <- temp_pos |>
-      dplyr::filter(match_right == TRUE) |>
-      dplyr::distinct(tx_id, exon_rank) |>
-      dplyr::rename(r = exon_rank)
+    left_tbl <- matches$left_tbl
+    right_tbl <- matches$right_tbl
 
     # join left and right by tx_id, filter for mx exons (l-r==2)
     pairs <- dplyr::inner_join(left_tbl, right_tbl, by = "tx_id") |>
