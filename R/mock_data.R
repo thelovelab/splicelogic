@@ -84,3 +84,31 @@ mx_mock_data <- function() {
 
 return(gr)
 }
+
+no_event_mock_data <- function() {
+  df1 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11, 21),
+    width = 5,
+    strand = "+",
+    exon_rank = 1:3,
+    gene_id = rep(1, 3),
+    coefs = rep(runif(1, min = -1, max = 0), 3)
+  )
+  df2 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11,  21),
+    width = 5,
+    strand = "+",
+    exon_rank = 1:3,
+    gene_id = rep(1, 3),
+    coefs = rep(runif(1, min = 0, max = 1), 3)
+  )
+  gr1 <- plyranges::as_granges(df1)
+  gr2 <- plyranges::as_granges(df2)
+  gr <- plyranges::bind_ranges(gr1, gr2) |>
+      plyranges::mutate(
+      tx_id = c(rep(1, 3), rep(2, 3)))
+
+return(gr)
+}
