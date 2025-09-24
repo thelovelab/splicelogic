@@ -19,27 +19,16 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
   pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
   neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
 
-  candidates <- neg_exons |>
-    plyranges::filter_by_non_overlaps_directed(pos_exons)
-  
-  if (length(candidates) == 0L) {
-    return(gr) #return unchanged if no candidates
-  }
-
-  candidates <- candidates |>
-    plyranges::filter(internal)
-
-  # keys of exons to the left and right of candidates
-  left_keys  <- paste0(candidates$tx_id, "-", 
-                        candidates$exon_rank - 1)
-  right_keys <- paste0(candidates$tx_id, "-", 
-                        candidates$exon_rank + 1)
-
-  # get the actual exons for the candidates
-  left_exons <- gr |> plyranges::slice(match(left_keys, key))
-  right_exons <- gr |> plyranges::slice(match(right_keys, key))
+  res <- candidates_by_non_overlap(neg_exons, pos_exons, gr)
+  candidates <- res$candidates
+  left_exons <- res$left_exons
+  right_exons <- res$right_exons
 
   hits <- GRanges()
+  if (length(candidates) == 0L) {
+    return(hits) #return unchanged if no candidates
+  }
+
   for (i in seq_along(candidates)) {
     cand <- candidates[i]  # a length-1 GRanges
 
@@ -90,27 +79,17 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
   pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
   neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
 
-  candidates <- neg_exons |>
-    plyranges::filter_by_non_overlaps_directed(pos_exons)
-  
-  if (length(candidates) == 0L) {
-    return(gr) #return unchanged if no candidates
-  }
+  res <- candidates_by_non_overlap(neg_exons, pos_exons, gr)
+  candidates <- res$candidates
+  left_exons <- res$left_exons
+  right_exons <- res$right_exons
 
-  candidates <- candidates |>
-    plyranges::filter(internal)
-
-  # keys of exons to the left and right of candidates
-  left_keys  <- paste0(candidates$tx_id, "-", 
-                        candidates$exon_rank - 1)
-  right_keys <- paste0(candidates$tx_id, "-", 
-                        candidates$exon_rank + 1)
-
-  # get the actual exons for the candidates
-  left_exons <- gr |> plyranges::slice(match(left_keys, key))
-  right_exons <- gr |> plyranges::slice(match(right_keys, key))
 
   hits <- GRanges()
+  if (length(candidates) == 0L) {
+    return(hits) #return unchanged if no candidates
+  }
+
   for (i in seq_along(candidates)) {
     cand <- candidates[i]  # a length-1 GRanges
 

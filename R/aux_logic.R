@@ -43,3 +43,46 @@ get_matcher <- function(gr, left_exon, right_exon, type = c("in", "over", "bound
 return(matcher)
 }
 
+# Filter candidates that do not overlap any pos_exons, and are internal
+# Then get the left and right exons for each candidate
+# Return a named list with three GRanges objects: candidates, left_exons, right_exons
+#' @param neg_exons A GRanges object with candidate negative exons (neg_exons)
+#' @param pos_exons A GRanges object with positive exons (pos_exons)
+#' @param gr The original GRanges object with all exons (for looking up left/right)
+#' @return A named list with three GRanges objects: candidates, left_exons, right_exons
+#' @importFrom plyranges filter_by_non_overlaps_directed slice
+#' @importFrom GenomicRanges GRanges  
+candidates_by_non_overlap <- function(neg_exons, pos_exons, gr, type) {
+  # filter candidates that do not overlap any pos_exons
+  candidates <- neg_exons |>
+    plyranges::filter_by_non_overlaps_directed(pos_exons)
+
+  # early return: no candidates -> empty list with GRanges objects
+  if (length(candidates) == 0L) {
+    return(list(
+      candidates = candidates,
+      left_exons  = GenomicRanges::GRanges(), 
+      right_exons = GenomicRanges::GRanges()
+    ))
+  }
+
+  candidates <- candidates |>
+    plyranges::filter(internal)
+
+  # keys of exons to the left and right of candidates
+  left_keys  <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank - 1L)
+  right_keys <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank + 1L)
+
+  # get the actual exons for the candidates (preserves order of keys)
+  left_exons  <- gr |> plyranges::slice(match(left_keys, key))
+  right_exons <- gr |> plyranges::slice(match(right_keys, key))
+
+  # return all three objects in a named list
+  list(
+    candidates = candidates,
+    left_exons  = left_exons,
+    right_exons = right_exons
+  )
+}
