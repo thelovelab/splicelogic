@@ -19,8 +19,7 @@ get_mock_data <- function() {
     strand = "+",
     exon_rank = 1:7,
     gene_id = rep(1, 7),
-    tx_id = rep(1, 7),
-    coefs = runif(7, min = -1, max = 0)
+    coefs = rep(runif(1, min = -1, max = 0), 7)
   )
   df2 <- data.frame(
     seqnames = "chr1",
@@ -29,8 +28,7 @@ get_mock_data <- function() {
     strand = "+",
     exon_rank = 1:6,
     gene_id = rep(1, 6),
-    tx_id = rep(1, 6),
-    coefs = runif(6, min = 0, max = 1)
+    coefs = rep(runif(1, min = 0, max = 1), 6)
   )
 
     df3 <- data.frame(
@@ -40,8 +38,7 @@ get_mock_data <- function() {
     strand = "+",
     exon_rank = 1:6,
     gene_id = rep(1, 6),
-    tx_id = rep(1, 6),
-    coefs = runif(6, min = 0, max = 1)
+    coefs = rep(runif(1, min = 0, max = 1), 6)
   )
 
 
