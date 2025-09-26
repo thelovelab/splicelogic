@@ -13,8 +13,7 @@ get_matcher(gr, left_exon, right_exon, type = c("in", "over", "boundary"))
 
 \item{right_exon}{A GRanges object with right exon(s) to match}
 
-\item{type}{The type of overlap to consider when identifying matches.
-Currently only "boundary" is implemented.}
+\item{type}{The type of overlap to consider when identifying matches.}
 }
 \value{
 A tibble with columns from gr and two additional columns:
