@@ -58,7 +58,16 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
   hits
   }
 
-
+#' Calculate mutually exclusive exons from a GRanges object
+#' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
+#' and 'coef_col' metadata columns.
+#' @param coef_col The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.
+#' @param type The type of overlap to consider when identifying mutually exclusive exons.
+#' @return A GRanges object with an additional 'event' metadata column indicating mutually exclusive exons.
+#' @import GenomicRanges
+#' @importFrom dplyr group_by mutate ungroup filter inner_join
+#' @importFrom plyranges filter_by_non_overlaps_directed
+#' @export
 calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "boundary")) {
   type <- match.arg(type)
   # if preprocessing didn't happen

@@ -9,7 +9,6 @@
 #' @importFrom dplyr mutate as_tibble
 #' @importFrom plyranges count_overlaps
 #' @importFrom magrittr %>%
-#' @export  
 get_matcher <- function(gr, left_exon, right_exon, type = c("in", "over", "boundary")) {
   type <- match.arg(type)
   matcher <- switch(
