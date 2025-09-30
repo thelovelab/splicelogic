@@ -140,44 +140,44 @@ plot_gr <- function(gr) {
     )
 }
 
-se_mock_data2 <- function() {
-  df1 <- data.frame(
-    seqnames = "chr1",
-    start = c(1, 11, 21, 31, 41, 51, 61, 81),
-    width = 5,
-    strand = "+",
-    exon_rank = 1:8,
-    gene_id = rep(1, 8),
-    coefs = rep(runif(1, min = -1, max = 0), 8)
-  )
-  df2 <- data.frame(
-    seqnames = "chr1",
-    start = c(1, 11, 31, 61, 71),
-    width = 5,
-    strand = "+",
-    exon_rank = 1:5,
-    gene_id = rep(1, 5),
-    coefs = rep(runif(1, min = 0, max = 1), 5)
-  )
-  df3 <- data.frame(
-    seqnames = "chr1",
-    start = c(1, 11, 31, 41, 61, 71),
-    width = 5,
-    strand = "+",
-    exon_rank = 1:6,
-    gene_id = rep(1, 6),
-    coefs = rep(runif(1, min = 0, max = 1), 6)
-  )
-  gr1 <- plyranges::as_granges(df1)
-  gr2 <- plyranges::as_granges(df2)
-  gr3 <- plyranges::as_granges(df3)
-  gr <- plyranges::bind_ranges(gr1, gr2, gr3) |>
-    plyranges::mutate(
-      tx_id = c(rep(1, 8), rep(2, 5), rep(3, 6))
-    )
+# se_mock_data2 <- function() {
+#   df1 <- data.frame(
+#     seqnames = "chr1",
+#     start = c(1, 11, 21, 31, 41, 51, 61, 81),
+#     width = 5,
+#     strand = "+",
+#     exon_rank = 1:8,
+#     gene_id = rep(1, 8),
+#     coefs = rep(runif(1, min = -1, max = 0), 8)
+#   )
+#   df2 <- data.frame(
+#     seqnames = "chr1",
+#     start = c(1, 11, 31, 61, 71),
+#     width = 5,
+#     strand = "+",
+#     exon_rank = 1:5,
+#     gene_id = rep(1, 5),
+#     coefs = rep(runif(1, min = 0, max = 1), 5)
+#   )
+#   df3 <- data.frame(
+#     seqnames = "chr1",
+#     start = c(1, 11, 31, 41, 61, 71),
+#     width = 5,
+#     strand = "+",
+#     exon_rank = 1:6,
+#     gene_id = rep(1, 6),
+#     coefs = rep(runif(1, min = 0, max = 1), 6)
+#   )
+#   gr1 <- plyranges::as_granges(df1)
+#   gr2 <- plyranges::as_granges(df2)
+#   gr3 <- plyranges::as_granges(df3)
+#   gr <- plyranges::bind_ranges(gr1, gr2, gr3) |>
+#     plyranges::mutate(
+#       tx_id = c(rep(1, 8), rep(2, 5), rep(3, 6))
+#     )
 
-  return(gr)
-}
+#   return(gr)
+# }
 
 # initialzie a matrix with values set to the intersections
 # of i and j.
