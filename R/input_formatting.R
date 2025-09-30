@@ -4,7 +4,6 @@
 #' @return TRUE if input is valid, otherwise throws an error
 #' @importFrom GenomicRanges mcols
 #' @importFrom plyranges bind_ranges
-#' @export
 check_input <- function(gr, coef_col) {
   if (!is(gr, "GRanges")) {
     stop("Input must be a GRanges object.")
@@ -51,6 +50,7 @@ combine_gr_input <- function(gr1, gr2) {
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.
 #' @return A GRanges object with added 'key', 'nexons', 'internal', and 'event' columns.
 #' @importFrom plyranges group_by mutate ungroup
+#' @export
 preprocess_input <- function(gr, coef_col) {
   check_input(gr, coef_col) # check metadata columns are present
 

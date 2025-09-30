@@ -84,7 +84,14 @@ mx_mock_data <- function() {
 
 return(gr)
 }
-
+#' Create a sample GRanges with one negative coef transcript and one positive coef transcripts
+#' This dataset is designed to include no splicing events
+#' @return A GRanges object with two transcripts per gene and no candidate logic
+#' @import GenomicRanges
+#' @importFrom plyranges as_granges bind_ranges
+#' @importFrom dplyr mutate case_when
+#' @return A GRanges object with two transcripts per gene
+#' @export  
 no_event_mock_data <- function() {
   df1 <- data.frame(
     seqnames = "chr1",
