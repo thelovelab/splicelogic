@@ -19,10 +19,10 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
   pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
   neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
 
-  res <- candidates_by_non_overlap(neg_exons, pos_exons, gr)
-  candidates <- res$candidates
-  left_exons <- res$left_exons
-  right_exons <- res$right_exons
+  filter_results <- candidates_by_non_overlap_directed(neg_exons, pos_exons, gr)
+  candidates <- filter_results$candidates
+  left_exons <- filter_results$left_exons
+  right_exons <- filter_results$right_exons
 
   hits <- GRanges()
   if (length(candidates) == 0L) {
@@ -78,11 +78,15 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
   var <- rlang::sym(coef_col)
   pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
   neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
-
-  res <- candidates_by_non_overlap(neg_exons, pos_exons, gr)
-  candidates <- res$candidates
-  left_exons <- res$left_exons
-  right_exons <- res$right_exons
+  
+  # returns a list of GRanges of same length:
+  # ‘candidates’ - neg exons that do not overlap any pos exons, and are internal
+  # ‘left_exons’ - left exons of candidates
+  # ‘right_exons’ - right exons of candidates
+  filter_results <- candidates_by_non_overlap_directed(neg_exons, pos_exons, gr)
+  candidates <- filter_results$candidates
+  left_exons <- filter_results$left_exons
+  right_exons <- filter_results$right_exons
 
 
   hits <- GRanges()

@@ -2,6 +2,7 @@
 
 export(calc_mutually_exclusive)
 export(calc_skipped_exons)
+export(find_candidates)
 export(mx_mock_data)
 export(no_event_mock_data)
 export(preprocess_input)
