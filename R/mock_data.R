@@ -119,3 +119,92 @@ no_event_mock_data <- function() {
 
 return(gr)
 }
+
+
+create_mock_data <- function(n_genes = 1,
+                              n_tx_per_gene = 2, 
+                              n_exons_per_tx = 5, 
+                              coef_range = c(-1, 1)) {
+  # Generate all combinations of genes, transcripts, and exons
+  data <- expand.grid(
+    gene_id = seq_len(n_genes),
+    tx_id = seq_len(n_tx_per_gene),
+    exon_rank = seq_len(n_exons_per_tx)
+  )
+  # browser()
+
+data <- data %>%
+  dplyr::arrange(gene_id, tx_id, exon_rank)
+
+  # Calculate transcript IDs globally
+  data <- data |>
+    dplyr::mutate(
+      tx_id = tx_id + (gene_id - 1) * n_tx_per_gene,
+      seqnames = paste0("chr", sample(1:22, 1)), # Random chromosome
+      start = (exon_rank - 1) * 10 + 1,         # Start positions
+      width = 5,                                # Fixed width
+      #strand = rep(sample(c("+", "-"), n_genes * n_tx_per_gene, replace = TRUE), each = n_exons_per_tx)
+      strand = "+" # Fixed strand for simplicity TO DO 
+    )
+
+  # Reverse exon_rank for transcripts with strand == "-"
+  data <- data |>
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(
+      exon_rank = ifelse(strand == "-", rev(exon_rank), exon_rank)
+    ) |>
+    dplyr::ungroup()
+  
+  # Assign random coefs per tx_id and gene_id
+  data <- data |>
+    dplyr::group_by(gene_id, tx_id) |>
+    dplyr::mutate(
+      coefs = runif(1, min = coef_range[1], max = coef_range[2]) # Same value for the group
+    ) |>
+    dplyr::ungroup()
+  
+  # Convert to GRanges
+  gr <- plyranges::as_granges(data)
+  return(gr)
+}
+
+generate_retained_introns <- function(gr, n_ri = 1) {
+  set.seed(123) # for reproducibility
+  # generate retained introns by creating a new exon that
+  # starts with exonrank x and ends at exons rank x+1 for each transcript
+  # only in transcripts with coefs > 0
+  # then remove the original exons that are being retained and add the new retained intron exon with coefs = 0
+  # and re-rank accordingly
+  ri_tx_ids <- gr |>
+    as.data.frame() |>
+    dplyr::filter(coefs > 0) |>
+    dplyr::distinct(tx_id) |>
+    dplyr::slice_sample(n = n_ri) |>
+    dplyr::pull(tx_id)
+
+  exon_idx <- 2
+  new_txps_with_ri <- gr |>
+    plyranges::filter(tx_id %in% ri_tx_ids) |>
+    #get the exons that are being retained
+    # get exon 2 and merged with exon 3 to create the retained intron
+    # then remove exon 2 and 3 and re rank the exons accordingly
+    plyranges::group_by(tx_id) |>
+    plyranges::mutate(
+      end = ifelse(exon_rank == exon_idx, end[exon_rank == exon_idx + 1], end)
+    ) |>
+    dplyr::filter(!(exon_rank %in% c(exon_idx + 1))) |>
+    # re rank the exons accordingly
+    dplyr::mutate(
+      exon_rank = seq_len(n())
+    ) |>
+    dplyr::ungroup() |>
+    plyranges::as_granges() 
+
+  #remove old transcripts with retained introns and add the new ones
+  gr <- gr |>
+    plyranges::filter(!tx_id %in% ri_tx_ids) |>
+    plyranges::bind_ranges(new_txps_with_ri) 
+  return(gr)
+}
+
+
