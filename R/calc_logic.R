@@ -31,9 +31,12 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
 
   for (i in seq_along(candidates)) {
     cand <- candidates[i]  # a length-1 GRanges
+    # restric to the same gene
+    cand_pos_exons <- pos_exons |> 
+                  plyranges::filter(gene_id == cand$gene_id)
 
     matches <- match_left_right(
-      pos_exons,
+      cand_pos_exons,
       left_exon  = left_exons[i],
       right_exon = right_exons[i],
       type = type
@@ -97,8 +100,11 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
   for (i in seq_along(candidates)) {
     cand <- candidates[i]  # a length-1 GRanges
 
+    # restric to the same gene
+    cand_pos_exons <- pos_exons |> 
+                  plyranges::filter(gene_id == cand$gene_id)
     matches <- match_left_right(
-      pos_exons,
+      cand_pos_exons,
       left_exon  = left_exons[i],
       right_exon = right_exons[i],
       type = type
@@ -113,7 +119,7 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
     for (i in seq_along(pairs)) {
       tx_event <- pairs$tx_id[i]
       exon_rank_event <- pairs$r[i] - 1  # middle exon rank
-      mx_pos_exon <- pos_exons |>
+      mx_pos_exon <- cand_pos_exons |>
         plyranges::filter(tx_id == tx_event & exon_rank == exon_rank_event)
       if (length(mx_pos_exon) == 1L) {
         cand_hit <- cand |>
