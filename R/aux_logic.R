@@ -134,3 +134,26 @@ match_left_right <- function(pos_exons, left_exon, right_exon, type) {
       left_tbl = left_tbl, 
       right_tbl = right_tbl)
 }
+
+
+#' function to find introns given a GRanges object of exons
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
+#' @return A GRanges object with introns as ranges and metadata (e.g., which transcripts they belong to, their rank, etc.).
+find_introns <- function(gr) {
+  introns <- gr |>
+    plyranges::group_by(tx_id) |>
+     # introns are between exons, so we can use the start of the next exon and the end of the current exon to define them
+    plyranges::mutate(
+      intron_start = end + 1,
+      intron_end = dplyr::lead(start) - 1,
+    ) |>
+    plyranges::filter(!is.na(intron_start) & !is.na(intron_end)) |>
+    plyranges::mutate(
+      start = intron_start,
+      end = intron_end,
+      intron = TRUE
+    ) |>
+    plyranges::ungroup() |>
+    plyranges::select(-intron_start, -intron_end, -exon_rank)
+  return(introns)
+}

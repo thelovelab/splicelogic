@@ -138,3 +138,46 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
   }
   hits
 }
+
+#' Function to calculate retained introns given a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
+#' @return A GRanges object with an additional 'event' metadata column indicating retained introns.
+#' @import GenomicRanges
+#' @export      
+calc_retained_introns <- function(gr) {
+    # find introns in the negative coef transcripts
+    introns <- gr |> plyranges::filter(coefs < 0) |> find_introns()
+
+    # filter by overlap on the positive coef transcripts
+    candidates <- gr |> plyranges::filter(coefs > 0) |> 
+                        plyranges::filter_by_overlaps(introns)
+
+    hits <- GRanges()
+    if (length(candidates) == 0L) {
+        return(hits) #return if no candidates
+    }
+    for (i in seq_along(candidates)) {
+    cand <- candidates[i]  # a length-1 GRanges
+
+    # restric to the same gene
+    cand_introns <- introns |> 
+                  plyranges::filter(gene_id == cand$gene_id)
+
+    # find which transcript pairs the event is happening with 
+    txp_events <- cand_introns |> 
+                plyranges::filter_by_overlaps(cand)|> 
+                as_tibble()|> 
+                dplyr::select(gene_id, tx_id)
+
+    if (nrow(txp_events) > 0) {
+      txs <- unique(txp_events$tx_id)
+      cand_rep <- rep(cand, length(txs)) |>
+        plyranges::mutate(
+          event    = "retained_intron",
+          tx_event = txs
+        )
+      hits <- c(hits, cand_rep)
+      }
+    }
+  hits
+  }

@@ -69,3 +69,17 @@ test_that("calc_mutually_exclusive returns empty GRanges if no events", {
   expect_s4_class(result, "GRanges")
   expect_equal(length(result), 0L)
 })
+
+# Test for calc retained introns
+test_that("calc_retained_introns test", {
+    gr <- create_mock_data(3,6,3)
+    gr <- preprocess_input(gr, coef_col = "coefs")
+    gr <- generate_retained_introns(gr, n_ri = 3)
+
+    result <- calc_retained_introns(gr)
+
+    expect_s4_class(result, "GRanges")
+    expect_true("event" %in% names(GenomicRanges::mcols(result)))
+    expect_true(any(result$event == "retained_intron"))
+
+})
