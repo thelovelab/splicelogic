@@ -138,22 +138,25 @@ match_left_right <- function(pos_exons, left_exon, right_exon, type) {
 
 #' function to find introns given a GRanges object of exons
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
-#' @return A GRanges object with introns as ranges and metadata (e.g., which transcripts they belong to, their rank, etc.).
+#' @return A GRanges object with introns as ranges and metadata (tx_id, gene_idß).
 find_introns <- function(gr) {
-  introns <- gr |>
+  gr <- gr |> plyranges::arrange(tx_id, start)
+   # introns are between exons - use the start of the next exon and the end of the current exon to define their start/end
+  gr <- gr |>
     plyranges::group_by(tx_id) |>
-     # introns are between exons, so we can use the start of the next exon and the end of the current exon to define them
     plyranges::mutate(
-      intron_start = end + 1,
-      intron_end = dplyr::lead(start) - 1,
+      intron_start = end + 1L,
+      intron_end   = dplyr::lead(start) - 1L
     ) |>
-    plyranges::filter(!is.na(intron_start) & !is.na(intron_end)) |>
-    plyranges::mutate(
-      start = intron_start,
-      end = intron_end,
-      intron = TRUE
-    ) |>
-    plyranges::ungroup() |>
-    plyranges::select(-intron_start, -intron_end, -exon_rank)
-  return(introns)
+    plyranges::filter(!is.na(intron_start) & !is.na(intron_end) & intron_end >= intron_start) |>
+    plyranges::ungroup() 
+  # create a GRanges object for the introns with the same metadata as the tx_id and gene_id they belong to
+  GenomicRanges::GRanges(
+      seqnames = GenomicRanges::seqnames(gr),
+      ranges   = IRanges::IRanges(start = gr$intron_start, end = gr$intron_end),
+      strand   = GenomicRanges::strand(gr),
+      gene_id = gr$gene_id,
+      tx_id   = gr$tx_id
+      )
+    
 }
