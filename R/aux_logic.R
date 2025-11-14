@@ -143,7 +143,7 @@ find_introns <- function(gr) {
   gr <- gr |> plyranges::arrange(tx_id, start)
    # introns are between exons - use the start of the next exon and the end of the current exon to define their start/end
   gr <- gr |>
-    plyranges::group_by(tx_id) |>
+    plyranges::group_by(gene_id, tx_id) |>
     plyranges::mutate(
       intron_start = end + 1L,
       intron_end   = dplyr::lead(start) - 1L
@@ -156,7 +156,9 @@ find_introns <- function(gr) {
       ranges   = IRanges::IRanges(start = gr$intron_start, end = gr$intron_end),
       strand   = GenomicRanges::strand(gr),
       gene_id = gr$gene_id,
-      tx_id   = gr$tx_id
-      )
-    
+      tx_id   = gr$tx_id,
+      coefs  = gr$coefs,
+      intron = TRUE
+    )
+  # TO DO : include case where no introns are found eg create_mock_data(1,1,1) and check that the output is an empty GRanges object with the correct metadata columns
 }
