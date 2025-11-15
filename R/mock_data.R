@@ -195,7 +195,7 @@ generate_retained_introns <- function(gr, n_ri = 1) {
     dplyr::filter(!(exon_rank %in% c(exon_idx + 1))) |>
     # re rank the exons accordingly
     dplyr::mutate(
-      exon_rank = seq_len(n())
+      exon_rank = seq_len(dplyr::n())
     ) |>
     dplyr::ungroup() |>
     plyranges::as_granges() 
