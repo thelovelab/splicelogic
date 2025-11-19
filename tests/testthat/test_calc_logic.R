@@ -86,7 +86,7 @@ test_that("calc_retained_introns test", {
 
 # Test for calc_a3ss_a5ss
 test_that("calc_a3ss_a5ss test", {
-    gr <- create_mock_data(1,2,4)
+    gr <- create_mock_data(3,3,6)
     gr <- preprocess_input(gr, coef_col = "coefs")
     gr <- generate_a3ss(gr, n_a3ss = 3)
 
