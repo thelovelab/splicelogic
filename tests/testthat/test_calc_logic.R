@@ -76,10 +76,23 @@ test_that("calc_retained_introns test", {
     gr <- preprocess_input(gr, coef_col = "coefs")
     gr <- generate_retained_introns(gr, n_ri = 3)
 
-    result <- calc_retained_introns(gr)
+    result <- calc_retained_introns(gr, coef_col = "coefs")
 
     expect_s4_class(result, "GRanges")
     expect_true("event" %in% names(GenomicRanges::mcols(result)))
     expect_true(any(result$event == "retained_intron"))
 
+})
+
+# Test for calc_a3ss_a5ss
+test_that("calc_a3ss_a5ss test", {
+    gr <- create_mock_data(1,2,4)
+    gr <- preprocess_input(gr, coef_col = "coefs")
+    gr <- generate_a3ss(gr, n_a3ss = 3)
+
+    result <- calc_a3ss_a5ss(gr, coef_col = "coefs")
+
+    expect_s4_class(result, "GRanges")
+    expect_true("event" %in% names(GenomicRanges::mcols(result)))
+    expect_true(any(result$event == "a3ss"))
 })

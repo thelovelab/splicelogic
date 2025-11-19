@@ -207,4 +207,45 @@ generate_retained_introns <- function(gr, n_ri = 1) {
   return(gr)
 }
 
+generate_a5ss <- function(gr, n_a5ss = 1) {
+    # if preprocessing didn't happen
+  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+    gr <- preprocess_input(gr, coef_col ="coefs")
+  }
+  set.seed(123) # for reproducibility
+  # generate alternative 5' splice sites by modifying the end() of random internal = TRUE exons in transcripts with coefs > 0
+  a5ss_exon_key <- gr |> 
+    as.data.frame() |>
+    dplyr::filter(coefs > 0 & internal == TRUE) |> #TO DO : include that it can be first and last exons
+    dplyr::distinct(key) |>
+    dplyr::slice_sample(n = n_a5ss) |>
+    dplyr::pull(key)
+  
+  gr_with_a5ss <- gr  |>
+    plyranges::mutate(
+      end = dplyr::if_else(key %in% a5ss_exon_key, end + sample(c(-2, 2), 1), end) # TO DO : include - strand case (start instead of end)
+    )
+    return(gr_with_a5ss)
+}
+
+generate_a3ss <- function(gr, n_a3ss = 1) {
+    # if preprocessing didn't happen
+  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+    gr <- preprocess_input(gr, coef_col)
+  }
+  set.seed(123) # for reproducibility
+  # generate alternative 3' splice sites by modifying the end() of random internal = TRUE exons in transcripts with coefs > 0
+  a3ss_exon_key <- gr |> 
+    as.data.frame() |>
+    dplyr::filter(coefs > 0 & internal == TRUE) |>
+    dplyr::distinct(key) |>
+    dplyr::slice_sample(n = n_a3ss) |>
+    dplyr::pull(key)
+  
+  gr_with_a3ss <- gr  |>
+    plyranges::mutate(
+      start = dplyr::if_else(key %in% a3ss_exon_key, start + sample(c(-2, 2), 1), start) ) # TO DO : include - strand case (end instead of start)
+
+    return(gr_with_a3ss)
+}
 
