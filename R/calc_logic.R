@@ -15,9 +15,9 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
     gr <- preprocess_input(gr, coef_col)
   }
   # separate positive and negative exons
-  var <- rlang::sym(coef_col)
-  pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
-  neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
+  coef <- rlang::sym(coef_col)
+  pos_exons <- gr |> plyranges::filter(sign(!!coef) == 1)
+  neg_exons <- gr |> plyranges::filter(sign(!!coef) == -1)
 
   filter_results <- candidates_by_non_overlap_directed(neg_exons, pos_exons, gr)
   candidates <- filter_results$candidates
@@ -78,9 +78,9 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
     gr <- preprocess_input(gr, coef_col)
   }
   # separate positive and negative exons
-  var <- rlang::sym(coef_col)
-  pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
-  neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
+  coef <- rlang::sym(coef_col)
+  pos_exons <- gr |> plyranges::filter(sign(!!coef) == 1)
+  neg_exons <- gr |> plyranges::filter(sign(!!coef) == -1)
   
   # returns a list of GRanges of same length:
   # ‘candidates’ - neg exons that do not overlap any pos exons, and are internal
@@ -90,7 +90,6 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
   candidates <- filter_results$candidates
   left_exons <- filter_results$left_exons
   right_exons <- filter_results$right_exons
-
 
   hits <- GRanges()
   if (length(candidates) == 0L) {
@@ -144,41 +143,46 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
 #' @return A GRanges object with an additional 'event' metadata column indicating retained introns.
 #' @export      
 calc_retained_introns <- function(gr, coef_col){
-   # TO DO : fix coef_col argument and add to preprocess_input and then rename coef_col to coefs
-    # find introns in the negative coef transcripts
-    introns <- gr |> plyranges::filter(coefs < 0) |> find_introns()
-
-    # filter by overlap on the positive coef transcripts
-    candidates <- gr |> plyranges::filter(coefs > 0) |> 
-                        plyranges::filter_by_overlaps(introns)
-
-    hits <- GRanges()
-    if (length(candidates) == 0L) {
-        return(hits) #return if no candidates
+  # TO DO : fix coef_col argument and add to preprocess_input and then rename coef_col to coefs
+  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+    gr <- preprocess_input(gr, coef_col)
     }
-    for (i in seq_along(candidates)) {
-    cand <- candidates[i]  # a length-1 GRanges
+  # separate positive and negative exons
+  coef <- rlang::sym(coef_col)
+  # find introns in the negative coef transcripts
+  introns <- gr |> plyranges::filter(!!coef < 0) |> find_introns()
 
-    # restric to the same gene
-    cand_introns <- introns |> 
-                  plyranges::filter(gene_id == cand$gene_id)
+  # filter by overlap on the positive coef transcripts
+  candidates <- gr |> plyranges::filter(!!coef > 0) |> 
+                      plyranges::filter_by_overlaps(introns)
 
-    # find which transcript pairs the event is happening with 
-    txp_events <- cand_introns |> 
-                plyranges::filter_by_overlaps(cand)|> 
-                as_tibble()|> 
-                dplyr::select(gene_id, tx_id)
+  hits <- GRanges()
+  if (length(candidates) == 0L) {
+      return(hits) #return if no candidates
+  }
+  for (i in seq_along(candidates)) {
+  cand <- candidates[i]  # a length-1 GRanges
 
-    if (nrow(txp_events) > 0) {
-      txs <- unique(txp_events$tx_id)
-      cand_rep <- rep(cand, length(txs)) |>
-        plyranges::mutate(
-          event    = "retained_intron",
-          tx_event = txs
-        )
-      hits <- c(hits, cand_rep)
-      }
+  # restric to the same gene
+  cand_introns <- introns |> 
+                plyranges::filter(gene_id == cand$gene_id)
+
+  # find which transcript pairs the event is happening with 
+  txp_events <- cand_introns |> 
+              plyranges::filter_by_overlaps(cand)|> 
+              as_tibble()|> 
+              dplyr::select(gene_id, tx_id)
+
+  if (nrow(txp_events) > 0) {
+    txs <- unique(txp_events$tx_id)
+    cand_rep <- rep(cand, length(txs)) |>
+      plyranges::mutate(
+        event    = "retained_intron",
+        tx_event = txs
+      )
+    hits <- c(hits, cand_rep)
     }
+  }
   hits
   }
 
@@ -187,7 +191,6 @@ calc_retained_introns <- function(gr, coef_col){
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
 #' @return A GRanges object with an additional 'event' metadata column indicating retained introns.
 #' @export      
-
 calc_a3ss_a5ss <- function(gr, coef_col ){
   # if preprocessing didn't happen
   if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
@@ -195,9 +198,9 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
   }
   
   # separate positive and negative exons
-  var <- rlang::sym(coef_col)
-  pos_exons <- gr |> plyranges::filter(sign(!!var) == 1)
-  neg_exons <- gr |> plyranges::filter(sign(!!var) == -1)
+  coef <- rlang::sym(coef_col)
+  pos_exons <- gr |> plyranges::filter(sign(!!coef) == 1)
+  neg_exons <- gr |> plyranges::filter(sign(!!coef) == -1)
 
   # candidates are pos exons that do not exacly match neg_exons (%in%)
   # filter candidates pos_exons that are exactly the same as any neg_exons
@@ -216,7 +219,6 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
 
   # candidates <- pos_exons[!(pos_id %in% neg_id)] |>
   #   plyranges::filter_by_overlaps_directed(neg_exons)
-
 
   hits <- GRanges()
   if (length(candidates) == 0L) {
@@ -251,6 +253,5 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
         hits <- c(hits, cand_rep)
         }
   }
-
   hits
 }
