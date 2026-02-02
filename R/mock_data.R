@@ -41,7 +41,7 @@ se_mock_data <- function() {
   gr2 <- plyranges::as_granges(df2)
   gr3 <- plyranges::as_granges(df3)
   gr <- plyranges::bind_ranges(gr1, gr2, gr3) |>
-      plyranges::mutate(
+      dplyr::mutate(
       tx_id = c(rep(1, 7), rep(2, 6), rep(3, 6)))
 
 return(gr)
@@ -79,7 +79,7 @@ mx_mock_data <- function() {
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
   gr <- plyranges::bind_ranges(gr1, gr2) |>
-      plyranges::mutate(
+      dplyr::mutate(
       tx_id = c(rep(1, 9), rep(2, 8)))
 
 return(gr)
@@ -114,7 +114,7 @@ no_event_mock_data <- function() {
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
   gr <- plyranges::bind_ranges(gr1, gr2) |>
-      plyranges::mutate(
+      dplyr::mutate(
       tx_id = c(rep(1, 3), rep(2, 3)))
 
 return(gr)
@@ -184,12 +184,12 @@ generate_retained_introns <- function(gr, n_ri = 1) {
 
   exon_idx <- 2
   new_txps_with_ri <- gr |>
-    plyranges::filter(tx_id %in% ri_tx_ids) |>
+    dplyr::filter(tx_id %in% ri_tx_ids) |>
     #get the exons that are being retained
     # get exon 2 and merged with exon 3 to create the retained intron
     # then remove exon 2 and 3 and re rank the exons accordingly
-    plyranges::group_by(tx_id) |>
-    plyranges::mutate(
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(
       end = ifelse(exon_rank == exon_idx, end[exon_rank == exon_idx + 1], end)
     ) |>
     dplyr::filter(!(exon_rank %in% c(exon_idx + 1))) |>
@@ -202,7 +202,7 @@ generate_retained_introns <- function(gr, n_ri = 1) {
 
   #remove old transcripts with retained introns and add the new ones
   gr <- gr |>
-    plyranges::filter(!tx_id %in% ri_tx_ids) |>
+    dplyr::filter(!tx_id %in% ri_tx_ids) |>
     plyranges::bind_ranges(new_txps_with_ri) 
   return(gr)
 }
@@ -222,7 +222,7 @@ generate_a5ss <- function(gr, n_a5ss = 1) {
     dplyr::pull(key)
   
   gr_with_a5ss <- gr  |>
-    plyranges::mutate(
+    dplyr::mutate(
       end = dplyr::if_else(key %in% a5ss_exon_key, end + sample(c(-2, 2), 1), end) # TO DO : include - strand case (start instead of end)
     )
     return(gr_with_a5ss)
@@ -243,7 +243,7 @@ generate_a3ss <- function(gr, n_a3ss = 1) {
     dplyr::pull(key)
   
   gr_with_a3ss <- gr  |>
-    plyranges::mutate(
+    dplyr::mutate(
       start = dplyr::if_else(key %in% a3ss_exon_key, start + sample(c(-2, 2), 1), start) ) # TO DO : include - strand case (end instead of start)
 
     return(gr_with_a3ss)

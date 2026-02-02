@@ -1,11 +1,12 @@
 Package: splicelogic
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: splicelogic: differential transcripts to splice events
+Version: 0.0.67
+Authors@R: c(
+    person("Bea", "Campillo", email="email@email.com", role = c("aut", "cre")),
+    person("Michael", "Love", role="aut")
+    )
+Description: Translate differential transcript usage results into discrete splice events.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

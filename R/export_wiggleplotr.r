@@ -1,12 +1,5 @@
-library(GenomicRanges)
-library(IRanges)
-library(GenomeInfoDb)
-library(S4Vectors)
-library(dplyr)
-library(ggplot2)
-library(rlang)
-library(purrr)
-library(assertthat)
+# put more information about when this was copied, 
+# what year, what version of wiggleplotr etc.
 
 # from wiggleplotr.R
 #-------------------------------------------------------------------------------

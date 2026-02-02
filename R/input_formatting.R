@@ -49,20 +49,19 @@ combine_gr_input <- function(gr1, gr2) {
 #'
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.
 #' @return A GRanges object with added 'key', 'nexons', 'internal', and 'event' columns.
-#' @importFrom plyranges group_by mutate ungroup
 #' @export
 preprocess_input <- function(gr, coef_col) {
   check_input(gr, coef_col) # check metadata columns are present
 
   # include key nexons and internal columns
   gr <- gr |>
-    plyranges::group_by(tx_id) |> 
-    plyranges::mutate(
+    dplyr::group_by(tx_id) |> 
+    dplyr::mutate(
       key     = paste0(tx_id, "-", exon_rank),
       nexons  = length(exon_rank),
       internal = exon_rank > 1 & exon_rank < nexons
     ) |> 
-    plyranges::ungroup()
+    dplyr::ungroup()
 
   # initialize event column if needed but dont wipe out existing annotations
   if (!"event" %in% colnames(mcols(gr))) {
