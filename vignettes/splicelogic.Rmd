@@ -1,0 +1,184 @@
+---
+title: "Introduction to `splicelogic`"
+author:
+    - name: Beatriz Campillo
+      orcid: 0000-0001-7323-9125
+    - name: Michael I. Love
+      orcid: 0000-0001-8401-0545
+date: "`r format(Sys.time(), '%m/%d/%Y')`"
+output: rmarkdown::html_document
+vignette: |
+  %\VignetteIndexEntry{Introduction to `splicelogic`}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+`splicelogic` is an R/Bioconductor package for detecting alternative
+splicing events from exon-level data stored as `GRanges` objects.
+Given a set of exons annotated with a coefficient column indicating
+differential transcript usage (positDTU), `splicelogic` identifies
+the following types of splicing events:
+
+- **Skipped exons (SE)** -- exons present in one isoform but absent
+  in another.
+- **Mutually exclusive exons (MXE)** -- pairs of exons where one is
+  included at the expense of the other.
+- **Retained introns (RI)** -- intronic regions that are retained as
+  part of an exon in an alternative isoform.
+- **Alternative 3' (A3SS)** -- exons that share the same 5' splice site
+  but differ at the 3' end.
+- **Alternative 5' (A5SS)** -- exons that share the same 3' splice site
+  but differ at the 5' end.
+
+# Input format
+
+`splicelogic` operates on `GRanges` objects that contain exon-level
+annotations. Each range represents one exon and must carry the
+following metadata columns:
+
+| Column      | Description                                        |
+|-------------|----------------------------------------------------|
+| `gene_id`   | Gene identifier                                    |
+| `tx_id`     | Transcript identifier                              |
+| `exon_rank` | Exon rank within the transcript                     |
+| *coef_col*  | DTU coefficient (column name is user-defined) 
+
+<!--
+considering if exon_rank should be inputed by user or calculated internally
+currently, it is required as input
+-->
+
+
+The coefficient input in *coef_col* indicates the differential transcript usage (DTU) of the specific
+transcript containing the exon. All exons from the same transcript share the
+same coefficient value. This values comes from a prior differential transcript usage
+analysis, such as that performed by `satuRn`.
+Positive coefficient values indicate upregulated exons and negative
+values indicate downregulated exons. 
+
+# How to start detecting splicing events
+
+```{r setup, message = FALSE}
+# library(splicelogic)
+devtools::load_all()
+```
+
+
+## Preprocessing
+We can create mock data for demonstration purposes using the
+`create_mock_data()` function. Before running any event detection, 
+call `preprocess_input()` to
+validate the data and annotate each exon with internal flags and a
+unique key:
+
+```{r preprocess}
+gr <- create_mock_data( n_genes = 2, n_tx = 4, n_exons = 6 )
+gr
+gr <- preprocess_input(gr, coef_col = "coefs")
+mcols(gr)
+```
+
+## Skipped exons
+
+`calc_skipped_exons()` identifies exons that are present in
+downregulated transcripts but absent (skipped) in upregulated ones.
+
+We use the `se_mock_data()` dataset, which contains one gene with
+three transcripts: one downregulated (7 exons) and two upregulated
+(6 exons each, missing exons at ranks 3 and 5 of the reference
+transcript).
+
+```{r skipped-exons}
+gr_se <- se_mock_data()
+gr_se <- preprocess_input(gr_se, coef_col = "coefs")
+se_result <- calc_skipped_exons(gr_se, coef_col = "coefs")
+se_result
+```
+
+The result is a `GRanges` object containing only the exons flagged as
+skipped, with an `event` column set to `"skipped_exon"`.
+
+```{r skipped-exons-check}
+mcols(se_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
+```
+
+## Mutually exclusive exons
+
+`calc_mutually_exclusive()` detects pairs of exons where one exon is
+included in one isoform and a different exon occupies the equivalent
+position in another isoform.
+
+The `mx_mock_data()` dataset is designed to contain mutually exclusive
+exon events:
+
+```{r mx-exons}
+gr_mx <- mx_mock_data()
+gr_mx <- preprocess_input(gr_mx, coef_col = "coefs")
+mx_result <- calc_mutually_exclusive(gr_mx, coef_col = "coefs")
+mx_result
+```
+
+```{r mx-exons-check}
+mcols(mx_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
+```
+
+## Retained introns
+
+`calc_retained_introns()` finds exons in upregulated transcripts that
+overlap intronic regions of downregulated transcripts, indicating
+intron retention.
+
+```{r retained-introns}
+gr_ri <- create_mock_data(3, 6, 3)
+gr_ri <- preprocess_input(gr_ri, coef_col = "coefs")
+gr_ri <- generate_retained_introns(gr_ri, n_ri = 3)
+ri_result <- calc_retained_introns(gr_ri, coef_col = "coefs")
+ri_result
+```
+
+```{r retained-introns-check}
+if (length(ri_result) > 0) {
+    mcols(ri_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
+}
+```
+
+## Alternative 3' and 5' splice sites
+
+`calc_a3ss_a5ss()` detects exons that share one boundary (start or
+end) with an exon in another isoform but differ at the opposite end,
+indicating alternative splice site usage.
+
+```{r a3ss-a5ss}
+gr_ss <- create_mock_data(3, 3, 6)
+gr_ss <- preprocess_input(gr_ss, coef_col = "coefs")
+gr_ss <- generate_a3ss(gr_ss, n_a3ss = 3)
+ss_result <- calc_a3ss_a5ss(gr_ss, coef_col = "coefs")
+ss_result
+```
+
+```{r a3ss-a5ss-check}
+if (length(ss_result) > 0) {
+    mcols(ss_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
+}
+```
+
+# Handling cases with no events
+
+When the input data does not contain any splicing events, each
+detection function returns an empty `GRanges` object:
+
+```{r no-events}
+gr_none <- no_event_mock_data()
+gr_none <- preprocess_input(gr_none, coef_col = "coefs")
+
+calc_skipped_exons(gr_none, coef_col = "coefs")
+calc_mutually_exclusive(gr_none, coef_col = "coefs")
+```
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```
