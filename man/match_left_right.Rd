@@ -21,3 +21,4 @@ A list with two tibbles: left_tbl and right_tbl
 \description{
 For a given candidate exon, find matching left and right exons in pos_exons
 }
+\keyword{internal}

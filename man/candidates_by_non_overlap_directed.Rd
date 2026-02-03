@@ -14,6 +14,8 @@ candidates_by_non_overlap_directed(neg_exons, pos_exons, gr, type)
 \item{pos_exons}{A GRanges object with positive exons (pos_exons)}
 
 \item{gr}{The original GRanges object with all exons (for looking up left/right)}
+
+\item{type}{The type of overlap to consider when identifying matches.}
 }
 \value{
 A named list with three GRanges objects: candidates, left_exons, right_exons

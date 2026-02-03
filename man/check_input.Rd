@@ -2,16 +2,21 @@
 % Please edit documentation in R/input_formatting.R
 \name{check_input}
 \alias{check_input}
-\title{Check that input is a valid GRanges object with required metadata columns}
+\title{Check that input is a valid GRanges object with required metadata columns
+exon_rank", "gene_id", "tx_id", coef_col}
 \usage{
 check_input(gr, coef_col)
 }
 \arguments{
 \item{gr}{A GRanges object}
+
+\item{coef_col}{Name of the coefficient metadata column (string)}
 }
 \value{
 TRUE if input is valid, otherwise throws an error
 }
 \description{
 Check that input is a valid GRanges object with required metadata columns
+exon_rank", "gene_id", "tx_id", coef_col
 }
+\keyword{internal}
