@@ -1,7 +1,8 @@
-# put more information about when this was copied, 
-# what year, what version of wiggleplotr etc.
+# export functions from wiggleplotr package to avoid dependency issues
+# wiggleplotr package version 1.33.1 
+# copied from https://github.com/kauralasoo/wiggleplotr on 2/2/2026
 
-# from wiggleplotr.R
+# from wiggleplotr.R 
 #-------------------------------------------------------------------------------
 #' Quickly plot transcript structure without read coverage tracks
 #'
@@ -24,13 +25,13 @@
 #' plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = FALSE)
 #' 
 #' @export
-myPlotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, 
+slPlotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, 
                             rescale_introns = TRUE, new_intron_length = 50, 
                             flanking_length = c(50,50), connect_exons = TRUE, 
                             transcript_label = TRUE, region_coords = NULL){
   
   #IF cdss is not specified then use exons instead on cdss
-  if(is.null(cdss) || length(ccds) == 0){
+  if(is.null(cdss) || length(cdss) == 0){
     cdss = exons
   }
   
