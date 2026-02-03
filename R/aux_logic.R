@@ -2,7 +2,7 @@
 #' i.e takes the pos_exons (GRanges) and left and right exons and returns
 #' a tibble that is the same as pos_exons but with two additional columns
 #' 'match_left' and 'match_right' indicating whether each exon matches the left
-#'  and right exons respectively. The matching is done based on the 'type'
+#' and right exons respectively. The matching is done based on the 'type'
 #' parameter which can be "in", "over", or "boundary".
 #' @param gr A GRanges object with exon annotations
 #' @param left_exon A GRanges object with left exon(s) to match
@@ -11,9 +11,8 @@
 #' @return A tibble created from gr with two additional columns:
 #' 'match_left' and 'match_right' indicating the number of overlaps with
 #' the left and right exons, respectively.
-#' @importFrom dplyr mutate as_tibble
-#' @importFrom plyranges count_overlaps
 #' @importFrom magrittr %>%
+#' @keywords internal
 compute_matches <- function(gr, left_exon, right_exon, type = c("in", "over", "boundary")) {
   type <- match.arg(type)
   gr_matched <- switch(
@@ -24,7 +23,7 @@ compute_matches <- function(gr, left_exon, right_exon, type = c("in", "over", "b
             match_left  = plyranges::count_overlaps(., left_exon) >= 1,
             match_right = plyranges::count_overlaps(., right_exon) >= 1
         ) |>
-        as_tibble()
+        tibble::as_tibble()
     },
     "in" = {
       gr %>%
@@ -32,7 +31,7 @@ compute_matches <- function(gr, left_exon, right_exon, type = c("in", "over", "b
           match_left  = . == left_exon,
           match_right = . == right_exon
         ) |>
-        as_tibble()
+        tibble::as_tibble()
     },
     "boundary" = {
       gr %>%
@@ -40,7 +39,7 @@ compute_matches <- function(gr, left_exon, right_exon, type = c("in", "over", "b
           match_left  = GenomicRanges::end(.)   %in% GenomicRanges::end(left_exon),
           match_right = GenomicRanges::start(.) %in% GenomicRanges::start(right_exon)
         ) |>
-        as_tibble()
+        tibble::as_tibble()
     }
   )
 return(gr_matched)
@@ -52,10 +51,9 @@ return(gr_matched)
 #' @param neg_exons A GRanges object with candidate negative exons (neg_exons)
 #' @param pos_exons A GRanges object with positive exons (pos_exons)
 #' @param gr The original GRanges object with all exons (for looking up left/right)
+#' @param type The type of overlap to consider when identifying matches.
 #' @return A named list with three GRanges objects: candidates, left_exons, right_exons 
 #' candidates, left_exons, right_exons are all from neg_exons set
-#' @importFrom plyranges filter_by_non_overlaps_directed
-#' @importFrom GenomicRanges GRanges  
 candidates_by_non_overlap_directed <- function(neg_exons, pos_exons, gr, type) {
   # filter candidates that do not overlap any pos_exons 
   candidates <- neg_exons |>
@@ -103,11 +101,9 @@ candidates_by_non_overlap_directed <- function(neg_exons, pos_exons, gr, type) {
 #' @param right_exon A GRanges object with the right exon to match
 #' @param type The type of overlap to consider when identifying matches.
 #' @return A list with two tibbles: left_tbl and right_tbl
-#' @importFrom dplyr inner_join filter distinct rename
-#' @importFrom plyranges filter_by_overlaps
 #' @importFrom magrittr %>%
+#' @keywords internal
 match_left_right <- function(pos_exons, left_exon, right_exon, type) {
-
     # check for matches to left and right exons in the pos_exons set
     pos_exons_matched <- compute_matches(
       pos_exons,
@@ -137,9 +133,11 @@ match_left_right <- function(pos_exons, left_exon, right_exon, type) {
 
 
 #' function to find introns given a GRanges object of exons
-#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
-#' @return A GRanges object with introns as ranges and metadata (tx_id, gene_idß).
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
+#' @return A GRanges object with introns as ranges and metadata (tx_id, gene_id)
+#' @keywords internal
 find_introns <- function(gr) {
+  gr <- gr |> dplyr::arrange(tx_id, start)
   gr <- gr |> dplyr::arrange(tx_id, start)
    # introns are between exons - use the start of the next exon and the end of the current exon to define their start/end
   gr <- gr |>
@@ -161,4 +159,112 @@ find_introns <- function(gr) {
       intron = TRUE
     )
   # TO DO : include case where no introns are found eg create_mock_data(1,1,1) and check that the output is an empty GRanges object with the correct metadata columns
+}
+
+
+#' Filter candidates based on their presence in transcripts
+#' Then get the left and right exons for each candidate
+#' Return a named list with three GRanges objects: candidates, left_exons, right
+#' @param gr A GRanges object with all exons
+#' @param coef_col The name of the coefficient column in gr
+#' @return A named list with three GRanges objects: candidates, left_exons, right_exons 
+#' candidates, left_exons, right_exons are all from neg_exons set
+#' @keywords internal
+candidates_by_presence <- function(gr, coef_col) {
+  coef <- rlang::sym(coef_col)
+  # filter internal exons and put n_txp per gene
+  gr_internal <- gr |> 
+    dplyr::group_by(gene_id) |>
+    dplyr::mutate(n_txp = dplyr::n_distinct(tx_id)) |>
+    dplyr::ungroup()
+
+  # full data
+  keys <- data.frame(seqnames = GenomicRanges::seqnames(gr_internal), 
+                      start = IRanges::start(gr_internal),
+                      end = IRanges::end(gr_internal),
+                      gene_id = gr_internal$gene_id,
+                      n_txp = gr_internal$n_txp)
+  # count occurrences of each exon 
+  key_count <- vctrs::vec_count(keys) |>
+    dplyr::filter((count / key$n_txp) < 1)
+
+  # match it back to GRanges
+   candidates <- gr_internal[vctrs::vec_in(keys, key_count$key)] |>
+    dplyr::filter(internal & (!!coef < 0 )) 
+    
+  # early return: no candidates -> empty list with GRanges objects
+  if (length(candidates) == 0L) {
+    return(list(
+      candidates = candidates,
+      left_exons  = GenomicRanges::GRanges(), 
+      right_exons = GenomicRanges::GRanges()
+    ))
+  }
+  # keys of exons to the left and right of candidates
+  # TO DO : check if this works for all cases if the strand is - instead of +. ie in a - would the left exon be exon_rank +1?
+  left_keys  <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank - 1L)
+  right_keys <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank + 1L)
+
+  # get the actual exons for the candidates (preserves order of keys)
+  # exon to the left of the candidates from the neg_exons set
+  left_exons  <- gr |> dplyr::slice(match(left_keys, key))
+  # exon to the right of the candidates from the neg_exons set
+  right_exons <- gr |> dplyr::slice(match(right_keys, key))
+
+  # returns a list of GRanges of same length:
+  # ‘candidates’ - neg exons that do not overlap any pos exons, and are internal
+  # ‘left_exons’ - left exons of candidates
+  # ‘right_exons’ - right exons of candidates
+  list(
+    candidates = candidates,
+    left_exons  = left_exons,
+    right_exons = right_exons
+  )
+}
+
+candidates_by_presence_v2 <- function(neg_exons, pos_exons) {
+  pos_exons <- pos_exons |>
+    dplyr::group_by(gene_id) |>
+    dplyr::mutate(n_txp_pos = dplyr::n_distinct(tx_id)) |>
+    dplyr::ungroup()
+  count <- neg_exons |> count_overlaps(pos_exons) 
+
+  neg_exons <- neg_exons |>
+    dplyr::mutate(overlap_count = count,
+                n_txp_pos = pos_exons$n_txp_pos[match(gene_id, pos_exons$gene_id)]) 
+  candidates <- neg_exons |>
+    dplyr::filter(internal & (overlap_count / n_txp_pos) < 1)
+
+ # early return: no candidates -> empty list with GRanges objects
+  if (length(candidates) == 0L) {
+    return(list(
+      candidates = candidates,
+      left_exons  = GenomicRanges::GRanges(), 
+      right_exons = GenomicRanges::GRanges()
+    ))
+  }
+  # keys of exons to the left and right of candidates
+  # TO DO : check if this works for all cases if the strand is - instead of +. ie in a - would the left exon be exon_rank +1?
+  left_keys  <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank - 1L)
+  right_keys <- paste0(candidates$tx_id, "-", 
+                        candidates$exon_rank + 1L)
+
+  # get the actual exons for the candidates (preserves order of keys)
+  # exon to the left of the candidates from the neg_exons set
+  left_exons  <- gr |> dplyr::slice(match(left_keys, key))
+  # exon to the right of the candidates from the neg_exons set
+  right_exons <- gr |> dplyr::slice(match(right_keys, key))
+
+  # returns a list of GRanges of same length:
+  # ‘candidates’ - neg exons that do not overlap any pos exons, and are internal
+  # ‘left_exons’ - left exons of candidates
+  # ‘right_exons’ - right exons of candidates
+  list(
+    candidates = candidates,
+    left_exons  = left_exons,
+    right_exons = right_exons
+  )
 }
