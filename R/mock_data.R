@@ -1,14 +1,8 @@
-
 #' Create a sample GRanges with one negative coef transcript and two positive coef transcripts
 #' This dataset is designed to include a skipped exon event at exon_rank 3 and 5 of tx_id 1 
 #' happening between both tx_id 2 and tx_id 3
-#' 
 #' @return A GRanges object with two transcripts per gene and candidate logic
-#' @import GenomicRanges
-#' @importFrom plyranges as_granges bind_ranges
-#' @importFrom dplyr mutate case_when
 #' @return A GRanges object with two transcripts per gene
-#' @export
 se_mock_data <- function() {
   df1 <- data.frame(
     seqnames = "chr1",
@@ -50,13 +44,9 @@ return(gr)
 #' Create a sample GRanges with one negative coef transcript and one positive coef transcripts
 #' This dataset is designed to include a mutually exclusive exons between exon_rank 3 of tx_id 1
 #' and exon_rank 3 of tx_id 2. There is also a skipped exon event at exon_rank 5 of tx_id 1.
-#' 
 #' @return A GRanges object with two transcripts per gene and candidate logic
 #' @import GenomicRanges
-#' @importFrom plyranges as_granges bind_ranges
-#' @importFrom dplyr mutate case_when
 #' @return A GRanges object with two transcripts per gene
-#' @export
 mx_mock_data <- function() {
   df1 <- data.frame(
     seqnames = "chr1",
@@ -88,10 +78,7 @@ return(gr)
 #' This dataset is designed to include no splicing events
 #' @return A GRanges object with two transcripts per gene and no candidate logic
 #' @import GenomicRanges
-#' @importFrom plyranges as_granges bind_ranges
-#' @importFrom dplyr mutate case_when
 #' @return A GRanges object with two transcripts per gene
-#' @export  
 no_event_mock_data <- function() {
   df1 <- data.frame(
     seqnames = "chr1",
@@ -120,7 +107,13 @@ no_event_mock_data <- function() {
 return(gr)
 }
 
-
+#' Create mock GRanges data for splicing event testing
+#' @param n_genes Number of genes to simulate
+#' @param n_tx_per_gene Number of transcripts per gene
+#' @param n_exons_per_tx Number of exons per transcript
+#' @param coef_range Range of coefficient values to sample from
+#' @return A GRanges object with simulated transcripts and exons
+#' @export
 create_mock_data <- function(n_genes = 1,
                               n_tx_per_gene = 2, 
                               n_exons_per_tx = 5, 
@@ -131,7 +124,6 @@ create_mock_data <- function(n_genes = 1,
     tx_id = seq_len(n_tx_per_gene),
     exon_rank = seq_len(n_exons_per_tx)
   )
-  # browser()
 
 data <- data %>%
   dplyr::arrange(gene_id, tx_id, exon_rank)
@@ -141,7 +133,7 @@ data <- data %>%
     dplyr::mutate(
       tx_id = tx_id + (gene_id - 1) * n_tx_per_gene,
       seqnames = paste0("chr", sample(1:22, 1)), # Random chromosome
-      start = (exon_rank - 1) * 10 + 1,         # Start positions
+      start = (exon_rank - 1) * 10 + 1 + (gene_id - 1) * 100, # Start positions and shifter by gene_id so they dont overlap
       width = 5,                                # Fixed width
       #strand = rep(sample(c("+", "-"), n_genes * n_tx_per_gene, replace = TRUE), each = n_exons_per_tx)
       strand = "+" # Fixed strand for simplicity TO DO 
@@ -165,9 +157,69 @@ data <- data %>%
   
   # Convert to GRanges
   gr <- plyranges::as_granges(data)
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  
+  # filter: only keep cases where there is at least one positive and one negative coef per gene
+  valid_genes <- gr |>
+    as.data.frame() |>
+    dplyr::group_by(gene_id) |>
+    dplyr::summarise(
+      has_positive = any(coefs > 0),
+      has_negative = any(coefs < 0)
+    ) |>
+    dplyr::filter(has_positive & has_negative) |>
+    dplyr::pull(gene_id)
+  gr <- gr |>
+    dplyr::filter(gene_id %in% valid_genes)
+  # TO DO: is it easier if i unrandomize the coef generation here to ensure there is always at least one pos and one neg per gene?
   return(gr)
 }
 
+#' Generate skipped exon events in a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
+#' @param n_se Number of skipped exon events to generate
+#' @return A GRanges object with skipped exon events introduced
+#' @export  
+generate_skipped_exons <- function(gr, n_se = 1) {
+  set.seed (123) # for reproducibility
+  # generate skipped exons by removing random internal = TRUE exons in transcripts with coefs > 0 
+se_ranges <- gr |>
+  dplyr::filter(coefs > 0, internal) |>
+  as.data.frame() |>
+  dplyr::slice_sample(n = n_se) |>
+  plyranges::as_granges()
+
+  to_remove <- gr |>
+    dplyr::filter(coefs > 0) %>%
+    dplyr::filter((. %over% se_ranges)) |>
+    tibble::as_tibble() |>
+    dplyr::pull(key)
+
+  gr <- gr |>
+    dplyr::filter(!key %in% to_remove)
+  # re-rank the exons accordingly
+  gr <- gr |>
+  dplyr::group_by(tx_id) |>
+  dplyr::mutate(
+    exon_rank = seq_len(dplyr::n()),
+    exon_rank = dplyr::if_else(
+      strand == "-",
+      # reverse the sequence for minus-strand transcripts
+      rev(exon_rank),
+      exon_rank
+    )
+  ) |>
+  dplyr::ungroup()
+  #update internal column and key nexons
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  return(gr)
+}
+
+#' Generate retained intron events in a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
+#' @param n_ri Number of retained intron events to generate
+#' @return A GRanges object with retained intron events introduced
+#' @export  
 generate_retained_introns <- function(gr, n_ri = 1) {
   set.seed(123) # for reproducibility
   # generate retained introns by creating a new exon that
@@ -207,9 +259,31 @@ generate_retained_introns <- function(gr, n_ri = 1) {
   return(gr)
 }
 
+#' Re-rank exons in a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank'
+#' @return A GRanges object with re-ranked exons
+#' @keywords internal
+rerank_exons <- function(gr) {
+  # re-rank the exons accordingly
+  gr <- gr |>
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(
+      exon_rank = seq_len(dplyr::n())
+    ) |>
+    dplyr::ungroup()
+  # recalculate internal column, key and  nexons
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  return(gr)
+}
+
+#' Generate alternative 5' splice site events in a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
+#' @param n_a5ss Number of alternative 5' splice site events to generate
+#' @return A GRanges object with alternative 5' splice site events introduced
+#' @export
 generate_a5ss <- function(gr, n_a5ss = 1) {
     # if preprocessing didn't happen
-  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col ="coefs")
   }
   set.seed(123) # for reproducibility
@@ -227,10 +301,14 @@ generate_a5ss <- function(gr, n_a5ss = 1) {
     )
     return(gr_with_a5ss)
 }
-
-generate_a3ss <- function(gr, n_a3ss = 1) {
+#' Generate alternative 3' splice site events in a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
+#' @param n_a3ss Number of alternative 3' splice site events to generate
+#' @return A GRanges object with alternative 3' splice site events introduced
+#' @export
+generate_a3ss <- function(gr, n_a3ss = 1, coef_col = "coefs") {
     # if preprocessing didn't happen
-  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col)
   }
   set.seed(123) # for reproducibility
@@ -245,7 +323,6 @@ generate_a3ss <- function(gr, n_a3ss = 1) {
   gr_with_a3ss <- gr  |>
     dplyr::mutate(
       start = dplyr::if_else(key %in% a3ss_exon_key, start + sample(c(-2, 2), 1), start) ) # TO DO : include - strand case (end instead of start)
-
     return(gr_with_a3ss)
 }
 
