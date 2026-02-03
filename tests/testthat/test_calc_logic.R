@@ -18,7 +18,7 @@ test_that("calc_skipped_exons errors if coef_col is invalid", {
 })
 
 # Test for no event detected in skipped exon
-test_that("calc_mutually_exclusive returns empty GRanges if no events", {
+test_that("calc_skipped_exons returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
   gr <- preprocess_input(gr, coef_col = "coefs")
   result <- calc_skipped_exons(gr, coef_col = "coefs")
