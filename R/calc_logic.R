@@ -4,14 +4,11 @@
 #' @param coef_col The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.
 #' @param type The type of overlap to consider when identifying skipped exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
-#' @import GenomicRanges
-#' @importFrom dplyr group_by mutate ungroup filter
-#' @importFrom plyranges filter_by_non_overlaps_directed
 #' @export
 calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
-  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col)
   }
   # separate positive and negative exons
@@ -20,6 +17,9 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
   neg_exons <- gr |> dplyr::filter(sign(!!coef) == -1)
 
   filter_results <- candidates_by_non_overlap_directed(neg_exons, pos_exons, gr)
+  # filter_results <- candidates_by_presence(gr, coef_col)
+  # filter_results <- candidates_by_presence_v2(neg_exons, pos_exons)
+
   candidates <- filter_results$candidates
   left_exons <- filter_results$left_exons
   right_exons <- filter_results$right_exons
@@ -67,14 +67,11 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
 #' @param coef_col The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.
 #' @param type The type of overlap to consider when identifying mutually exclusive exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating mutually exclusive exons.
-#' @import GenomicRanges
-#' @importFrom dplyr group_by mutate ungroup filter inner_join
-#' @importFrom plyranges filter_by_non_overlaps_directed
 #' @export
 calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "boundary")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
-  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col)
   }
   # separate positive and negative exons
@@ -98,7 +95,7 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
 
   for (i in seq_along(candidates)) {
     cand <- candidates[i]  # a length-1 GRanges
-
+    
     # restric to the same gene
     cand_pos_exons <- pos_exons |> 
                   dplyr::filter(gene_id == cand$gene_id)
@@ -144,7 +141,7 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
 #' @export      
 calc_retained_introns <- function(gr, coef_col){
   # TO DO : fix coef_col argument and add to preprocess_input and then rename coef_col to coefs
-  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col)
     }
   # separate positive and negative exons
@@ -170,7 +167,7 @@ calc_retained_introns <- function(gr, coef_col){
   # find which transcript pairs the event is happening with 
   txp_events <- cand_introns |> 
               plyranges::filter_by_overlaps(cand)|> 
-              as_tibble()|> 
+              tibble::as_tibble()|> 
               dplyr::select(gene_id, tx_id)
 
   if (nrow(txp_events) > 0) {
@@ -193,7 +190,7 @@ calc_retained_introns <- function(gr, coef_col){
 #' @export      
 calc_a3ss_a5ss <- function(gr, coef_col ){
   # if preprocessing didn't happen
-  if (!all(c("key", "nexons", "internal", "event") %in% names(mcols(gr)))) {
+  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col)
   }
   
@@ -219,6 +216,9 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
     # restric to check on the same gene in neg_exons
     cand_neg_exons <- neg_exons |> 
                   dplyr::filter(gene_id == cand$gene_id) 
+                  # dplyr::filter(!(. %in%c cand))
+                  # dplyr::filter_by_overlaps(cand)
+
 
       matches <- cand_neg_exons %>%
         dplyr::mutate(
