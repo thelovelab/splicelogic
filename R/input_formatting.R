@@ -1,9 +1,10 @@
-
 #' Check that input is a valid GRanges object with required metadata columns
+#' exon_rank", "gene_id", "tx_id", coef_col
 #' @param gr A GRanges object
+#' @param coef_col Name of the coefficient metadata column (string)
 #' @return TRUE if input is valid, otherwise throws an error
 #' @importFrom GenomicRanges mcols
-#' @importFrom plyranges bind_ranges
+#' @keywords internal
 check_input <- function(gr, coef_col) {
   if (!is(gr, "GRanges")) {
     stop("Input must be a GRanges object.")
@@ -14,7 +15,7 @@ check_input <- function(gr, coef_col) {
   if (length(missing_cols) > 0) {
       stop(paste("Missing required metadata columns:", paste(missing_cols, collapse = ", ")))
     }
-  #check if coef column is present and valid
+  #check if coef_col is present and valid
   if (coef_col %in% names(mcols(gr))) {
     vals <- mcols(gr)[[coef_col]]
     if (any(vals < -1 | vals > 1)) {
@@ -25,16 +26,25 @@ check_input <- function(gr, coef_col) {
   TRUE
 }
 
-combine_gr_input <- function(gr1, gr2) {
+#' Combine two GRanges objects into one for splicing event analysis
+#' This function takes two GRanges objects, typically representing
+#' positive and negative sets of exons, and combines them into a single GRanges object.
+#' @param gr1 A GRanges object (e.g., positive set)
+#' @param gr2 A GRanges object (e.g., negative set)
+#' @param coef_col Name of the coefficient metadata column (string)
+#' @return A combined GRanges object with appropriate coef metadata
+#' @keywords internal
+combine_gr_input <- function(gr1, gr2, coef_col) {
   if (!is(gr1, "GRanges") || !is(gr2, "GRanges")) {
     stop("Both inputs must be GRanges objects.")
   }
+  coef <- rlang::sym(coef_col)
   #check if they have coef metadata column, add it if missing 
-  if (!"coef" %in% names(mcols(gr1))) {
-    mcols(gr1)$coef <- +1 #gr1 is the contrast
+  if (!coef_col %in% names(mcols(gr1))) {
+    mcols(gr1)[[coef_col]] <- +1 #gr1 is the contrast
   }
-  if (!"coef" %in% names(mcols(gr2))) {
-    mcols(gr2)$coef <- -1 #gr2 is the reference
+  if (!coef_col %in% names(mcols(gr2))) {
+    mcols(gr2)[[coef_col]] <- -1 #gr2 is the reference
   }
 
   gr <- plyranges::bind_ranges(gr1,gr2)
@@ -63,9 +73,5 @@ preprocess_input <- function(gr, coef_col) {
     ) |> 
     dplyr::ungroup()
 
-  # initialize event column if needed but dont wipe out existing annotations
-  if (!"event" %in% colnames(mcols(gr))) {
-    gr$event <- NA_character_
-  }
   return(gr)
 }
