@@ -61,8 +61,7 @@ values indicate downregulated exons.
 # How to start detecting splicing events
 
 ```{r setup, message = FALSE}
-# library(splicelogic)
-devtools::load_all()
+library(splicelogic)
 ```
 
 
