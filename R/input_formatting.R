@@ -3,7 +3,6 @@
 #' @param gr A GRanges object
 #' @param coef_col Name of the coefficient metadata column (string)
 #' @return TRUE if input is valid, otherwise throws an error
-#' @importFrom GenomicRanges mcols
 #' @keywords internal
 check_input <- function(gr, coef_col) {
   if (!is(gr, "GRanges")) {
@@ -11,13 +10,13 @@ check_input <- function(gr, coef_col) {
   }
   #check for required metadata columns
   required_cols <- c("exon_rank", "gene_id", "tx_id", coef_col)
-  missing_cols <- setdiff(required_cols, names(mcols(gr)))
+  missing_cols <- setdiff(required_cols, names(GenomicRanges::mcols(gr)))
   if (length(missing_cols) > 0) {
       stop(paste("Missing required metadata columns:", paste(missing_cols, collapse = ", ")))
     }
   #check if coef_col is present and valid
-  if (coef_col %in% names(mcols(gr))) {
-    vals <- mcols(gr)[[coef_col]]
+  if (coef_col %in% names(GenomicRanges::mcols(gr))) {
+    vals <- GenomicRanges::mcols(gr)[[coef_col]]
     if (any(vals < -1 | vals > 1)) {
       stop(sprintf("The '%s' metadata column must contain values only in the range [-1, 1].", coef_col))
     }
@@ -40,11 +39,11 @@ combine_gr_input <- function(gr1, gr2, coef_col) {
   }
   coef <- rlang::sym(coef_col)
   #check if they have coef metadata column, add it if missing 
-  if (!coef_col %in% names(mcols(gr1))) {
-    mcols(gr1)[[coef_col]] <- +1 #gr1 is the contrast
+  if (!coef_col %in% names(GenomicRanges::mcols(gr1))) {
+    GenomicRanges::mcols(gr1)[[coef_col]] <- +1 #gr1 is the contrast
   }
-  if (!coef_col %in% names(mcols(gr2))) {
-    mcols(gr2)[[coef_col]] <- -1 #gr2 is the reference
+  if (!coef_col %in% names(GenomicRanges::mcols(gr2))) {
+    GenomicRanges::mcols(gr2)[[coef_col]] <- -1 #gr2 is the reference
   }
 
   gr <- plyranges::bind_ranges(gr1,gr2)
