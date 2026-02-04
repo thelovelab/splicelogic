@@ -62,6 +62,7 @@ values indicate downregulated exons.
 
 ```{r setup, message = FALSE}
 library(splicelogic)
+library(GenomicRanges)
 ```
 
 
