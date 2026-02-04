@@ -127,7 +127,7 @@ plot_gr <- function(gr) {
   ggplot(data, aes(x = start, y = id)) +
     geom_segment(
       data = \(x) {
-        group_by(x, id) |> summarise(start = min(start), end = max(end))
+        dplyr::group_by(x, id) |> dplyr::summarise(start = min(start), end = max(end))
       },
       aes(xend = end)
     ) +
