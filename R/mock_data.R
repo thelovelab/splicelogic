@@ -150,31 +150,33 @@ data <- data %>%
     ) |>
     dplyr::ungroup()
   
-  # Assign random coefs per tx_id and gene_id
-  data <- data |>
-    dplyr::group_by(gene_id, tx_id) |>
-    dplyr::mutate(
-      coefs = runif(1, min = coef_range[1], max = coef_range[2]) # Same value for the group
-    ) |>
+
+  # Assign coefs per tx_id ensuring at least 1 neg and 1 pos per gene
+  # Create a lookup table for tx coefs: first tx gets negative, second gets positive, rest random
+  tx_coefs <- data |>
+    dplyr::distinct(gene_id, tx_id) |>
+    dplyr::group_by(gene_id) |>
+    dplyr::mutate(tx_order = dplyr::row_number()) |>
     dplyr::ungroup()
-  
+
+  n_tx <- nrow(tx_coefs)
+  # Generate all random coefs first, then override first two per gene
+  tx_coefs <- tx_coefs |>
+    dplyr::mutate(
+      coefs = runif(n_tx, min = coef_range[1], max = coef_range[2]),
+      coefs = dplyr::if_else(tx_order == 1, runif(n_tx, min = coef_range[1], max = -0.01), coefs),
+      coefs = dplyr::if_else(tx_order == 2, runif(n_tx, min = 0.01, max = coef_range[2]), coefs)
+    ) |>
+    dplyr::select(tx_id, coefs)
+
+  # Join coefs back to data
+  data <- data |>
+    dplyr::left_join(tx_coefs, by = "tx_id")
+
   # Convert to GRanges
   gr <- plyranges::as_granges(data)
   gr <- preprocess_input(gr, coef_col = "coefs")
-   
-  # filter: only keep cases where there is at least one positive and one negative coef per gene
-  valid_genes <- gr |>
-    as.data.frame() |>
-    dplyr::group_by(gene_id) |>
-    dplyr::summarise(
-      has_positive = any(coefs > 0),
-      has_negative = any(coefs < 0)
-    ) |>
-    dplyr::filter(has_positive & has_negative) |>
-    dplyr::pull(gene_id)
-  gr <- gr |>
-    dplyr::filter(gene_id %in% valid_genes)
-  # TO DO: is it easier if i unrandomize the coef generation here to ensure there is always at least one pos and one neg per gene?
+
   return(gr)
 }
 
