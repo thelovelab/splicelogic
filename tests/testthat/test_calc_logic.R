@@ -96,3 +96,16 @@ test_that("calc_a3ss_a5ss test", {
     expect_true("event" %in% names(GenomicRanges::mcols(result)))
     expect_true(any(result$event == "a3ss"))
 })
+
+# Test for calc_skipped_exons with new mock data
+test_that("calc_skipped_exons test with generate_skipped_exons", {
+    gr <- create_mock_data(3,3,6)
+    gr <- preprocess_input(gr, coef_col = "coefs")
+    gr <- generate_skipped_exons(gr, n_se = 1)
+
+    result <- calc_skipped_exons(gr, coef_col = "coefs")
+
+    expect_s4_class(result, "GRanges")
+    expect_true("event" %in% names(GenomicRanges::mcols(result)))
+    expect_true(any(result$event == "skipped_exon"))
+})

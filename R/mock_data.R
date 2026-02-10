@@ -161,7 +161,7 @@ data <- data %>%
   # Convert to GRanges
   gr <- plyranges::as_granges(data)
   gr <- preprocess_input(gr, coef_col = "coefs")
-  
+   
   # filter: only keep cases where there is at least one positive and one negative coef per gene
   valid_genes <- gr |>
     as.data.frame() |>
@@ -178,12 +178,12 @@ data <- data %>%
   return(gr)
 }
 
-#' Generate skipped exon events in a GRanges object
+#' Generate skipped exon events in a GRanges object making all >0 coefs transcripts have a the same exon eventfor the same gene
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
 #' @param n_se Number of skipped exon events to generate
 #' @return A GRanges object with skipped exon events introduced
 #' @export  
-generate_skipped_exons <- function(gr, n_se = 1) {
+generate_skipped_exons_restricted <- function(gr, n_se = 1) {
   set.seed (123) # for reproducibility
   # generate skipped exons by removing random internal = TRUE exons in transcripts with coefs > 0 
 se_ranges <- gr |>
@@ -200,6 +200,42 @@ se_ranges <- gr |>
 
   gr <- gr |>
     dplyr::filter(!key %in% to_remove)
+  # re-rank the exons accordingly
+  gr <- gr |>
+  dplyr::group_by(tx_id) |>
+  dplyr::mutate(
+    exon_rank = seq_len(dplyr::n()),
+    exon_rank = dplyr::if_else(
+      strand == "-",
+      # reverse the sequence for minus-strand transcripts
+      rev(exon_rank),
+      exon_rank
+    )
+  ) |>
+  dplyr::ungroup()
+  #update internal column and key nexons
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  return(gr)
+}
+
+
+#' Generate skipped exon events in a GRanges object making all >0 coefs transcripts have a the same exon eventfor the same gene
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
+#' @param n_se Number of skipped exon events to generate
+#' @return A GRanges object with skipped exon events introduced
+#' @export  
+generate_skipped_exons <- function(gr, n_se = 1) {
+  set.seed(123) # for reproducibility
+  # generate alternative 3' splice sites by modifying the end() of random internal = TRUE exons in transcripts with coefs > 0
+  se_exons_key <- gr |> 
+    as.data.frame() |>
+    dplyr::filter(coefs > 0 & internal == TRUE) |>
+    dplyr::distinct(key) |>
+    dplyr::slice_sample(n = n_se) |>
+    dplyr::pull(key)
+
+  gr <- gr |>
+    dplyr::filter(!key %in% se_exons_key)
   # re-rank the exons accordingly
   gr <- gr |>
   dplyr::group_by(tx_id) |>
