@@ -16,8 +16,8 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
   pos_exons <- gr |> dplyr::filter(sign(!!coef) == 1)
   neg_exons <- gr |> dplyr::filter(sign(!!coef) == -1)
 
-  filter_results <- candidates_by_non_overlap_directed(neg_exons, pos_exons, gr)
-  # filter_results <- candidates_by_presence(gr, coef_col)
+  # filter_results <- candidates_by_non_overlap_directed(neg_exons, pos_exons, gr)
+  filter_results <- candidates_by_presence(gr, coef_col)
   # filter_results <- candidates_by_presence_v2(neg_exons, pos_exons)
 
   candidates <- filter_results$candidates

@@ -229,7 +229,7 @@ candidates_by_presence_v2 <- function(neg_exons, pos_exons) {
     dplyr::group_by(gene_id) |>
     dplyr::mutate(n_txp_pos = dplyr::n_distinct(tx_id)) |>
     dplyr::ungroup()
-  count <- neg_exons |> count_overlaps(pos_exons) 
+  count <- neg_exons |> plyranges::count_overlaps(pos_exons) 
 
   neg_exons <- neg_exons |>
     dplyr::mutate(overlap_count = count,
