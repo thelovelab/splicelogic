@@ -96,7 +96,7 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
     dplyr::filter_(~feature_type == "exon") %>%
     dplyr::arrange_('transcript_id', 'start') %>%
-    dplyr::filter(row_number() == 1)
+    dplyr::filter(dplyr::row_number() == 1)
   
   # Define default fill column
   color_by <- "feature_type"
@@ -110,41 +110,41 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   }
   
   #Create a plot of transcript structure
-  plot = ggplot(exons_df) + geom_blank()
+  plot = ggplot2::ggplot(exons_df) + ggplot2::geom_blank()
   if(connect_exons){ #Print line connecting exons
-    plot = plot + geom_line(aes(x = start, y = transcript_rank, 
-                                group = transcript_rank, 
+    plot = plot + ggplot2::geom_line(ggplot2::aes(x = start, y = transcript_rank,
+                                group = transcript_rank,
                                 color = !!rlang::sym(color_by)))
   }
-  plot = plot + 
-    geom_rect(aes(xmin = start, 
-                  xmax = end, 
-                  ymax = transcript_rank + 0.25, 
-                  ymin = transcript_rank - 0.25, 
-                  fill = !!rlang::sym(color_by))) + 
-    theme_light() +
-    theme(plot.margin=unit(c(0,1,1,1),"line"), 
-          axis.title.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
+  plot = plot +
+    ggplot2::geom_rect(ggplot2::aes(xmin = start,
+                  xmax = end,
+                  ymax = transcript_rank + 0.25,
+                  ymin = transcript_rank - 0.25,
+                  fill = !!rlang::sym(color_by))) +
+    ggplot2::theme_light() +
+    ggplot2::theme(plot.margin=grid::unit(c(0,1,1,1),"line"),
+          axis.title.y = ggplot2::element_blank(),
+          axis.text.y = ggplot2::element_blank(),
+          axis.ticks.y = ggplot2::element_blank(),
           legend.position="none",
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          strip.text.y = element_text(colour = "grey10"),
-          strip.background = element_rect(fill = "grey85")) +
-    xlab(xlabel) +
-    facet_grid(type~.) +
-    scale_y_continuous(expand = c(0.2,0.15)) +
-    scale_fill_manual(values = colors) +
-    scale_colour_manual(values = colors)
+          panel.grid.major = ggplot2::element_blank(),
+          panel.grid.minor = ggplot2::element_blank(),
+          strip.text.y = ggplot2::element_text(colour = "grey10"),
+          strip.background = ggplot2::element_rect(fill = "grey85")) +
+    ggplot2::xlab(xlabel) +
+    ggplot2::facet_grid(type~.) +
+    ggplot2::scale_y_continuous(expand = c(0.2,0.15)) +
+    ggplot2::scale_fill_manual(values = colors) +
+    ggplot2::scale_colour_manual(values = colors)
   if(all(!is.na(limits))){
-    plot = plot + scale_x_continuous(expand = c(0,0)) +
-      coord_cartesian(xlim = limits)
+    plot = plot + ggplot2::scale_x_continuous(expand = c(0,0)) +
+      ggplot2::coord_cartesian(xlim = limits)
   }
   if(transcript_label){
-    plot = plot + geom_text(aes_(x = ~start, 
-                                 y = ~transcript_rank + 0.30, 
-                                 label = ~transcript_label), 
+    plot = plot + ggplot2::geom_text(ggplot2::aes_(x = ~start,
+                                 y = ~transcript_rank + 0.30,
+                                 label = ~transcript_label),
                             data = transcript_annot, hjust = 0, vjust = 0, size = 4)
     
   }
