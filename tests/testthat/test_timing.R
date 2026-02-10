@@ -8,7 +8,7 @@ test_that("timing as the number of transcripts grows large", {
   # generate some skipped exon events in the mock data
   gr <- generate_skipped_exons(gr, n_se = 2)
   # view the plot to check that the events look correct
-  slPltRanges(gr)  
+  # slPltRanges(gr)  
   
   gr <- preprocess_input(gr, coef_col = "coefs")
   res <- calc_skipped_exons(gr, "coefs")
