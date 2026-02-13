@@ -13,7 +13,7 @@
 #' the left and right exons, respectively.
 #' @importFrom magrittr %>%
 #' @keywords internal
-compute_matches <- function(gr, left_exon, right_exon, type = c("in", "over", "boundary")) {
+compute_matches <- function(gr, left_exon, right_exon, type = c("over","in","boundary")) {
   type <- match.arg(type)
   gr_matched <- switch(
     type,
@@ -172,6 +172,7 @@ find_introns <- function(gr) {
 #' @keywords internal
 candidates_by_presence <- function(gr, coef_col) {
   coef <- rlang::sym(coef_col)
+
   # filter internal exons and put n_txp per gene
   gr_internal <- gr |> 
     dplyr::group_by(gene_id) |>
@@ -184,6 +185,7 @@ candidates_by_presence <- function(gr, coef_col) {
                       end = IRanges::end(gr_internal),
                       gene_id = gr_internal$gene_id,
                       n_txp = gr_internal$n_txp)
+                      
   # count occurrences of each exon 
   key_count <- vctrs::vec_count(keys) |>
     dplyr::filter((count / key$n_txp) < 1)
