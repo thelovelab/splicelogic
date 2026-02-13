@@ -5,7 +5,7 @@
 #' @param type The type of overlap to consider when identifying skipped exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
 #' @export
-calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary")) {
+calc_skipped_exons <- function(gr, coef_col, type = c("over","in", "boundary")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
   if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
@@ -17,7 +17,7 @@ calc_skipped_exons <- function(gr, coef_col, type = c("in", "over", "boundary"))
   neg_exons <- gr |> dplyr::filter(sign(!!coef) == -1)
 
   # filter_results <- candidates_by_non_overlap_directed(neg_exons, pos_exons, gr)
-  filter_results <- candidates_by_presence(gr, coef_col)
+  filter_results <- candidates_by_presence(gr, coef_col) # TO DO : check by overlap not in 
   # filter_results <- candidates_by_presence_v2(neg_exons, pos_exons)
 
   candidates <- filter_results$candidates
@@ -202,6 +202,8 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
   # candidates are pos exons that do not exacly match neg_exons (%in%)
   # filter candidates pos_exons that are exactly the same as any neg_exons
   # and keep only those that overlap any neg_exons
+  # TO DO: this is not pairwise comparison - need to restrict to the same gene and then compare to all neg exons in that gene pair by pair
+  # rn if any neg exon is the same as the candidate, it will be filtered out, even if there is another neg exon that overlaps but is not the same and could be a valid a3ss/a5ss event.
   candidates <- pos_exons |> 
                 dplyr::filter(!(pos_exons %in% neg_exons)) |>
                 plyranges::filter_by_overlaps_directed(neg_exons)
@@ -222,7 +224,7 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
 
       matches <- cand_neg_exons %>%
         dplyr::mutate(
-          match_start  = GenomicRanges::start(.)   %in% GenomicRanges::start(cand),
+          match_start  = GenomicRanges::start(.) %in% GenomicRanges::start(cand),
           match_end = GenomicRanges::end(.) %in% GenomicRanges::end(cand)
         ) |>
          # only keep those that match on one end but not the other
@@ -230,7 +232,7 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
         
       if (length(matches) > 0L) {
         event_type <- ifelse(matches$match_start, "a5ss", "a3ss")
-        txs <- unique(matches$tx_id)
+        txs <- matches$tx_id
         cand_rep <- rep(cand, length(txs)) |>
           dplyr::mutate(
             event    = event_type,
