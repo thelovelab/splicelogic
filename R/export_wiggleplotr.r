@@ -96,8 +96,8 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   
   #Extract the position for plotting transcript name
   transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
-    dplyr::filter_(~feature_type == "exon") %>%
-    dplyr::arrange_('transcript_id', 'start') %>%
+    dplyr::filter(feature_type == "exon") %>%
+    dplyr::arrange(transcript_id, start) %>%
     dplyr::filter(dplyr::row_number() == 1)
   
   # Define default fill column
