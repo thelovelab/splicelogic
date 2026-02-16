@@ -1,0 +1,13 @@
+url: https://thelovelab.github.io/splicelogic
+
+title: splicelogic
+
+authors:
+  Bea Campillo:
+    href: https://github.com/beamimc
+  Michael Love:
+    href: https://mikelove.github.io
+    
+template:
+  bootstrap: 5
+
