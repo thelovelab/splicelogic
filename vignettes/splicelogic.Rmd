@@ -104,7 +104,7 @@ skipped, with an `event` column set to `"skipped_exon"`. The `"tx_id"` refers to
 that includes the skipped exon, `"tx_event"` indicates the transcripts in respect to which the exon 
 is skipped (i.e. the downregulated transcripts that do not include the exon).
 
-```{r skipped-exons-check}
+```{r skipped-exons-check, eval=FALSE}
 mcols(se_result)[, c("gene_id", "tx_id", "n_txp", "event", "tx_event")]
 ```
 
@@ -117,14 +117,14 @@ position in another isoform.
 The `mx_mock_data()` dataset is designed to contain mutually exclusive
 exon events:
 
-```{r mx-exons}
+```{r mx-exons, eval=FALSE}
 gr_mx <- mx_mock_data()
 gr_mx <- preprocess_input(gr_mx, coef_col = "coefs")
 mx_result <- calc_mutually_exclusive(gr_mx, coef_col = "coefs")
 mx_result
 ```
 
-```{r mx-exons-check}
+```{r mx-exons-check, eval=FALSE}
 mcols(mx_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
 ```
 
@@ -134,7 +134,7 @@ mcols(mx_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
 overlap intronic regions of downregulated transcripts, indicating
 intron retention.
 
-```{r retained-introns}
+```{r retained-introns, eval=FALSE}
 gr_ri <- create_mock_data(3, 6, 3)
 gr_ri <- preprocess_input(gr_ri, coef_col = "coefs")
 gr_ri <- generate_retained_introns(gr_ri, n_ri = 3)
@@ -142,7 +142,7 @@ ri_result <- calc_retained_introns(gr_ri, coef_col = "coefs")
 ri_result
 ```
 
-```{r retained-introns-check}
+```{r retained-introns-check, eval=FALSE}
 if (length(ri_result) > 0) {
     mcols(ri_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
 }
@@ -154,7 +154,7 @@ if (length(ri_result) > 0) {
 end) with an exon in another isoform but differ at the opposite end,
 indicating alternative splice site usage.
 
-```{r a3ss-a5ss}
+```{r a3ss-a5ss, eval=FALSE}
 gr_ss <- create_mock_data(3, 3, 6)
 gr_ss <- preprocess_input(gr_ss, coef_col = "coefs")
 gr_ss <- generate_a3ss(gr_ss, n_a3ss = 3)
@@ -162,7 +162,7 @@ ss_result <- calc_a3ss_a5ss(gr_ss, coef_col = "coefs")
 ss_result
 ```
 
-```{r a3ss-a5ss-check}
+```{r a3ss-a5ss-check, eval=FALSE}
 if (length(ss_result) > 0) {
     mcols(ss_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
 }
@@ -173,7 +173,7 @@ if (length(ss_result) > 0) {
 When the input data does not contain any splicing events, each
 detection function returns an empty `GRanges` object:
 
-```{r no-events}
+```{r no-events, eval=FALSE}
 gr_none <- no_event_mock_data()
 gr_none <- preprocess_input(gr_none, coef_col = "coefs")
 
