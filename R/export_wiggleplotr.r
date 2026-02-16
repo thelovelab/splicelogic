@@ -23,6 +23,8 @@
 #' @return ggplot2 object
 #' @examples
 #' plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = FALSE)
+#'
+#' @importFrom assertthat assert_that
 #' 
 #' @export
 slPlotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, 

@@ -24,4 +24,5 @@ Imports:
     ggplot2,
     patchwork,
     plyranges,
-    tibble
+    tibble,
+    assertthat
