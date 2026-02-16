@@ -1,0 +1,56 @@
+# Package index
+
+## All functions
+
+- [`calc_a3ss_a5ss()`](https://thelovelab.github.io/splicelogic/reference/calc_a3ss_a5ss.md)
+  : Function to calcualte 5' and 3' alternative splice sites given a
+  GRanges object
+- [`calc_mutually_exclusive()`](https://thelovelab.github.io/splicelogic/reference/calc_mutually_exclusive.md)
+  : Calculate mutually exclusive exons from a GRanges object
+- [`calc_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/calc_retained_introns.md)
+  : Function to calculate retained introns given a GRanges object
+- [`calc_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_skipped_exons.md)
+  : Calculate skipped exons from a GRanges object
+- [`candidates_by_non_overlap_directed()`](https://thelovelab.github.io/splicelogic/reference/candidates_by_non_overlap_directed.md)
+  : Filter candidates that do not overlap any pos_exons, and are
+  internal Then get the left and right exons for each candidate Return a
+  named list with three GRanges objects: candidates, left_exons,
+  right_exons
+- [`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md)
+  : Create mock GRanges data for splicing event testing
+- [`find_candidates()`](https://thelovelab.github.io/splicelogic/reference/find_candidates.md)
+  : Find candidates skipped exons
+- [`generate_a3ss()`](https://thelovelab.github.io/splicelogic/reference/generate_a3ss.md)
+  : Generate alternative 3' splice site events in a GRanges object
+- [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_a5ss.md)
+  : Generate alternative 5' splice site events in a GRanges object
+- [`generate_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/generate_retained_introns.md)
+  : Generate retained intron events in a GRanges object
+- [`generate_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/generate_skipped_exons.md)
+  : Generate skipped exon events in a GRanges object making all \>0
+  coefs transcripts have a the same exon eventfor the same gene
+- [`generate_skipped_exons_restricted()`](https://thelovelab.github.io/splicelogic/reference/generate_skipped_exons_restricted.md)
+  : Generate skipped exon events in a GRanges object making all \>0
+  coefs transcripts have a the same exon eventfor the same gene
+- [`mx_mock_data()`](https://thelovelab.github.io/splicelogic/reference/mx_mock_data.md)
+  : Create a sample GRanges with one negative coef transcript and one
+  positive coef transcripts This dataset is designed to include a
+  mutually exclusive exons between exon_rank 3 of tx_id 1 and exon_rank
+  3 of tx_id 2. There is also a skipped exon event at exon_rank 5 of
+  tx_id 1.
+- [`no_event_mock_data()`](https://thelovelab.github.io/splicelogic/reference/no_event_mock_data.md)
+  : Create a sample GRanges with one negative coef transcript and one
+  positive coef transcripts This dataset is designed to include no
+  splicing events
+- [`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md)
+  : Preprocess input GRanges object for splicing event calculation
+- [`se_mock_data()`](https://thelovelab.github.io/splicelogic/reference/se_mock_data.md)
+  : Create a sample GRanges with one negative coef transcript and two
+  positive coef transcripts This dataset is designed to include a
+  skipped exon event at exon_rank 3 and 5 of tx_id 1 happening between
+  both tx_id 2 and tx_id 3
+- [`slPlotTranscripts()`](https://thelovelab.github.io/splicelogic/reference/slPlotTranscripts.md)
+  : Quickly plot transcript structure without read coverage tracks
+- [`slPltRanges()`](https://thelovelab.github.io/splicelogic/reference/slPltRanges.md)
+  : Basic function to visualize easily a gr object with transcript
+  coefficients and events.
