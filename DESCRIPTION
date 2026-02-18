@@ -15,15 +15,13 @@ BugReports: https://github.com/thelovelab/splicelogic/issues
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    wiggleplotr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Imports:
     dplyr,
     magrittr,
     GenomicRanges,
-    ggplot2,
-    patchwork,
     plyranges,
-    tibble,
-    assertthat
+    tibble
