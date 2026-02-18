@@ -117,7 +117,7 @@ se_result <- calc_skipped_exons(gr_se, coef_col = "coefs")
 se_result
 ```
 
-    ## GRanges object with 5 ranges and 10 metadata columns:
+    ## GRanges object with 5 ranges and 11 metadata columns:
     ##       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
     ##          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
     ##   [1]    chr13     31-35      + |         1         1         4 -0.235204
@@ -125,13 +125,20 @@ se_result
     ##   [3]    chr13     31-35      + |         1         4         4 -0.985201
     ##   [4]    chr13   141-145      + |         2         5         5 -0.682818
     ##   [5]    chr13   141-145      + |         2         7         5 -0.420466
-    ##               key    nexons  internal     n_txp        event  tx_event
-    ##       <character> <integer> <logical> <integer>  <character> <numeric>
-    ##   [1]         1-4         6      TRUE         4 skipped_exon         2
-    ##   [2]         3-4         6      TRUE         4 skipped_exon         2
-    ##   [3]         4-4         6      TRUE         4 skipped_exon         2
-    ##   [4]         5-5         6      TRUE         4 skipped_exon         8
-    ##   [5]         7-5         6      TRUE         4 skipped_exon         8
+    ##               key    nexons  internal overlap_count n_txp_pos        event
+    ##       <character> <integer> <logical>     <integer> <integer>  <character>
+    ##   [1]         1-4         6      TRUE             0         1 skipped_exon
+    ##   [2]         3-4         6      TRUE             0         1 skipped_exon
+    ##   [3]         4-4         6      TRUE             0         1 skipped_exon
+    ##   [4]         5-5         6      TRUE             1         2 skipped_exon
+    ##   [5]         7-5         6      TRUE             1         2 skipped_exon
+    ##        tx_event
+    ##       <numeric>
+    ##   [1]         2
+    ##   [2]         2
+    ##   [3]         2
+    ##   [4]         8
+    ##   [5]         8
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
