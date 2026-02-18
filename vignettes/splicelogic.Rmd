@@ -76,8 +76,6 @@ one transcript is upregulated (coef>0) and one is downregulated (coef<0) for eac
 gr <- create_mock_data( n_genes = 2, n_tx = 4, n_exons = 6 )
 
 mcols(gr)
-#visualize the input data
-slPltRanges(gr)
 ```
 
 ## Skipped exons
@@ -91,7 +89,7 @@ which modifies the input `GRanges` object to include skipped exon events.
  Then we can run the detection function `calc_skipped_exons()` on the modified `GRanges` object:
 ```{r skipped-exons}
 gr_se <- generate_skipped_exons(gr, n_se = 2)
-slPltRanges(gr_se)
+
 
 gr_se <- preprocess_input(gr_se, coef_col = "coefs")
 
