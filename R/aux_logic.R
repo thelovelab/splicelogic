@@ -226,7 +226,7 @@ candidates_by_presence <- function(gr, coef_col) {
   )
 }
 
-candidates_by_presence_v2 <- function(neg_exons, pos_exons) {
+candidates_by_presence_v2 <- function(gr, neg_exons, pos_exons) {
   pos_exons <- pos_exons |>
     dplyr::group_by(gene_id) |>
     dplyr::mutate(n_txp_pos = dplyr::n_distinct(tx_id)) |>
