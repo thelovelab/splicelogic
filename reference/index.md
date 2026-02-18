@@ -49,8 +49,3 @@
   positive coef transcripts This dataset is designed to include a
   skipped exon event at exon_rank 3 and 5 of tx_id 1 happening between
   both tx_id 2 and tx_id 3
-- [`slPlotTranscripts()`](https://thelovelab.github.io/splicelogic/reference/slPlotTranscripts.md)
-  : Quickly plot transcript structure without read coverage tracks
-- [`slPltRanges()`](https://thelovelab.github.io/splicelogic/reference/slPltRanges.md)
-  : Basic function to visualize easily a gr object with transcript
-  coefficients and events.

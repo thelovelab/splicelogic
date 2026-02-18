@@ -78,14 +78,6 @@ mcols(gr)
     ## 47          2         8         5  0.465764         8-5         6      TRUE
     ## 48          2         8         6  0.465764         8-6         6     FALSE
 
-``` r
-
-#visualize the input data
-slPltRanges(gr)
-```
-
-![](splicelogic_files/figure-html/preprocess-1.png)
-
 ### Skipped exons
 
 [`calc_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_skipped_exons.md)
@@ -104,12 +96,7 @@ on the modified `GRanges` object:
 ``` r
 
 gr_se <- generate_skipped_exons(gr, n_se = 2)
-slPltRanges(gr_se)
-```
 
-![](splicelogic_files/figure-html/skipped-exons-1.png)
-
-``` r
 
 gr_se <- preprocess_input(gr_se, coef_col = "coefs")
 
@@ -271,41 +258,36 @@ sessionInfo()
     ## [7] splicelogic_0.0.67  
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] SummarizedExperiment_1.40.0 gtable_0.3.6               
-    ##  [3] ggplot2_4.0.2               rjson_0.2.23               
-    ##  [5] xfun_0.56                   bslib_0.10.0               
-    ##  [7] htmlwidgets_1.6.4           plyranges_1.30.1           
-    ##  [9] Biobase_2.70.0              lattice_0.22-9             
-    ## [11] vctrs_0.7.1                 tools_4.5.2                
-    ## [13] bitops_1.0-9                curl_7.0.0                 
-    ## [15] parallel_4.5.2              tibble_3.3.1               
-    ## [17] pkgconfig_2.0.3             Matrix_1.7-4               
-    ## [19] RColorBrewer_1.1-3          S7_0.2.1                   
-    ## [21] desc_1.4.3                  cigarillo_1.0.0            
-    ## [23] assertthat_0.2.1            lifecycle_1.0.5            
-    ## [25] farver_2.1.2                compiler_4.5.2             
-    ## [27] Rsamtools_2.26.0            textshaping_1.0.4          
-    ## [29] Biostrings_2.78.0           codetools_0.2-20           
-    ## [31] htmltools_0.5.9             sass_0.4.10                
-    ## [33] RCurl_1.98-1.17             yaml_2.3.12                
-    ## [35] pillar_1.11.1               pkgdown_2.2.0              
-    ## [37] crayon_1.5.3                jquerylib_0.1.4            
-    ## [39] BiocParallel_1.44.0         DelayedArray_0.36.0        
-    ## [41] cachem_1.1.0                abind_1.4-8                
-    ## [43] tidyselect_1.2.1            digest_0.6.39              
-    ## [45] purrr_1.2.1                 dplyr_1.2.0                
-    ## [47] restfulr_0.0.16             labeling_0.4.3             
-    ## [49] fastmap_1.2.0               grid_4.5.2                 
-    ## [51] cli_3.6.5                   SparseArray_1.10.8         
-    ## [53] magrittr_2.0.4              patchwork_1.3.2            
-    ## [55] S4Arrays_1.10.1             XML_3.99-0.22              
-    ## [57] withr_3.0.2                 scales_1.4.0               
-    ## [59] rmarkdown_2.30              XVector_0.50.0             
-    ## [61] httr_1.4.8                  matrixStats_1.5.0          
-    ## [63] otel_0.2.0                  ragg_1.5.0                 
-    ## [65] evaluate_1.0.5              knitr_1.51                 
-    ## [67] BiocIO_1.20.0               rtracklayer_1.70.1         
-    ## [69] rlang_1.1.7                 glue_1.8.0                 
-    ## [71] jsonlite_2.0.0              R6_2.6.1                   
-    ## [73] MatrixGenerics_1.22.0       GenomicAlignments_1.46.0   
-    ## [75] systemfonts_1.3.1           fs_1.6.6
+    ##  [1] SummarizedExperiment_1.40.0 rjson_0.2.23               
+    ##  [3] xfun_0.56                   bslib_0.10.0               
+    ##  [5] htmlwidgets_1.6.4           plyranges_1.30.1           
+    ##  [7] Biobase_2.70.0              lattice_0.22-9             
+    ##  [9] vctrs_0.7.1                 tools_4.5.2                
+    ## [11] bitops_1.0-9                curl_7.0.0                 
+    ## [13] parallel_4.5.2              tibble_3.3.1               
+    ## [15] pkgconfig_2.0.3             Matrix_1.7-4               
+    ## [17] desc_1.4.3                  cigarillo_1.0.0            
+    ## [19] lifecycle_1.0.5             compiler_4.5.2             
+    ## [21] Rsamtools_2.26.0            textshaping_1.0.4          
+    ## [23] Biostrings_2.78.0           codetools_0.2-20           
+    ## [25] htmltools_0.5.9             sass_0.4.10                
+    ## [27] RCurl_1.98-1.17             yaml_2.3.12                
+    ## [29] pillar_1.11.1               pkgdown_2.2.0              
+    ## [31] crayon_1.5.3                jquerylib_0.1.4            
+    ## [33] BiocParallel_1.44.0         DelayedArray_0.36.0        
+    ## [35] cachem_1.1.0                abind_1.4-8                
+    ## [37] tidyselect_1.2.1            digest_0.6.39              
+    ## [39] dplyr_1.2.0                 restfulr_0.0.16            
+    ## [41] fastmap_1.2.0               grid_4.5.2                 
+    ## [43] cli_3.6.5                   SparseArray_1.10.8         
+    ## [45] magrittr_2.0.4              S4Arrays_1.10.1            
+    ## [47] XML_3.99-0.22               withr_3.0.2                
+    ## [49] rmarkdown_2.30              XVector_0.50.0             
+    ## [51] httr_1.4.8                  matrixStats_1.5.0          
+    ## [53] otel_0.2.0                  ragg_1.5.0                 
+    ## [55] evaluate_1.0.5              knitr_1.51                 
+    ## [57] BiocIO_1.20.0               rtracklayer_1.70.1         
+    ## [59] rlang_1.1.7                 glue_1.8.0                 
+    ## [61] jsonlite_2.0.0              R6_2.6.1                   
+    ## [63] MatrixGenerics_1.22.0       GenomicAlignments_1.46.0   
+    ## [65] systemfonts_1.3.1           fs_1.6.6
