@@ -4,7 +4,7 @@
 \alias{calc_skipped_exons}
 \title{Calculate skipped exons from a GRanges object}
 \usage{
-calc_skipped_exons(gr, coef_col, type = c("in", "over", "boundary"))
+calc_skipped_exons(gr, coef_col, type = c("over", "in", "boundary"))
 }
 \arguments{
 \item{gr}{A GRanges object with exon annotations, including 'tx_id', 'exon',

@@ -9,7 +9,7 @@ a tibble that is the same as pos_exons but with two additional columns
 and right exons respectively. The matching is done based on the 'type'
 parameter which can be "in", "over", or "boundary".}
 \usage{
-compute_matches(gr, left_exon, right_exon, type = c("in", "over", "boundary"))
+compute_matches(gr, left_exon, right_exon, type = c("over", "in", "boundary"))
 }
 \arguments{
 \item{gr}{A GRanges object with exon annotations}
