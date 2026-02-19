@@ -5,7 +5,7 @@ Calculate skipped exons from a GRanges object
 ## Usage
 
 ``` r
-calc_skipped_exons(gr, coef_col, type = c("in", "over", "boundary"))
+calc_skipped_exons(gr, coef_col, type = c("over", "in", "boundary"))
 ```
 
 ## Arguments

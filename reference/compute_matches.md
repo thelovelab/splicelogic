@@ -10,7 +10,7 @@ left and right exons respectively. The matching is done based on the
 ## Usage
 
 ``` r
-compute_matches(gr, left_exon, right_exon, type = c("in", "over", "boundary"))
+compute_matches(gr, left_exon, right_exon, type = c("over", "in", "boundary"))
 ```
 
 ## Arguments
