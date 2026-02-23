@@ -5,9 +5,11 @@
 #' @param type The type of overlap to consider when identifying skipped exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
 #' @export
-calc_skipped_exons <- function(gr, coef_col, type = c("over","in", "boundary")) {
+calc_skipped_exons <- function(gr, type = c("over","in", "boundary")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
+  check_preprocessed(gr)
+
   if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col)
   }
@@ -242,4 +244,9 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
         }
   }
   hits
+}
+
+check_preprocessed <- function(gr) {
+  if (is.null(metadata(gr)$splicelogic_preprocessed) | !metadata(gr)$splicelogic_preprocessed)
+    stop("cant")
 }

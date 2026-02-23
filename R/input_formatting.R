@@ -57,9 +57,12 @@ combine_gr_input <- function(gr1, gr2, coef_col) {
 #' It also initializes an 'event' column for downstream splicing event annotation.
 #'
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.
+#' @param coef_col blah
+#' @param method_string blah
+#' 
 #' @return A GRanges object with added 'key', 'nexons', 'internal', and 'event' columns.
 #' @export
-preprocess_input <- function(gr, coef_col) {
+preprocess_input <- function(gr, coef_col, method_string=NULL) {
   check_input(gr, coef_col) # check metadata columns are present
 
   # include key nexons and internal columns
@@ -71,6 +74,11 @@ preprocess_input <- function(gr, coef_col) {
       internal = exon_rank > 1 & exon_rank < nexons
     ) |> 
     dplyr::ungroup()
+
+  metadata(gr)$splicelogic_preprocessed <- TRUE
+  if (!is.null(method_string)) {
+    metadata(gr)$method_string <- method_string
+  }
 
   return(gr)
 }

@@ -54,9 +54,12 @@ currently, it is required as input
 The coefficient input in *coef_col* indicates the differential transcript usage (DTU) of the specific
 transcript containing the exon. All exons from the same transcript share the
 same coefficient value. This values comes from a prior differential transcript usage
-analysis, such as that performed by `satuRn`.
+analysis, such as that performed by 
+[satuRn](https://bioconductor.org/packages/satuRn).
 Positive coefficient values indicate upregulated exons and negative
 values indicate downregulated exons. 
+
+<!-- Mike will add getting exons and adding the table -->
 
 # How to start detecting splicing events
 
