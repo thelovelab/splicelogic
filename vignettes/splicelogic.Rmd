@@ -83,23 +83,27 @@ values indicate downregulated exons.
 Here we demontrate reading in exon ranges from a GTF and adding example DTU results.
 
 ```{r}
-# look up annotations of exons and transcripts
+# first we get an example TxDB for our exon ranges
 suppressPackageStartupMessages({
   library(AnnotationHub)
   library(GenomicFeatures)
   library(tibble)
 })
+# here we will use the transcript database for GENCODE v32 from AHub
+# typically, you should supply your own GTF to makeTxDbFromGFF()
 ah <- AnnotationHub()
-# here look up the transcript database for GENCODE v32
-# typically, supply your own GTF to makeTxDbFromGFF()
-query(ah, c("GENCODE", "Homo sapiens", "GTF", "v32"))
-# download an example TxDB for generating exon ranges
 txdb <- ah[["AH75191"]]
+```
+
+The following extracts the exons from the *TxDb*:
+
+```{r}
 # extract exons as a GRangesList
 ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
 ```
 
-Build a transcript table if it isn't provided by your DTU method:
+Here we build a transcript table, likely this is already 
+provided by an upstream DTU method.
 
 ```{r}
 # extract transcript table as tibble
@@ -123,8 +127,9 @@ txps[1:3,]
 ```
 
 ```{r}
-# check the concordance, and if aligned, set new names for exons
+# check the concordance...
 all.equal(txps$tx_num, as.integer(names(ebt)))
+# and if aligned, set new names for exons
 exons <- ebt
 names(exons) <- txps$tx_id
 ```
@@ -148,8 +153,8 @@ merged_DF <- cbind(mcols(exons), add_columns)
 mcols(exons) <- merged_DF
 ```
 
-We end up with all the exons, grouped by transcript, 
-in a flat *GRanges* object, with the following columns:
+We end up with all the exons-per-transcript in a 
+flat *GRanges* object with the following columns:
 
 ```{r}
 exons[1:3] |> mcols()
