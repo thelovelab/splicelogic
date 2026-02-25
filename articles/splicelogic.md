@@ -1,4 +1,4 @@
-# Introduction to \`splicelogic\`
+# Introduction to splicelogic
 
 ## Introduction
 
@@ -14,10 +14,10 @@ following types of splicing events:
   included at the expense of the other.
 - **Retained introns (RI)** – intronic regions that are retained as part
   of an exon in an alternative isoform.
-- **Alternative 3’ (A3SS)** – exons that share the same 5’ splice site
-  but differ at the 3’ end.
 - **Alternative 5’ (A5SS)** – exons that share the same 3’ splice site
   but differ at the 5’ end.
+  - **Alternative 3’ (A3SS)** – exons that share the same 5’ splice site
+    but differ at the 3’ end.
 
 ## Quick start
 
