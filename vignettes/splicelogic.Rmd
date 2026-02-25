@@ -84,29 +84,24 @@ Here we demontrate reading in exon ranges from a GTF and adding example DTU resu
 
 ```{r}
 # look up annotations of exons and transcripts
-library(AnnotationHub)
+suppressPackageStartupMessages({
+  library(AnnotationHub)
+  library(GenomicFeatures)
+  library(tibble)
+})
 ah <- AnnotationHub()
+# here look up the transcript database for GENCODE v32
+# typically, supply your own GTF to makeTxDbFromGFF()
 query(ah, c("GENCODE", "Homo sapiens", "GTF", "v32"))
 # download an example TxDB for generating exon ranges
 txdb <- ah[["AH75191"]]
-library(GenomicFeatures)
+# extract exons as GRanges
 ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
-```
-
-```{r}
-library(tibble)
+# extract transcript table
 txps <- txdb |>
-  AnnotationDbi::select(
-    keys(txdb, "TXID"), 
-    c("TXNAME","GENEID"), 
-    "TXID"
-    ) |>
+  AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
   tibble::as_tibble() |>
-  dplyr::select(
-    tx_number = TXID,
-    tx_id = TXNAME,
-    gene_id = GENEID
-  )
+  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
 ```
 
 Suppose DTU results:
