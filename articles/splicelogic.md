@@ -270,7 +270,7 @@ on the modified `GRanges` object:
 
 gr_se <- generate_skipped_exons(gr, n_se = 2)
 gr_se <- preprocess_input(gr_se, coef_col = "coefs")
-se_result <- calc_skipped_exons(gr_se, coef_col = "coefs")
+se_result <- calc_skipped_exons(gr_se)
 se_result
 ```
 
@@ -299,7 +299,7 @@ dataset is designed to contain mutually exclusive exon events:
 
 gr_mx <- mx_mock_data()
 gr_mx <- preprocess_input(gr_mx, coef_col = "coefs")
-mx_result <- calc_mutually_exclusive(gr_mx, coef_col = "coefs")
+mx_result <- calc_mutually_exclusive(gr_mx)
 mx_result
 ```
 
@@ -319,7 +319,7 @@ downregulated transcripts, indicating intron retention.
 gr_ri <- create_mock_data(3, 6, 3)
 gr_ri <- preprocess_input(gr_ri, coef_col = "coefs")
 gr_ri <- generate_retained_introns(gr_ri, n_ri = 3)
-ri_result <- calc_retained_introns(gr_ri, coef_col = "coefs")
+ri_result <- calc_retained_introns(gr_ri)
 ri_result
 ```
 
@@ -344,7 +344,7 @@ splice site usage.
 gr_ss <- create_mock_data(3, 3, 6)
 gr_ss <- preprocess_input(gr_ss, coef_col = "coefs")
 gr_ss <- generate_a3ss(gr_ss, n_a3ss = 3)
-ss_result <- calc_a3ss_a5ss(gr_ss, coef_col = "coefs")
+ss_result <- calc_a3ss_a5ss(gr_ss)
 ss_result
 ```
 
@@ -365,8 +365,8 @@ function returns an empty `GRanges` object:
 gr_none <- no_event_mock_data()
 gr_none <- preprocess_input(gr_none, coef_col = "coefs")
 
-calc_skipped_exons(gr_none, coef_col = "coefs")
-calc_mutually_exclusive(gr_none, coef_col = "coefs")
+calc_skipped_exons(gr_none)
+calc_mutually_exclusive(gr_none)
 ```
 
 ## Session info
