@@ -69,43 +69,21 @@ DTU results.
 
 ``` r
 
-# look up annotations of exons and transcripts
+# first we get an example TxDB for our exon ranges
 suppressPackageStartupMessages({
   library(AnnotationHub)
   library(GenomicFeatures)
   library(tibble)
 })
+# here we will use the transcript database for GENCODE v32 from AHub
+# typically, you should supply your own GTF to makeTxDbFromGFF()
 ah <- AnnotationHub()
-# here look up the transcript database for GENCODE v32
-# typically, supply your own GTF to makeTxDbFromGFF()
-query(ah, c("GENCODE", "Homo sapiens", "GTF", "v32"))
-```
-
-    ## AnnotationHub with 6 records
-    ## # snapshotDate(): 2025-10-29
-    ## # $dataprovider: GENCODE
-    ## # $species: Homo sapiens
-    ## # $rdataclass: list, TxDb, GRanges
-    ## # additional mcols(): taxonomyid, genome, description,
-    ## #   coordinate_1_based, maintainer, rdatadateadded, preparerclass, tags,
-    ## #   rdatapath, sourceurl, sourcetype 
-    ## # retrieve records with, e.g., 'object[["AH75188"]]' 
-    ## 
-    ##             title                                              
-    ##   AH75188 | TxDb for Gencode v32 on hg19 coordinates           
-    ##   AH75189 | Annotated genes for Gencode v32 on hg19 coordinates
-    ##   AH75190 | GenomicState for Gencode v32 on hg19 coordinates   
-    ##   AH75191 | TxDb for Gencode v32 on hg38 coordinates           
-    ##   AH75192 | Annotated genes for Gencode v32 on hg38 coordinates
-    ##   AH75193 | GenomicState for Gencode v32 on hg38 coordinates
-
-``` r
-
-# download an example TxDB for generating exon ranges
 txdb <- ah[["AH75191"]]
 ```
 
     ## loading from cache
+
+The following extracts the exons from the *TxDb*:
 
 ``` r
 
@@ -113,7 +91,8 @@ txdb <- ah[["AH75191"]]
 ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
 ```
 
-Build a transcript table if it isn’t provided by your DTU method:
+Here we build a transcript table, likely this is already provided by an
+upstream DTU method.
 
 ``` r
 
@@ -149,7 +128,7 @@ txps[1:3,]
 
 ``` r
 
-# check the concordance, and if aligned, set new names for exons
+# check the concordance...
 all.equal(txps$tx_num, as.integer(names(ebt)))
 ```
 
@@ -157,6 +136,7 @@ all.equal(txps$tx_num, as.integer(names(ebt)))
 
 ``` r
 
+# and if aligned, set new names for exons
 exons <- ebt
 names(exons) <- txps$tx_id
 ```
@@ -196,8 +176,8 @@ merged_DF <- cbind(mcols(exons), add_columns)
 mcols(exons) <- merged_DF
 ```
 
-We end up with all the exons, grouped by transcript, in a flat *GRanges*
-object, with the following columns:
+We end up with all the exons-per-transcript in a flat *GRanges* object
+with the following columns:
 
 ``` r
 
