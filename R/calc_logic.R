@@ -1,7 +1,6 @@
 #' Calculate skipped exons from a GRanges object
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
-#' and 'coef_col' metadata columns.
-#' @param coef_col The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.
+#' and 'coef_col' metadata columns and preprocessed with preprocess_input().
 #' @param type The type of overlap to consider when identifying skipped exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
 #' @export
@@ -10,13 +9,9 @@ calc_skipped_exons <- function(gr, type = c("over","in", "boundary")) {
   # if preprocessing didn't happen
   check_preprocessed(gr)
 
-  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
-    gr <- preprocess_input(gr, coef_col)
-  }
   # separate positive and negative exons
-  coef <- rlang::sym(coef_col)
-  pos_exons <- gr |> dplyr::filter(sign(!!coef) == 1)
-  neg_exons <- gr |> dplyr::filter(sign(!!coef) == -1)
+  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
+  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
 
   # filter_results <- candidates_by_non_overlap_directed(neg_exons, pos_exons, gr)
   # filter_results <- candidates_by_presence(gr, coef_col) # TO DO : check by overlap not in 
@@ -65,21 +60,18 @@ calc_skipped_exons <- function(gr, type = c("over","in", "boundary")) {
 
 #' Calculate mutually exclusive exons from a GRanges object
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
-#' and 'coef_col' metadata columns.
-#' @param coef_col The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.
+#' and 'coef_col' metadata columns and preprocessed with preprocess_input().
 #' @param type The type of overlap to consider when identifying mutually exclusive exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating mutually exclusive exons.
 #' @export
-calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "boundary")) {
+calc_mutually_exclusive <- function(gr, type = c("in", "over", "boundary")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
-  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
-    gr <- preprocess_input(gr, coef_col)
-  }
+  check_preprocessed(gr)
+
   # separate positive and negative exons
-  coef <- rlang::sym(coef_col)
-  pos_exons <- gr |> dplyr::filter(sign(!!coef) == 1)
-  neg_exons <- gr |> dplyr::filter(sign(!!coef) == -1)
+  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
+  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
   
   # returns a list of GRanges of same length:
   # ‘candidates’ - neg exons that do not overlap any pos exons, and are internal
@@ -141,18 +133,18 @@ calc_mutually_exclusive <- function(gr, coef_col, type = c("in", "over", "bounda
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
 #' @return A GRanges object with an additional 'event' metadata column indicating retained introns.
 #' @export      
-calc_retained_introns <- function(gr, coef_col){
+calc_retained_introns <- function(gr){
   # TO DO : fix coef_col argument and add to preprocess_input and then rename coef_col to coefs
-  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
-    gr <- preprocess_input(gr, coef_col)
-    }
+
+  # if preprocessing didn't happen
+  check_preprocessed(gr)
+
   # separate positive and negative exons
-  coef <- rlang::sym(coef_col)
   # find introns in the negative coef transcripts
-  introns <- gr |> dplyr::filter(!!coef < 0) |> find_introns()
+  introns <- gr |> dplyr::filter(estimates < 0) |> find_introns()
 
   # filter by overlap on the positive coef transcripts
-  candidates <- gr |> dplyr::filter(!!coef > 0) |> 
+  candidates <- gr |> dplyr::filter(estimates > 0) |> 
                       plyranges::filter_by_overlaps(introns)
 
   hits <- GRanges()
@@ -190,16 +182,13 @@ calc_retained_introns <- function(gr, coef_col){
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
 #' @return A GRanges object with an additional 'event' metadata column indicating retained introns.
 #' @export      
-calc_a3ss_a5ss <- function(gr, coef_col ){
+calc_a3ss_a5ss <- function(gr ){
   # if preprocessing didn't happen
-  if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
-    gr <- preprocess_input(gr, coef_col)
-  }
-  
+  check_preprocessed(gr)
+
   # separate positive and negative exons
-  coef <- rlang::sym(coef_col)
-  pos_exons <- gr |> dplyr::filter(sign(!!coef) == 1)
-  neg_exons <- gr |> dplyr::filter(sign(!!coef) == -1)
+  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
+  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
 
   # candidates are pos exons that do not exacly match neg_exons (%in%)
   # filter candidates pos_exons that are exactly the same as any neg_exons
@@ -244,9 +233,4 @@ calc_a3ss_a5ss <- function(gr, coef_col ){
         }
   }
   hits
-}
-
-check_preprocessed <- function(gr) {
-  if (is.null(metadata(gr)$splicelogic_preprocessed) | !metadata(gr)$splicelogic_preprocessed)
-    stop("cant")
 }

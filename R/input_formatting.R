@@ -1,4 +1,4 @@
-#' Check that input is a valid GRanges object with required metadata columns
+#' Check that input is a valid GRanges object with required metadata columns provided by the user
 #' exon_rank", "gene_id", "tx_id", coef_col
 #' @param gr A GRanges object
 #' @param coef_col Name of the coefficient metadata column (string)
@@ -57,8 +57,8 @@ combine_gr_input <- function(gr1, gr2, coef_col) {
 #' It also initializes an 'event' column for downstream splicing event annotation.
 #'
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.
-#' @param coef_col blah
-#' @param method_string blah
+#' @param coef_col The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.
+#' @param method_string The Differential Transcript Usage (DTU) method used to obtain the coef_col, for annotation purposes (optional).
 #' 
 #' @return A GRanges object with added 'key', 'nexons', 'internal', and 'event' columns.
 #' @export
@@ -71,14 +71,21 @@ preprocess_input <- function(gr, coef_col, method_string=NULL) {
     dplyr::mutate(
       key     = paste0(tx_id, "-", exon_rank),
       nexons  = length(exon_rank),
-      internal = exon_rank > 1 & exon_rank < nexons
+      internal = exon_rank > 1 & exon_rank < nexons,
+      estimates = !!rlang::sym(coef_col) # always use "estimates" as the column name for the coef values in downstream functions
     ) |> 
     dplyr::ungroup()
 
-  metadata(gr)$splicelogic_preprocessed <- TRUE
+  S4Vectors::metadata(gr)$splicelogic_preprocessed <- TRUE
   if (!is.null(method_string)) {
-    metadata(gr)$method_string <- method_string
+    S4Vectors::metadata(gr)$method_string <- method_string
   }
-
+  S4Vectors::metadata(gr)$splicelogic_preprocessed <- TRUE
   return(gr)
+}
+
+
+check_preprocessed <- function(gr) {
+  if (!isTRUE(S4Vectors::metadata(gr)$splicelogic_preprocessed))
+    stop("Input has not been preprocessed with preprocess_input(). Please run preprocess_input() on your GRanges object before calculating splicing events.")
 }
