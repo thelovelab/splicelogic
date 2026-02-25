@@ -95,16 +95,21 @@ ah <- AnnotationHub()
 query(ah, c("GENCODE", "Homo sapiens", "GTF", "v32"))
 # download an example TxDB for generating exon ranges
 txdb <- ah[["AH75191"]]
-# extract exons as GRanges
+# extract exons as a GRangesList
 ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
-# extract transcript table
+```
+
+Build a transcript table if it isn't provided by your DTU method:
+
+```{r}
+# extract transcript table as tibble
 txps <- txdb |>
   AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
   tibble::as_tibble() |>
   dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
 ```
 
-Suppose DTU results:
+Suppose we already have DTU results for transcripts:
 
 ```{r}
 # here just simulated results
@@ -113,17 +118,21 @@ txps <- txps |>
     padj = runif(dplyr::n()),
     effect_est = rnorm(dplyr::n())
   )
+# show the top 3
+txps[1:3,]
 ```
 
 ```{r}
-all.equal(txps$tx_number, as.numeric(names(ebt)))
-names(ebt) <- txps$tx_id
+# check the concordance, and if aligned, set new names for exons
+all.equal(txps$tx_num, as.integer(names(ebt)))
+exons <- ebt
+names(exons) <- txps$tx_id
 ```
 
 Next flattening the exons:
 
 ```{r}
-exons <- unlist(ebt)
+exons <- unlist(exons)
 exons$tx_id <- names(exons)
 names(exons) <- exons$exon_name
 exons[1:3] # show the top 3
@@ -132,9 +141,18 @@ exons[1:3] # show the top 3
 Adding DTU results and gene ID:
 
 ```{r}
-add_columns <- txps[match(exons$tx_id, txps$tx_id),]
+# arrange `txps` as in `exons`, including duplicates
+txp_idx <- match(exons$tx_id, txps$tx_id)
+add_columns <- txps[txp_idx,] |> dplyr::select(-c(tx_id, tx_num))
 merged_DF <- cbind(mcols(exons), add_columns)
 mcols(exons) <- merged_DF
+```
+
+We end up with all the exons, grouped by transcript, 
+in a flat *GRanges* object, with the following columns:
+
+```{r}
+exons[1:3] |> mcols()
 ```
 
 ## Upstream methods
