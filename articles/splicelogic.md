@@ -70,44 +70,14 @@ DTU results.
 ``` r
 
 # look up annotations of exons and transcripts
-library(AnnotationHub)
-```
-
-    ## Loading required package: BiocGenerics
-
-    ## Loading required package: generics
-
-    ## 
-    ## Attaching package: 'generics'
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,
-    ##     setequal, union
-
-    ## 
-    ## Attaching package: 'BiocGenerics'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     IQR, mad, sd, var, xtabs
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
-    ##     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
-    ##     get, grep, grepl, is.unsorted, lapply, Map, mapply, match, mget,
-    ##     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
-    ##     rbind, Reduce, rownames, sapply, saveRDS, table, tapply, unique,
-    ##     unsplit, which.max, which.min
-
-    ## Loading required package: BiocFileCache
-
-    ## Loading required package: dbplyr
-
-``` r
-
+suppressPackageStartupMessages({
+  library(AnnotationHub)
+  library(GenomicFeatures)
+  library(tibble)
+})
 ah <- AnnotationHub()
+# here look up the transcript database for GENCODE v32
+# typically, supply your own GTF to makeTxDbFromGFF()
 query(ah, c("GENCODE", "Homo sapiens", "GTF", "v32"))
 ```
 
@@ -137,67 +107,15 @@ txdb <- ah[["AH75191"]]
 
     ## loading from cache
 
-    ## Loading required package: GenomicFeatures
-
-    ## Loading required package: S4Vectors
-
-    ## Loading required package: stats4
-
-    ## 
-    ## Attaching package: 'S4Vectors'
-
-    ## The following object is masked from 'package:utils':
-    ## 
-    ##     findMatches
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     expand.grid, I, unname
-
-    ## Loading required package: IRanges
-
-    ## Loading required package: Seqinfo
-
-    ## Loading required package: GenomicRanges
-
-    ## Loading required package: AnnotationDbi
-
-    ## Loading required package: Biobase
-
-    ## Welcome to Bioconductor
-    ## 
-    ##     Vignettes contain introductory material; view with
-    ##     'browseVignettes()'. To cite Bioconductor, see
-    ##     'citation("Biobase")', and for packages 'citation("pkgname")'.
-
-    ## 
-    ## Attaching package: 'Biobase'
-
-    ## The following object is masked from 'package:AnnotationHub':
-    ## 
-    ##     cache
-
 ``` r
 
-library(GenomicFeatures)
+# extract exons as GRanges
 ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
-```
-
-``` r
-
-library(tibble)
+# extract transcript table
 txps <- txdb |>
-  AnnotationDbi::select(
-    keys(txdb, "TXID"), 
-    c("TXNAME","GENEID"), 
-    "TXID"
-    ) |>
+  AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
   tibble::as_tibble() |>
-  dplyr::select(
-    tx_number = TXID,
-    tx_id = TXNAME,
-    gene_id = GENEID
-  )
+  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
 ```
 
     ## 'select()' returned 1:1 mapping between keys and columns
@@ -219,7 +137,9 @@ txps <- txps |>
 all.equal(txps$tx_number, as.numeric(names(ebt)))
 ```
 
-    ## [1] TRUE
+    ## Warning: Unknown or uninitialised column: `tx_number`.
+
+    ## [1] "target is NULL, current is numeric"
 
 ``` r
 
@@ -491,8 +411,8 @@ sessionInfo()
     ## [63] htmltools_0.5.9             R6_2.6.1                   
     ## [65] httr2_1.2.2                 textshaping_1.0.4          
     ## [67] evaluate_1.0.5              lattice_0.22-9             
-    ## [69] cigarillo_1.0.0             png_0.1-8                  
-    ## [71] Rsamtools_2.26.0            memoise_2.0.1              
+    ## [69] png_0.1-8                   Rsamtools_2.26.0           
+    ## [71] cigarillo_1.0.0             memoise_2.0.1              
     ## [73] bslib_0.10.0                SparseArray_1.10.8         
     ## [75] xfun_0.56                   fs_1.6.6                   
     ## [77] MatrixGenerics_1.22.0       pkgconfig_2.0.3
