@@ -223,7 +223,7 @@ gr <- create_mock_data( n_genes = 2, n_tx = 4, n_exons = 6 )
 mcols(gr)
 ```
 
-    ## DataFrame with 48 rows and 7 columns
+    ## DataFrame with 48 rows and 8 columns
     ##       gene_id     tx_id exon_rank     coefs         key    nexons  internal
     ##     <integer> <numeric> <integer> <numeric> <character> <integer> <logical>
     ## 1           1         1         1 -0.821507         1-1         6     FALSE
@@ -237,6 +237,19 @@ mcols(gr)
     ## 46          2         8         4 -0.707009         8-4         6      TRUE
     ## 47          2         8         5 -0.707009         8-5         6      TRUE
     ## 48          2         8         6 -0.707009         8-6         6     FALSE
+    ##     estimates
+    ##     <numeric>
+    ## 1   -0.821507
+    ## 2   -0.821507
+    ## 3   -0.821507
+    ## 4   -0.821507
+    ## 5   -0.821507
+    ## ...       ...
+    ## 44  -0.707009
+    ## 45  -0.707009
+    ## 46  -0.707009
+    ## 47  -0.707009
+    ## 48  -0.707009
 
 ### Skipped exons
 

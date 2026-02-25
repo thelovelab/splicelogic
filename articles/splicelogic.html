@@ -274,7 +274,7 @@ one transcript is upregulated (coef&gt;0) and one is downregulated
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_mock_data.html">create_mock_data</a></span><span class="op">(</span> n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx <span class="op">=</span> <span class="fl">4</span>, n_exons <span class="op">=</span> <span class="fl">6</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## DataFrame with 48 rows and 7 columns</span></span>
+<pre><code><span><span class="co">## DataFrame with 48 rows and 8 columns</span></span>
 <span><span class="co">##       gene_id     tx_id exon_rank     coefs         key    nexons  internal</span></span>
 <span><span class="co">##     &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt; &lt;character&gt; &lt;integer&gt; &lt;logical&gt;</span></span>
 <span><span class="co">## 1           1         1         1 -0.821507         1-1         6     FALSE</span></span>
@@ -287,7 +287,20 @@ one transcript is upregulated (coef&gt;0) and one is downregulated
 <span><span class="co">## 45          2         8         3 -0.707009         8-3         6      TRUE</span></span>
 <span><span class="co">## 46          2         8         4 -0.707009         8-4         6      TRUE</span></span>
 <span><span class="co">## 47          2         8         5 -0.707009         8-5         6      TRUE</span></span>
-<span><span class="co">## 48          2         8         6 -0.707009         8-6         6     FALSE</span></span></code></pre>
+<span><span class="co">## 48          2         8         6 -0.707009         8-6         6     FALSE</span></span>
+<span><span class="co">##     estimates</span></span>
+<span><span class="co">##     &lt;numeric&gt;</span></span>
+<span><span class="co">## 1   -0.821507</span></span>
+<span><span class="co">## 2   -0.821507</span></span>
+<span><span class="co">## 3   -0.821507</span></span>
+<span><span class="co">## 4   -0.821507</span></span>
+<span><span class="co">## 5   -0.821507</span></span>
+<span><span class="co">## ...       ...</span></span>
+<span><span class="co">## 44  -0.707009</span></span>
+<span><span class="co">## 45  -0.707009</span></span>
+<span><span class="co">## 46  -0.707009</span></span>
+<span><span class="co">## 47  -0.707009</span></span>
+<span><span class="co">## 48  -0.707009</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="skipped-exons">Skipped exons<a class="anchor" aria-label="anchor" href="#skipped-exons"></a>
