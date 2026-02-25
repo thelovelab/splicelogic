@@ -2,26 +2,26 @@
 test_that("calc_skipped_exons works with se_mock_data and preprocess_input", {
   gr <- se_mock_data()
   gr <- preprocess_input(gr, coef_col = "coefs")
-  result <- calc_skipped_exons(gr, coef_col = "coefs")
+  result <- calc_skipped_exons(gr)
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(mcols(result)))
   expect_true(any(result$event == "skipped_exon"))
 })
 
-# Test for invalid coef column input in calc_skipped_exons
-test_that("calc_skipped_exons errors if coef_col is invalid", {
-  gr <- se_mock_data()
-  expect_error(
-    calc_skipped_exons(gr, coef_col = "foo"),
-    regexp = "Missing required metadata columns: foo"
-  )
-})
+# # Test for invalid coef column input in calc_skipped_exons
+# test_that("calc_skipped_exons errors if coef_col is invalid", {
+#   gr <- se_mock_data()
+#   expect_error(
+#     calc_skipped_exons(gr),
+#     regexp = "Missing required metadata columns: foo"
+#   )
+# })
 
 # Test for no event detected in skipped exon
 test_that("calc_skipped_exons returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
   gr <- preprocess_input(gr, coef_col = "coefs")
-  result <- calc_skipped_exons(gr, coef_col = "coefs")
+  result <- calc_skipped_exons(gr)
 
   expect_s4_class(result, "GRanges")
   expect_equal(length(result), 0L)
@@ -31,7 +31,7 @@ test_that("calc_skipped_exons returns empty GRanges if no events", {
 test_that("calc_skipped_exons detects single skipped exon in mx_mock_data", {
   gr <- mx_mock_data()
   gr <- preprocess_input(gr, coef_col = "coefs")
-  result <- calc_skipped_exons(gr, coef_col = "coefs")
+  result <- calc_skipped_exons(gr)
 
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
@@ -48,7 +48,7 @@ test_that("calc_skipped_exons detects single skipped exon in mx_mock_data", {
 test_that("calc_mutually_exclusive detects mutually exclusive exons in mx_mock_data", {
   gr <- mx_mock_data()
   gr <- preprocess_input(gr, coef_col = "coefs")
-  result <- calc_mutually_exclusive(gr, coef_col = "coefs")
+  result <- calc_mutually_exclusive(gr)
 
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
@@ -64,7 +64,7 @@ test_that("calc_mutually_exclusive detects mutually exclusive exons in mx_mock_d
 test_that("calc_mutually_exclusive returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
   gr <- preprocess_input(gr, coef_col = "coefs")
-  result <- calc_mutually_exclusive(gr, coef_col = "coefs")
+  result <- calc_mutually_exclusive(gr)
 
   expect_s4_class(result, "GRanges")
   expect_equal(length(result), 0L)
@@ -76,7 +76,7 @@ test_that("calc_retained_introns test", {
     gr <- preprocess_input(gr, coef_col = "coefs")
     gr <- generate_retained_introns(gr, n_ri = 3)
 
-    result <- calc_retained_introns(gr, coef_col = "coefs")
+    result <- calc_retained_introns(gr)
 
     expect_s4_class(result, "GRanges")
     expect_true("event" %in% names(GenomicRanges::mcols(result)))
@@ -90,7 +90,7 @@ test_that("calc_a3ss_a5ss test", {
     gr <- preprocess_input(gr, coef_col = "coefs")
     gr <- generate_a3ss(gr, n_a3ss = 3)
 
-    result <- calc_a3ss_a5ss(gr, coef_col = "coefs")
+    result <- calc_a3ss_a5ss(gr)
 
     expect_s4_class(result, "GRanges")
     expect_true("event" %in% names(GenomicRanges::mcols(result)))
@@ -103,7 +103,7 @@ test_that("calc_skipped_exons test with generate_skipped_exons", {
     gr <- preprocess_input(gr, coef_col = "coefs")
     gr <- generate_skipped_exons(gr, n_se = 1)
 
-    result <- calc_skipped_exons(gr, coef_col = "coefs")
+    result <- calc_skipped_exons(gr)
 
     expect_s4_class(result, "GRanges")
     expect_true("event" %in% names(GenomicRanges::mcols(result)))

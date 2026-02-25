@@ -11,6 +11,6 @@ test_that("timing as the number of transcripts grows large", {
   # slPltRanges(gr)  
   
   gr <- preprocess_input(gr, coef_col = "coefs")
-  res <- calc_skipped_exons(gr, "coefs")
+  res <- calc_skipped_exons(gr)
   
 })
