@@ -4,10 +4,14 @@
 \alias{preprocess_input}
 \title{Preprocess input GRanges object for splicing event calculation}
 \usage{
-preprocess_input(gr, coef_col)
+preprocess_input(gr, coef_col, method_string = NULL)
 }
 \arguments{
 \item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.}
+
+\item{coef_col}{The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.}
+
+\item{method_string}{The Differential Transcript Usage (DTU) method used to obtain the coef_col, for annotation purposes (optional).}
 }
 \value{
 A GRanges object with added 'key', 'nexons', 'internal', and 'event' columns.

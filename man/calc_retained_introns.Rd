@@ -4,7 +4,7 @@
 \alias{calc_retained_introns}
 \title{Function to calculate retained introns given a GRanges object}
 \usage{
-calc_retained_introns(gr, coef_col)
+calc_retained_introns(gr)
 }
 \arguments{
 \item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.}

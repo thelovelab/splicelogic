@@ -4,7 +4,7 @@
 \alias{calc_a3ss_a5ss}
 \title{Function to calcualte 5' and 3' alternative splice sites given a GRanges object}
 \usage{
-calc_a3ss_a5ss(gr, coef_col)
+calc_a3ss_a5ss(gr)
 }
 \arguments{
 \item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.}
