@@ -109,9 +109,15 @@ txdb <- ah[["AH75191"]]
 
 ``` r
 
-# extract exons as GRanges
+# extract exons as a GRangesList
 ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
-# extract transcript table
+```
+
+Build a transcript table if it isn’t provided by your DTU method:
+
+``` r
+
+# extract transcript table as tibble
 txps <- txdb |>
   AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
   tibble::as_tibble() |>
@@ -120,7 +126,7 @@ txps <- txdb |>
 
     ## 'select()' returned 1:1 mapping between keys and columns
 
-Suppose DTU results:
+Suppose we already have DTU results for transcripts:
 
 ``` r
 
@@ -130,27 +136,36 @@ txps <- txps |>
     padj = runif(dplyr::n()),
     effect_est = rnorm(dplyr::n())
   )
+# show the top 3
+txps[1:3,]
 ```
+
+    ## # A tibble: 3 × 5
+    ##   tx_num tx_id             gene_id             padj effect_est
+    ##    <int> <chr>             <chr>              <dbl>      <dbl>
+    ## 1      1 ENST00000456328.2 ENSG00000223972.5 0.0808     -0.497
+    ## 2      2 ENST00000450305.2 ENSG00000223972.5 0.834       0.938
+    ## 3      3 ENST00000473358.1 ENSG00000243485.5 0.601      -1.84
 
 ``` r
 
-all.equal(txps$tx_number, as.numeric(names(ebt)))
+# check the concordance, and if aligned, set new names for exons
+all.equal(txps$tx_num, as.integer(names(ebt)))
 ```
 
-    ## Warning: Unknown or uninitialised column: `tx_number`.
-
-    ## [1] "target is NULL, current is numeric"
+    ## [1] TRUE
 
 ``` r
 
-names(ebt) <- txps$tx_id
+exons <- ebt
+names(exons) <- txps$tx_id
 ```
 
 Next flattening the exons:
 
 ``` r
 
-exons <- unlist(ebt)
+exons <- unlist(exons)
 exons$tx_id <- names(exons)
 names(exons) <- exons$exon_name
 exons[1:3] # show the top 3
@@ -174,10 +189,32 @@ Adding DTU results and gene ID:
 
 ``` r
 
-add_columns <- txps[match(exons$tx_id, txps$tx_id),]
+# arrange `txps` as in `exons`, including duplicates
+txp_idx <- match(exons$tx_id, txps$tx_id)
+add_columns <- txps[txp_idx,] |> dplyr::select(-c(tx_id, tx_num))
 merged_DF <- cbind(mcols(exons), add_columns)
 mcols(exons) <- merged_DF
 ```
+
+We end up with all the exons, grouped by transcript, in a flat *GRanges*
+object, with the following columns:
+
+``` r
+
+exons[1:3] |> mcols()
+```
+
+    ## DataFrame with 3 rows and 7 columns
+    ##                     exon_id         exon_name exon_rank             tx_id
+    ##                   <integer>       <character> <integer>       <character>
+    ## ENSE00002234944.1         1 ENSE00002234944.1         1 ENST00000456328.2
+    ## ENSE00003582793.1         5 ENSE00003582793.1         2 ENST00000456328.2
+    ## ENSE00002312635.1         8 ENSE00002312635.1         3 ENST00000456328.2
+    ##                             gene_id      padj effect_est
+    ##                         <character> <numeric>  <numeric>
+    ## ENSE00002234944.1 ENSG00000223972.5 0.0807501  -0.496625
+    ## ENSE00003582793.1 ENSG00000223972.5 0.0807501  -0.496625
+    ## ENSE00002312635.1 ENSG00000223972.5 0.0807501  -0.496625
 
 ### Upstream methods
 
@@ -387,32 +424,33 @@ sessionInfo()
     ## [15] RSQLite_2.4.6               magrittr_2.0.4             
     ## [17] compiler_4.5.2              rlang_1.1.7                
     ## [19] sass_0.4.10                 tools_4.5.2                
-    ## [21] yaml_2.3.12                 rtracklayer_1.70.1         
-    ## [23] knitr_1.51                  S4Arrays_1.10.1            
-    ## [25] htmlwidgets_1.6.4           bit_4.6.0                  
-    ## [27] curl_7.0.0                  DelayedArray_0.36.0        
-    ## [29] abind_1.4-8                 BiocParallel_1.44.0        
-    ## [31] withr_3.0.2                 purrr_1.2.1                
-    ## [33] desc_1.4.3                  grid_4.5.2                 
-    ## [35] SummarizedExperiment_1.40.0 cli_3.6.5                  
-    ## [37] rmarkdown_2.30              crayon_1.5.3               
-    ## [39] ragg_1.5.0                  otel_0.2.0                 
-    ## [41] httr_1.4.8                  rjson_0.2.23               
-    ## [43] DBI_1.2.3                   cachem_1.1.0               
-    ## [45] parallel_4.5.2              BiocManager_1.30.27        
-    ## [47] XVector_0.50.0              restfulr_0.0.16            
-    ## [49] matrixStats_1.5.0           vctrs_0.7.1                
-    ## [51] Matrix_1.7-4                jsonlite_2.0.0             
-    ## [53] bit64_4.6.0-1               systemfonts_1.3.1          
-    ## [55] jquerylib_0.1.4             glue_1.8.0                 
-    ## [57] pkgdown_2.2.0               codetools_0.2-20           
-    ## [59] BiocVersion_3.22.0          BiocIO_1.20.0              
-    ## [61] pillar_1.11.1               rappdirs_0.3.4             
-    ## [63] htmltools_0.5.9             R6_2.6.1                   
-    ## [65] httr2_1.2.2                 textshaping_1.0.4          
-    ## [67] evaluate_1.0.5              lattice_0.22-9             
-    ## [69] png_0.1-8                   Rsamtools_2.26.0           
-    ## [71] cigarillo_1.0.0             memoise_2.0.1              
-    ## [73] bslib_0.10.0                SparseArray_1.10.8         
-    ## [75] xfun_0.56                   fs_1.6.6                   
-    ## [77] MatrixGenerics_1.22.0       pkgconfig_2.0.3
+    ## [21] utf8_1.2.6                  yaml_2.3.12                
+    ## [23] rtracklayer_1.70.1          knitr_1.51                 
+    ## [25] S4Arrays_1.10.1             htmlwidgets_1.6.4          
+    ## [27] bit_4.6.0                   curl_7.0.0                 
+    ## [29] DelayedArray_0.36.0         abind_1.4-8                
+    ## [31] BiocParallel_1.44.0         withr_3.0.2                
+    ## [33] purrr_1.2.1                 desc_1.4.3                 
+    ## [35] grid_4.5.2                  SummarizedExperiment_1.40.0
+    ## [37] cli_3.6.5                   rmarkdown_2.30             
+    ## [39] crayon_1.5.3                ragg_1.5.0                 
+    ## [41] otel_0.2.0                  httr_1.4.8                 
+    ## [43] rjson_0.2.23                DBI_1.2.3                  
+    ## [45] cachem_1.1.0                parallel_4.5.2             
+    ## [47] BiocManager_1.30.27         XVector_0.50.0             
+    ## [49] restfulr_0.0.16             matrixStats_1.5.0          
+    ## [51] vctrs_0.7.1                 Matrix_1.7-4               
+    ## [53] jsonlite_2.0.0              bit64_4.6.0-1              
+    ## [55] systemfonts_1.3.1           jquerylib_0.1.4            
+    ## [57] glue_1.8.0                  pkgdown_2.2.0              
+    ## [59] codetools_0.2-20            BiocVersion_3.22.0         
+    ## [61] BiocIO_1.20.0               pillar_1.11.1              
+    ## [63] rappdirs_0.3.4              htmltools_0.5.9            
+    ## [65] R6_2.6.1                    httr2_1.2.2                
+    ## [67] textshaping_1.0.4           evaluate_1.0.5             
+    ## [69] lattice_0.22-9              png_0.1-8                  
+    ## [71] Rsamtools_2.26.0            cigarillo_1.0.0            
+    ## [73] memoise_2.0.1               bslib_0.10.0               
+    ## [75] SparseArray_1.10.8          xfun_0.56                  
+    ## [77] fs_1.6.6                    MatrixGenerics_1.22.0      
+    ## [79] pkgconfig_2.0.3

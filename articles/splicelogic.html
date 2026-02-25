@@ -189,31 +189,42 @@ example DTU results.</p>
 <span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH75191"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">## loading from cache</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># extract exons as GRanges</span></span>
-<span><span class="va">ebt</span> <span class="op">&lt;-</span> <span class="fu">GenomicFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcriptsBy.html" class="external-link">exonsBy</a></span><span class="op">(</span><span class="va">txdb</span>, by<span class="op">=</span><span class="st">"tx"</span><span class="op">)</span> <span class="co"># exon id, name, and rank</span></span>
-<span><span class="co"># extract transcript table</span></span>
+<code class="sourceCode R"><span><span class="co"># extract exons as a GRangesList</span></span>
+<span><span class="va">ebt</span> <span class="op">&lt;-</span> <span class="fu">GenomicFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcriptsBy.html" class="external-link">exonsBy</a></span><span class="op">(</span><span class="va">txdb</span>, by<span class="op">=</span><span class="st">"tx"</span><span class="op">)</span> <span class="co"># exon id, name, and rank</span></span></code></pre></div>
+<p>Build a transcript table if it isn’t provided by your DTU method:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># extract transcript table as tibble</span></span>
 <span><span class="va">txps</span> <span class="op">&lt;-</span> <span class="va">txdb</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">keys</a></span><span class="op">(</span><span class="va">txdb</span>, <span class="st">"TXID"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TXNAME"</span>,<span class="st">"GENEID"</span><span class="op">)</span>, <span class="st">"TXID"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>tx_num <span class="op">=</span> <span class="va">TXID</span>, tx_id <span class="op">=</span> <span class="va">TXNAME</span>, gene_id <span class="op">=</span> <span class="va">GENEID</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 'select()' returned 1:1 mapping between keys and columns</span></span></code></pre>
-<p>Suppose DTU results:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>Suppose we already have DTU results for transcripts:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># here just simulated results</span></span>
 <span><span class="va">txps</span> <span class="op">&lt;-</span> <span class="va">txps</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    padj <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    effect_est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">txps</span><span class="op">$</span><span class="va">tx_number</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ebt</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Unknown or uninitialised column: `tx_number`.</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "target is NULL, current is numeric"</span></span></code></pre>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ebt</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">txps</span><span class="op">$</span><span class="va">tx_id</span></span></code></pre></div>
-<p>Next flattening the exons:</p>
+<span>  <span class="op">)</span></span>
+<span><span class="co"># show the top 3</span></span>
+<span><span class="va">txps</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
+<span><span class="co">##   tx_num tx_id             gene_id             padj effect_est</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>      1 ENST00000456328.2 ENSG00000223972.5 0.080<span style="text-decoration: underline;">8</span>     -<span style="color: #BB0000;">0.497</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>      2 ENST00000450305.2 ENSG00000223972.5 0.834       0.938</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>      3 ENST00000473358.1 ENSG00000243485.5 0.601      -<span style="color: #BB0000;">1.84</span></span></span></code></pre>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># check the concordance, and if aligned, set new names for exons</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">txps</span><span class="op">$</span><span class="va">tx_num</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ebt</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">ebt</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="va">ebt</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">txps</span><span class="op">$</span><span class="va">tx_id</span></span></code></pre></div>
+<p>Next flattening the exons:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span></span>
 <span><span class="va">exons</span><span class="op">$</span><span class="va">tx_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">exons</span><span class="op">$</span><span class="va">exon_name</span></span>
 <span><span class="va">exons</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="co"># show the top 3</span></span></code></pre></div>
@@ -231,10 +242,27 @@ example DTU results.</p>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 25 sequences (1 circular) from hg38 genome</span></span></code></pre>
 <p>Adding DTU results and gene ID:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">add_columns</span> <span class="op">&lt;-</span> <span class="va">txps</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">exons</span><span class="op">$</span><span class="va">tx_id</span>, <span class="va">txps</span><span class="op">$</span><span class="va">tx_id</span><span class="op">)</span>,<span class="op">]</span></span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># arrange `txps` as in `exons`, including duplicates</span></span>
+<span><span class="va">txp_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">exons</span><span class="op">$</span><span class="va">tx_id</span>, <span class="va">txps</span><span class="op">$</span><span class="va">tx_id</span><span class="op">)</span></span>
+<span><span class="va">add_columns</span> <span class="op">&lt;-</span> <span class="va">txps</span><span class="op">[</span><span class="va">txp_idx</span>,<span class="op">]</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">tx_num</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">merged_DF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span>, <span class="va">add_columns</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">merged_DF</span></span></code></pre></div>
+<p>We end up with all the exons, grouped by transcript, in a flat
+<em>GRanges</em> object, with the following columns:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exons</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 3 rows and 7 columns</span></span>
+<span><span class="co">##                     exon_id         exon_name exon_rank             tx_id</span></span>
+<span><span class="co">##                   &lt;integer&gt;       &lt;character&gt; &lt;integer&gt;       &lt;character&gt;</span></span>
+<span><span class="co">## ENSE00002234944.1         1 ENSE00002234944.1         1 ENST00000456328.2</span></span>
+<span><span class="co">## ENSE00003582793.1         5 ENSE00003582793.1         2 ENST00000456328.2</span></span>
+<span><span class="co">## ENSE00002312635.1         8 ENSE00002312635.1         3 ENST00000456328.2</span></span>
+<span><span class="co">##                             gene_id      padj effect_est</span></span>
+<span><span class="co">##                         &lt;character&gt; &lt;numeric&gt;  &lt;numeric&gt;</span></span>
+<span><span class="co">## ENSE00002234944.1 ENSG00000223972.5 0.0807501  -0.496625</span></span>
+<span><span class="co">## ENSE00003582793.1 ENSG00000223972.5 0.0807501  -0.496625</span></span>
+<span><span class="co">## ENSE00002312635.1 ENSG00000223972.5 0.0807501  -0.496625</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="upstream-methods">Upstream methods<a class="anchor" aria-label="anchor" href="#upstream-methods"></a>
@@ -246,7 +274,7 @@ switching analysis.</p>
 <div class="section level2">
 <h2 id="how-to-start-detecting-splicing-events">How to start detecting splicing events<a class="anchor" aria-label="anchor" href="#how-to-start-detecting-splicing-events"></a>
 </h2>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thelovelab/splicelogic" class="external-link">splicelogic</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="preprocessing">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing"></a>
@@ -257,7 +285,7 @@ switching analysis.</p>
 random coefficient values for each transcript, making sure that at least
 one transcript is upregulated (coef&gt;0) and one is downregulated
 (coef&lt;0) for each gene.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_mock_data.html">create_mock_data</a></span><span class="op">(</span> n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx <span class="op">=</span> <span class="fl">4</span>, n_exons <span class="op">=</span> <span class="fl">6</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 48 rows and 7 columns</span></span>
@@ -287,7 +315,7 @@ can generate skiped exon events with the
 <code>GRanges</code> object to include skipped exon events. Then we can
 run the detection function <code><a href="../reference/calc_skipped_exons.html">calc_skipped_exons()</a></code> on the
 modified <code>GRanges</code> object:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr_se</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_skipped_exons.html">generate_skipped_exons</a></span><span class="op">(</span><span class="va">gr</span>, n_se <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">gr_se</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">gr_se</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">se_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_skipped_exons.html">calc_skipped_exons</a></span><span class="op">(</span><span class="va">gr_se</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
@@ -298,7 +326,7 @@ flagged as skipped, with an <code>event</code> column set to
 transcript that includes the skipped exon, <code>"tx_event"</code>
 indicates the transcripts in respect to which the exon is skipped
 (i.e. the downregulated transcripts that do not include the exon).</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">se_result</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"tx_id"</span>, <span class="st">"n_txp"</span>, <span class="st">"event"</span>, <span class="st">"tx_event"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -309,12 +337,12 @@ one exon is included in one isoform and a different exon occupies the
 equivalent position in another isoform.</p>
 <p>The <code><a href="../reference/mx_mock_data.html">mx_mock_data()</a></code> dataset is designed to contain
 mutually exclusive exon events:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr_mx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mx_mock_data.html">mx_mock_data</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">gr_mx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">gr_mx</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">mx_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_mutually_exclusive.html">calc_mutually_exclusive</a></span><span class="op">(</span><span class="va">gr_mx</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">mx_result</span></span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">mx_result</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"tx_id"</span>, <span class="st">"exon_rank"</span>, <span class="st">"event"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -323,13 +351,13 @@ mutually exclusive exon events:</p>
 <p><code><a href="../reference/calc_retained_introns.html">calc_retained_introns()</a></code> finds exons in upregulated
 transcripts that overlap intronic regions of downregulated transcripts,
 indicating intron retention.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr_ri</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_mock_data.html">create_mock_data</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">gr_ri</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">gr_ri</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">gr_ri</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_retained_introns.html">generate_retained_introns</a></span><span class="op">(</span><span class="va">gr_ri</span>, n_ri <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">ri_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_retained_introns.html">calc_retained_introns</a></span><span class="op">(</span><span class="va">gr_ri</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">ri_result</span></span></code></pre></div>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ri_result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">ri_result</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"tx_id"</span>, <span class="st">"exon_rank"</span>, <span class="st">"event"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -341,13 +369,13 @@ indicating intron retention.</p>
 <p><code><a href="../reference/calc_a3ss_a5ss.html">calc_a3ss_a5ss()</a></code> detects exons that share one boundary
 (start or end) with an exon in another isoform but differ at the
 opposite end, indicating alternative splice site usage.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr_ss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_mock_data.html">create_mock_data</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">gr_ss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">gr_ss</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">gr_ss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_a3ss.html">generate_a3ss</a></span><span class="op">(</span><span class="va">gr_ss</span>, n_a3ss <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">ss_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_a3ss_a5ss.html">calc_a3ss_a5ss</a></span><span class="op">(</span><span class="va">gr_ss</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">ss_result</span></span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ss_result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">ss_result</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"tx_id"</span>, <span class="st">"exon_rank"</span>, <span class="st">"event"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -358,7 +386,7 @@ opposite end, indicating alternative splice site usage.</p>
 </h2>
 <p>When the input data does not contain any splicing events, each
 detection function returns an empty <code>GRanges</code> object:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr_none</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/no_event_mock_data.html">no_event_mock_data</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">gr_none</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">gr_none</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span></span>
@@ -368,7 +396,7 @@ detection function returns an empty <code>GRanges</code> object:</p>
 <div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.5.2 (2025-10-31)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>
@@ -411,35 +439,36 @@ detection function returns an empty <code>GRanges</code> object:</p>
 <span><span class="co">## [15] RSQLite_2.4.6               magrittr_2.0.4             </span></span>
 <span><span class="co">## [17] compiler_4.5.2              rlang_1.1.7                </span></span>
 <span><span class="co">## [19] sass_0.4.10                 tools_4.5.2                </span></span>
-<span><span class="co">## [21] yaml_2.3.12                 rtracklayer_1.70.1         </span></span>
-<span><span class="co">## [23] knitr_1.51                  S4Arrays_1.10.1            </span></span>
-<span><span class="co">## [25] htmlwidgets_1.6.4           bit_4.6.0                  </span></span>
-<span><span class="co">## [27] curl_7.0.0                  DelayedArray_0.36.0        </span></span>
-<span><span class="co">## [29] abind_1.4-8                 BiocParallel_1.44.0        </span></span>
-<span><span class="co">## [31] withr_3.0.2                 purrr_1.2.1                </span></span>
-<span><span class="co">## [33] desc_1.4.3                  grid_4.5.2                 </span></span>
-<span><span class="co">## [35] SummarizedExperiment_1.40.0 cli_3.6.5                  </span></span>
-<span><span class="co">## [37] rmarkdown_2.30              crayon_1.5.3               </span></span>
-<span><span class="co">## [39] ragg_1.5.0                  otel_0.2.0                 </span></span>
-<span><span class="co">## [41] httr_1.4.8                  rjson_0.2.23               </span></span>
-<span><span class="co">## [43] DBI_1.2.3                   cachem_1.1.0               </span></span>
-<span><span class="co">## [45] parallel_4.5.2              BiocManager_1.30.27        </span></span>
-<span><span class="co">## [47] XVector_0.50.0              restfulr_0.0.16            </span></span>
-<span><span class="co">## [49] matrixStats_1.5.0           vctrs_0.7.1                </span></span>
-<span><span class="co">## [51] Matrix_1.7-4                jsonlite_2.0.0             </span></span>
-<span><span class="co">## [53] bit64_4.6.0-1               systemfonts_1.3.1          </span></span>
-<span><span class="co">## [55] jquerylib_0.1.4             glue_1.8.0                 </span></span>
-<span><span class="co">## [57] pkgdown_2.2.0               codetools_0.2-20           </span></span>
-<span><span class="co">## [59] BiocVersion_3.22.0          BiocIO_1.20.0              </span></span>
-<span><span class="co">## [61] pillar_1.11.1               rappdirs_0.3.4             </span></span>
-<span><span class="co">## [63] htmltools_0.5.9             R6_2.6.1                   </span></span>
-<span><span class="co">## [65] httr2_1.2.2                 textshaping_1.0.4          </span></span>
-<span><span class="co">## [67] evaluate_1.0.5              lattice_0.22-9             </span></span>
-<span><span class="co">## [69] png_0.1-8                   Rsamtools_2.26.0           </span></span>
-<span><span class="co">## [71] cigarillo_1.0.0             memoise_2.0.1              </span></span>
-<span><span class="co">## [73] bslib_0.10.0                SparseArray_1.10.8         </span></span>
-<span><span class="co">## [75] xfun_0.56                   fs_1.6.6                   </span></span>
-<span><span class="co">## [77] MatrixGenerics_1.22.0       pkgconfig_2.0.3</span></span></code></pre>
+<span><span class="co">## [21] utf8_1.2.6                  yaml_2.3.12                </span></span>
+<span><span class="co">## [23] rtracklayer_1.70.1          knitr_1.51                 </span></span>
+<span><span class="co">## [25] S4Arrays_1.10.1             htmlwidgets_1.6.4          </span></span>
+<span><span class="co">## [27] bit_4.6.0                   curl_7.0.0                 </span></span>
+<span><span class="co">## [29] DelayedArray_0.36.0         abind_1.4-8                </span></span>
+<span><span class="co">## [31] BiocParallel_1.44.0         withr_3.0.2                </span></span>
+<span><span class="co">## [33] purrr_1.2.1                 desc_1.4.3                 </span></span>
+<span><span class="co">## [35] grid_4.5.2                  SummarizedExperiment_1.40.0</span></span>
+<span><span class="co">## [37] cli_3.6.5                   rmarkdown_2.30             </span></span>
+<span><span class="co">## [39] crayon_1.5.3                ragg_1.5.0                 </span></span>
+<span><span class="co">## [41] otel_0.2.0                  httr_1.4.8                 </span></span>
+<span><span class="co">## [43] rjson_0.2.23                DBI_1.2.3                  </span></span>
+<span><span class="co">## [45] cachem_1.1.0                parallel_4.5.2             </span></span>
+<span><span class="co">## [47] BiocManager_1.30.27         XVector_0.50.0             </span></span>
+<span><span class="co">## [49] restfulr_0.0.16             matrixStats_1.5.0          </span></span>
+<span><span class="co">## [51] vctrs_0.7.1                 Matrix_1.7-4               </span></span>
+<span><span class="co">## [53] jsonlite_2.0.0              bit64_4.6.0-1              </span></span>
+<span><span class="co">## [55] systemfonts_1.3.1           jquerylib_0.1.4            </span></span>
+<span><span class="co">## [57] glue_1.8.0                  pkgdown_2.2.0              </span></span>
+<span><span class="co">## [59] codetools_0.2-20            BiocVersion_3.22.0         </span></span>
+<span><span class="co">## [61] BiocIO_1.20.0               pillar_1.11.1              </span></span>
+<span><span class="co">## [63] rappdirs_0.3.4              htmltools_0.5.9            </span></span>
+<span><span class="co">## [65] R6_2.6.1                    httr2_1.2.2                </span></span>
+<span><span class="co">## [67] textshaping_1.0.4           evaluate_1.0.5             </span></span>
+<span><span class="co">## [69] lattice_0.22-9              png_0.1-8                  </span></span>
+<span><span class="co">## [71] Rsamtools_2.26.0            cigarillo_1.0.0            </span></span>
+<span><span class="co">## [73] memoise_2.0.1               bslib_0.10.0               </span></span>
+<span><span class="co">## [75] SparseArray_1.10.8          xfun_0.56                  </span></span>
+<span><span class="co">## [77] fs_1.6.6                    MatrixGenerics_1.22.0      </span></span>
+<span><span class="co">## [79] pkgconfig_2.0.3</span></span></code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
