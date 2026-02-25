@@ -138,7 +138,6 @@ Something about what methods can be used for upstream DTU or switching analysis.
 
 ```{r setup, message = FALSE}
 library(splicelogic)
-library(GenomicRanges)
 ```
 
 ## Preprocessing
