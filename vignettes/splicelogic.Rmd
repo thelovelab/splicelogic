@@ -75,10 +75,10 @@ Here we demontrate reading in exon ranges from a GTF and adding example DTU resu
 library(AnnotationHub)
 ah <- AnnotationHub()
 query(ah, c("GENCODE", "Homo sapiens", "GTF", "v32"))
-# generating exon ranges
+# download an example TxDB for generating exon ranges
 txdb <- ah[["AH75191"]]
 library(GenomicFeatures)
-ebt <- exonsBy(txdb, by="tx") # exon id, name, and rank
+ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
 ```
 
 ```{r}
@@ -119,12 +119,16 @@ Next flattening the exons:
 exons <- unlist(ebt)
 exons$tx_id <- names(exons)
 names(exons) <- exons$exon_name
-exons[1:3]
+exons[1:3] # show the top 3
 ```
 
 Adding DTU results and gene ID:
 
-<!-- Mike todo -->
+```{r}
+add_columns <- txps[match(exons$tx_id, txps$tx_id),]
+merged_DF <- cbind(mcols(exons), add_columns)
+mcols(exons) <- merged_DF
+```
 
 ## Upstream methods
 
@@ -218,6 +222,8 @@ if (length(ri_result) > 0) {
 ```
 
 ## Alternative 3' and 5' splice sites
+
+**NOTE: I think it's more common to list 5 then 3**
 
 `calc_a3ss_a5ss()` detects exons that share one boundary (start or
 end) with an exon in another isoform but differ at the opposite end,
