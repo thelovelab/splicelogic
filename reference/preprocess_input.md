@@ -8,7 +8,7 @@ initializes an 'event' column for downstream splicing event annotation.
 ## Usage
 
 ``` r
-preprocess_input(gr, coef_col)
+preprocess_input(gr, coef_col, method_string = NULL)
 ```
 
 ## Arguments
@@ -17,6 +17,16 @@ preprocess_input(gr, coef_col)
 
   A GRanges object with metadata columns: 'exon_rank', 'gene_id',
   'tx_id', 'coef'.
+
+- coef_col:
+
+  The name of the metadata column indicating upregulated (+1) and
+  downregulated (-1) exons.
+
+- method_string:
+
+  The Differential Transcript Usage (DTU) method used to obtain the
+  coef_col, for annotation purposes (optional).
 
 ## Value
 

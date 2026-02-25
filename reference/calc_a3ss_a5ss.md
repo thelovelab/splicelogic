@@ -6,7 +6,7 @@ object
 ## Usage
 
 ``` r
-calc_a3ss_a5ss(gr, coef_col)
+calc_a3ss_a5ss(gr)
 ```
 
 ## Arguments

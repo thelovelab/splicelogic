@@ -5,7 +5,7 @@ Calculate skipped exons from a GRanges object
 ## Usage
 
 ``` r
-calc_skipped_exons(gr, coef_col, type = c("over", "in", "boundary"))
+calc_skipped_exons(gr, type = c("over", "in", "boundary"))
 ```
 
 ## Arguments
@@ -13,12 +13,7 @@ calc_skipped_exons(gr, coef_col, type = c("over", "in", "boundary"))
 - gr:
 
   A GRanges object with exon annotations, including 'tx_id', 'exon', and
-  'coef_col' metadata columns.
-
-- coef_col:
-
-  The name of the metadata column indicating upregulated (+1) and
-  downregulated (-1) exons.
+  'coef_col' metadata columns and preprocessed with preprocess_input().
 
 - type:
 

@@ -1,7 +1,7 @@
-# Check that input is a valid GRanges object with required metadata columns exon_rank", "gene_id", "tx_id", coef_col
+# Check that input is a valid GRanges object with required metadata columns provided by the user exon_rank", "gene_id", "tx_id", coef_col
 
 Check that input is a valid GRanges object with required metadata
-columns exon_rank", "gene_id", "tx_id", coef_col
+columns provided by the user exon_rank", "gene_id", "tx_id", coef_col
 
 ## Usage
 

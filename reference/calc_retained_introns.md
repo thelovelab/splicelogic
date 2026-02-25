@@ -5,7 +5,7 @@ Function to calculate retained introns given a GRanges object
 ## Usage
 
 ``` r
-calc_retained_introns(gr, coef_col)
+calc_retained_introns(gr)
 ```
 
 ## Arguments

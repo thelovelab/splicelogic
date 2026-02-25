@@ -45,7 +45,7 @@ It also initializes an 'event' column for downstream splicing event annotation.<
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">preprocess_input</span><span class="op">(</span><span class="va">gr</span>, <span class="va">coef_col</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">preprocess_input</span><span class="op">(</span><span class="va">gr</span>, <span class="va">coef_col</span>, method_string <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -54,6 +54,14 @@ It also initializes an 'event' column for downstream splicing event annotation.<
 
 <dl><dt id="arg-gr">gr<a class="anchor" aria-label="anchor" href="#arg-gr"></a></dt>
 <dd><p>A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.</p></dd>
+
+
+<dt id="arg-coef-col">coef_col<a class="anchor" aria-label="anchor" href="#arg-coef-col"></a></dt>
+<dd><p>The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.</p></dd>
+
+
+<dt id="arg-method-string">method_string<a class="anchor" aria-label="anchor" href="#arg-method-string"></a></dt>
+<dd><p>The Differential Transcript Usage (DTU) method used to obtain the coef_col, for annotation purposes (optional).</p></dd>
 
 </dl></div>
     <div class="section level2">
