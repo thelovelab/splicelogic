@@ -225,18 +225,23 @@ candidates_by_presence <- function(gr, coef_col) {
     right_exons = right_exons
   )
 }
-
+#' Filter candidates based on their presence in transcripts 
+#' Then get the left and right exons for each candidate
+#' Return a named list with three tibbles: candidates, left_exons, right_exons
+#' @param gr A GRanges object with all exons
+#' @return A named list with three granges: candidates, left_exons, right_exons 
+#' candidates, left_exons, right_exons are all from neg_exons set
+#' @keywords internal
 candidates_by_presence_v2 <- function(gr, neg_exons, pos_exons) {
   pos_exons <- pos_exons |>
     dplyr::group_by(gene_id) |>
     dplyr::mutate(n_txp_pos = dplyr::n_distinct(tx_id)) |>
     dplyr::ungroup()
-  count <- neg_exons |> plyranges::count_overlaps(pos_exons) 
+  count <- neg_exons |> plyranges::count_overlaps(pos_exons)
 
-  neg_exons <- neg_exons |>
-    dplyr::mutate(overlap_count = count,
-                n_txp_pos = pos_exons$n_txp_pos[match(gene_id, pos_exons$gene_id)]) 
   candidates <- neg_exons |>
+    dplyr::mutate(overlap_count = count,
+                n_txp_pos = pos_exons$n_txp_pos[match(gene_id, pos_exons$gene_id)]) |>
     dplyr::filter(internal & (overlap_count / n_txp_pos) < 1)
 
  # early return: no candidates -> empty list with GRanges objects
@@ -270,3 +275,93 @@ candidates_by_presence_v2 <- function(gr, neg_exons, pos_exons) {
     right_exons = right_exons
   )
 }
+
+#' Batch find overlaps between query and subject GRanges based on match type
+#' @param query A GRanges object (e.g. pos_exons)
+#' @param subject A GRanges object (e.g. all left or right exons from the candidates (neg exons set))
+#' @param type Match type: "over" for any overlap, "in" for exact match,
+#'   "boundary" for shared start or end coordinate
+#' @return A Hits object with queryHits and subjectHits indices
+#' @keywords internal
+find_matches_batch <- function(query, subject, type = c("over", "in", "boundary")) {
+  type <- match.arg(type)
+  switch(type,
+    "over" = {
+      GenomicRanges::findOverlaps(query, subject)
+    },
+    "in" = {
+      # exact coordinate match
+      GenomicRanges::findOverlaps(query, subject, type = "equal")
+    },
+    "boundary" = {
+      # match on shared start OR shared end
+      hits_start <- GenomicRanges::findOverlaps(query, subject) |>
+        S4Vectors::as.data.frame() |>
+        dplyr::filter(
+          IRanges::start(query[queryHits]) == IRanges::start(subject[subjectHits]) |
+          IRanges::end(query[queryHits]) == IRanges::end(subject[subjectHits])
+        )
+      S4Vectors::Hits(
+        from = hits_start$queryHits,
+        to   = hits_start$subjectHits,
+        nLnode = length(query),
+        nRnode = length(subject),
+        sort.by.query = TRUE
+      )
+    }
+  )
+}
+
+
+# #' Filter candidates based on their presence in transcripts 
+# #' Then get the left and right exons for each candidate
+# #' Return a named list with three tibbles: candidates, left_exons, right_exons
+# #' @param gr A GRanges object with all exons
+# #' @return A named list with three tibbles: candidates, left_exons, right_exons 
+# #' candidates, left_exons, right_exons are all from neg_exons set
+# #' @keywords internal
+# candidates_by_presence_tibble <- function(gr) {
+
+#   #get pos and neg exons from gr
+#   pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
+#   neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
+
+#   # overlap counting requires GRanges object for plyranges::count_overlaps
+#   pos_exons <- pos_exons |>
+#     dplyr::group_by(gene_id) |>
+#     dplyr::mutate(n_txp_pos = dplyr::n_distinct(tx_id)) |>
+#     dplyr::ungroup()
+#   count <- neg_exons |> plyranges::count_overlaps(pos_exons)
+
+#   candidates <- neg_exons |>
+#     dplyr::mutate(overlap_count = count,
+#                 n_txp_pos = pos_exons$n_txp_pos[match(gene_id, pos_exons$gene_id)]) |>
+#     dplyr::filter(internal & (overlap_count / n_txp_pos) < 1)
+
+#   # early return: no candidates -> empty tibbles
+#   if (length(candidates) == 0L) {
+#     return(list(
+#       candidates  = tibble::tibble(),
+#       left_exons  = tibble::tibble(),
+#       right_exons = tibble::tibble()
+#     ))
+#   }
+
+#   # convert to tibbles for vectorized key operations
+#   cand_tbl <- tibble::as_tibble(candidates)
+#   gr_tbl   <- tibble::as_tibble(gr)
+
+#   # build left/right keys and join against gr_tbl
+#   left_keys  <- paste0(cand_tbl$tx_id, "-", cand_tbl$exon_rank - 1L)
+#   right_keys <- paste0(cand_tbl$tx_id, "-", cand_tbl$exon_rank + 1L)
+
+#   left_tbl  <- gr_tbl[match(left_keys, gr_tbl$key), ]
+#   right_tbl <- gr_tbl[match(right_keys, gr_tbl$key), ]
+
+#   list(
+#     candidates  = cand_tbl,
+#     left_exons  = left_tbl,
+#     right_exons = right_tbl
+#   )
+# }
+
