@@ -87,5 +87,7 @@ preprocess_input <- function(gr, coef_col, method_string=NULL) {
 
 check_preprocessed <- function(gr) {
   if (!isTRUE(S4Vectors::metadata(gr)$splicelogic_preprocessed))
-    stop("Input has not been preprocessed with preprocess_input(). Please run preprocess_input() on your GRanges object before calculating splicing events.")
+    stop("Input has not been preprocessed with preprocess_input().\n", 
+        "  Please run preprocess_input() on your GRanges object before\n", 
+        "  calculating splicing events.")
 }
