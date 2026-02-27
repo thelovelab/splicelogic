@@ -428,7 +428,7 @@ sessionInfo()
     ## [37] cli_3.6.5                   rmarkdown_2.30             
     ## [39] crayon_1.5.3                ragg_1.5.0                 
     ## [41] otel_0.2.0                  httr_1.4.8                 
-    ## [43] rjson_0.2.23                DBI_1.2.3                  
+    ## [43] rjson_0.2.23                DBI_1.3.0                  
     ## [45] cachem_1.1.0                parallel_4.5.2             
     ## [47] BiocManager_1.30.27         XVector_0.50.0             
     ## [49] restfulr_0.0.16             matrixStats_1.5.0          
