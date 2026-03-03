@@ -256,6 +256,70 @@ generate_skipped_exons <- function(gr, n_se = 1) {
   return(gr)
 }
 
+#' Generate mutually exclusive exon events in a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
+#' 'tx_id', and 'coefs'.
+#' @param n_mx Number of mutually exclusive exon events to generate
+#' @return A GRanges object with mutually exclusive exon events introduced
+#' @export
+generate_mx <- function(gr, n_mx = 1) {
+    set.seed(123) # for reproducibility
+    # Find consecutive pairs of internal exons from neg transcripts
+    # Both rank k and rank k+1 must be internal
+    neg_internal <- gr |>
+        as.data.frame() |>
+        dplyr::filter(coefs < 0 & internal == TRUE)
+
+    # Find rank k where rank k+1 is also internal in same transcript
+    mx_candidates <- neg_internal |>
+        dplyr::mutate(
+            next_key = paste0(tx_id, "-", exon_rank + 1L)
+        ) |>
+        dplyr::filter(next_key %in% neg_internal$key) |>
+        dplyr::slice_sample(n = n_mx)
+
+    # Pair each selected neg transcript with one pos transcript from same gene
+    gr_df <- as.data.frame(gr)
+
+    pos_txs <- gr_df |>
+        dplyr::filter(coefs > 0) |>
+        dplyr::distinct(gene_id, tx_id)
+
+    mx_pairs <- mx_candidates |>
+        dplyr::select(gene_id, neg_tx_id = tx_id, exon_rank) |>
+        dplyr::inner_join(pos_txs, by = "gene_id") |>
+        dplyr::rename(pos_tx_id = tx_id) |>
+        dplyr::group_by(neg_tx_id, exon_rank) |>
+        dplyr::slice_sample(n = 1) |>
+        dplyr::ungroup()
+
+    # Build keys to remove (pairwise):
+    # rank k from the selected pos transcript (pos loses k, keeps k+1)
+    # rank k+1 from the selected neg transcript (neg keeps k, loses k+1)
+    pos_remove <- paste0(mx_pairs$pos_tx_id, "-", mx_pairs$exon_rank)
+    neg_remove <- paste0(mx_pairs$neg_tx_id, "-",
+                         mx_pairs$exon_rank + 1L)
+
+    gr <- gr |>
+        dplyr::filter(!key %in% c(pos_remove, neg_remove))
+
+    # re-rank the exons accordingly
+    gr <- gr |>
+        dplyr::group_by(tx_id) |>
+        dplyr::mutate(
+            exon_rank = seq_len(dplyr::n()),
+            exon_rank = dplyr::if_else(
+                strand == "-",
+                rev(exon_rank),
+                exon_rank
+            )
+        ) |>
+        dplyr::ungroup()
+    # update internal column and key nexons
+    gr <- preprocess_input(gr, coef_col = "coefs")
+    return(gr)
+}
+
 #' Generate retained intron events in a GRanges object
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
 #' @param n_ri Number of retained intron events to generate
