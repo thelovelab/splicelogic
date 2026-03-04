@@ -274,59 +274,81 @@ calc_retained_introns <- function(gr){
 }
 
 
-#' Function to calcualte 5' and 3' alternative splice sites given a GRanges object
-#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
-#' @return A GRanges object with an additional 'event' metadata column indicating retained introns.
-#' @export      
-calc_a3ss_a5ss <- function(gr ){
-  # if preprocessing didn't happen
-  check_preprocessed(gr)
+#' Function to calculate 5' and 3' alternative splice sites given a GRanges
+#' object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
+#' 'tx_id', and 'coef'.
+#' @return A GRanges object with an additional 'event' metadata column
+#' indicating alternative splice site events.
+#' @export
+calc_a3ss_a5ss <- function(gr) {
+    # if preprocessing didn't happen
+    check_preprocessed(gr)
 
-  # separate positive and negative exons
-  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
-  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
+    # separate positive and negative exons
+    pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
+    neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
 
-  # candidates are pos exons that do not exacly match neg_exons (%in%)
-  # filter candidates pos_exons that are exactly the same as any neg_exons
-  # and keep only those that overlap any neg_exons
-  # TO DO: this is not pairwise comparison - need to restrict to the same gene and then compare to all neg exons in that gene pair by pair
-  # rn if any neg exon is the same as the candidate, it will be filtered out, even if there is another neg exon that overlaps but is not the same and could be a valid a3ss/a5ss event.
-  candidates <- pos_exons |> 
-                dplyr::filter(!(pos_exons %in% neg_exons)) |>
-                plyranges::filter_by_overlaps_directed(neg_exons)
+    # candidates: pos exons not exactly identical to any neg exon,
+    # but overlapping at least one neg exon (directed)
+    candidates <- pos_exons |>
+        dplyr::filter(!(pos_exons %in% neg_exons)) |>
+        plyranges::filter_by_overlaps_directed(neg_exons)
 
-  hits <- GRanges()
-  if (length(candidates) == 0L) {
-    return(hits) #return unchanged if no candidates
-  }
+    if (length(candidates) == 0L) {
+        return(GRanges())
+    }
 
- for (i in seq_along(candidates)) {
-    cand <- candidates[i]  # a length-1 GRanges
-    # restric to check on the same gene in neg_exons
-    cand_neg_exons <- neg_exons |> 
-                  dplyr::filter(gene_id == cand$gene_id) 
-                  # dplyr::filter(!(. %in%c cand))
-                  # dplyr::filter_by_overlaps(cand)
+    # batch findOverlaps: candidates against neg_exons
+    hits <- GenomicRanges::findOverlaps(candidates, neg_exons)
 
+    if (length(hits) == 0L) {
+        return(GRanges())
+    }
 
-      matches <- cand_neg_exons %>%
+    cand_tbl <- tibble::as_tibble(candidates)
+    neg_tbl <- tibble::as_tibble(neg_exons)
+
+    # build match tibble with boundary checks
+    match_tbl <- tibble::tibble(
+        cand_idx = S4Vectors::queryHits(hits),
+        neg_idx  = S4Vectors::subjectHits(hits)
+    ) |>
         dplyr::mutate(
-          match_start  = GenomicRanges::start(.) %in% GenomicRanges::start(cand),
-          match_end = GenomicRanges::end(.) %in% GenomicRanges::end(cand)
+            gene_id_cand = cand_tbl$gene_id[cand_idx],
+            gene_id_neg  = neg_tbl$gene_id[neg_idx],
+            match_start  = cand_tbl$start[cand_idx] ==
+                           neg_tbl$start[neg_idx],
+            match_end    = cand_tbl$end[cand_idx] ==
+                           neg_tbl$end[neg_idx],
+            tx_id_neg    = neg_tbl$tx_id[neg_idx]
         ) |>
-         # only keep those that match on one end but not the other
-        dplyr::filter(match_start != match_end)
-        
-      if (length(matches) > 0L) {
-        event_type <- ifelse(matches$match_start, "a5ss", "a3ss")
-        txs <- matches$tx_id
-        cand_rep <- rep(cand, length(txs)) |>
-          dplyr::mutate(
-            event    = event_type,
-            tx_event = txs
-          )
-        hits <- c(hits, cand_rep)
-        }
-  }
-  hits
+        # restrict to same gene
+        dplyr::filter(gene_id_cand == gene_id_neg) |>
+        # one boundary matches but not the other (XOR)
+        dplyr::filter(match_start != match_end) |>
+        dplyr::mutate(
+            event = dplyr::if_else(match_start, "a5ss", "a3ss")
+        )
+
+    if (nrow(match_tbl) == 0L) {
+        return(GRanges())
+    }
+
+    # build result: one row per (candidate, neg exon match)
+    hits_tbl <- cand_tbl[match_tbl$cand_idx, ] |>
+        dplyr::mutate(
+            event    = match_tbl$event,
+            tx_event = match_tbl$tx_id_neg
+        )
+
+    # convert back to GRanges for return
+    GenomicRanges::GRanges(
+        seqnames = hits_tbl$seqnames,
+        ranges   = IRanges::IRanges(start = hits_tbl$start,
+                                     end = hits_tbl$end),
+        strand   = hits_tbl$strand,
+        hits_tbl |> dplyr::select(-seqnames, -start, -end,
+                                   -width, -strand)
+    )
 }
