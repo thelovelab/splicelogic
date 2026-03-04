@@ -214,48 +214,64 @@ calc_mutually_exclusive <- function(gr, type = c("in", "over", "boundary")) {
 #' @return A GRanges object with an additional 'event' metadata column indicating retained introns.
 #' @export      
 calc_retained_introns <- function(gr){
-  # TO DO : fix coef_col argument and add to preprocess_input and then rename coef_col to coefs
-
   # if preprocessing didn't happen
   check_preprocessed(gr)
 
-  # separate positive and negative exons
-  # find introns in the negative coef transcripts
-  introns <- gr |> dplyr::filter(estimates < 0) |> find_introns()
+    # find introns in the negative coef transcripts
+    neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
+    pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
+    introns <- neg_exons |> find_introns()
 
-  # filter by overlap on the positive coef transcripts
-  candidates <- gr |> dplyr::filter(estimates > 0) |> 
-                      plyranges::filter_by_overlaps(introns)
-
-  hits <- GRanges()
-  if (length(candidates) == 0L) {
-      return(hits) #return if no candidates
-  }
-  for (i in seq_along(candidates)) {
-  cand <- candidates[i]  # a length-1 GRanges
-
-  # restric to the same gene
-  cand_introns <- introns |> 
-                dplyr::filter(gene_id == cand$gene_id)
-
-  # find which transcript pairs the event is happening with 
-  txp_events <- cand_introns |> 
-              plyranges::filter_by_overlaps(cand)|> 
-              tibble::as_tibble()|> 
-              dplyr::select(gene_id, tx_id)
-
-  if (nrow(txp_events) > 0) {
-    txs <- unique(txp_events$tx_id)
-    cand_rep <- rep(cand, length(txs)) |>
-      dplyr::mutate(
-        event    = "retained_intron",
-        tx_event = txs
-      )
-    hits <- c(hits, cand_rep)
+    if (length(introns) == 0L || length(pos_exons) == 0L) {
+        return(GRanges())
     }
-  }
-  hits
-  }
+
+    # batch findOverlaps: intron must be fully within the pos exon
+    hits <- GenomicRanges::findOverlaps(introns, pos_exons,
+                                        type = "within")
+
+    if (length(hits) == 0L) {
+        return(GRanges())
+    }
+
+    # build match tibble from hits
+    intron_tbl <- tibble::as_tibble(introns)
+    pos_tbl <- tibble::as_tibble(pos_exons)
+
+    match_tbl <- tibble::tibble(
+        intron_idx = S4Vectors::queryHits(hits),
+        pos_idx    = S4Vectors::subjectHits(hits)
+    ) |>
+        dplyr::mutate(
+            gene_id_intron = intron_tbl$gene_id[intron_idx],
+            gene_id_pos    = pos_tbl$gene_id[pos_idx],
+            tx_id_intron   = intron_tbl$tx_id[intron_idx]
+        ) |>
+        # restrict to same gene
+        dplyr::filter(gene_id_intron == gene_id_pos) |>
+        dplyr::distinct(pos_idx, tx_id_intron)
+
+    if (nrow(match_tbl) == 0L) {
+        return(GRanges())
+    }
+
+    # build result: one row per (pos exon, intron transcript) pair
+    hits_tbl <- pos_tbl[match_tbl$pos_idx, ] |>
+        dplyr::mutate(
+            event    = "retained_intron",
+            tx_event = match_tbl$tx_id_intron
+        )
+
+    # convert back to GRanges for return
+    GenomicRanges::GRanges(
+        seqnames = hits_tbl$seqnames,
+        ranges   = IRanges::IRanges(start = hits_tbl$start,
+                                     end = hits_tbl$end),
+        strand   = hits_tbl$strand,
+        hits_tbl |> dplyr::select(-seqnames, -start, -end,
+                                   -width, -strand)
+    )
+}
 
 
 #' Function to calcualte 5' and 3' alternative splice sites given a GRanges object
