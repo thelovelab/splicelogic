@@ -2,16 +2,20 @@
 % Please edit documentation in R/calc_logic.R
 \name{calc_a3ss_a5ss}
 \alias{calc_a3ss_a5ss}
-\title{Function to calcualte 5' and 3' alternative splice sites given a GRanges object}
+\title{Function to calculate 5' and 3' alternative splice sites given a GRanges
+object}
 \usage{
 calc_a3ss_a5ss(gr)
 }
 \arguments{
-\item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.}
+\item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id',
+'tx_id', and 'coef'.}
 }
 \value{
-A GRanges object with an additional 'event' metadata column indicating retained introns.
+A GRanges object with an additional 'event' metadata column
+indicating alternative splice site events.
 }
 \description{
-Function to calcualte 5' and 3' alternative splice sites given a GRanges object
+Function to calculate 5' and 3' alternative splice sites given a GRanges
+object
 }
