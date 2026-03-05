@@ -113,6 +113,10 @@ dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
 library(plyranges)
 exons <- read_bed(file.path(dir, "exons_M31.bed.gz"))
 mcols(exons) <- DataFrame(readr::read_delim(file.path(dir, "exons_mcols.tsv.gz")))
+# M31 is paired with GRCm39 / mm39
+si <- Seqinfo::Seqinfo(genome="mm39")
+seqlevels(exons) <- seqlevels(si)
+seqinfo(exons) <- si
 ```
 
 ## Obtaining exon ranges
