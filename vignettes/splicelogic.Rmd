@@ -62,8 +62,8 @@ from a DTU results table.
 |-------------|----------------------------------------------------|
 | `gene_id`   | Gene identifier                                    |
 | `tx_id`     | Transcript identifier                              |
-| `exon_rank` | Exon rank within the transcript                     |
-| *coef_col*  | DTU effect estimate (column name is user-defined) 
+| `exon_rank` | Exon rank within the transcript                    |
+| *coef_col*  | DTU effect estimate (column name is user-defined)  |
 
 <!--
 considering if exon_rank should be inputed by user or calculated internally
@@ -77,6 +77,43 @@ analysis, such as that performed by
 [satuRn](https://bioconductor.org/packages/satuRn).
 Positive coefficient values indicate upregulated exons and negative
 values indicate downregulated exons. 
+
+## Jones et al mouse long read dataset
+
+We will use a published long read dataset and it's reported splicing 
+changes to demonstrate some of the functionality in *splicelogic*.
+
+The citation is:
+
+> Emma F. Jones, Timothy C. Howton, Victoria L. Flanary, 
+> Amanda D. Clark, Brittany N. Lasseigne
+> Long-read RNA sequencing identifies region- and sex-specific 
+> C57BL/6J mouse brain mRNA isoform expression and usage
+> **Mol Brain** 17, 40 (2024). 
+> [doi: 10.1186/s13041-024-01112-7](https://doi.org/10.1186/s13041-024-01112-7)
+
+And information about the paper, including code and publicly
+available data can be found at this URL:
+
+<https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv>
+
+In the abstract, Jones *et al.* describe the experiment:
+
+> To assess differences in AS across the cerebellum, cortex, hippocampus, 
+> and striatum by sex, we generated and analyzed Oxford Nanopore Technologies 
+> (ONT) long-read RNA sequencing (lrRNA-Seq) C57BL/6J mouse brain cDNA libraries. 
+> From > 85 million reads that passed quality control metrics, we calculated 
+> differential gene expression (DGE), differential transcript expression (DTE), 
+> and differential transcript usage (DTU) across brain regions and by sex.
+
+```{r}
+library(readr)
+dir <- system.file("extdata", package="splicelogic")
+dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
+library(plyranges)
+exons <- read_bed(file.path(dir, "exons_M31.bed.gz"))
+mcols(exons) <- DataFrame(readr::read_delim(file.path(dir, "exons_mcols.tsv.gz")))
+```
 
 ## Obtaining exon ranges
 
