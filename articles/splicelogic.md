@@ -62,6 +62,163 @@ such as that performed by
 values indicate upregulated exons and negative values indicate
 downregulated exons.
 
+### Jones et al mouse long read dataset
+
+We will use a published long read dataset and it’s reported splicing
+changes to demonstrate some of the functionality in *splicelogic*.
+
+The citation is:
+
+> Emma F. Jones, Timothy C. Howton, Victoria L. Flanary, Amanda D.
+> Clark, Brittany N. Lasseigne Long-read RNA sequencing identifies
+> region- and sex-specific C57BL/6J mouse brain mRNA isoform expression
+> and usage **Mol Brain** 17, 40 (2024). [doi:
+> 10.1186/s13041-024-01112-7](https://doi.org/10.1186/s13041-024-01112-7)
+
+And information about the paper, including code and publicly available
+data can be found at this URL:
+
+<https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv>
+
+In the abstract, Jones *et al.* describe the experiment:
+
+> To assess differences in AS across the cerebellum, cortex,
+> hippocampus, and striatum by sex, we generated and analyzed Oxford
+> Nanopore Technologies (ONT) long-read RNA sequencing (lrRNA-Seq)
+> C57BL/6J mouse brain cDNA libraries. From \> 85 million reads that
+> passed quality control metrics, we calculated differential gene
+> expression (DGE), differential transcript expression (DTE), and
+> differential transcript usage (DTU) across brain regions and by sex.
+
+``` r
+
+library(readr)
+dir <- system.file("extdata", package="splicelogic")
+dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
+```
+
+    ## Rows: 49 Columns: 5
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (3): tx_id, gene_id, gene_name
+    ## dbl (2): estimate, padj
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+
+library(plyranges)
+```
+
+    ## Loading required package: BiocGenerics
+    ## Loading required package: generics
+    ## 
+    ## Attaching package: 'generics'
+    ## 
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,
+    ##     setequal, union
+    ## 
+    ## 
+    ## Attaching package: 'BiocGenerics'
+    ## 
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     IQR, mad, sd, var, xtabs
+    ## 
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+    ##     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+    ##     get, grep, grepl, is.unsorted, lapply, Map, mapply, match, mget,
+    ##     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    ##     rbind, Reduce, rownames, sapply, saveRDS, table, tapply, unique,
+    ##     unsplit, which.max, which.min
+    ## 
+    ## Loading required package: IRanges
+    ## Loading required package: S4Vectors
+    ## Loading required package: stats4
+    ## 
+    ## Attaching package: 'S4Vectors'
+    ## 
+    ## The following object is masked from 'package:utils':
+    ## 
+    ##     findMatches
+    ## 
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     expand.grid, I, unname
+    ## 
+    ## Loading required package: GenomicRanges
+    ## Loading required package: Seqinfo
+    ## Loading required package: dplyr
+    ## 
+    ## Attaching package: 'dplyr'
+    ## 
+    ## The following objects are masked from 'package:GenomicRanges':
+    ## 
+    ##     intersect, setdiff, union
+    ## 
+    ## The following object is masked from 'package:Seqinfo':
+    ## 
+    ##     intersect
+    ## 
+    ## The following objects are masked from 'package:IRanges':
+    ## 
+    ##     collapse, desc, intersect, setdiff, slice, union
+    ## 
+    ## The following objects are masked from 'package:S4Vectors':
+    ## 
+    ##     first, intersect, rename, setdiff, setequal, union
+    ## 
+    ## The following objects are masked from 'package:BiocGenerics':
+    ## 
+    ##     combine, intersect, setdiff, setequal, union
+    ## 
+    ## The following object is masked from 'package:generics':
+    ## 
+    ##     explain
+    ## 
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+    ## 
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+    ## 
+    ## 
+    ## Attaching package: 'plyranges'
+    ## 
+    ## The following objects are masked from 'package:dplyr':
+    ## 
+    ##     between, n, n_distinct
+
+``` r
+
+exons <- read_bed(file.path(dir, "exons_M31.bed.gz"))
+mcols(exons) <- DataFrame(readr::read_delim(file.path(dir, "exons_mcols.tsv.gz")))
+```
+
+    ## Rows: 601 Columns: 4
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (2): exon_name, tx_id
+    ## dbl (2): exon_id, exon_rank
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+
+# M31 is paired with GRCm39 / mm39
+si <- Seqinfo::Seqinfo(genome="mm39")
+seqlevels(exons) <- seqlevels(si)
+seqinfo(exons) <- si
+```
+
 ### Obtaining exon ranges
 
 Here we demontrate reading in exon ranges from a GTF and adding example
@@ -358,48 +515,51 @@ sessionInfo()
     ## 
     ## other attached packages:
     ##  [1] splicelogic_0.0.67     tibble_3.3.1           GenomicFeatures_1.62.0
-    ##  [4] AnnotationDbi_1.72.0   Biobase_2.70.0         GenomicRanges_1.62.1  
-    ##  [7] Seqinfo_1.0.0          IRanges_2.44.0         S4Vectors_0.48.0      
-    ## [10] AnnotationHub_4.0.0    BiocFileCache_3.0.0    dbplyr_2.5.2          
-    ## [13] BiocGenerics_0.56.0    generics_0.1.4        
+    ##  [4] AnnotationDbi_1.72.0   Biobase_2.70.0         AnnotationHub_4.0.0   
+    ##  [7] BiocFileCache_3.0.0    dbplyr_2.5.2           plyranges_1.30.1      
+    ## [10] dplyr_1.2.0            GenomicRanges_1.62.1   Seqinfo_1.0.0         
+    ## [13] IRanges_2.44.0         S4Vectors_0.48.0       BiocGenerics_0.56.0   
+    ## [16] generics_0.1.4         readr_2.2.0           
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] tidyselect_1.2.1            dplyr_1.2.0                
-    ##  [3] blob_1.3.0                  filelock_1.0.3             
-    ##  [5] Biostrings_2.78.0           bitops_1.0-9               
-    ##  [7] fastmap_1.2.0               RCurl_1.98-1.17            
-    ##  [9] GenomicAlignments_1.46.0    XML_3.99-0.22              
-    ## [11] digest_0.6.39               lifecycle_1.0.5            
-    ## [13] plyranges_1.30.1            KEGGREST_1.50.0            
-    ## [15] RSQLite_2.4.6               magrittr_2.0.4             
-    ## [17] compiler_4.5.2              rlang_1.1.7                
-    ## [19] sass_0.4.10                 tools_4.5.2                
-    ## [21] yaml_2.3.12                 rtracklayer_1.70.1         
-    ## [23] knitr_1.51                  S4Arrays_1.10.1            
-    ## [25] htmlwidgets_1.6.4           bit_4.6.0                  
-    ## [27] curl_7.0.0                  DelayedArray_0.36.0        
-    ## [29] abind_1.4-8                 BiocParallel_1.44.0        
-    ## [31] withr_3.0.2                 purrr_1.2.1                
-    ## [33] desc_1.4.3                  grid_4.5.2                 
-    ## [35] SummarizedExperiment_1.40.0 cli_3.6.5                  
-    ## [37] rmarkdown_2.30              crayon_1.5.3               
-    ## [39] ragg_1.5.0                  otel_0.2.0                 
-    ## [41] httr_1.4.8                  rjson_0.2.23               
-    ## [43] DBI_1.3.0                   cachem_1.1.0               
-    ## [45] parallel_4.5.2              BiocManager_1.30.27        
-    ## [47] XVector_0.50.0              restfulr_0.0.16            
-    ## [49] matrixStats_1.5.0           vctrs_0.7.1                
-    ## [51] Matrix_1.7-4                jsonlite_2.0.0             
+    ##  [1] tidyselect_1.2.1            blob_1.3.0                 
+    ##  [3] filelock_1.0.3              Biostrings_2.78.0          
+    ##  [5] bitops_1.0-9                fastmap_1.2.0              
+    ##  [7] RCurl_1.98-1.17             GenomicAlignments_1.46.0   
+    ##  [9] XML_3.99-0.22               digest_0.6.39              
+    ## [11] lifecycle_1.0.5             KEGGREST_1.50.0            
+    ## [13] RSQLite_2.4.6               magrittr_2.0.4             
+    ## [15] compiler_4.5.2              rlang_1.1.7                
+    ## [17] sass_0.4.10                 tools_4.5.2                
+    ## [19] yaml_2.3.12                 rtracklayer_1.70.1         
+    ## [21] knitr_1.51                  S4Arrays_1.10.1            
+    ## [23] htmlwidgets_1.6.4           bit_4.6.0                  
+    ## [25] curl_7.0.0                  DelayedArray_0.36.0        
+    ## [27] abind_1.4-8                 BiocParallel_1.44.0        
+    ## [29] withr_3.0.2                 purrr_1.2.1                
+    ## [31] desc_1.4.3                  grid_4.5.2                 
+    ## [33] SummarizedExperiment_1.40.0 cli_3.6.5                  
+    ## [35] rmarkdown_2.30              crayon_1.5.3               
+    ## [37] ragg_1.5.0                  otel_0.2.0                 
+    ## [39] httr_1.4.8                  tzdb_0.5.0                 
+    ## [41] rjson_0.2.23                DBI_1.3.0                  
+    ## [43] cachem_1.1.0                parallel_4.5.2             
+    ## [45] BiocManager_1.30.27         XVector_0.50.0             
+    ## [47] restfulr_0.0.16             matrixStats_1.5.0          
+    ## [49] vctrs_0.7.1                 Matrix_1.7-4               
+    ## [51] jsonlite_2.0.0              hms_1.1.4                  
     ## [53] bit64_4.6.0-1               systemfonts_1.3.1          
     ## [55] jquerylib_0.1.4             glue_1.8.0                 
     ## [57] pkgdown_2.2.0               codetools_0.2-20           
-    ## [59] BiocVersion_3.22.0          BiocIO_1.20.0              
-    ## [61] pillar_1.11.1               rappdirs_0.3.4             
-    ## [63] htmltools_0.5.9             R6_2.6.1                   
-    ## [65] httr2_1.2.2                 textshaping_1.0.4          
-    ## [67] evaluate_1.0.5              lattice_0.22-9             
-    ## [69] png_0.1-8                   Rsamtools_2.26.0           
-    ## [71] cigarillo_1.0.0             memoise_2.0.1              
-    ## [73] bslib_0.10.0                SparseArray_1.10.8         
-    ## [75] xfun_0.56                   fs_1.6.6                   
-    ## [77] MatrixGenerics_1.22.0       pkgconfig_2.0.3
+    ## [59] BiocVersion_3.22.0          GenomeInfoDb_1.46.2        
+    ## [61] BiocIO_1.20.0               UCSC.utils_1.6.1           
+    ## [63] pillar_1.11.1               rappdirs_0.3.4             
+    ## [65] htmltools_0.5.9             R6_2.6.1                   
+    ## [67] httr2_1.2.2                 textshaping_1.0.4          
+    ## [69] vroom_1.7.0                 evaluate_1.0.5             
+    ## [71] lattice_0.22-9              png_0.1-8                  
+    ## [73] Rsamtools_2.26.0            cigarillo_1.0.0            
+    ## [75] memoise_2.0.1               bslib_0.10.0               
+    ## [77] SparseArray_1.10.8          xfun_0.56                  
+    ## [79] fs_1.6.6                    MatrixGenerics_1.22.0      
+    ## [81] pkgconfig_2.0.3
