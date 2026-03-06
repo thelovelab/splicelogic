@@ -261,9 +261,9 @@ candidates_by_presence_v2 <- function(gr, neg_exons, pos_exons) {
 
   # get the actual exons for the candidates (preserves order of keys)
   # exon to the left of the candidates from the neg_exons set
-  left_exons  <- gr |> dplyr::slice(match(left_keys, key))
+  left_exons  <- neg_exons |> dplyr::slice(match(left_keys, key))
   # exon to the right of the candidates from the neg_exons set
-  right_exons <- gr |> dplyr::slice(match(right_keys, key))
+  right_exons <- neg_exons |> dplyr::slice(match(right_keys, key))
 
   # returns a list of GRanges of same length:
   # ‘candidates’ - neg exons that do not overlap any pos exons, and are internal
