@@ -45,10 +45,10 @@ test_that("calc_skipped_exons detects single skipped exon in mx_mock_data", {
 
 
 # Test for mutually exclusive detection in mx_mock_data
-test_that("calc_mutually_exclusive detects mutually exclusive exons in mx_mock_data", {
+test_that("calc_mx_exons detects mutually exclusive exons in mx_mock_data", {
   gr <- mx_mock_data()
   gr <- preprocess_input(gr, coef_col = "coefs")
-  result <- calc_mutually_exclusive(gr)
+  result <- calc_mx_exons(gr)
 
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
@@ -61,10 +61,10 @@ test_that("calc_mutually_exclusive detects mutually exclusive exons in mx_mock_d
 })
 
 # Test for no event detected in mx 
-test_that("calc_mutually_exclusive returns empty GRanges if no events", {
+test_that("calc_mx_exons returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
   gr <- preprocess_input(gr, coef_col = "coefs")
-  result <- calc_mutually_exclusive(gr)
+  result <- calc_mx_exons(gr)
 
   expect_s4_class(result, "GRanges")
   expect_equal(length(result), 0L)
