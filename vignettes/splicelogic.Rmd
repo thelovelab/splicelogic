@@ -40,7 +40,7 @@ transcripts, one can use the following code to identify splice events:
 ```{r eval=FALSE}
 exons <- preprocess_input(exons, coef_col = "coefs")
 skipped <- exons |> calc_skipped_exons()
-mut_exc <- exons |> calc_mutually_exclusive()
+mut_exc <- exons |> calc_mx_exons()
 # etc.
 ```
 
@@ -240,7 +240,7 @@ mcols(se_result)[, c("gene_id", "tx_id", "n_txp", "event", "tx_event")]
 
 ## Mutually exclusive exons
 
-`calc_mutually_exclusive()` detects pairs of exons where one exon is
+`calc_mx_exons()` detects pairs of exons where one exon is
 included in one isoform and a different exon occupies the equivalent
 position in another isoform.
 
@@ -250,7 +250,7 @@ exon events:
 ```{r mx-exons, eval=FALSE}
 gr_mx <- mx_mock_data()
 gr_mx <- preprocess_input(gr_mx, coef_col = "coefs")
-mx_result <- calc_mutually_exclusive(gr_mx)
+mx_result <- calc_mx_exons(gr_mx)
 mx_result
 ```
 
@@ -310,7 +310,7 @@ gr_none <- no_event_mock_data()
 gr_none <- preprocess_input(gr_none, coef_col = "coefs")
 
 calc_skipped_exons(gr_none)
-calc_mutually_exclusive(gr_none)
+calc_mx_exons(gr_none)
 ```
 
 # Session info

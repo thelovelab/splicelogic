@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(splicelogics)
+library(splicelogic)
 
-test_check("splicelogics")
+test_check("splicelogic")
