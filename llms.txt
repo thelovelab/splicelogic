@@ -28,10 +28,15 @@ as part of the EOSS program.
 
 ## All functions
 
-- [`calc_a3ss_a5ss()`](https://thelovelab.github.io/splicelogic/reference/calc_a3ss_a5ss.md)
-  : Function to calcualte 5' and 3' alternative splice sites given a
-  GRanges object
-- [`calc_mutually_exclusive()`](https://thelovelab.github.io/splicelogic/reference/calc_mutually_exclusive.md)
+- [`calc_a3ss()`](https://thelovelab.github.io/splicelogic/reference/calc_a3ss.md)
+  : Calculate alternative 3' splice sites from a GRanges object
+- [`calc_a5ss()`](https://thelovelab.github.io/splicelogic/reference/calc_a5ss.md)
+  : Calculate alternative 5' splice sites from a GRanges object
+- [`calc_all_events()`](https://thelovelab.github.io/splicelogic/reference/calc_all_events.md)
+  : Calculate all splicing events from a GRanges object
+- [`calc_included_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_included_exons.md)
+  : Calculate included exons from a GRanges object
+- [`calc_mx_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_mx_exons.md)
   : Calculate mutually exclusive exons from a GRanges object
 - [`calc_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/calc_retained_introns.md)
   : Function to calculate retained introns given a GRanges object
@@ -50,6 +55,8 @@ as part of the EOSS program.
   : Generate alternative 3' splice site events in a GRanges object
 - [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_a5ss.md)
   : Generate alternative 5' splice site events in a GRanges object
+- [`generate_mx()`](https://thelovelab.github.io/splicelogic/reference/generate_mx.md)
+  : Generate mutually exclusive exon events in a GRanges object
 - [`generate_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/generate_retained_introns.md)
   : Generate retained intron events in a GRanges object
 - [`generate_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/generate_skipped_exons.md)

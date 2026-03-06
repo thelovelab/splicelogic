@@ -28,7 +28,7 @@ transcripts, one can use the following code to identify splice events:
 
 exons <- preprocess_input(exons, coef_col = "coefs")
 skipped <- exons |> calc_skipped_exons()
-mut_exc <- exons |> calc_mutually_exclusive()
+mut_exc <- exons |> calc_mx_exons()
 # etc.
 ```
 
@@ -401,7 +401,7 @@ mcols(se_result)[, c("gene_id", "tx_id", "n_txp", "event", "tx_event")]
 
 ### Mutually exclusive exons
 
-[`calc_mutually_exclusive()`](https://thelovelab.github.io/splicelogic/reference/calc_mutually_exclusive.md)
+[`calc_mx_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_mx_exons.md)
 detects pairs of exons where one exon is included in one isoform and a
 different exon occupies the equivalent position in another isoform.
 
@@ -413,7 +413,7 @@ dataset is designed to contain mutually exclusive exon events:
 
 gr_mx <- mx_mock_data()
 gr_mx <- preprocess_input(gr_mx, coef_col = "coefs")
-mx_result <- calc_mutually_exclusive(gr_mx)
+mx_result <- calc_mx_exons(gr_mx)
 mx_result
 ```
 
@@ -448,10 +448,9 @@ if (length(ri_result) > 0) {
 
 **NOTE: I think it’s more common to list 5 then 3**
 
-[`calc_a3ss_a5ss()`](https://thelovelab.github.io/splicelogic/reference/calc_a3ss_a5ss.md)
-detects exons that share one boundary (start or end) with an exon in
-another isoform but differ at the opposite end, indicating alternative
-splice site usage.
+`calc_a3ss_a5ss()` detects exons that share one boundary (start or end)
+with an exon in another isoform but differ at the opposite end,
+indicating alternative splice site usage.
 
 ``` r
 
@@ -480,7 +479,7 @@ gr_none <- no_event_mock_data()
 gr_none <- preprocess_input(gr_none, coef_col = "coefs")
 
 calc_skipped_exons(gr_none)
-calc_mutually_exclusive(gr_none)
+calc_mx_exons(gr_none)
 ```
 
 ## Session info
@@ -548,7 +547,7 @@ sessionInfo()
     ## [47] restfulr_0.0.16             matrixStats_1.5.0          
     ## [49] vctrs_0.7.1                 Matrix_1.7-4               
     ## [51] jsonlite_2.0.0              hms_1.1.4                  
-    ## [53] bit64_4.6.0-1               systemfonts_1.3.1          
+    ## [53] bit64_4.6.0-1               systemfonts_1.3.2          
     ## [55] jquerylib_0.1.4             glue_1.8.0                 
     ## [57] pkgdown_2.2.0               codetools_0.2-20           
     ## [59] BiocVersion_3.22.0          GenomeInfoDb_1.46.2        

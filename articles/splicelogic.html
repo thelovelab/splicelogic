@@ -56,7 +56,7 @@ Campillo</h4>
                                     <h4 data-toc-skip class="author">Michael
 I. Love</h4>
                         
-            <h4 data-toc-skip class="date">03/05/2026</h4>
+            <h4 data-toc-skip class="date">03/06/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/thelovelab/splicelogic/blob/devel/vignettes/splicelogic.Rmd" class="external-link"><code>vignettes/splicelogic.Rmd</code></a></small>
       <div class="d-none name"><code>splicelogic.Rmd</code></div>
@@ -100,7 +100,7 @@ splice events:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">exons</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">skipped</span> <span class="op">&lt;-</span> <span class="va">exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_skipped_exons.html">calc_skipped_exons</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">mut_exc</span> <span class="op">&lt;-</span> <span class="va">exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_mutually_exclusive.html">calc_mutually_exclusive</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">mut_exc</span> <span class="op">&lt;-</span> <span class="va">exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_mx_exons.html">calc_mx_exons</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co"># etc.</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -434,15 +434,15 @@ indicates the transcripts in respect to which the exon is skipped
 <div class="section level3">
 <h3 id="mutually-exclusive-exons">Mutually exclusive exons<a class="anchor" aria-label="anchor" href="#mutually-exclusive-exons"></a>
 </h3>
-<p><code><a href="../reference/calc_mutually_exclusive.html">calc_mutually_exclusive()</a></code> detects pairs of exons where
-one exon is included in one isoform and a different exon occupies the
-equivalent position in another isoform.</p>
+<p><code><a href="../reference/calc_mx_exons.html">calc_mx_exons()</a></code> detects pairs of exons where one exon is
+included in one isoform and a different exon occupies the equivalent
+position in another isoform.</p>
 <p>The <code><a href="../reference/mx_mock_data.html">mx_mock_data()</a></code> dataset is designed to contain
 mutually exclusive exon events:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr_mx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mx_mock_data.html">mx_mock_data</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">gr_mx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">gr_mx</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
-<span><span class="va">mx_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_mutually_exclusive.html">calc_mutually_exclusive</a></span><span class="op">(</span><span class="va">gr_mx</span><span class="op">)</span></span>
+<span><span class="va">mx_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_mx_exons.html">calc_mx_exons</a></span><span class="op">(</span><span class="va">gr_mx</span><span class="op">)</span></span>
 <span><span class="va">mx_result</span></span></code></pre></div>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">mx_result</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"tx_id"</span>, <span class="st">"exon_rank"</span>, <span class="st">"event"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
@@ -468,14 +468,14 @@ indicating intron retention.</p>
 <h3 id="alternative-3-and-5-splice-sites">Alternative 3’ and 5’ splice sites<a class="anchor" aria-label="anchor" href="#alternative-3-and-5-splice-sites"></a>
 </h3>
 <p><strong>NOTE: I think it’s more common to list 5 then 3</strong></p>
-<p><code><a href="../reference/calc_a3ss_a5ss.html">calc_a3ss_a5ss()</a></code> detects exons that share one boundary
+<p><code>calc_a3ss_a5ss()</code> detects exons that share one boundary
 (start or end) with an exon in another isoform but differ at the
 opposite end, indicating alternative splice site usage.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr_ss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_mock_data.html">create_mock_data</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">gr_ss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">gr_ss</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span><span class="va">gr_ss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_a3ss.html">generate_a3ss</a></span><span class="op">(</span><span class="va">gr_ss</span>, n_a3ss <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">ss_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_a3ss_a5ss.html">calc_a3ss_a5ss</a></span><span class="op">(</span><span class="va">gr_ss</span><span class="op">)</span></span>
+<span><span class="va">ss_result</span> <span class="op">&lt;-</span> <span class="fu">calc_a3ss_a5ss</span><span class="op">(</span><span class="va">gr_ss</span><span class="op">)</span></span>
 <span><span class="va">ss_result</span></span></code></pre></div>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ss_result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
@@ -493,7 +493,7 @@ detection function returns an empty <code>GRanges</code> object:</p>
 <span><span class="va">gr_none</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">gr_none</span>, coef_col <span class="op">=</span> <span class="st">"coefs"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/calc_skipped_exons.html">calc_skipped_exons</a></span><span class="op">(</span><span class="va">gr_none</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/calc_mutually_exclusive.html">calc_mutually_exclusive</a></span><span class="op">(</span><span class="va">gr_none</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/calc_mx_exons.html">calc_mx_exons</a></span><span class="op">(</span><span class="va">gr_none</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
@@ -558,7 +558,7 @@ detection function returns an empty <code>GRanges</code> object:</p>
 <span><span class="co">## [47] restfulr_0.0.16             matrixStats_1.5.0          </span></span>
 <span><span class="co">## [49] vctrs_0.7.1                 Matrix_1.7-4               </span></span>
 <span><span class="co">## [51] jsonlite_2.0.0              hms_1.1.4                  </span></span>
-<span><span class="co">## [53] bit64_4.6.0-1               systemfonts_1.3.1          </span></span>
+<span><span class="co">## [53] bit64_4.6.0-1               systemfonts_1.3.2          </span></span>
 <span><span class="co">## [55] jquerylib_0.1.4             glue_1.8.0                 </span></span>
 <span><span class="co">## [57] pkgdown_2.2.0               codetools_0.2-20           </span></span>
 <span><span class="co">## [59] BiocVersion_3.22.0          GenomeInfoDb_1.46.2        </span></span>
@@ -581,7 +581,7 @@ detection function returns an empty <code>GRanges</code> object:</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by <a href="https://github.com/beamimc" class="external-link">Bea Campillo</a>, <a href="https://mikelove.github.io" class="external-link">Michael Love</a>.</p>
+  <p>Developed by Beatriz Campillo, <a href="https://mikelove.github.io" class="external-link">Michael Love</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

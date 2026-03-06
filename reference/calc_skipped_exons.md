@@ -5,7 +5,7 @@ Calculate skipped exons from a GRanges object
 ## Usage
 
 ``` r
-calc_skipped_exons(gr, type = c("over", "in", "boundary"))
+calc_skipped_exons(gr, type = c("boundary", "over", "in"), inverse = FALSE)
 ```
 
 ## Arguments
@@ -18,6 +18,10 @@ calc_skipped_exons(gr, type = c("over", "in", "boundary"))
 - type:
 
   The type of overlap to consider when identifying skipped exons.
+
+- inverse:
+
+  If TRUE, identifies included exons instead of skipped exons.
 
 ## Value
 

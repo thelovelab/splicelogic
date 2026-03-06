@@ -5,7 +5,7 @@ Generate alternative 3' splice site events in a GRanges object
 ## Usage
 
 ``` r
-generate_a3ss(gr, n_a3ss = 1, coef_col = "coefs")
+generate_a3ss(gr, n_a3ss = 1)
 ```
 
 ## Arguments
