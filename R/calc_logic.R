@@ -292,16 +292,18 @@ calc_retained_introns <- function(gr){
 }
 
 
-#' Function to calculate 5' and 3' alternative splice sites given a GRanges
-#' object
+#' Function to calculate alternative splice sites
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
-#' 'tx_id', and 'coef'.
-#' @return A GRanges object with an additional 'event' metadata column
-#' indicating alternative splice site events.
-#' @export
-calc_a3ss_a5ss <- function(gr) {
+#' 'tx_id', and 'coef'. Must be preprocessed with preprocess_input().
+#' @param by_start If TRUE, detects a5ss (same exon start, different end).
+#' If FALSE, detects a3ss (same end, different start).
+#' @return A GRanges object with annotated events for alternative splice sites.
+#' @keywords internal
+calc_alt_ss <- function(gr, by_start = TRUE) {
     # if preprocessing didn't happen
     check_preprocessed(gr)
+
+    event_name <- if (by_start) "a5ss" else "a3ss"
 
     # separate positive and negative exons
     pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
@@ -345,8 +347,9 @@ calc_a3ss_a5ss <- function(gr) {
         dplyr::filter(gene_id_cand == gene_id_neg) |>
         # one boundary matches but not the other (XOR)
         dplyr::filter(match_start != match_end) |>
+        dplyr::filter(match_start == by_start) |>
         dplyr::mutate(
-            event = dplyr::if_else(match_start, "a5ss", "a3ss")
+            event = event_name
         )
 
     if (nrow(match_tbl) == 0L) {
@@ -369,4 +372,25 @@ calc_a3ss_a5ss <- function(gr) {
         hits_tbl |> dplyr::select(-seqnames, -start, -end,
                                    -width, -strand)
     )
+}
+
+
+#' Calculate alternative 5' splice sites from a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
+#' 'tx_id', and 'coef'. Must be preprocessed with preprocess_input().
+#' @return A GRanges object with an additional 'event' metadata column
+#' indicating a5ss events.
+#' @export
+calc_a5ss <- function(gr) {
+    calc_alt_ss(gr, by_start = TRUE)
+}
+
+#' Calculate alternative 3' splice sites from a GRanges object
+#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
+#' 'tx_id', and 'coef'. Must be preprocessed with preprocess_input().
+#' @return A GRanges object with an additional 'event' metadata column
+#' indicating a3ss events.
+#' @export
+calc_a3ss <- function(gr) {
+    calc_alt_ss(gr, by_start = FALSE)
 }
