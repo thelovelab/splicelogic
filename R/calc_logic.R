@@ -11,15 +11,16 @@ calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = F
   check_preprocessed(gr)
 
   if (inverse) {
-    gr <- gr |> dplyr::mutate(estimates = -estimates)
+    factor <- -1
     event_name <- "included_exon"
   } else {
+    factor <- 1
     event_name <- "skipped_exon"
   }
 
   # separate positive and negative exons
-  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
-  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
+  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1*factor)
+  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1*factor)
 
   # candidates_by_presence_v2 returns GRanges
   filter_results <- candidates_by_presence_v2(gr, neg_exons, pos_exons)
