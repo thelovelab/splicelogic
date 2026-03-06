@@ -6,7 +6,7 @@ GRanges with results from each.
 ## Usage
 
 ``` r
-calc_all_events(gr, type = c("boundary", "over", "in"))
+calc_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 ```
 
 ## Arguments
@@ -20,6 +20,10 @@ calc_all_events(gr, type = c("boundary", "over", "in"))
 
   The type of overlap to consider for skipped exons, included exons, and
   mutually exclusive exons.
+
+- verbose:
+
+  If TRUE, prints progress messages. Default TRUE.
 
 ## Value
 
