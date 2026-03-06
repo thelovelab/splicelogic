@@ -93,7 +93,7 @@ calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = F
     seqnames = hits_tbl$seqnames,
     ranges   = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
     strand   = hits_tbl$strand,
-    hits_tbl |> dplyr::select(-seqnames, -start, -end, -width, -strand, -cand_idx)
+    hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
   )
 }
 
@@ -229,10 +229,7 @@ calc_mutually_exclusive <- function(gr, type = c("boundary","in", "over")) {
         seqnames = hits_tbl$seqnames,
         ranges   = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
         strand   = hits_tbl$strand,
-        hits_tbl |> dplyr::select(
-            -seqnames, -start, -end, -width, -strand,
-            -dplyr::any_of("cand_idx")
-        )
+        hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
     )
 }
 
@@ -295,8 +292,7 @@ calc_retained_introns <- function(gr){
         ranges   = IRanges::IRanges(start = hits_tbl$start,
                                      end = hits_tbl$end),
         strand   = hits_tbl$strand,
-        hits_tbl |> dplyr::select(-seqnames, -start, -end,
-                                   -width, -strand)
+        hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
     )
 }
 
@@ -387,8 +383,7 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
         ranges   = IRanges::IRanges(start = hits_tbl$start,
                                      end = hits_tbl$end),
         strand   = hits_tbl$strand,
-        hits_tbl |> dplyr::select(-seqnames, -start, -end,
-                                   -width, -strand)
+        hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
     )
 }
 
