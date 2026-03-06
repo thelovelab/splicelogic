@@ -428,42 +428,45 @@ calc_a3ss <- function(gr) {
 #' preprocess_input().
 #' @param type The type of overlap to consider for skipped exons, included
 #' exons, and mutually exclusive exons.
+#' @param verbose If TRUE, prints progress messages. Default TRUE.
 #' @return A GRanges object combining all detected events, with an 'event'
 #' metadata column indicating the event type.
 #' @export
-calc_all_events <- function(gr, type = c("boundary", "over", "in")) {
+calc_all_events <- function(gr, type = c("boundary", "over", "in"),
+                            verbose = TRUE) {
     type <- match.arg(type)
     check_preprocessed(gr)
+    msg <- if (verbose) message else function(...) invisible(NULL)
 
     results <- list()
 
-    message("Calculating skipped exon events...")
+    msg("Calculating skipped exon events...")
     results$se <- calc_skipped_exons(gr, type)
 
-    message("Calculating included exon events...")
+    msg("Calculating included exon events...")
     results$ie <- calc_included_exons(gr, type)
 
-    message("Calculating mutually exclusive exon events...")
+    msg("Calculating mutually exclusive exon events...")
     results$mx <- calc_mx_exons(gr, type)
 
-    message("Calculating retained intron events...")
+    msg("Calculating retained intron events...")
     results$ri <- calc_retained_introns(gr)
 
-    message("Calculating alternative 5' splice site events...")
+    msg("Calculating alternative 5' splice site events...")
     results$a5ss <- calc_a5ss(gr)
 
-    message("Calculating alternative 3' splice site events...")
+    msg("Calculating alternative 3' splice site events...")
     results$a3ss <- calc_a3ss(gr)
 
     # keep only non-empty results
     results <- Filter(function(x) length(x) > 0L, results)
 
     if (length(results) == 0L) {
-    message("No events detected.")
-    return(GenomicRanges::GRanges())
+        msg("No events detected.")
+        return(GenomicRanges::GRanges())
     }
 
     combined <- do.call(plyranges::bind_ranges, results)
-    message("Done! ", length(combined), " events detected.")
+    msg("Done! ", length(combined), " events detected.")
     combined
 }

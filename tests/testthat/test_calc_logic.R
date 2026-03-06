@@ -132,7 +132,7 @@ test_that("calc_all_events returns combined GRanges with multiple event types", 
     gr <- generate_a3ss(gr, n_a3ss = 1)
     gr <- generate_a5ss(gr, n_a5ss = 1)
 
-    result <- calc_all_events(gr, type = "over")
+    result <- calc_all_events(gr, type = "over", verbose = FALSE)
 
     expect_s4_class(result, "GRanges")
     expect_true(length(result) > 0L)
@@ -144,7 +144,7 @@ test_that("calc_all_events returns empty GRanges when no events exist", {
     gr <- no_event_mock_data()
     gr <- preprocess_input(gr, coef_col = "coefs")
 
-    result <- calc_all_events(gr)
+    result <- calc_all_events(gr, verbose = FALSE)
 
     expect_s4_class(result, "GRanges")
     expect_equal(length(result), 0L)

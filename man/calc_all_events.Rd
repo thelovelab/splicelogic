@@ -4,7 +4,7 @@
 \alias{calc_all_events}
 \title{Calculate all splicing events from a GRanges object}
 \usage{
-calc_all_events(gr, type = c("boundary", "over", "in"))
+calc_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 }
 \arguments{
 \item{gr}{A GRanges object with exon annotations, preprocessed with
@@ -12,6 +12,8 @@ preprocess_input().}
 
 \item{type}{The type of overlap to consider for skipped exons, included
 exons, and mutually exclusive exons.}
+
+\item{verbose}{If TRUE, prints progress messages. Default TRUE.}
 }
 \value{
 A GRanges object combining all detected events, with an 'event'
