@@ -189,6 +189,15 @@ calc_mutually_exclusive <- function(gr, type = c("boundary","in", "over")) {
         dplyr::inner_join(
             pos_lookup,
             by = c("tx_id", "middle_rank" = "exon_rank")
+        ) |>
+        # exclude pairs where the middle pos exon has the same coordinates
+        # as the candidate neg exon (not a true MX — just an overlap/SE)
+        # FP scenario: candidate neg exon (e.g. 21-25) is absent from some pos
+        # txps but present in another (tx3). tx3 has flanking matches with gap=2,
+        # and the middle pos exon IS the candidate itself — not a true MX pair.
+        dplyr::filter(
+            pos_tbl$start[pos_row] != cand_tbl$start[cand_idx] |
+            pos_tbl$end[pos_row] != cand_tbl$end[cand_idx]
         )
 
     if (nrow(pairs) == 0L) {
