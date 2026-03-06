@@ -17,13 +17,18 @@ Imports:
     magrittr,
     GenomicRanges,
     plyranges,
-    tibble
+    tibble,
+    IRanges,
+    S4Vectors,
+    rlang,
+    vctrs
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
     wiggleplotr,
     GenomicFeatures,
-    AnnotationHub
+    AnnotationHub,
+    ggplot2
 Config/testthat/edition: 3
 VignetteBuilder: knitr
