@@ -113,7 +113,7 @@ calc_included_exons <- function(gr, type = c("boundary","over","in")) {
 #' @param type The type of overlap to consider when identifying mutually exclusive exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating mutually exclusive exons.
 #' @export
-calc_mutually_exclusive <- function(gr, type = c("in", "over", "boundary")) {
+calc_mutually_exclusive <- function(gr, type = c("boundary","in", "over")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
   check_preprocessed(gr)

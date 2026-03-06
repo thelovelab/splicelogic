@@ -13,7 +13,7 @@
 #' the left and right exons, respectively.
 #' @importFrom magrittr %>%
 #' @keywords internal
-compute_matches <- function(gr, left_exon, right_exon, type = c("over","in","boundary")) {
+compute_matches <- function(gr, left_exon, right_exon, type = c("boundary","over","in")) {
   type <- match.arg(type)
   gr_matched <- switch(
     type,
@@ -283,7 +283,7 @@ candidates_by_presence_v2 <- function(gr, neg_exons, pos_exons) {
 #'   "boundary" for shared start or end coordinate
 #' @return A Hits object with queryHits and subjectHits indices
 #' @keywords internal
-find_matches_batch <- function(query, subject, type = c("over", "in", "boundary")) {
+find_matches_batch <- function(query, subject, type = c("boundary","over", "in")) {
   type <- match.arg(type)
   switch(type,
     "over" = {

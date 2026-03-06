@@ -4,7 +4,7 @@
 \alias{find_matches_batch}
 \title{Batch find overlaps between query and subject GRanges based on match type}
 \usage{
-find_matches_batch(query, subject, type = c("over", "in", "boundary"))
+find_matches_batch(query, subject, type = c("boundary", "over", "in"))
 }
 \arguments{
 \item{query}{A GRanges object (e.g. pos_exons)}

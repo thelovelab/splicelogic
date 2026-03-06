@@ -4,7 +4,7 @@
 \alias{calc_mutually_exclusive}
 \title{Calculate mutually exclusive exons from a GRanges object}
 \usage{
-calc_mutually_exclusive(gr, type = c("in", "over", "boundary"))
+calc_mutually_exclusive(gr, type = c("boundary", "in", "over"))
 }
 \arguments{
 \item{gr}{A GRanges object with exon annotations, including 'tx_id', 'exon',
