@@ -2,8 +2,10 @@ Package: splicelogic
 Title: splicelogic: differential transcripts to splice events
 Version: 0.0.67
 Authors@R: c(
-    person("Bea", "Campillo", email="email@email.com", role = c("aut", "cre")),
-    person("Michael", "Love", role="aut")
+    person("Beatriz", "Campillo", email = "beatrizcampillo29@gmail.com", role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0001-7323-9125")),
+    person("Michael", "Love", email = "michaelisaiahlove@gmail.com", role = "aut",
+    comment = c(ORCID = "0000-0001-8401-0545"))
     )
 Description: Translate differential transcript usage results into discrete splice events.
 License: MIT + file LICENSE
