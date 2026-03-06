@@ -411,10 +411,10 @@ generate_a5ss <- function(gr, n_a5ss = 1) {
 #' @param n_a3ss Number of alternative 3' splice site events to generate
 #' @return A GRanges object with alternative 3' splice site events introduced
 #' @export
-generate_a3ss <- function(gr, n_a3ss = 1, coef_col = "coefs") {
+generate_a3ss <- function(gr, n_a3ss = 1) {
     # if preprocessing didn't happen
   if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
-    gr <- preprocess_input(gr, coef_col)
+    gr <- preprocess_input(gr, coef_col = "coefs")
   }
   set.seed(123) # for reproducibility
   # generate alternative 3' splice sites by modifying the end() of random internal = TRUE exons in transcripts with coefs > 0

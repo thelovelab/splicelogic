@@ -240,6 +240,7 @@ mat_col_groups <- function(id) {
 #' and then finds candidate exons in neg whose adjacent exons
 #' exist in the positive set and are also adjacent
 #' @examples
+#' \dontrun{
 #' gr <- se_mock_data()
 #' library(ggplot2)
 #' library(GenomicRanges)
@@ -248,6 +249,7 @@ mat_col_groups <- function(id) {
 #' gr_pos <- filter(gr, coefs > 0)
 #' gr_neg <- filter(gr, coefs < 0)
 #' find_candidates(gr_pos, gr_neg, gr_pos$tx_id, gr_neg$tx_id)
+#' }
 #' @export
 find_candidates <- function(gr_pos, gr_neg, id_pos, id_neg) {
   # returns values between [0--1]
