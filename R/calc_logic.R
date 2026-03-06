@@ -2,12 +2,20 @@
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
 #' and 'coef_col' metadata columns and preprocessed with preprocess_input().
 #' @param type The type of overlap to consider when identifying skipped exons.
+#' @param inverse If TRUE, identifies included exons instead of skipped exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
 #' @export
-calc_skipped_exons <- function(gr, type = c("over","in", "boundary")) {
+calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = FALSE) {
   type <- match.arg(type)
   # if preprocessing didn't happen
   check_preprocessed(gr)
+
+  if (inverse) {
+    gr <- gr |> dplyr::mutate(estimates = -estimates)
+    event_name <- "included_exon"
+  } else {
+    event_name <- "skipped_exon"
+  }
 
   # separate positive and negative exons
   pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
@@ -76,7 +84,7 @@ calc_skipped_exons <- function(gr, type = c("over","in", "boundary")) {
   # build result tibble: one row per (candidate, tx_event) pair
   hits_tbl <- cand_tbl[pairs$cand_idx, ] |>
     dplyr::mutate(
-      event    = "skipped_exon",
+      event    = event_name,
       tx_event = pairs$tx_id
     )
 
@@ -87,6 +95,16 @@ calc_skipped_exons <- function(gr, type = c("over","in", "boundary")) {
     strand   = hits_tbl$strand,
     hits_tbl |> dplyr::select(-seqnames, -start, -end, -width, -strand, -cand_idx)
   )
+}
+
+#' Calculate included exons from a GRanges object
+#' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
+#' and 'coef_col' metadata columns and preprocessed with preprocess_input().
+#' @param type The type of overlap to consider when identifying included exons.
+#' @return A GRanges object with an additional 'event' metadata column indicating included exons.
+#' @export  
+calc_included_exons <- function(gr, type = c("boundary","over","in")) {
+  calc_skipped_exons(gr, type, inverse = TRUE)
 }
 
 #' Calculate mutually exclusive exons from a GRanges object
