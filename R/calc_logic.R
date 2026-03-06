@@ -394,3 +394,50 @@ calc_a5ss <- function(gr) {
 calc_a3ss <- function(gr) {
     calc_alt_ss(gr, by_start = FALSE)
 }
+
+#' Calculate all splicing events from a GRanges object
+#' @description Runs all event detection functions and returns a single
+#' concatenated GRanges with results from each.
+#' @param gr A GRanges object with exon annotations, preprocessed with
+#' preprocess_input().
+#' @param type The type of overlap to consider for skipped exons, included
+#' exons, and mutually exclusive exons.
+#' @return A GRanges object combining all detected events, with an 'event'
+#' metadata column indicating the event type.
+#' @export
+calc_all_events <- function(gr, type = c("boundary", "over", "in")) {
+    type <- match.arg(type)
+    check_preprocessed(gr)
+
+    results <- list()
+
+    message("Calculating skipped exon events...")
+    results$se <- calc_skipped_exons(gr, type)
+
+    message("Calculating included exon events...")
+    results$ie <- calc_included_exons(gr, type)
+
+    message("Calculating mutually exclusive exon events...")
+    results$mx <- calc_mutually_exclusive(gr, type)
+
+    message("Calculating retained intron events...")
+    results$ri <- calc_retained_introns(gr)
+
+    message("Calculating alternative 5' splice site events...")
+    results$a5ss <- calc_a5ss(gr)
+
+    message("Calculating alternative 3' splice site events...")
+    results$a3ss <- calc_a3ss(gr)
+
+    # keep only non-empty results
+    results <- Filter(function(x) length(x) > 0L, results)
+
+    if (length(results) == 0L) {
+    message("No events detected.")
+    return(GenomicRanges::GRanges())
+    }
+
+    combined <- do.call(plyranges::bind_ranges, results)
+    message("Done! ", length(combined), " events detected.")
+    combined
+}

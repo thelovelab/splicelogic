@@ -123,3 +123,29 @@ test_that("calc_skipped_exons test with generate_skipped_exons", {
     expect_true("event" %in% names(GenomicRanges::mcols(result)))
     expect_true(any(result$event == "skipped_exon"))
 })
+
+# Test for calc_all_events
+test_that("calc_all_events returns combined GRanges with multiple event types", {
+    gr <- create_mock_data(3, 3, 6)
+    gr <- preprocess_input(gr, coef_col = "coefs")
+    gr <- generate_skipped_exons(gr, n_se = 1)
+    gr <- generate_a3ss(gr, n_a3ss = 1)
+    gr <- generate_a5ss(gr, n_a5ss = 1)
+
+    result <- calc_all_events(gr, type = "over")
+
+    expect_s4_class(result, "GRanges")
+    expect_true(length(result) > 0L)
+    expect_true("event" %in% names(GenomicRanges::mcols(result)))
+    expect_true("skipped_exon" %in% result$event)
+})
+
+test_that("calc_all_events returns empty GRanges when no events exist", {
+    gr <- no_event_mock_data()
+    gr <- preprocess_input(gr, coef_col = "coefs")
+
+    result <- calc_all_events(gr)
+
+    expect_s4_class(result, "GRanges")
+    expect_equal(length(result), 0L)
+})
