@@ -186,7 +186,7 @@ data <- data %>%
 #' @return A GRanges object with skipped exon events introduced
 #' @export  
 generate_skipped_exons_restricted <- function(gr, n_se = 1) {
-  set.seed (123) # for reproducibility
+
   # generate skipped exons by removing random internal = TRUE exons in transcripts with coefs > 0 
 se_ranges <- gr |>
   dplyr::filter(coefs > 0, internal) |>
@@ -227,7 +227,7 @@ se_ranges <- gr |>
 #' @return A GRanges object with skipped exon events introduced
 #' @export  
 generate_skipped_exons <- function(gr, n_se = 1) {
-  set.seed(123) # for reproducibility
+
   # generate alternative 3' splice sites by modifying the end() of random internal = TRUE exons in transcripts with coefs > 0
   se_exons_key <- gr |> 
     as.data.frame() |>
@@ -263,7 +263,7 @@ generate_skipped_exons <- function(gr, n_se = 1) {
 #' @return A GRanges object with mutually exclusive exon events introduced
 #' @export
 generate_mx <- function(gr, n_mx = 1) {
-    set.seed(123) # for reproducibility
+  
     # Find consecutive pairs of internal exons from neg transcripts
     # Both rank k and rank k+1 must be internal
     neg_internal <- gr |>
@@ -326,7 +326,7 @@ generate_mx <- function(gr, n_mx = 1) {
 #' @return A GRanges object with retained intron events introduced
 #' @export  
 generate_retained_introns <- function(gr, n_ri = 1) {
-  set.seed(123) # for reproducibility
+
   # generate retained introns by creating a new exon that
   # starts with exonrank x and ends at exons rank x+1 for each transcript
   # only in transcripts with coefs > 0
@@ -391,7 +391,7 @@ generate_a5ss <- function(gr, n_a5ss = 1) {
   if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col ="coefs")
   }
-  set.seed(123) # for reproducibility
+
   # generate alternative 5' splice sites by modifying the end() of random internal = TRUE exons in transcripts with coefs > 0
   a5ss_exon_key <- gr |> 
     as.data.frame() |>
@@ -416,7 +416,7 @@ generate_a3ss <- function(gr, n_a3ss = 1) {
   if (!all(c("key", "nexons", "internal", "event") %in% names(GenomicRanges::mcols(gr)))) {
     gr <- preprocess_input(gr, coef_col = "coefs")
   }
-  set.seed(123) # for reproducibility
+
   # generate alternative 3' splice sites by modifying the end() of random internal = TRUE exons in transcripts with coefs > 0
   a3ss_exon_key <- gr |> 
     as.data.frame() |>
