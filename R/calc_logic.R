@@ -344,7 +344,16 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
             tx_id_neg    = neg_tbl$tx_id[neg_idx]
         ) |>
         # restrict to same gene
-        dplyr::filter(gene_id_cand == gene_id_neg) |>
+        dplyr::filter(gene_id_cand == gene_id_neg)
+
+    # exclude candidates that overlap 2+ neg exons in the same neg
+    # transcript — those are retained introns, not alternative splice sites
+    multi_overlap <- match_tbl |>
+        dplyr::count(cand_idx, tx_id_neg) |>
+        dplyr::filter(n >= 2)
+
+    match_tbl <- match_tbl |>
+        dplyr::anti_join(multi_overlap, by = c("cand_idx", "tx_id_neg")) |>
         # one boundary matches but not the other (XOR)
         dplyr::filter(match_start != match_end) |>
         dplyr::filter(match_start == by_start) |>
