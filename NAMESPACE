@@ -2,6 +2,7 @@
 
 export(calc_a3ss)
 export(calc_a5ss)
+export(calc_all_events)
 export(calc_included_exons)
 export(calc_mutually_exclusive)
 export(calc_retained_introns)
