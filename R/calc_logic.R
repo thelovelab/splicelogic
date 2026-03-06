@@ -88,13 +88,16 @@ calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = F
       tx_event = pairs$tx_id
     )
 
-  # convert back to GRanges for return 
-  GenomicRanges::GRanges(
+  # convert back to GRanges for return
+  res <- GenomicRanges::GRanges(
     seqnames = hits_tbl$seqnames,
     ranges   = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
     strand   = hits_tbl$strand,
     hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
   )
+  # preserve seqinfo from input
+  GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
+  res
 }
 
 #' Calculate included exons from a GRanges object
@@ -225,12 +228,15 @@ calc_mx_exons <- function(gr, type = c("boundary","in", "over")) {
         dplyr::select(-.pair_order)
 
     # convert back to GRanges for return
-    GenomicRanges::GRanges(
+    res <- GenomicRanges::GRanges(
         seqnames = hits_tbl$seqnames,
         ranges   = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
         strand   = hits_tbl$strand,
         hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
     )
+    # preserve seqinfo from input
+    GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
+    res
 }
 
 #' Function to calculate retained introns given a GRanges object
@@ -287,13 +293,16 @@ calc_retained_introns <- function(gr){
         )
 
     # convert back to GRanges for return
-    GenomicRanges::GRanges(
+    res <- GenomicRanges::GRanges(
         seqnames = hits_tbl$seqnames,
         ranges   = IRanges::IRanges(start = hits_tbl$start,
                                      end = hits_tbl$end),
         strand   = hits_tbl$strand,
         hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
     )
+    # preserve seqinfo from input
+    GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
+    res
 }
 
 
@@ -378,13 +387,17 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
         )
 
     # convert back to GRanges for return
-    GenomicRanges::GRanges(
+    res <- GenomicRanges::GRanges(
         seqnames = hits_tbl$seqnames,
         ranges   = IRanges::IRanges(start = hits_tbl$start,
                                      end = hits_tbl$end),
         strand   = hits_tbl$strand,
         hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
     )
+    # preserve seqinfo from input
+    GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
+    res
+
 }
 
 
