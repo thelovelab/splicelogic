@@ -219,96 +219,29 @@ seqlevels(exons) <- seqlevels(si)
 seqinfo(exons) <- si
 ```
 
-### Obtaining exon ranges
+### Obtaining exon ranges with prepare_exons
 
-Here we demontrate reading in exon ranges from a GTF and adding example
-DTU results.
+`prepare_exons()` extracts exon ranges from a *TxDb* object and merges
+them with your DTU results table in a single call. It returns a flat
+*GRanges* ready for
+[`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md).
 
 ``` r
-
-# first we get an example TxDB for our exon ranges
-suppressPackageStartupMessages({
-  library(AnnotationHub)
-  library(GenomicFeatures)
-  library(tibble)
-})
-# here we will use the transcript database for GENCODE v32 from AHub
-# typically, you should supply your own GTF to makeTxDbFromGFF()
+library(AnnotationHub)
 ah <- AnnotationHub()
 txdb <- ah[["AH75191"]]
-```
-
-    ## loading from cache
-
-The following extracts the exons from the *TxDb*:
-
-``` r
-
-# extract exons as a GRangesList
-ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
-```
-
-Here we build a transcript table, likely this is already provided by an
-upstream DTU method.
-
-``` r
-
-# extract transcript table as tibble
-txps <- txdb |>
-  AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
-  tibble::as_tibble() |>
-  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
-```
-
-    ## 'select()' returned 1:1 mapping between keys and columns
-
-Suppose we already have DTU results for transcripts:
-
-``` r
-
 # here just simulated results
 dtu_table <- txps |>
   dplyr::mutate(
     padj = runif(dplyr::n()),
     effect_est = rnorm(dplyr::n())
-  )
+
+exons <- prepare_exons(txdb, dtu_table, coef_col = "effect_est")
+gr <- preprocess_input(exons, coef_col = "effect_est")
 ```
 
-``` r
-
-# check the concordance...
-all.equal(dtu_table$tx_num, as.integer(names(ebt)))
-```
-
-    ## [1] TRUE
-
-``` r
-
-# and if aligned, set new names for exons
-exons <- ebt
-names(exons) <- dtu_table$tx_id
-```
-
-Next flattening the exons:
-
-``` r
-
-exons <- unlist(exons)
-exons$tx_id <- names(exons)
-names(exons) <- exons$exon_name
-```
-
-Adding DTU results and gene ID:
-
-``` r
-
-# arrange `dtu_table` as in `exons`, including duplicates
-txp_idx <- match(exons$tx_id, dtu_table$tx_id)
-add_columns <- dtu_table[txp_idx,] |> 
-  dplyr::select(-c(tx_id, tx_num))
-merged_DF <- cbind(mcols(exons), add_columns)
-mcols(exons) <- merged_DF
-```
+For a step-by-step breakdown of what `prepare_exons()` does internally,
+see [Obtaining exon ranges manually](#obtaining-exon-ranges-manually).
 
 ### Upstream methods
 
@@ -340,30 +273,30 @@ mcols(gr)
     ## DataFrame with 48 rows and 8 columns
     ##       gene_id     tx_id exon_rank     coefs         key    nexons  internal
     ##     <integer> <numeric> <integer> <numeric> <character> <integer> <logical>
-    ## 1           1         1         1 -0.821507         1-1         6     FALSE
-    ## 2           1         1         2 -0.821507         1-2         6      TRUE
-    ## 3           1         1         3 -0.821507         1-3         6      TRUE
-    ## 4           1         1         4 -0.821507         1-4         6      TRUE
-    ## 5           1         1         5 -0.821507         1-5         6      TRUE
+    ## 1           1         1         1 -0.235204         1-1         6     FALSE
+    ## 2           1         1         2 -0.235204         1-2         6      TRUE
+    ## 3           1         1         3 -0.235204         1-3         6      TRUE
+    ## 4           1         1         4 -0.235204         1-4         6      TRUE
+    ## 5           1         1         5 -0.235204         1-5         6      TRUE
     ## ...       ...       ...       ...       ...         ...       ...       ...
-    ## 44          2         8         2 -0.707009         8-2         6      TRUE
-    ## 45          2         8         3 -0.707009         8-3         6      TRUE
-    ## 46          2         8         4 -0.707009         8-4         6      TRUE
-    ## 47          2         8         5 -0.707009         8-5         6      TRUE
-    ## 48          2         8         6 -0.707009         8-6         6     FALSE
+    ## 44          2         8         2  0.465764         8-2         6      TRUE
+    ## 45          2         8         3  0.465764         8-3         6      TRUE
+    ## 46          2         8         4  0.465764         8-4         6      TRUE
+    ## 47          2         8         5  0.465764         8-5         6      TRUE
+    ## 48          2         8         6  0.465764         8-6         6     FALSE
     ##     estimates
     ##     <numeric>
-    ## 1   -0.821507
-    ## 2   -0.821507
-    ## 3   -0.821507
-    ## 4   -0.821507
-    ## 5   -0.821507
+    ## 1   -0.235204
+    ## 2   -0.235204
+    ## 3   -0.235204
+    ## 4   -0.235204
+    ## 5   -0.235204
     ## ...       ...
-    ## 44  -0.707009
-    ## 45  -0.707009
-    ## 46  -0.707009
-    ## 47  -0.707009
-    ## 48  -0.707009
+    ## 44   0.465764
+    ## 45   0.465764
+    ## 46   0.465764
+    ## 47   0.465764
+    ## 48   0.465764
 
 ### Skipped exons
 
@@ -448,16 +381,17 @@ if (length(ri_result) > 0) {
 
 **NOTE: I think it’s more common to list 5 then 3**
 
-`calc_a3ss_a5ss()` detects exons that share one boundary (start or end)
-with an exon in another isoform but differ at the opposite end,
-indicating alternative splice site usage.
+[`calc_a3ss()`](https://thelovelab.github.io/splicelogic/reference/calc_a3ss.md)
+detects exons that share one boundary (start or end) with an exon in
+another isoform but differ at the opposite end, indicating alternative
+splice site usage.
 
 ``` r
 
 gr_ss <- create_mock_data(3, 3, 6)
 gr_ss <- preprocess_input(gr_ss, coef_col = "coefs")
 gr_ss <- generate_a3ss(gr_ss, n_a3ss = 3)
-ss_result <- calc_a3ss_a5ss(gr_ss)
+ss_result <- calc_a3ss(gr_ss)
 ss_result
 ```
 
@@ -480,6 +414,88 @@ gr_none <- preprocess_input(gr_none, coef_col = "coefs")
 
 calc_skipped_exons(gr_none)
 calc_mx_exons(gr_none)
+```
+
+## Obtaining exon ranges manually
+
+This section walks through the steps that `prepare_exons()` performs
+internally. This is useful if you need more control over the process or
+want to understand how exon ranges are built from a *TxDb*.
+
+``` r
+
+# first we get an example TxDB for our exon ranges
+suppressPackageStartupMessages({
+  library(AnnotationHub)
+  library(GenomicFeatures)
+  library(tibble)
+})
+# here we will use the transcript database for GENCODE v32 from AHub
+# typically, you should supply your own GTF to makeTxDbFromGFF()
+ah <- AnnotationHub()
+txdb <- ah[["AH75191"]]
+```
+
+The following extracts the exons from the *TxDb*:
+
+``` r
+
+# extract exons as a GRangesList
+ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
+```
+
+Here we build a transcript table, likely this is already provided by an
+upstream DTU method.
+
+``` r
+
+# extract transcript table as tibble
+txps <- txdb |>
+  AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
+  tibble::as_tibble() |>
+  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
+```
+
+Suppose we already have DTU results for transcripts:
+
+``` r
+
+# here just simulated results
+dtu_table <- txps |>
+  dplyr::mutate(
+    padj = runif(dplyr::n()),
+    effect_est = rnorm(dplyr::n())
+  )
+```
+
+``` r
+
+# check the concordance...
+all.equal(dtu_table$tx_num, as.integer(names(ebt)))
+# and if aligned, set new names for exons
+exons <- ebt
+names(exons) <- dtu_table$tx_id
+```
+
+Next flattening the exons:
+
+``` r
+
+exons <- unlist(exons)
+exons$tx_id <- names(exons)
+names(exons) <- exons$exon_name
+```
+
+Adding DTU results and gene ID:
+
+``` r
+
+# arrange `dtu_table` as in `exons`, including duplicates
+txp_idx <- match(exons$tx_id, dtu_table$tx_id)
+add_columns <- dtu_table[txp_idx,] |>
+  dplyr::select(-c(tx_id, tx_num))
+merged_DF <- cbind(mcols(exons), add_columns)
+mcols(exons) <- merged_DF
 ```
 
 ## Session info
@@ -513,52 +529,45 @@ sessionInfo()
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] splicelogic_0.0.67     tibble_3.3.1           GenomicFeatures_1.62.0
-    ##  [4] AnnotationDbi_1.72.0   Biobase_2.70.0         AnnotationHub_4.0.0   
-    ##  [7] BiocFileCache_3.0.0    dbplyr_2.5.2           plyranges_1.30.1      
-    ## [10] dplyr_1.2.0            GenomicRanges_1.62.1   Seqinfo_1.0.0         
-    ## [13] IRanges_2.44.0         S4Vectors_0.48.0       BiocGenerics_0.56.0   
-    ## [16] generics_0.1.4         readr_2.2.0           
+    ##  [1] splicelogic_0.0.67   plyranges_1.30.1     dplyr_1.2.0         
+    ##  [4] GenomicRanges_1.62.1 Seqinfo_1.0.0        IRanges_2.44.0      
+    ##  [7] S4Vectors_0.48.0     BiocGenerics_0.56.0  generics_0.1.4      
+    ## [10] readr_2.2.0         
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] tidyselect_1.2.1            blob_1.3.0                 
-    ##  [3] filelock_1.0.3              Biostrings_2.78.0          
-    ##  [5] bitops_1.0-9                fastmap_1.2.0              
-    ##  [7] RCurl_1.98-1.17             GenomicAlignments_1.46.0   
-    ##  [9] XML_3.99-0.22               digest_0.6.39              
-    ## [11] lifecycle_1.0.5             KEGGREST_1.50.0            
-    ## [13] RSQLite_2.4.6               magrittr_2.0.4             
-    ## [15] compiler_4.5.2              rlang_1.1.7                
-    ## [17] sass_0.4.10                 tools_4.5.2                
-    ## [19] yaml_2.3.12                 rtracklayer_1.70.1         
-    ## [21] knitr_1.51                  S4Arrays_1.10.1            
-    ## [23] htmlwidgets_1.6.4           bit_4.6.0                  
-    ## [25] curl_7.0.0                  DelayedArray_0.36.0        
-    ## [27] abind_1.4-8                 BiocParallel_1.44.0        
-    ## [29] withr_3.0.2                 purrr_1.2.1                
-    ## [31] desc_1.4.3                  grid_4.5.2                 
-    ## [33] SummarizedExperiment_1.40.0 cli_3.6.5                  
-    ## [35] rmarkdown_2.30              crayon_1.5.3               
-    ## [37] ragg_1.5.0                  otel_0.2.0                 
-    ## [39] httr_1.4.8                  tzdb_0.5.0                 
-    ## [41] rjson_0.2.23                DBI_1.3.0                  
-    ## [43] cachem_1.1.0                parallel_4.5.2             
-    ## [45] BiocManager_1.30.27         XVector_0.50.0             
-    ## [47] restfulr_0.0.16             matrixStats_1.5.0          
-    ## [49] vctrs_0.7.1                 Matrix_1.7-4               
-    ## [51] jsonlite_2.0.0              hms_1.1.4                  
-    ## [53] bit64_4.6.0-1               systemfonts_1.3.2          
-    ## [55] jquerylib_0.1.4             glue_1.8.0                 
-    ## [57] pkgdown_2.2.0               codetools_0.2-20           
-    ## [59] BiocVersion_3.22.0          GenomeInfoDb_1.46.2        
-    ## [61] BiocIO_1.20.0               UCSC.utils_1.6.1           
-    ## [63] pillar_1.11.1               rappdirs_0.3.4             
-    ## [65] htmltools_0.5.9             R6_2.6.1                   
-    ## [67] httr2_1.2.2                 textshaping_1.0.4          
-    ## [69] vroom_1.7.0                 evaluate_1.0.5             
-    ## [71] lattice_0.22-9              png_0.1-8                  
-    ## [73] Rsamtools_2.26.0            cigarillo_1.0.0            
-    ## [75] memoise_2.0.1               bslib_0.10.0               
-    ## [77] SparseArray_1.10.8          xfun_0.56                  
-    ## [79] fs_1.6.6                    MatrixGenerics_1.22.0      
-    ## [81] pkgconfig_2.0.3
+    ##  [1] SummarizedExperiment_1.40.0 rjson_0.2.23               
+    ##  [3] xfun_0.56                   bslib_0.10.0               
+    ##  [5] htmlwidgets_1.6.4           Biobase_2.70.0             
+    ##  [7] lattice_0.22-9              tzdb_0.5.0                 
+    ##  [9] vctrs_0.7.1                 tools_4.5.2                
+    ## [11] bitops_1.0-9                curl_7.0.0                 
+    ## [13] parallel_4.5.2              tibble_3.3.1               
+    ## [15] pkgconfig_2.0.3             Matrix_1.7-4               
+    ## [17] desc_1.4.3                  cigarillo_1.0.0            
+    ## [19] lifecycle_1.0.5             compiler_4.5.2             
+    ## [21] Rsamtools_2.26.0            textshaping_1.0.5          
+    ## [23] Biostrings_2.78.0           codetools_0.2-20           
+    ## [25] GenomeInfoDb_1.46.2         htmltools_0.5.9            
+    ## [27] sass_0.4.10                 RCurl_1.98-1.17            
+    ## [29] yaml_2.3.12                 pillar_1.11.1              
+    ## [31] pkgdown_2.2.0               crayon_1.5.3               
+    ## [33] jquerylib_0.1.4             BiocParallel_1.44.0        
+    ## [35] cachem_1.1.0                DelayedArray_0.36.0        
+    ## [37] abind_1.4-8                 tidyselect_1.2.1           
+    ## [39] digest_0.6.39               restfulr_0.0.16            
+    ## [41] fastmap_1.2.0               grid_4.5.2                 
+    ## [43] cli_3.6.5                   SparseArray_1.10.9         
+    ## [45] magrittr_2.0.4              S4Arrays_1.10.1            
+    ## [47] XML_3.99-0.22               withr_3.0.2                
+    ## [49] UCSC.utils_1.6.1            bit64_4.6.0-1              
+    ## [51] httr_1.4.8                  rmarkdown_2.30             
+    ## [53] XVector_0.50.0              matrixStats_1.5.0          
+    ## [55] bit_4.6.0                   otel_0.2.0                 
+    ## [57] ragg_1.5.1                  hms_1.1.4                  
+    ## [59] evaluate_1.0.5              knitr_1.51                 
+    ## [61] BiocIO_1.20.0               rtracklayer_1.70.1         
+    ## [63] rlang_1.1.7                 glue_1.8.0                 
+    ## [65] vroom_1.7.0                 jsonlite_2.0.0             
+    ## [67] R6_2.6.1                    MatrixGenerics_1.22.0      
+    ## [69] GenomicAlignments_1.46.0    systemfonts_1.3.2          
+    ## [71] fs_1.6.7
