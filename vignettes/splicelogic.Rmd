@@ -119,78 +119,28 @@ seqlevels(exons) <- seqlevels(si)
 seqinfo(exons) <- si
 ```
 
-## Obtaining exon ranges
+## Obtaining exon ranges with prepare_exons
 
-Here we demontrate reading in exon ranges from a GTF and adding example DTU results.
+`prepare_exons()` extracts exon ranges from a *TxDb* object and merges
+them with your DTU results table in a single call. It returns a flat
+*GRanges* ready for `preprocess_input()`.
 
-```{r}
-# first we get an example TxDB for our exon ranges
-suppressPackageStartupMessages({
-  library(AnnotationHub)
-  library(GenomicFeatures)
-  library(tibble)
-})
-# here we will use the transcript database for GENCODE v32 from AHub
-# typically, you should supply your own GTF to makeTxDbFromGFF()
+```{r eval=FALSE}
+library(AnnotationHub)
 ah <- AnnotationHub()
 txdb <- ah[["AH75191"]]
-```
-
-The following extracts the exons from the *TxDb*:
-
-```{r}
-# extract exons as a GRangesList
-ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
-```
-
-Here we build a transcript table, likely this is already 
-provided by an upstream DTU method.
-
-```{r}
-# extract transcript table as tibble
-txps <- txdb |>
-  AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
-  tibble::as_tibble() |>
-  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
-```
-
-Suppose we already have DTU results for transcripts:
-
-```{r}
 # here just simulated results
 dtu_table <- txps |>
   dplyr::mutate(
     padj = runif(dplyr::n()),
     effect_est = rnorm(dplyr::n())
-  )
+
+exons <- prepare_exons(txdb, dtu_table, coef_col = "effect_est")
+gr <- preprocess_input(exons, coef_col = "effect_est")
 ```
 
-```{r}
-# check the concordance...
-all.equal(dtu_table$tx_num, as.integer(names(ebt)))
-# and if aligned, set new names for exons
-exons <- ebt
-names(exons) <- dtu_table$tx_id
-```
-
-Next flattening the exons:
-
-```{r}
-exons <- unlist(exons)
-exons$tx_id <- names(exons)
-names(exons) <- exons$exon_name
-```
-
-Adding DTU results and gene ID:
-
-```{r}
-# arrange `dtu_table` as in `exons`, including duplicates
-txp_idx <- match(exons$tx_id, dtu_table$tx_id)
-add_columns <- dtu_table[txp_idx,] |> 
-  dplyr::select(-c(tx_id, tx_num))
-merged_DF <- cbind(mcols(exons), add_columns)
-mcols(exons) <- merged_DF
-```
+For a step-by-step breakdown of what `prepare_exons()` does internally,
+see [Obtaining exon ranges manually](#obtaining-exon-ranges-manually).
 
 ## Upstream methods
 
@@ -282,7 +232,7 @@ if (length(ri_result) > 0) {
 
 **NOTE: I think it's more common to list 5 then 3**
 
-`calc_a3ss_a5ss()` detects exons that share one boundary (start or
+`calc_a3ss()` detects exons that share one boundary (start or
 end) with an exon in another isoform but differ at the opposite end,
 indicating alternative splice site usage.
 
@@ -290,7 +240,7 @@ indicating alternative splice site usage.
 gr_ss <- create_mock_data(3, 3, 6)
 gr_ss <- preprocess_input(gr_ss, coef_col = "coefs")
 gr_ss <- generate_a3ss(gr_ss, n_a3ss = 3)
-ss_result <- calc_a3ss_a5ss(gr_ss)
+ss_result <- calc_a3ss(gr_ss)
 ss_result
 ```
 
@@ -311,6 +261,81 @@ gr_none <- preprocess_input(gr_none, coef_col = "coefs")
 
 calc_skipped_exons(gr_none)
 calc_mx_exons(gr_none)
+```
+
+# Obtaining exon ranges manually {#obtaining-exon-ranges-manually}
+
+This section walks through the steps that `prepare_exons()` performs
+internally. This is useful if you need more control over the process
+or want to understand how exon ranges are built from a *TxDb*.
+
+```{r eval=FALSE}
+# first we get an example TxDB for our exon ranges
+suppressPackageStartupMessages({
+  library(AnnotationHub)
+  library(GenomicFeatures)
+  library(tibble)
+})
+# here we will use the transcript database for GENCODE v32 from AHub
+# typically, you should supply your own GTF to makeTxDbFromGFF()
+ah <- AnnotationHub()
+txdb <- ah[["AH75191"]]
+```
+
+The following extracts the exons from the *TxDb*:
+
+```{r eval=FALSE}
+# extract exons as a GRangesList
+ebt <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
+```
+
+Here we build a transcript table, likely this is already
+provided by an upstream DTU method.
+
+```{r eval=FALSE}
+# extract transcript table as tibble
+txps <- txdb |>
+  AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
+  tibble::as_tibble() |>
+  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
+```
+
+Suppose we already have DTU results for transcripts:
+
+```{r eval=FALSE}
+# here just simulated results
+dtu_table <- txps |>
+  dplyr::mutate(
+    padj = runif(dplyr::n()),
+    effect_est = rnorm(dplyr::n())
+  )
+```
+
+```{r eval=FALSE}
+# check the concordance...
+all.equal(dtu_table$tx_num, as.integer(names(ebt)))
+# and if aligned, set new names for exons
+exons <- ebt
+names(exons) <- dtu_table$tx_id
+```
+
+Next flattening the exons:
+
+```{r eval=FALSE}
+exons <- unlist(exons)
+exons$tx_id <- names(exons)
+names(exons) <- exons$exon_name
+```
+
+Adding DTU results and gene ID:
+
+```{r eval=FALSE}
+# arrange `dtu_table` as in `exons`, including duplicates
+txp_idx <- match(exons$tx_id, dtu_table$tx_id)
+add_columns <- dtu_table[txp_idx,] |>
+  dplyr::select(-c(tx_id, tx_num))
+merged_DF <- cbind(mcols(exons), add_columns)
+mcols(exons) <- merged_DF
 ```
 
 # Session info

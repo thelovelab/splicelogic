@@ -91,3 +91,94 @@ check_preprocessed <- function(gr) {
         "  Please run preprocess_input() on your GRanges object before\n", 
         "  calculating splicing events.")
 }
+
+#' Prepare exon ranges from a TxDb and DTU results table
+#'
+#' Extracts exon ranges from a TxDb object, merges them with
+#' differential transcript usage (DTU) results, and returns a flat
+#' GRanges ready for \code{\link{preprocess_input}}.
+#'
+#' @param txdb A \code{TxDb} object (from GenomicFeatures).
+#' @param dtu_table A data.frame or tibble with DTU results. Must
+#'   contain columns for transcript ID, gene ID, and a coefficient.
+#' @param coef_col Column name in \code{dtu_table} with the
+#'   coefficient / effect size values.
+#' @param tx_id_col Column name in \code{dtu_table} with transcript
+#'   IDs matching the TxDb transcript names. Default \code{"tx_id"}.
+#' @param gene_id_col Column name in \code{dtu_table} with gene IDs.
+#'   Default \code{"gene_id"}.
+#' @return A GRanges object with metadata columns: \code{gene_id},
+#'   \code{tx_id}, \code{exon_rank}, the coefficient column, and any
+#'   additional columns from \code{dtu_table}.
+#' @export
+prepare_exons <- function(txdb, dtu_table, coef_col, tx_id_col = "tx_id",
+                          gene_id_col = "gene_id", verbose = TRUE) {
+    msg <- if (verbose) message else function(...) invisible(NULL)
+
+    if (!requireNamespace("GenomicFeatures", quietly = TRUE))
+        stop("Package 'GenomicFeatures' is required. ",
+             "Install with: BiocManager::install('GenomicFeatures')")
+    if (!requireNamespace("AnnotationDbi", quietly = TRUE))
+        stop("Package 'AnnotationDbi' is required. ",
+             "Install with: BiocManager::install('AnnotationDbi')")
+
+    dtu_table <- tibble::as_tibble(dtu_table)
+    required <- c(tx_id_col, gene_id_col, coef_col)
+    missing_cols <- setdiff(required, colnames(dtu_table))
+    if (length(missing_cols) > 0)
+        stop("Missing columns in dtu_table: ",
+             paste(missing_cols, collapse = ", "))
+
+    # extract exons grouped by transcript
+    msg("Extracting exons from TxDb...")
+    ebt <- GenomicFeatures::exonsBy(txdb, by = "tx")
+
+    # map TxDb internal TXID to TXNAME
+    msg("Mapping transcript IDs...")
+    tx_map <- suppressMessages(AnnotationDbi::select(
+        txdb,
+        keys = AnnotationDbi::keys(txdb, "TXID"),
+        columns = "TXNAME",
+        keytype = "TXID"
+    )) |> tibble::as_tibble()
+
+    # map TXID to TXNAME
+    idx <- match(names(ebt), tx_map$TXID)
+    names(ebt) <- tx_map$TXNAME[idx]
+
+    # check that dtu_table tx_ids match TxDb transcript names
+    keep <- names(ebt) %in% dtu_table[[tx_id_col]]
+    if (!any(keep))
+        stop("No matching transcript IDs between TxDb and dtu_table$",
+             tx_id_col, ". Check that tx_id_col contains TXNAME values ",
+             "(e.g. ENST...), not internal TXID integers.")
+    n_missing <- sum(!dtu_table[[tx_id_col]] %in% names(ebt))
+    if (n_missing > 0)
+        msg(n_missing, " transcript(s) in dtu_table not found in TxDb ",
+            "and will be excluded.")
+    ebt <- ebt[keep]
+
+    # flatten GRangesList to GRanges
+    exons <- unlist(ebt)
+    exons$tx_id <- names(exons)
+    names(exons) <- exons$exon_name
+
+    # merge dtu_table columns onto exons by tx_id
+    msg("Merging DTU results onto exons...")
+    txp_idx <- match(exons$tx_id, dtu_table[[tx_id_col]])
+    add_cols <- dtu_table[txp_idx, ] |>
+        dplyr::select(-dplyr::any_of(tx_id_col))
+    merged_DF <- cbind(GenomicRanges::mcols(exons),
+                       S4Vectors::DataFrame(add_cols))
+    GenomicRanges::mcols(exons) <- merged_DF
+
+    # rename to standard column names expected by preprocess_input
+    if (gene_id_col != "gene_id") {
+        col_names <- names(GenomicRanges::mcols(exons))
+        col_names[col_names == gene_id_col] <- "gene_id"
+        names(GenomicRanges::mcols(exons)) <- col_names
+    }
+
+    msg("Done. Returned ", length(exons), " exon ranges from ", length(unique(exons$tx_id)), "unique transcripts.")
+    exons
+}
