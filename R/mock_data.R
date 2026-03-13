@@ -3,6 +3,7 @@
 #' happening between both tx_id 2 and tx_id 3
 #' @return A GRanges object with two transcripts per gene and candidate logic
 #' @return A GRanges object with two transcripts per gene
+#' @importFrom stats runif
 #' @export
 se_mock_data <- function() {
   df1 <- data.frame(

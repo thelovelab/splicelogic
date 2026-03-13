@@ -3,6 +3,7 @@
 #' @param gr A GRanges object
 #' @param coef_col Name of the coefficient metadata column (string)
 #' @return TRUE if input is valid, otherwise throws an error
+#' @importFrom methods is
 #' @keywords internal
 check_input <- function(gr, coef_col) {
   if (!is(gr, "GRanges")) {
@@ -107,6 +108,7 @@ check_preprocessed <- function(gr) {
 #'   IDs matching the TxDb transcript names. Default \code{"tx_id"}.
 #' @param gene_id_col Column name in \code{dtu_table} with gene IDs.
 #'   Default \code{"gene_id"}.
+#' @param verbose Whether to print progress messages. Default \code{TRUE}.
 #' @return A GRanges object with metadata columns: \code{gene_id},
 #'   \code{tx_id}, \code{exon_rank}, the coefficient column, and any
 #'   additional columns from \code{dtu_table}.
