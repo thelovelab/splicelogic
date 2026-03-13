@@ -219,14 +219,27 @@ mcols(exons) <- DataFrame(readr::read_delim(file.path(dir, "exons_mcols.tsv.gz")
 si <- Seqinfo::Seqinfo(genome="mm39")
 seqlevels(exons) <- seqlevels(si)
 seqinfo(exons) <- si
+```
+
+next we join the …
+
+``` r
 
 # insert dtu results into exon metadata
-# exons <- exons |> plyranges::left_join(dtu_table, by = c("tx_id" = "tx_id"))
 txp_idx <- match(exons$tx_id, dtu_table$tx_id)
 add_columns <- dtu_table[txp_idx, ] |>
   dplyr::select(-c(tx_id))
 merged_DF <- cbind(mcols(exons), add_columns)
 mcols(exons) <- merged_DF
+```
+
+As of Bioc 3.23 and *plyranges* version 1.32, the above can be replaced
+with:
+
+``` r
+
+exons <- exons |> 
+  plyranges::join_mcols_left(dtu_table, by = "tx_id")
 ```
 
 ``` r
