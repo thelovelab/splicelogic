@@ -242,6 +242,14 @@ exons <- exons |>
   plyranges::join_mcols_left(dtu_table, by = "tx_id")
 ```
 
+splicelogic works on exons from significantly changed transcripts, so we
+first filter out transcripts that were not signficant:
+
+``` r
+
+exons <- exons |> filter(padj < .05)
+```
+
 ``` r
 
 library(splicelogic)
@@ -250,46 +258,46 @@ processed_exons <- preprocess_input(exons, coef_col = "estimate")
 calc_all_events(processed_exons)
 ```
 
-    ## GRanges object with 77 ranges and 10 metadata columns:
+    ## GRanges object with 16 ranges and 10 metadata columns:
     ##        seqnames              ranges strand |   exon_id            exon_name
     ##           <Rle>           <IRanges>  <Rle> | <numeric>          <character>
-    ##    [1]     chr2   34697290-34697459      - |     59827 ENSMUSE00001206213.2
-    ##    [2]     chr2   34697290-34697459      - |     59827 ENSMUSE00001206213.2
-    ##    [3]    chr18     6065705-6065845      - |    490847 ENSMUSE00001246683.2
-    ##    [4]    chr18     6065705-6065845      - |    490847 ENSMUSE00001246683.2
-    ##    [5]    chr18     6065705-6065845      - |    490847 ENSMUSE00001246683.2
+    ##    [1]    chr17   66647479-66647535      - |    480827 ENSMUSE00000443570.7
+    ##    [2]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2
+    ##    [3]     chr8 120884207-120884236      + |    250989 ENSMUSE00001243257.2
+    ##    [4]    chr12   91799829-91799996      - |    374021 ENSMUSE00001304078.2
+    ##    [5]    chr12   91798541-91798558      - |    374018 ENSMUSE00001473756.2
     ##    ...      ...                 ...    ... .       ...                  ...
-    ##   [73]     chr7 112806764-112806851      + |    209987 ENSMUSE00001388704.2
-    ##   [74]     chr7   45433371-45433404      + |    202898 ENSMUSE00000674271.2
-    ##   [75]     chr7   45434804-45435105      + |    202899 ENSMUSE00000718506.2
-    ##   [76]     chr7   45434804-45435105      + |    202899 ENSMUSE00000718506.2
-    ##   [77]     chr7   45444123-45444985      + |    202930 ENSMUSE00001450062.2
-    ##        exon_rank                 tx_id               gene_id   gene_name
-    ##        <numeric>           <character>           <character> <character>
-    ##    [1]         6 ENSMUST00000028220.10 ENSMUSG00000035949.16       Fbxw2
-    ##    [2]         7  ENSMUST00000113080.9 ENSMUSG00000035949.16       Fbxw2
-    ##    [3]         5 ENSMUST00000077128.13 ENSMUSG00000041225.17    Arhgap12
-    ##    [4]         5  ENSMUST00000182038.2 ENSMUSG00000041225.17    Arhgap12
-    ##    [5]         5  ENSMUST00000182213.8 ENSMUSG00000041225.17    Arhgap12
-    ##    ...       ...                   ...                   ...         ...
-    ##   [73]         1  ENSMUST00000210238.2  ENSMUSG00000055116.9       Bmal1
-    ##   [74]         1 ENSMUST00000072580.12 ENSMUSG00000062044.17       Lmtk3
-    ##   [75]         1 ENSMUST00000120005.10 ENSMUSG00000062044.17       Lmtk3
-    ##   [76]         1  ENSMUST00000233503.2 ENSMUSG00000062044.17       Lmtk3
-    ##   [77]        12  ENSMUST00000233503.2 ENSMUSG00000062044.17       Lmtk3
-    ##         estimate      padj        event             tx_event
-    ##        <numeric> <numeric>  <character>          <character>
-    ##    [1]  -2.90289  0.315131 skipped_exon ENSMUST00000156130.2
-    ##    [2]  -5.96402  1.000000 skipped_exon ENSMUST00000156130.2
-    ##    [3]  -8.09684  1.000000 skipped_exon ENSMUST00000182066.8
-    ##    [4]  -5.50256  1.000000 skipped_exon ENSMUST00000182066.8
-    ##    [5]  -3.75246  1.000000 skipped_exon ENSMUST00000182066.8
-    ##    ...       ...       ...          ...                  ...
-    ##   [73]  2.315491 0.8019663         a3ss ENSMUST00000047321.9
-    ##   [74]  0.486359 1.0000000         a3ss ENSMUST00000209617.2
-    ##   [75]  3.315342 0.0427914         a3ss ENSMUST00000209617.2
-    ##   [76]  0.778687 1.0000000         a3ss ENSMUST00000209617.2
-    ##   [77]  0.778687 1.0000000         a3ss ENSMUST00000209617.2
+    ##   [12]     chr8 112437109-112438026      - |    262490 ENSMUSE00001391518.2
+    ##   [13]     chr4 101504990-101505022      + |    107521 ENSMUSE00000631777.3
+    ##   [14]     chr4 101513375-101513492      + |    107524 ENSMUSE00000671573.2
+    ##   [15]     chr9   21849570-21849860      + |    266124 ENSMUSE00001334761.2
+    ##   [16]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2
+    ##        exon_rank                 tx_id               gene_id     gene_name
+    ##        <numeric>           <character>           <character>   <character>
+    ##    [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18         Mtcl1
+    ##    [2]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##    [3]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##    [4]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15         Sel1l
+    ##    [5]         4  ENSMUST00000178462.8 ENSMUSG00000020964.15         Sel1l
+    ##    ...       ...                   ...                   ...           ...
+    ##   [12]         7  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1
+    ##   [13]         1  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [14]         3  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [15]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [16]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
+    ##         estimate        padj              event              tx_event
+    ##        <numeric>   <numeric>        <character>           <character>
+    ##    [1]  -2.97320 0.009701213       skipped_exon ENSMUST00000086693.12
+    ##    [2]   3.02406 0.018472554      included_exon ENSMUST00000065504.17
+    ##    [3]   4.14230 0.000995041      included_exon  ENSMUST00000108951.8
+    ##    [4]  -3.28535 0.001719345 mutually_exclusive  ENSMUST00000178462.8
+    ##    [5]   2.99384 0.001719345 mutually_exclusive ENSMUST00000021347.12
+    ##    ...       ...         ...                ...                   ...
+    ##   [12]   3.85659  0.02700941               a3ss  ENSMUST00000166232.4
+    ##   [13]   9.13055  0.01847255               a3ss ENSMUST00000030254.15
+    ##   [14]   9.13055  0.01847255               a3ss ENSMUST00000030254.15
+    ##   [15]   6.33671  0.00607823               a3ss ENSMUST00000046371.13
+    ##   [16]   2.88524  0.01396713               a3ss ENSMUST00000097291.10
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
