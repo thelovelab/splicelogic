@@ -140,6 +140,13 @@ exons <- exons |>
   plyranges::join_mcols_left(dtu_table, by = "tx_id")
 ```
 
+splicelogic works on exons from significantly changed transcripts, 
+so we first filter out transcripts that were not signficant:
+
+```{r}
+exons <- exons |> filter(padj < .05)
+```
+
 ```{r setup, message = FALSE}
 library(splicelogic)
 
