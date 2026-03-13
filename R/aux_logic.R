@@ -155,7 +155,7 @@ find_introns <- function(gr) {
       strand   = GenomicRanges::strand(gr),
       gene_id = gr$gene_id,
       tx_id   = gr$tx_id,
-      coefs  = gr$coefs,
+      estimates  = gr$estimates,
       intron = TRUE
     )
   # TO DO : include case where no introns are found eg create_mock_data(1,1,1) and check that the output is an empty GRanges object with the correct metadata columns
