@@ -21,6 +21,8 @@ calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = F
   type <- match.arg(type)
   # if preprocessing didn't happen
   check_preprocessed(gr)
+  # keep user's original metadata columns (minus preprocessing intermediates)
+  keep_cols <- setdiff(names(GenomicRanges::mcols(gr)), c("key", "nexons", "internal", "estimates"))
 
   if (inverse) {
     factor <- -1
@@ -106,7 +108,7 @@ calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = F
     seqnames = hits_tbl$seqnames,
     ranges   = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
     strand   = hits_tbl$strand,
-    hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
+    hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
   )
   # preserve seqinfo from input
   GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
@@ -133,6 +135,7 @@ calc_mx_exons <- function(gr, type = c("boundary","in", "over")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
   check_preprocessed(gr)
+  keep_cols <- setdiff(names(GenomicRanges::mcols(gr)), c("key", "nexons", "internal", "estimates"))
 
   # separate positive and negative exons
   pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
@@ -245,7 +248,7 @@ calc_mx_exons <- function(gr, type = c("boundary","in", "over")) {
         seqnames = hits_tbl$seqnames,
         ranges   = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
         strand   = hits_tbl$strand,
-        hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
+        hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
     )
     # preserve seqinfo from input
     GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
@@ -259,6 +262,7 @@ calc_mx_exons <- function(gr, type = c("boundary","in", "over")) {
 calc_retained_introns <- function(gr){
   # if preprocessing didn't happen
   check_preprocessed(gr)
+  keep_cols <- setdiff(names(GenomicRanges::mcols(gr)), c("key", "nexons", "internal", "estimates"))
 
     # find introns in the negative coef transcripts
     neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
@@ -311,7 +315,7 @@ calc_retained_introns <- function(gr){
         ranges   = IRanges::IRanges(start = hits_tbl$start,
                                      end = hits_tbl$end),
         strand   = hits_tbl$strand,
-        hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
+        hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
     )
     # preserve seqinfo from input
     GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
@@ -329,6 +333,7 @@ calc_retained_introns <- function(gr){
 calc_alt_ss <- function(gr, by_start = TRUE) {
     # if preprocessing didn't happen
     check_preprocessed(gr)
+    keep_cols <- setdiff(names(GenomicRanges::mcols(gr)), c("key", "nexons", "internal", "estimates"))
 
     event_name <- if (by_start) "a5ss" else "a3ss"
 
@@ -405,7 +410,7 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
         ranges   = IRanges::IRanges(start = hits_tbl$start,
                                      end = hits_tbl$end),
         strand   = hits_tbl$strand,
-        hits_tbl |> dplyr::select(gene_id, tx_id, exon_rank, estimates, event, tx_event)
+        hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
     )
     # preserve seqinfo from input
     GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
