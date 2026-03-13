@@ -56,11 +56,17 @@ test_that("calc_mx_exons detects mutually exclusive exons in mx_mock_data", {
   # expect exactly one detected event on exon_rank = 5 of tx_id 1
   expect_equal(length(result), 4L)
   expect_equal(as.integer(GenomicRanges::mcols(result)$tx_id), c(1, 2, 1, 2))
-  expect_equal(as.integer(GenomicRanges::mcols(result)$exon_rank), c(3, 3, 8, 7))
-  expect_equal(as.character(GenomicRanges::mcols(result)$event), rep("mutually_exclusive", 4L))
+  expect_equal(
+    as.integer(GenomicRanges::mcols(result)$exon_rank),
+    c(3, 3, 8, 7)
+  )
+  expect_equal(
+    as.character(GenomicRanges::mcols(result)$event),
+    rep("mutually_exclusive", 4L)
+  )
 })
 
-# Test for no event detected in mx 
+# Test for no event detected in mx
 test_that("calc_mx_exons returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
   gr <- preprocess_input(gr, coef_col = "coefs")
@@ -72,80 +78,79 @@ test_that("calc_mx_exons returns empty GRanges if no events", {
 
 # Test for calc retained introns
 test_that("calc_retained_introns test", {
-    gr <- create_mock_data(3,6,3)
-    gr <- preprocess_input(gr, coef_col = "coefs")
-    gr <- generate_retained_introns(gr, n_ri = 3)
+  gr <- create_mock_data(3, 6, 3)
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- generate_retained_introns(gr, n_ri = 3)
 
-    result <- calc_retained_introns(gr)
+  result <- calc_retained_introns(gr)
 
-    expect_s4_class(result, "GRanges")
-    expect_true("event" %in% names(GenomicRanges::mcols(result)))
-    expect_true(any(result$event == "retained_intron"))
-
+  expect_s4_class(result, "GRanges")
+  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event == "retained_intron"))
 })
 
 # Test for calc_a3ss
 test_that("calc_a3ss test", {
-    gr <- create_mock_data(3,3,6)
-    gr <- preprocess_input(gr, coef_col = "coefs")
-    gr <- generate_a3ss(gr, n_a3ss = 3)
+  gr <- create_mock_data(3, 3, 6)
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- generate_a3ss(gr, n_a3ss = 3)
 
-    result <- calc_a3ss(gr)
+  result <- calc_a3ss(gr)
 
-    expect_s4_class(result, "GRanges")
-    expect_true("event" %in% names(GenomicRanges::mcols(result)))
-    expect_true(any(result$event == "a3ss"))
+  expect_s4_class(result, "GRanges")
+  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event == "a3ss"))
 })
 
 
 # Test for calc_a5ss
 test_that("calc_a5ss test", {
-    gr <- create_mock_data(3,3,6)
-    gr <- preprocess_input(gr, coef_col = "coefs")
-    gr <- generate_a5ss(gr, n_a5ss = 3)
+  gr <- create_mock_data(3, 3, 6)
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- generate_a5ss(gr, n_a5ss = 3)
 
-    result <- calc_a5ss(gr)
+  result <- calc_a5ss(gr)
 
-    expect_s4_class(result, "GRanges")
-    expect_true("event" %in% names(GenomicRanges::mcols(result)))
-    expect_true(any(result$event == "a5ss"))
+  expect_s4_class(result, "GRanges")
+  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event == "a5ss"))
 })
 
 # Test for calc_skipped_exons with new mock data
 test_that("calc_skipped_exons test with generate_skipped_exons", {
-    gr <- create_mock_data(3,3,6)
-    gr <- preprocess_input(gr, coef_col = "coefs")
-    gr <- generate_skipped_exons(gr, n_se = 1)
+  gr <- create_mock_data(3, 3, 6)
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- generate_skipped_exons(gr, n_se = 1)
 
-    result <- calc_skipped_exons(gr)
+  result <- calc_skipped_exons(gr)
 
-    expect_s4_class(result, "GRanges")
-    expect_true("event" %in% names(GenomicRanges::mcols(result)))
-    expect_true(any(result$event == "skipped_exon"))
+  expect_s4_class(result, "GRanges")
+  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event == "skipped_exon"))
 })
 
 # Test for calc_all_events
 test_that("calc_all_events returns combined GRanges with multiple event types", {
-    gr <- create_mock_data(3, 3, 6)
-    gr <- preprocess_input(gr, coef_col = "coefs")
-    gr <- generate_skipped_exons(gr, n_se = 1)
-    gr <- generate_a3ss(gr, n_a3ss = 1)
-    gr <- generate_a5ss(gr, n_a5ss = 1)
+  gr <- create_mock_data(3, 3, 6)
+  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- generate_skipped_exons(gr, n_se = 1)
+  gr <- generate_a3ss(gr, n_a3ss = 1)
+  gr <- generate_a5ss(gr, n_a5ss = 1)
 
-    result <- calc_all_events(gr, type = "over", verbose = FALSE)
+  result <- calc_all_events(gr, type = "over", verbose = FALSE)
 
-    expect_s4_class(result, "GRanges")
-    expect_true(length(result) > 0L)
-    expect_true("event" %in% names(GenomicRanges::mcols(result)))
-    expect_true("skipped_exon" %in% result$event)
+  expect_s4_class(result, "GRanges")
+  expect_true(length(result) > 0L)
+  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+  expect_true("skipped_exon" %in% result$event)
 })
 
 test_that("calc_all_events returns empty GRanges when no events exist", {
-    gr <- no_event_mock_data()
-    gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- no_event_mock_data()
+  gr <- preprocess_input(gr, coef_col = "coefs")
 
-    result <- calc_all_events(gr, verbose = FALSE)
+  result <- calc_all_events(gr, verbose = FALSE)
 
-    expect_s4_class(result, "GRanges")
-    expect_equal(length(result), 0L)
+  expect_s4_class(result, "GRanges")
+  expect_equal(length(result), 0L)
 })

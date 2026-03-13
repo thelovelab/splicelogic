@@ -1,5 +1,4 @@
-
-# test_that 
+# test_that
 # tests for se_mock_data from mock_data.R
 test_that("se_mock_data returns a GRanges and has required metadata columns", {
   gr <- se_mock_data()
