@@ -5,7 +5,9 @@ Authors@R: c(
     person("Beatriz", "Campillo", email = "beatrizcampillo29@gmail.com", role = c("aut", "cre"),
     comment = c(ORCID = "0000-0001-7323-9125")),
     person("Michael", "Love", email = "michaelisaiahlove@gmail.com", role = "aut",
-    comment = c(ORCID = "0000-0001-8401-0545"))
+    comment = c(ORCID = "0000-0001-8401-0545")),
+    person("NIH NHGRI", role="fnd"),
+    person("Wellcome Trust", role="fnd")
     )
 Description: Translate differential transcript usage results into discrete splice events.
 License: MIT + file LICENSE
