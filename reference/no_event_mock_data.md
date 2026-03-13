@@ -13,5 +13,3 @@ no_event_mock_data()
 ## Value
 
 A GRanges object with two transcripts per gene and no candidate logic
-
-A GRanges object with two transcripts per gene

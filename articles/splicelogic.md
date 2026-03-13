@@ -93,6 +93,7 @@ In the abstract, Jones *et al.* describe the experiment:
 ``` r
 
 library(readr)
+# load DTU results 
 dir <- system.file("extdata", package="splicelogic")
 dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
 ```
@@ -198,6 +199,7 @@ library(plyranges)
 
 ``` r
 
+# load exon ranges and metadata, and set seqinfo
 exons <- read_bed(file.path(dir, "exons_M31.bed.gz"))
 mcols(exons) <- DataFrame(readr::read_delim(file.path(dir, "exons_mcols.tsv.gz")))
 ```
@@ -217,31 +219,99 @@ mcols(exons) <- DataFrame(readr::read_delim(file.path(dir, "exons_mcols.tsv.gz")
 si <- Seqinfo::Seqinfo(genome="mm39")
 seqlevels(exons) <- seqlevels(si)
 seqinfo(exons) <- si
+
+# insert dtu results into exon metadata
+# exons <- exons |> plyranges::left_join(dtu_table, by = c("tx_id" = "tx_id"))
+txp_idx <- match(exons$tx_id, dtu_table$tx_id)
+add_columns <- dtu_table[txp_idx, ] |>
+  dplyr::select(-c(tx_id))
+merged_DF <- cbind(mcols(exons), add_columns)
+mcols(exons) <- merged_DF
 ```
+
+``` r
+
+library(splicelogic)
+
+processed_exons <- preprocess_input(exons, coef_col = "estimate")
+calc_all_events(processed_exons)
+```
+
+    ## GRanges object with 77 ranges and 10 metadata columns:
+    ##        seqnames              ranges strand |   exon_id            exon_name
+    ##           <Rle>           <IRanges>  <Rle> | <numeric>          <character>
+    ##    [1]     chr2   34697290-34697459      - |     59827 ENSMUSE00001206213.2
+    ##    [2]     chr2   34697290-34697459      - |     59827 ENSMUSE00001206213.2
+    ##    [3]    chr18     6065705-6065845      - |    490847 ENSMUSE00001246683.2
+    ##    [4]    chr18     6065705-6065845      - |    490847 ENSMUSE00001246683.2
+    ##    [5]    chr18     6065705-6065845      - |    490847 ENSMUSE00001246683.2
+    ##    ...      ...                 ...    ... .       ...                  ...
+    ##   [73]     chr7 112806764-112806851      + |    209987 ENSMUSE00001388704.2
+    ##   [74]     chr7   45433371-45433404      + |    202898 ENSMUSE00000674271.2
+    ##   [75]     chr7   45434804-45435105      + |    202899 ENSMUSE00000718506.2
+    ##   [76]     chr7   45434804-45435105      + |    202899 ENSMUSE00000718506.2
+    ##   [77]     chr7   45444123-45444985      + |    202930 ENSMUSE00001450062.2
+    ##        exon_rank                 tx_id               gene_id   gene_name
+    ##        <numeric>           <character>           <character> <character>
+    ##    [1]         6 ENSMUST00000028220.10 ENSMUSG00000035949.16       Fbxw2
+    ##    [2]         7  ENSMUST00000113080.9 ENSMUSG00000035949.16       Fbxw2
+    ##    [3]         5 ENSMUST00000077128.13 ENSMUSG00000041225.17    Arhgap12
+    ##    [4]         5  ENSMUST00000182038.2 ENSMUSG00000041225.17    Arhgap12
+    ##    [5]         5  ENSMUST00000182213.8 ENSMUSG00000041225.17    Arhgap12
+    ##    ...       ...                   ...                   ...         ...
+    ##   [73]         1  ENSMUST00000210238.2  ENSMUSG00000055116.9       Bmal1
+    ##   [74]         1 ENSMUST00000072580.12 ENSMUSG00000062044.17       Lmtk3
+    ##   [75]         1 ENSMUST00000120005.10 ENSMUSG00000062044.17       Lmtk3
+    ##   [76]         1  ENSMUST00000233503.2 ENSMUSG00000062044.17       Lmtk3
+    ##   [77]        12  ENSMUST00000233503.2 ENSMUSG00000062044.17       Lmtk3
+    ##         estimate      padj        event             tx_event
+    ##        <numeric> <numeric>  <character>          <character>
+    ##    [1]  -2.90289  0.315131 skipped_exon ENSMUST00000156130.2
+    ##    [2]  -5.96402  1.000000 skipped_exon ENSMUST00000156130.2
+    ##    [3]  -8.09684  1.000000 skipped_exon ENSMUST00000182066.8
+    ##    [4]  -5.50256  1.000000 skipped_exon ENSMUST00000182066.8
+    ##    [5]  -3.75246  1.000000 skipped_exon ENSMUST00000182066.8
+    ##    ...       ...       ...          ...                  ...
+    ##   [73]  2.315491 0.8019663         a3ss ENSMUST00000047321.9
+    ##   [74]  0.486359 1.0000000         a3ss ENSMUST00000209617.2
+    ##   [75]  3.315342 0.0427914         a3ss ENSMUST00000209617.2
+    ##   [76]  0.778687 1.0000000         a3ss ENSMUST00000209617.2
+    ##   [77]  0.778687 1.0000000         a3ss ENSMUST00000209617.2
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
 ### Obtaining exon ranges with prepare_exons
 
-`prepare_exons()` extracts exon ranges from a *TxDb* object and merges
-them with your DTU results table in a single call. It returns a flat
-*GRanges* ready for
+[`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
+extracts exon ranges from a *TxDb* object and merges them with your DTU
+results table in a single call. It returns a flat *GRanges* ready for
 [`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md).
 
 ``` r
+
 library(AnnotationHub)
 ah <- AnnotationHub()
 txdb <- ah[["AH75191"]]
-# here just simulated results
+# extract transcript table as tibble
+txps <- txdb |>
+  AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
+  tibble::as_tibble() |>
+  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
+# simulate DTU results
 dtu_table <- txps |>
   dplyr::mutate(
     padj = runif(dplyr::n()),
     effect_est = rnorm(dplyr::n())
+  )
 
-exons <- prepare_exons(txdb, dtu_table, coef_col = "effect_est")
+exons <- prepare_exons(txdb, dtu_table, coef_col = "effect_est", verbose = TRUE)
 gr <- preprocess_input(exons, coef_col = "effect_est")
 ```
 
-For a step-by-step breakdown of what `prepare_exons()` does internally,
-see [Obtaining exon ranges manually](#obtaining-exon-ranges-manually).
+For a step-by-step breakdown of what
+[`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
+does internally, see [Obtaining exon ranges
+manually](#obtaining-exon-ranges-manually).
 
 ### Upstream methods
 
@@ -249,11 +319,6 @@ Something about what methods can be used for upstream DTU or switching
 analysis.
 
 ## How to start detecting splicing events
-
-``` r
-
-library(splicelogic)
-```
 
 ### Preprocessing
 
@@ -269,34 +334,6 @@ one is downregulated (coef\<0) for each gene.
 gr <- create_mock_data( n_genes = 2, n_tx = 4, n_exons = 6 )
 mcols(gr)
 ```
-
-    ## DataFrame with 48 rows and 8 columns
-    ##       gene_id     tx_id exon_rank     coefs         key    nexons  internal
-    ##     <integer> <numeric> <integer> <numeric> <character> <integer> <logical>
-    ## 1           1         1         1 -0.235204         1-1         6     FALSE
-    ## 2           1         1         2 -0.235204         1-2         6      TRUE
-    ## 3           1         1         3 -0.235204         1-3         6      TRUE
-    ## 4           1         1         4 -0.235204         1-4         6      TRUE
-    ## 5           1         1         5 -0.235204         1-5         6      TRUE
-    ## ...       ...       ...       ...       ...         ...       ...       ...
-    ## 44          2         8         2  0.465764         8-2         6      TRUE
-    ## 45          2         8         3  0.465764         8-3         6      TRUE
-    ## 46          2         8         4  0.465764         8-4         6      TRUE
-    ## 47          2         8         5  0.465764         8-5         6      TRUE
-    ## 48          2         8         6  0.465764         8-6         6     FALSE
-    ##     estimates
-    ##     <numeric>
-    ## 1   -0.235204
-    ## 2   -0.235204
-    ## 3   -0.235204
-    ## 4   -0.235204
-    ## 5   -0.235204
-    ## ...       ...
-    ## 44   0.465764
-    ## 45   0.465764
-    ## 46   0.465764
-    ## 47   0.465764
-    ## 48   0.465764
 
 ### Skipped exons
 
@@ -418,9 +455,10 @@ calc_mx_exons(gr_none)
 
 ## Obtaining exon ranges manually
 
-This section walks through the steps that `prepare_exons()` performs
-internally. This is useful if you need more control over the process or
-want to understand how exon ranges are built from a *TxDb*.
+This section walks through the steps that
+[`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
+performs internally. This is useful if you need more control over the
+process or want to understand how exon ranges are built from a *TxDb*.
 
 ``` r
 

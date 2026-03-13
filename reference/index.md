@@ -23,8 +23,6 @@
   right_exons
 - [`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md)
   : Create mock GRanges data for splicing event testing
-- [`find_candidates()`](https://thelovelab.github.io/splicelogic/reference/find_candidates.md)
-  : Find candidates skipped exons
 - [`generate_a3ss()`](https://thelovelab.github.io/splicelogic/reference/generate_a3ss.md)
   : Generate alternative 3' splice site events in a GRanges object
 - [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_a5ss.md)
@@ -49,6 +47,8 @@
   : Create a sample GRanges with one negative coef transcript and one
   positive coef transcripts This dataset is designed to include no
   splicing events
+- [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
+  : Prepare exon ranges from a TxDb and DTU results table
 - [`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md)
   : Preprocess input GRanges object for splicing event calculation
 - [`se_mock_data()`](https://thelovelab.github.io/splicelogic/reference/se_mock_data.md)
