@@ -18,8 +18,8 @@ check_input <- function(gr, coef_col) {
   #check if coef_col is present and valid
   if (coef_col %in% names(GenomicRanges::mcols(gr))) {
     vals <- GenomicRanges::mcols(gr)[[coef_col]]
-    if (any(vals < -1 | vals > 1)) {
-      stop(sprintf("The '%s' metadata column must contain values only in the range [-1, 1].", coef_col))
+    if (!is.numeric(vals)) {
+      stop(sprintf("The '%s' metadata column must contain numeric values.", coef_col))
     }
   }
 
