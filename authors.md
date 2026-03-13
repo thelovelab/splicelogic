@@ -8,6 +8,10 @@
 - **[Michael Love](https://mikelove.github.io)**. Author.
   [](https://orcid.org/0000-0001-8401-0545)
 
+- **NIH NHGRI**. Funder.
+
+- **Wellcome Trust**. Funder.
+
 ## Citation
 
 Source:
