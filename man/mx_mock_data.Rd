@@ -10,8 +10,6 @@ mx_mock_data()
 }
 \value{
 A GRanges object with two transcripts per gene and candidate logic
-
-A GRanges object with two transcripts per gene
 }
 \description{
 Create a sample GRanges with one negative coef transcript and one positive coef transcripts

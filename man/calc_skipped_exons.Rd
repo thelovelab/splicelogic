@@ -20,3 +20,16 @@ A GRanges object with an additional 'event' metadata column indicating skipped e
 \description{
 Calculate skipped exons from a GRanges object
 }
+\examples{
+
+# make some mock data and run the function
+gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+  preprocess_input(coef_col = "coefs") |> 
+  generate_skipped_exons(1)
+
+# this should find the skipped exon events we generated
+calc_skipped_exons(gr, type = "boundary")
+
+calc_included_exons(gr, type = "boundary")
+
+}

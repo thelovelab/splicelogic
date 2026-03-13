@@ -5,6 +5,18 @@
 #' @param inverse If TRUE, identifies included exons instead of skipped exons.
 #' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
 #' @export
+#' @examples
+#' 
+#' # make some mock data and run the function
+#' gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+#'   preprocess_input(coef_col = "coefs") |> 
+#'   generate_skipped_exons(1)
+#' 
+#' # this should find the skipped exon events we generated
+#' calc_skipped_exons(gr, type = "boundary")
+#' 
+#' calc_included_exons(gr, type = "boundary")
+#' 
 calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = FALSE) {
   type <- match.arg(type)
   # if preprocessing didn't happen
@@ -30,7 +42,7 @@ calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = F
   right_exons <- filter_results$right_exons
 
   if (length(candidates) == 0L) {
-    return(GRanges())
+    return(GenomicRanges::GRanges())
   }
 
   # batch findOverlaps: match pos_exons against all left/right exons at once
@@ -79,7 +91,7 @@ calc_skipped_exons <- function(gr, type = c("boundary","over","in"), inverse = F
     dplyr::distinct(cand_idx, tx_id)
 
   if (nrow(pairs) == 0L) {
-    return(GRanges())
+    return(GenomicRanges::GRanges())
   }
 
   # build result tibble: one row per (candidate, tx_event) pair
@@ -133,7 +145,7 @@ calc_mx_exons <- function(gr, type = c("boundary","in", "over")) {
   right_exons <- filter_results$right_exons
 
     if (length(candidates) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     # batch findOverlaps: match pos_exons against all left/right exons at once
@@ -181,7 +193,7 @@ calc_mx_exons <- function(gr, type = c("boundary","in", "over")) {
         dplyr::mutate(middle_rank = pmin(l, r) + 1L)
 
     if (nrow(pairs) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     # look up the middle pos exon for each pair
@@ -205,7 +217,7 @@ calc_mx_exons <- function(gr, type = c("boundary","in", "over")) {
         )
 
     if (nrow(pairs) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     # build candidate hit rows
@@ -254,7 +266,7 @@ calc_retained_introns <- function(gr){
     introns <- neg_exons |> find_introns()
 
     if (length(introns) == 0L || length(pos_exons) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     # batch findOverlaps: intron must be fully within the pos exon
@@ -262,7 +274,7 @@ calc_retained_introns <- function(gr){
                                         type = "within")
 
     if (length(hits) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     # build match tibble from hits
@@ -283,7 +295,7 @@ calc_retained_introns <- function(gr){
         dplyr::distinct(pos_idx, tx_id_intron)
 
     if (nrow(match_tbl) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     # build result: one row per (pos exon, intron transcript) pair
@@ -331,14 +343,14 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
         plyranges::filter_by_overlaps_directed(neg_exons)
 
     if (length(candidates) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     # batch findOverlaps: candidates against neg_exons
     hits <- GenomicRanges::findOverlaps(candidates, neg_exons)
 
     if (length(hits) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     cand_tbl <- tibble::as_tibble(candidates)
@@ -377,7 +389,7 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
         )
 
     if (nrow(match_tbl) == 0L) {
-        return(GRanges())
+        return(GenomicRanges::GRanges())
     }
 
     # build result: one row per (candidate, neg exon match)
