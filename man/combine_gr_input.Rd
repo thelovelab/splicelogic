@@ -4,7 +4,8 @@
 \alias{combine_gr_input}
 \title{Combine two GRanges objects into one for splicing event analysis
 This function takes two GRanges objects, typically representing
-positive and negative sets of exons, and combines them into a single GRanges object.}
+positive and negative sets of exons, and combines them into
+a single GRanges object.}
 \usage{
 combine_gr_input(gr1, gr2, coef_col)
 }
@@ -21,6 +22,6 @@ A combined GRanges object with appropriate coef metadata
 \description{
 Combine two GRanges objects into one for splicing event analysis
 This function takes two GRanges objects, typically representing
-positive and negative sets of exons, and combines them into a single GRanges object.
+positive and negative sets of exons, and combines them into
+a single GRanges object.
 }
-\keyword{internal}

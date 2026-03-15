@@ -2,22 +2,23 @@
 % Please edit documentation in R/aux_logic.R
 \name{candidates_by_presence_v2}
 \alias{candidates_by_presence_v2}
-\title{Filter candidates based on their presence in transcripts
-Then get the left and right exons for each candidate
+\title{Then get the left and right exons for each candidate
 Return a named list with three tibbles: candidates, left_exons, right_exons}
 \usage{
 candidates_by_presence_v2(gr, neg_exons, pos_exons)
 }
 \arguments{
 \item{gr}{A GRanges object with all exons}
+
+\item{neg_exons}{A GRanges object with negative coefficient exons}
+
+\item{pos_exons}{A GRanges object with positive coefficient exons}
 }
 \value{
 A named list with three granges: candidates, left_exons, right_exons
 candidates, left_exons, right_exons are all from neg_exons set
 }
 \description{
-Filter candidates based on their presence in transcripts
 Then get the left and right exons for each candidate
 Return a named list with three tibbles: candidates, left_exons, right_exons
 }
-\keyword{internal}

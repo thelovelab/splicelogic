@@ -15,4 +15,3 @@ A GRanges object with re-ranked exons
 \description{
 Re-rank exons in a GRanges object
 }
-\keyword{internal}

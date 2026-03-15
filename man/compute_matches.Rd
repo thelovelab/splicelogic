@@ -33,4 +33,3 @@ a tibble that is the same as pos_exons but with two additional columns
 and right exons respectively. The matching is done based on the 'type'
 parameter which can be "in", "over", or "boundary".
 }
-\keyword{internal}

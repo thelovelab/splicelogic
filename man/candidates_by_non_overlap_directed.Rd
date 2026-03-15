@@ -4,25 +4,31 @@
 \alias{candidates_by_non_overlap_directed}
 \title{Filter candidates that do not overlap any pos_exons, and are internal
 Then get the left and right exons for each candidate
-Return a named list with three GRanges objects: candidates, left_exons, right_exons}
+Return a named list with three GRanges objects:
+candidates, left_exons, right_exons}
 \usage{
 candidates_by_non_overlap_directed(neg_exons, pos_exons, gr, type)
 }
 \arguments{
-\item{neg_exons}{A GRanges object with candidate negative exons (neg_exons)}
+\item{neg_exons}{A GRanges object with candidate
+negative exons (neg_exons)}
 
-\item{pos_exons}{A GRanges object with positive exons (pos_exons)}
+\item{pos_exons}{A GRanges object with positive exons}
 
-\item{gr}{The original GRanges object with all exons (for looking up left/right)}
+\item{gr}{The original GRanges object with all exons
+(for looking up left/right)}
 
-\item{type}{The type of overlap to consider when identifying matches.}
+\item{type}{The type of overlap to consider when
+identifying matches.}
 }
 \value{
-A named list with three GRanges objects: candidates, left_exons, right_exons
+A named list with three GRanges objects:
+candidates, left_exons, right_exons
 candidates, left_exons, right_exons are all from neg_exons set
 }
 \description{
 Filter candidates that do not overlap any pos_exons, and are internal
 Then get the left and right exons for each candidate
-Return a named list with three GRanges objects: candidates, left_exons, right_exons
+Return a named list with three GRanges objects:
+candidates, left_exons, right_exons
 }

@@ -7,12 +7,13 @@
 find_introns(gr)
 }
 \arguments{
-\item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.}
+\item{gr}{A GRanges object with metadata columns:
+'exon_rank', 'gene_id', 'tx_id', and 'coefs'.}
 }
 \value{
-A GRanges object with introns as ranges and metadata (tx_id, gene_id)
+A GRanges object with introns as ranges and
+metadata (tx_id, gene_id)
 }
 \description{
 function to find introns given a GRanges object of exons
 }
-\keyword{internal}

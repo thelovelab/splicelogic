@@ -1,10 +1,10 @@
-#' Check that input is a valid GRanges object with required metadata columns provided by the user
+#' Check that input is a valid GRanges object with required
+#' metadata columns provided by the user
 #' exon_rank", "gene_id", "tx_id", coef_col
 #' @param gr A GRanges object
 #' @param coef_col Name of the coefficient metadata column (string)
 #' @return TRUE if input is valid, otherwise throws an error
 #' @importFrom methods is
-#' @keywords internal
 check_input <- function(gr, coef_col) {
   if (!is(gr, "GRanges")) {
     stop("Input must be a GRanges object.")
@@ -34,12 +34,12 @@ check_input <- function(gr, coef_col) {
 
 #' Combine two GRanges objects into one for splicing event analysis
 #' This function takes two GRanges objects, typically representing
-#' positive and negative sets of exons, and combines them into a single GRanges object.
+#' positive and negative sets of exons, and combines them into
+#' a single GRanges object.
 #' @param gr1 A GRanges object (e.g., positive set)
 #' @param gr2 A GRanges object (e.g., negative set)
 #' @param coef_col Name of the coefficient metadata column (string)
 #' @return A combined GRanges object with appropriate coef metadata
-#' @keywords internal
 combine_gr_input <- function(gr1, gr2, coef_col) {
   if (!is(gr1, "GRanges") || !is(gr2, "GRanges")) {
     stop("Both inputs must be GRanges objects.")
@@ -59,15 +59,22 @@ combine_gr_input <- function(gr1, gr2, coef_col) {
 
 #' Preprocess input GRanges object for splicing event calculation
 #'
-#' This function checks that the input is a valid GRanges object with required metadata columns,
-#' then adds a unique key, the number of exons per transcript, and an 'internal' flag for each exon.
-#' It also initializes an 'event' column for downstream splicing event annotation.
+#' This function checks that the input is a valid GRanges
+#' object with required metadata columns, then adds a unique
+#' key, the number of exons per transcript, and an 'internal'
+#' flag for each exon. It also initializes an 'event' column
+#' for downstream splicing event annotation.
 #'
-#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', 'coef'.
-#' @param coef_col The name of the metadata column indicating upregulated (+1) and downregulated (-1) exons.
-#' @param method_string The Differential Transcript Usage (DTU) method used to obtain the coef_col, for annotation purposes (optional).
+#' @param gr A GRanges object with metadata columns:
+#' 'exon_rank', 'gene_id', 'tx_id', 'coef'.
+#' @param coef_col The name of the metadata column indicating
+#' upregulated (+1) and downregulated (-1) exons.
+#' @param method_string The Differential Transcript Usage (DTU)
+#' method used to obtain the coef_col, for annotation purposes
+#' (optional).
 #'
-#' @return A GRanges object with added 'key', 'nexons', 'internal', and 'event' columns.
+#' @return A GRanges object with added 'key', 'nexons',
+#' 'internal', and 'event' columns.
 #' @export
 preprocess_input <- function(gr, coef_col, method_string = NULL) {
   check_input(gr, coef_col) # check metadata columns are present
@@ -79,7 +86,9 @@ preprocess_input <- function(gr, coef_col, method_string = NULL) {
       key = paste0(tx_id, "-", exon_rank),
       nexons = length(exon_rank),
       internal = exon_rank > 1 & exon_rank < nexons,
-      estimates = !!rlang::sym(coef_col) # always use "estimates" as the column name for the coef values in downstream functions
+      # always use "estimates" as the column name
+      # for coef values in downstream functions
+      estimates = !!rlang::sym(coef_col)
     ) |>
     dplyr::ungroup()
 

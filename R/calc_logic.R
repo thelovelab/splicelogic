@@ -1,9 +1,24 @@
-#' Calculate skipped exons from a GRanges object
+#' @rdname calc_events
+#' @name calc_events
+#'
+#' @title Calculate splice events from a GRanges object
+#'
+#' @description Functions to detect different types of alternative splicing
+#' events from preprocessed GRanges exon data.
+#'
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
 #' and 'coef_col' metadata columns and preprocessed with preprocess_input().
-#' @param type The type of overlap to consider when identifying skipped exons.
-#' @param inverse If TRUE, identifies included exons instead of skipped exons.
-#' @return A GRanges object with an additional 'event' metadata column indicating skipped exons.
+
+NULL
+
+#' @rdname calc_events
+#' @param type The type of overlap to consider when
+#' identifying events.
+#' @param inverse If TRUE, identifies included exons
+#' instead of skipped exons.
+#' @return `calc_skipped_exons()`: A GRanges object with
+#' an additional 'event' metadata column indicating
+#' skipped exons.
 #' @export
 #' @examples
 #'
@@ -56,13 +71,16 @@ calc_skipped_exons <- function(
 
   # batch findOverlaps: match pos_exons against all left/right exons at once
   ##############################################################
-  left_hits <- find_matches_batch(pos_exons, left_exons, type) #returns Hits object with queryHits = pos_exons index, subjectHits = left_exons index
+  # returns Hits object with queryHits = pos_exons index,
+  # subjectHits = left_exons index
+  left_hits <- find_matches_batch(pos_exons, left_exons, type)
   right_hits <- find_matches_batch(pos_exons, right_exons, type)
   pos_tbl <- tibble::as_tibble(pos_exons)
   cand_tbl <- tibble::as_tibble(candidates)
   cand_tbl$cand_idx <- seq_len(nrow(cand_tbl))
 
-  # build tibbles from overlap hits: pos_exon index -> (tx_id, exon_rank, cand_idx)
+  # build tibbles from overlap hits:
+  # pos_exon index -> (tx_id, exon_rank, cand_idx)
   left_match_tbl <- tibble::tibble(
     pos_idx = S4Vectors::queryHits(left_hits),
     cand_idx = S4Vectors::subjectHits(left_hits)
@@ -121,21 +139,17 @@ calc_skipped_exons <- function(
   res
 }
 
-#' Calculate included exons from a GRanges object
-#' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
-#' and 'coef_col' metadata columns and preprocessed with preprocess_input().
-#' @param type The type of overlap to consider when identifying included exons.
-#' @return A GRanges object with an additional 'event' metadata column indicating included exons.
+#' @rdname calc_events
+#' @return `calc_included_exons()`: A GRanges object with an additional 'event'
+#' metadata column indicating included exons.
 #' @export
 calc_included_exons <- function(gr, type = c("boundary", "over", "in")) {
   calc_skipped_exons(gr, type, inverse = TRUE)
 }
 
-#' Calculate mutually exclusive exons from a GRanges object
-#' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
-#' and 'coef_col' metadata columns and preprocessed with preprocess_input().
-#' @param type The type of overlap to consider when identifying mutually exclusive exons.
-#' @return A GRanges object with an additional 'event' metadata column indicating mutually exclusive exons.
+#' @rdname calc_events
+#' @return `calc_mx_exons()`: A GRanges object with an additional 'event'
+#' metadata column indicating mutually exclusive exons.
 #' @export
 calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
   type <- match.arg(type)
@@ -168,7 +182,8 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
   cand_tbl <- tibble::as_tibble(candidates)
   cand_tbl$cand_idx <- seq_len(nrow(cand_tbl))
 
-  # build tibbles from overlap hits: pos_exon index -> (tx_id, exon_rank, cand_idx)
+  # build tibbles from overlap hits:
+  # pos_exon index -> (tx_id, exon_rank, cand_idx)
   left_match_tbl <- tibble::tibble(
     pos_idx = S4Vectors::queryHits(left_hits),
     cand_idx = S4Vectors::subjectHits(left_hits)
@@ -264,9 +279,9 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
   res
 }
 
-#' Function to calculate retained introns given a GRanges object
-#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id', 'tx_id', and 'coef'.
-#' @return A GRanges object with an additional 'event' metadata column indicating retained introns.
+#' @rdname calc_events
+#' @return `calc_retained_introns()`: A GRanges object with an additional
+#' 'event' metadata column indicating retained introns.
 #' @export
 calc_retained_introns <- function(gr) {
   # if preprocessing didn't happen
@@ -333,13 +348,11 @@ calc_retained_introns <- function(gr) {
 }
 
 
-#' Function to calculate alternative splice sites
-#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
-#' 'tx_id', and 'coef'. Must be preprocessed with preprocess_input().
+#' @rdname calc_events
 #' @param by_start If TRUE, detects a5ss (same exon start, different end).
 #' If FALSE, detects a3ss (same end, different start).
-#' @return A GRanges object with annotated events for alternative splice sites.
-#' @keywords internal
+#' @return `calc_alt_ss()`: A GRanges object with annotated events for
+#' alternative splice sites.
 calc_alt_ss <- function(gr, by_start = TRUE) {
   # if preprocessing didn't happen
   check_preprocessed(gr)
@@ -428,36 +441,26 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
 }
 
 
-#' Calculate alternative 5' splice sites from a GRanges object
-#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
-#' 'tx_id', and 'coef'. Must be preprocessed with preprocess_input().
-#' @return A GRanges object with an additional 'event' metadata column
-#' indicating a5ss events.
+#' @rdname calc_events
+#' @return `calc_a5ss()`: A GRanges object with an additional 'event' metadata
+#' column indicating a5ss events.
 #' @export
 calc_a5ss <- function(gr) {
   calc_alt_ss(gr, by_start = TRUE)
 }
 
-#' Calculate alternative 3' splice sites from a GRanges object
-#' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
-#' 'tx_id', and 'coef'. Must be preprocessed with preprocess_input().
-#' @return A GRanges object with an additional 'event' metadata column
-#' indicating a3ss events.
+#' @rdname calc_events
+#' @return `calc_a3ss()`: A GRanges object with an additional 'event' metadata
+#' column indicating a3ss events.
 #' @export
 calc_a3ss <- function(gr) {
   calc_alt_ss(gr, by_start = FALSE)
 }
 
-#' Calculate all splicing events from a GRanges object
-#' @description Runs all event detection functions and returns a single
-#' concatenated GRanges with results from each.
-#' @param gr A GRanges object with exon annotations, preprocessed with
-#' preprocess_input().
-#' @param type The type of overlap to consider for skipped exons, included
-#' exons, and mutually exclusive exons.
+#' @rdname calc_events
 #' @param verbose If TRUE, prints progress messages. Default TRUE.
-#' @return A GRanges object combining all detected events, with an 'event'
-#' metadata column indicating the event type.
+#' @return `calc_all_events()`: A GRanges object combining all detected events,
+#' with an 'event' metadata column indicating the event type.
 #' @export
 calc_all_events <- function(
   gr,

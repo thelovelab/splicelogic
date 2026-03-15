@@ -2,7 +2,8 @@
 % Please edit documentation in R/mock_data.R
 \name{no_event_mock_data}
 \alias{no_event_mock_data}
-\title{Create a sample GRanges with one negative coef transcript and one positive coef transcripts
+\title{Create a sample GRanges with one negative coef
+transcript and one positive coef transcripts
 This dataset is designed to include no splicing events}
 \usage{
 no_event_mock_data()
@@ -11,6 +12,7 @@ no_event_mock_data()
 A GRanges object with two transcripts per gene and no candidate logic
 }
 \description{
-Create a sample GRanges with one negative coef transcript and one positive coef transcripts
+Create a sample GRanges with one negative coef
+transcript and one positive coef transcripts
 This dataset is designed to include no splicing events
 }

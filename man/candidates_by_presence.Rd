@@ -14,12 +14,12 @@ candidates_by_presence(gr, coef_col)
 \item{coef_col}{The name of the coefficient column in gr}
 }
 \value{
-A named list with three GRanges objects: candidates, left_exons, right_exons
-candidates, left_exons, right_exons are all from neg_exons set
+A named list with three GRanges objects:
+candidates, left_exons, right_exons.
+All are from the neg_exons set.
 }
 \description{
 Filter candidates based on their presence in transcripts
 Then get the left and right exons for each candidate
 Return a named list with three GRanges objects: candidates, left_exons, right
 }
-\keyword{internal}
