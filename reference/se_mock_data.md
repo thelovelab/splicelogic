@@ -13,6 +13,4 @@ se_mock_data()
 
 ## Value
 
-A GRanges object with two transcripts per gene and candidate logic
-
 A GRanges object with two transcripts per gene

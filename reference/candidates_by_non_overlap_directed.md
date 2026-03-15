@@ -18,7 +18,7 @@ candidates_by_non_overlap_directed(neg_exons, pos_exons, gr, type)
 
 - pos_exons:
 
-  A GRanges object with positive exons (pos_exons)
+  A GRanges object with positive exons
 
 - gr:
 

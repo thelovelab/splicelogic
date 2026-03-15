@@ -28,47 +28,61 @@ as part of the EOSS program.
 
 ## All functions
 
-- [`calc_a3ss()`](https://thelovelab.github.io/splicelogic/reference/calc_a3ss.md)
-  : Calculate alternative 3' splice sites from a GRanges object
-- [`calc_a5ss()`](https://thelovelab.github.io/splicelogic/reference/calc_a5ss.md)
-  : Calculate alternative 5' splice sites from a GRanges object
-- [`calc_all_events()`](https://thelovelab.github.io/splicelogic/reference/calc_all_events.md)
-  : Calculate all splicing events from a GRanges object
-- [`calc_included_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_included_exons.md)
-  : Calculate included exons from a GRanges object
-- [`calc_mx_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_mx_exons.md)
-  : Calculate mutually exclusive exons from a GRanges object
-- [`calc_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/calc_retained_introns.md)
-  : Function to calculate retained introns given a GRanges object
-- [`calc_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_skipped_exons.md)
-  : Calculate skipped exons from a GRanges object
+- [`calc_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
+  [`calc_included_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
+  [`calc_mx_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
+  [`calc_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
+  [`calc_alt_ss()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
+  [`calc_a5ss()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
+  [`calc_a3ss()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
+  [`calc_all_events()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
+  : Calculate splice events from a GRanges object
 - [`candidates_by_non_overlap_directed()`](https://thelovelab.github.io/splicelogic/reference/candidates_by_non_overlap_directed.md)
   : Filter candidates that do not overlap any pos_exons, and are
   internal Then get the left and right exons for each candidate Return a
   named list with three GRanges objects: candidates, left_exons,
   right_exons
+- [`candidates_by_presence()`](https://thelovelab.github.io/splicelogic/reference/candidates_by_presence.md)
+  : Filter candidates based on their presence in transcripts Then get
+  the left and right exons for each candidate Return a named list with
+  three GRanges objects: candidates, left_exons, right
+- [`candidates_by_presence_v2()`](https://thelovelab.github.io/splicelogic/reference/candidates_by_presence_v2.md)
+  : Then get the left and right exons for each candidate Return a named
+  list with three tibbles: candidates, left_exons, right_exons
+- [`check_input()`](https://thelovelab.github.io/splicelogic/reference/check_input.md)
+  : Check that input is a valid GRanges object with required metadata
+  columns provided by the user exon_rank", "gene_id", "tx_id", coef_col
+- [`combine_gr_input()`](https://thelovelab.github.io/splicelogic/reference/combine_gr_input.md)
+  : Combine two GRanges objects into one for splicing event analysis
+  This function takes two GRanges objects, typically representing
+  positive and negative sets of exons, and combines them into a single
+  GRanges object.
+- [`compute_matches()`](https://thelovelab.github.io/splicelogic/reference/compute_matches.md)
+  : Takes a GRanges object and left/right exons to compute matches. i.e
+  takes the pos_exons (GRanges) and left and right exons and returns a
+  tibble that is the same as pos_exons but with two additional columns
+  'match_left' and 'match_right' indicating whether each exon matches
+  the left and right exons respectively. The matching is done based on
+  the 'type' parameter which can be "in", "over", or "boundary".
 - [`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md)
   : Create mock GRanges data for splicing event testing
-- [`generate_a3ss()`](https://thelovelab.github.io/splicelogic/reference/generate_a3ss.md)
-  : Generate alternative 3' splice site events in a GRanges object
-- [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_a5ss.md)
-  : Generate alternative 5' splice site events in a GRanges object
-- [`generate_mx()`](https://thelovelab.github.io/splicelogic/reference/generate_mx.md)
-  : Generate mutually exclusive exon events in a GRanges object
-- [`generate_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/generate_retained_introns.md)
-  : Generate retained intron events in a GRanges object
-- [`generate_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/generate_skipped_exons.md)
-  : Generate skipped exon events in a GRanges object making all \>0
-  coefs transcripts have a the same exon eventfor the same gene
-- [`generate_skipped_exons_restricted()`](https://thelovelab.github.io/splicelogic/reference/generate_skipped_exons_restricted.md)
-  : Generate skipped exon events in a GRanges object making all \>0
-  coefs transcripts have a the same exon eventfor the same gene
+- [`find_introns()`](https://thelovelab.github.io/splicelogic/reference/find_introns.md)
+  : function to find introns given a GRanges object of exons
+- [`find_matches_batch()`](https://thelovelab.github.io/splicelogic/reference/find_matches_batch.md)
+  : Batch find overlaps between query and subject GRanges based on match
+  type
+- [`generate_skipped_exons_restricted()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_mx()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_a3ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  : Generate mock splice events in a GRanges object
 - [`mx_mock_data()`](https://thelovelab.github.io/splicelogic/reference/mx_mock_data.md)
   : Create a sample GRanges with one negative coef transcript and one
-  positive coef transcripts This dataset is designed to include a
-  mutually exclusive exons between exon_rank 3 of tx_id 1 and exon_rank
-  3 of tx_id 2. There is also a skipped exon event at exon_rank 5 of
-  tx_id 1.
+  positive coef transcripts This dataset is designed to include mutually
+  exclusive exons between exon_rank 3 of tx_id 1 and exon_rank 3 of
+  tx_id 2. There is also a skipped exon event at exon_rank 5 of tx_id 1.
 - [`no_event_mock_data()`](https://thelovelab.github.io/splicelogic/reference/no_event_mock_data.md)
   : Create a sample GRanges with one negative coef transcript and one
   positive coef transcripts This dataset is designed to include no
@@ -77,6 +91,8 @@ as part of the EOSS program.
   : Prepare exon ranges from a TxDb and DTU results table
 - [`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md)
   : Preprocess input GRanges object for splicing event calculation
+- [`rerank_exons()`](https://thelovelab.github.io/splicelogic/reference/rerank_exons.md)
+  : Re-rank exons in a GRanges object
 - [`se_mock_data()`](https://thelovelab.github.io/splicelogic/reference/se_mock_data.md)
   : Create a sample GRanges with one negative coef transcript and two
   positive coef transcripts This dataset is designed to include a

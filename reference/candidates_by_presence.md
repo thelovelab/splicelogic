@@ -23,5 +23,4 @@ candidates_by_presence(gr, coef_col)
 ## Value
 
 A named list with three GRanges objects: candidates, left_exons,
-right_exons candidates, left_exons, right_exons are all from neg_exons
-set
+right_exons. All are from the neg_exons set.
