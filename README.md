@@ -2,7 +2,7 @@
 
 # How to install
 
-*splicelogic* will be submitted to Bioconductor. For now you can test it by
+`splicelogic` will be submitted to Bioconductor. For now you can test it by
 installing from GitHub:
 
 ```
@@ -27,5 +27,5 @@ We would love to hear your feedback. Please post to an
 
 # Funding
 
-splicelogic was supported by NHGRI R01-HG009937, and
+`splicelogic` was supported by NHGRI R01-HG009937, and
 the Wellcome Trust as part of the EOSS program.
