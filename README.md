@@ -12,10 +12,12 @@ devtools::install_github("thelovelab/splicelogic")
 # Quick start
 
 ```
-here
-is 
-some
-code
+exons <- prepare_exons(txdb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+  dtu_table = <DTU_TABLE>,
+  coef_col = "estimate")
+
+processed_exons <- preprocess_input(exons, coef_col = "estimate")
+events <- processed_exons |> calc_all_events()
 ```
 
 # Feedback
