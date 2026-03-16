@@ -45,7 +45,6 @@ calc_skipped_exons <- function(
     names(GenomicRanges::mcols(gr)),
     c("key", "nexons", "internal", "estimates")
   )
-
   if (inverse) {
     factor <- -1
     event_name <- "included_exon"
@@ -54,58 +53,16 @@ calc_skipped_exons <- function(
     event_name <- "skipped_exon"
   }
 
-  # separate positive and negative exons
-  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1 * factor)
-  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1 * factor)
-
-  # candidates_by_presence_v2 returns GRanges
-  filter_results <- candidates_by_presence_v2(gr, neg_exons, pos_exons)
-
-  candidates <- filter_results$candidates
-  left_exons <- filter_results$left_exons
-  right_exons <- filter_results$right_exons
-
-  if (length(candidates) == 0L) {
+  matches <- find_candidates_and_flanks(gr, type, factor)
+  #check if early return is needed
+  if (length(matches) == 0L) {
     return(GenomicRanges::GRanges())
   }
-
-  # batch findOverlaps: match pos_exons against all left/right exons at once
-  ##############################################################
-  # returns Hits object with queryHits = pos_exons index,
-  # subjectHits = left_exons index
-  left_hits <- find_matches_batch(pos_exons, left_exons, type)
-  right_hits <- find_matches_batch(pos_exons, right_exons, type)
-  pos_tbl <- tibble::as_tibble(pos_exons)
-  cand_tbl <- tibble::as_tibble(candidates)
-  cand_tbl$cand_idx <- seq_len(nrow(cand_tbl))
-
-  # build tibbles from overlap hits:
-  # pos_exon index -> (tx_id, exon_rank, cand_idx)
-  left_match_tbl <- tibble::tibble(
-    pos_idx = S4Vectors::queryHits(left_hits),
-    cand_idx = S4Vectors::subjectHits(left_hits)
-  ) |>
-    dplyr::mutate(
-      tx_id = pos_tbl$tx_id[pos_idx],
-      l = pos_tbl$exon_rank[pos_idx],
-      gene_id_pos = pos_tbl$gene_id[pos_idx]
-    )
-
-  right_match_tbl <- tibble::tibble(
-    pos_idx = S4Vectors::queryHits(right_hits),
-    cand_idx = S4Vectors::subjectHits(right_hits)
-  ) |>
-    dplyr::mutate(
-      tx_id = pos_tbl$tx_id[pos_idx],
-      r = pos_tbl$exon_rank[pos_idx],
-      gene_id_pos = pos_tbl$gene_id[pos_idx]
-    )
-
-  # restrict matches to same gene as candidate
-  left_match_tbl <- left_match_tbl |>
-    dplyr::filter(gene_id_pos == cand_tbl$gene_id[cand_idx])
-  right_match_tbl <- right_match_tbl |>
-    dplyr::filter(gene_id_pos == cand_tbl$gene_id[cand_idx])
+  #unlist results
+  pos_tbl <- matches$pos_tbl
+  cand_tbl <- matches$cand_tbl
+  left_match_tbl <- matches$left_match_tbl
+  right_match_tbl <- matches$right_match_tbl
 
   # join left and right by (cand_idx, tx_id), filter adjacent exons
   pairs <- dplyr::inner_join(
@@ -113,6 +70,7 @@ calc_skipped_exons <- function(
     right_match_tbl |> dplyr::select(cand_idx, tx_id, r),
     by = c("cand_idx", "tx_id")
   ) |>
+    # for SE/included exon, the flanking exons must be adjacent (rank difference of 1)
     dplyr::filter(abs(l - r) == 1) |>
     dplyr::distinct(cand_idx, tx_id)
 
@@ -126,7 +84,6 @@ calc_skipped_exons <- function(
       event = event_name,
       tx_event = pairs$tx_id
     )
-
   # convert back to GRanges for return
   res <- GenomicRanges::GRanges(
     seqnames = hits_tbl$seqnames,
@@ -160,55 +117,17 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
     c("key", "nexons", "internal", "estimates")
   )
 
-  # separate positive and negative exons
-  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
-  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
+  matches <- find_candidates_and_flanks(gr, type, 1)
 
-  # candidates_by_presence_v2 returns GRanges (pairwise-compatible)
-  filter_results <- candidates_by_presence_v2(gr, neg_exons, pos_exons)
-  candidates <- filter_results$candidates
-  left_exons <- filter_results$left_exons
-  right_exons <- filter_results$right_exons
-
-  if (length(candidates) == 0L) {
+  #check if early return is needed
+  if (length(matches) == 0L) {
     return(GenomicRanges::GRanges())
   }
-
-  # batch findOverlaps: match pos_exons against all left/right exons at once
-  ##############################################################
-  left_hits <- find_matches_batch(pos_exons, left_exons, type)
-  right_hits <- find_matches_batch(pos_exons, right_exons, type)
-  pos_tbl <- tibble::as_tibble(pos_exons)
-  cand_tbl <- tibble::as_tibble(candidates)
-  cand_tbl$cand_idx <- seq_len(nrow(cand_tbl))
-
-  # build tibbles from overlap hits:
-  # pos_exon index -> (tx_id, exon_rank, cand_idx)
-  left_match_tbl <- tibble::tibble(
-    pos_idx = S4Vectors::queryHits(left_hits),
-    cand_idx = S4Vectors::subjectHits(left_hits)
-  ) |>
-    dplyr::mutate(
-      tx_id = pos_tbl$tx_id[pos_idx],
-      l = pos_tbl$exon_rank[pos_idx],
-      gene_id_pos = pos_tbl$gene_id[pos_idx]
-    )
-
-  right_match_tbl <- tibble::tibble(
-    pos_idx = S4Vectors::queryHits(right_hits),
-    cand_idx = S4Vectors::subjectHits(right_hits)
-  ) |>
-    dplyr::mutate(
-      tx_id = pos_tbl$tx_id[pos_idx],
-      r = pos_tbl$exon_rank[pos_idx],
-      gene_id_pos = pos_tbl$gene_id[pos_idx]
-    )
-
-  # restrict matches to same gene as candidate
-  left_match_tbl <- left_match_tbl |>
-    dplyr::filter(gene_id_pos == cand_tbl$gene_id[cand_idx])
-  right_match_tbl <- right_match_tbl |>
-    dplyr::filter(gene_id_pos == cand_tbl$gene_id[cand_idx])
+  #unlist results
+  pos_tbl <- matches$pos_tbl
+  cand_tbl <- matches$cand_tbl
+  left_match_tbl <- matches$left_match_tbl
+  right_match_tbl <- matches$right_match_tbl
 
   # join left and right by (cand_idx, tx_id), filter for mx exons (l-r==2)
   pairs <- dplyr::inner_join(
@@ -216,12 +135,9 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
     right_match_tbl |> dplyr::select(cand_idx, tx_id, r),
     by = c("cand_idx", "tx_id")
   ) |>
+    # for MX, the flanking exons must have a gap of exactly 2 (one exon in between)
     dplyr::filter(abs(l - r) == 2) |>
     dplyr::mutate(middle_rank = pmin(l, r) + 1L)
-
-  if (nrow(pairs) == 0L) {
-    return(GenomicRanges::GRanges())
-  }
 
   # look up the middle pos exon for each pair
   pos_lookup <- pos_tbl |>
@@ -260,13 +176,11 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
       event = "mutually_exclusive",
       tx_event = cand_tbl$tx_id[pairs$cand_idx]
     )
-
   # interleave candidate and pos hits (cand1, pos1, cand2, pos2, ...)
   hits_tbl <- dplyr::bind_rows(cand_hits, pos_hits) |>
     dplyr::mutate(.pair_order = rep(seq_len(nrow(pairs)), 2)) |>
     dplyr::arrange(.pair_order) |>
     dplyr::select(-.pair_order)
-
   # convert back to GRanges for return
   res <- GenomicRanges::GRanges(
     seqnames = hits_tbl$seqnames,
