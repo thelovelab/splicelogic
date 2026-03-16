@@ -28,3 +28,10 @@ key, the number of exons per transcript, and an 'internal'
 flag for each exon. It also initializes an 'event' column
 for downstream splicing event annotation.
 }
+\examples{
+
+# create mock data and run preprocessing
+gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+ preprocess_input(coef_col = "coefs", method_string = "mock_method")
+
+}

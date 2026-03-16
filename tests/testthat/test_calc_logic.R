@@ -80,7 +80,7 @@ test_that("calc_mx_exons returns empty GRanges if no events", {
 test_that("calc_retained_introns test", {
   gr <- create_mock_data(3, 6, 3)
   gr <- preprocess_input(gr, coef_col = "coefs")
-  gr <- generate_retained_introns(gr, n_ri = 3)
+  gr <- generate_retained_introns(gr, n_events = 3)
 
   result <- calc_retained_introns(gr)
 
@@ -93,7 +93,7 @@ test_that("calc_retained_introns test", {
 test_that("calc_a3ss test", {
   gr <- create_mock_data(3, 3, 6)
   gr <- preprocess_input(gr, coef_col = "coefs")
-  gr <- generate_a3ss(gr, n_a3ss = 3)
+  gr <- generate_a3ss(gr, n_events = 3)
 
   result <- calc_a3ss(gr)
 
@@ -107,7 +107,7 @@ test_that("calc_a3ss test", {
 test_that("calc_a5ss test", {
   gr <- create_mock_data(3, 3, 6)
   gr <- preprocess_input(gr, coef_col = "coefs")
-  gr <- generate_a5ss(gr, n_a5ss = 3)
+  gr <- generate_a5ss(gr, n_events = 3)
 
   result <- calc_a5ss(gr)
 
@@ -120,7 +120,7 @@ test_that("calc_a5ss test", {
 test_that("calc_skipped_exons test with generate_skipped_exons", {
   gr <- create_mock_data(3, 3, 6)
   gr <- preprocess_input(gr, coef_col = "coefs")
-  gr <- generate_skipped_exons(gr, n_se = 1)
+  gr <- generate_skipped_exons(gr, n_events = 1)
 
   result <- calc_skipped_exons(gr)
 
@@ -133,9 +133,9 @@ test_that("calc_skipped_exons test with generate_skipped_exons", {
 test_that("calc_all_events returns combined GRanges with multiple event types", {
   gr <- create_mock_data(3, 3, 6)
   gr <- preprocess_input(gr, coef_col = "coefs")
-  gr <- generate_skipped_exons(gr, n_se = 1)
-  gr <- generate_a3ss(gr, n_a3ss = 1)
-  gr <- generate_a5ss(gr, n_a5ss = 1)
+  gr <- generate_skipped_exons(gr, n_events = 1)
+  gr <- generate_a3ss(gr, n_events = 1)
+  gr <- generate_a5ss(gr, n_events = 1)
 
   result <- calc_all_events(gr, type = "over", verbose = FALSE)
 

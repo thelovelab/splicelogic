@@ -85,4 +85,49 @@ calc_skipped_exons(gr, type = "boundary")
 
 calc_included_exons(gr, type = "boundary")
 
+
+# detect mutually exclusive exons
+gr_mx <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_mx(1)
+calc_mx_exons(gr_mx, type = "boundary")
+
+
+# detect retained introns
+gr_ri <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_retained_introns(1)
+calc_retained_introns(gr_ri)
+
+
+# detect alternative 5' splice sites
+gr_a5 <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_a5ss(1)
+calc_a5ss(gr_a5)
+
+
+# detect alternative 3' splice sites
+gr_a3 <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_a3ss(1)
+calc_a3ss(gr_a3)
+
+
+# detect all event types at once
+gr_all <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_skipped_exons(1)
+calc_all_events(gr_all, type = "boundary", verbose = FALSE)
+
 }

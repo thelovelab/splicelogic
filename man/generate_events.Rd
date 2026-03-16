@@ -2,7 +2,6 @@
 % Please edit documentation in R/mock_data.R
 \name{generate_events}
 \alias{generate_events}
-\alias{generate_skipped_exons_restricted}
 \alias{generate_skipped_exons}
 \alias{generate_mx}
 \alias{generate_retained_introns}
@@ -10,36 +9,23 @@
 \alias{generate_a3ss}
 \title{Generate mock splice events in a GRanges object}
 \usage{
-generate_skipped_exons_restricted(gr, n_se = 1)
+generate_skipped_exons(gr, n_events = 1)
 
-generate_skipped_exons(gr, n_se = 1)
+generate_mx(gr, n_events = 1)
 
-generate_mx(gr, n_mx = 1)
+generate_retained_introns(gr, n_events = 1)
 
-generate_retained_introns(gr, n_ri = 1)
+generate_a5ss(gr, n_events = 1)
 
-generate_a5ss(gr, n_a5ss = 1)
-
-generate_a3ss(gr, n_a3ss = 1)
+generate_a3ss(gr, n_events = 1)
 }
 \arguments{
 \item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id',
 'tx_id', and 'coefs'.}
 
-\item{n_se}{Number of skipped exon events to generate}
-
-\item{n_mx}{Number of mutually exclusive exon events to generate}
-
-\item{n_ri}{Number of retained intron events to generate}
-
-\item{n_a5ss}{Number of alternative 5' splice site events to generate}
-
-\item{n_a3ss}{Number of alternative 3' splice site events to generate}
+\item{n_events}{Number of events to generate}
 }
 \value{
-\code{generate_skipped_exons_restricted()}: A GRanges object with skipped
-exon events introduced
-
 \code{generate_skipped_exons()}: A GRanges object with skipped exon
 events introduced
 
@@ -58,4 +44,36 @@ events introduced
 \description{
 Functions to introduce specific types of alternative splicing
 events into mock GRanges data for testing purposes.
+}
+\examples{
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+)
+generate_skipped_exons(gr, n_events = 1)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+)
+generate_mx(gr, n_events = 1)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+)
+generate_retained_introns(gr, n_events = 1)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+)
+generate_a5ss(gr, n_events = 1)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+)
+generate_a3ss(gr, n_events = 1)
+
 }

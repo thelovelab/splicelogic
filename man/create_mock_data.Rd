@@ -26,3 +26,10 @@ A GRanges object with simulated transcripts and exons
 \description{
 Create mock GRanges data for splicing event testing
 }
+\examples{
+
+# create mock data with 2 genes, 4 transcripts
+# per gene, and 4 exons per transcript
+gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4)
+
+}

@@ -214,7 +214,7 @@ create_mock_data <- function(
 NULL
 
 #' @rdname generate_events
-#' @param n_se Number of skipped exon events to generate
+#' @param n_events Number of events to generate
 #' @return `generate_skipped_exons()`: A GRanges object with skipped exon
 #' events introduced
 #' @export
@@ -223,16 +223,16 @@ NULL
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' )
-#' generate_skipped_exons(gr, n_se = 1)
+#' generate_skipped_exons(gr, n_events = 1)
 #'
-generate_skipped_exons <- function(gr, n_se = 1) {
+generate_skipped_exons <- function(gr, n_events = 1) {
   # generate skipped exons by modifying random internal
   # exons in transcripts with coefs > 0
   se_exons_key <- gr |>
     as.data.frame() |>
     dplyr::filter(coefs > 0 & internal == TRUE) |>
     dplyr::distinct(key) |>
-    dplyr::slice_sample(n = n_se) |>
+    dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
 
   gr <- gr |>
@@ -256,7 +256,7 @@ generate_skipped_exons <- function(gr, n_se = 1) {
 }
 
 #' @rdname generate_events
-#' @param n_mx Number of mutually exclusive exon events to generate
+#' @param n_events Number of events to generate
 #' @return `generate_mx()`: A GRanges object with mutually exclusive exon
 #' events introduced
 #' @export
@@ -265,9 +265,9 @@ generate_skipped_exons <- function(gr, n_se = 1) {
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' )
-#' generate_mx(gr, n_mx = 1)
+#' generate_mx(gr, n_events = 1)
 #'
-generate_mx <- function(gr, n_mx = 1) {
+generate_mx <- function(gr, n_events = 1) {
   # Find consecutive pairs of internal exons from neg transcripts
   # Both rank k and rank k+1 must be internal
   neg_internal <- gr |>
@@ -280,7 +280,7 @@ generate_mx <- function(gr, n_mx = 1) {
       next_key = paste0(tx_id, "-", exon_rank + 1L)
     ) |>
     dplyr::filter(next_key %in% neg_internal$key) |>
-    dplyr::slice_sample(n = n_mx)
+    dplyr::slice_sample(n = n_events)
 
   # Pair each selected neg transcript with one pos transcript from same gene
   gr_df <- as.data.frame(gr)
@@ -324,7 +324,7 @@ generate_mx <- function(gr, n_mx = 1) {
 }
 
 #' @rdname generate_events
-#' @param n_ri Number of retained intron events to generate
+#' @param n_events Number of events to generate
 #' @return `generate_retained_introns()`: A GRanges object with retained intron
 #' events introduced
 #' @examples
@@ -332,10 +332,10 @@ generate_mx <- function(gr, n_mx = 1) {
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' )
-#' generate_retained_introns(gr, n_ri = 1)
+#' generate_retained_introns(gr, n_events = 1)
 #'
 #' @export
-generate_retained_introns <- function(gr, n_ri = 1) {
+generate_retained_introns <- function(gr, n_events = 1) {
   # generate retained introns by creating a new exon that
   # starts with exonrank x and ends at exons rank x+1 for each transcript
   # only in transcripts with coefs > 0
@@ -346,7 +346,7 @@ generate_retained_introns <- function(gr, n_ri = 1) {
     as.data.frame() |>
     dplyr::filter(coefs > 0) |>
     dplyr::distinct(tx_id) |>
-    dplyr::slice_sample(n = n_ri) |>
+    dplyr::slice_sample(n = n_events) |>
     dplyr::pull(tx_id)
 
   exon_idx <- 2
@@ -391,7 +391,7 @@ rerank_exons <- function(gr) {
 }
 
 #' @rdname generate_events
-#' @param n_a5ss Number of alternative 5' splice site events to generate
+#' @param n_events Number of events to generate
 #' @return `generate_a5ss()`: A GRanges object with alternative 5' splice site
 #' events introduced
 #' @export
@@ -400,9 +400,9 @@ rerank_exons <- function(gr) {
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' )
-#' generate_a5ss(gr, n_a5ss = 1)
+#' generate_a5ss(gr, n_events = 1)
 #'
-generate_a5ss <- function(gr, n_a5ss = 1) {
+generate_a5ss <- function(gr, n_events = 1) {
   # if preprocessing didn't happen
   if (
     !all(
@@ -420,7 +420,7 @@ generate_a5ss <- function(gr, n_a5ss = 1) {
     # TO DO: include first and last exons
     dplyr::filter(coefs > 0 & internal == TRUE) |>
     dplyr::distinct(key) |>
-    dplyr::slice_sample(n = n_a5ss) |>
+    dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
 
   gr_with_a5ss <- gr |>
@@ -434,7 +434,7 @@ generate_a5ss <- function(gr, n_a5ss = 1) {
   return(gr_with_a5ss)
 }
 #' @rdname generate_events
-#' @param n_a3ss Number of alternative 3' splice site events to generate
+#' @param n_events Number of events to generate
 #' @return `generate_a3ss()`: A GRanges object with alternative 3' splice site
 #' events introduced
 #' @export
@@ -443,9 +443,9 @@ generate_a5ss <- function(gr, n_a5ss = 1) {
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' )
-#' generate_a3ss(gr, n_a3ss = 1)
+#' generate_a3ss(gr, n_events = 1)
 #'
-generate_a3ss <- function(gr, n_a3ss = 1) {
+generate_a3ss <- function(gr, n_events = 1) {
   # if preprocessing didn't happen
   if (
     !all(
@@ -462,7 +462,7 @@ generate_a3ss <- function(gr, n_a3ss = 1) {
     as.data.frame() |>
     dplyr::filter(coefs > 0 & internal == TRUE) |>
     dplyr::distinct(key) |>
-    dplyr::slice_sample(n = n_a3ss) |>
+    dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
 
   gr_with_a3ss <- gr |>
