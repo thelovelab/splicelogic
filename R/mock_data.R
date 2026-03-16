@@ -237,21 +237,7 @@ generate_skipped_exons <- function(gr, n_events = 1) {
 
   gr <- gr |>
     dplyr::filter(!key %in% se_exons_key)
-  # re-rank the exons accordingly
-  gr <- gr |>
-    dplyr::group_by(tx_id) |>
-    dplyr::mutate(
-      exon_rank = seq_len(dplyr::n()),
-      exon_rank = dplyr::if_else(
-        strand == "-",
-        # reverse the sequence for minus-strand transcripts
-        rev(exon_rank),
-        exon_rank
-      )
-    ) |>
-    dplyr::ungroup()
-  #update internal column and key nexons
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- rerank_exons(gr)
   return(gr)
 }
 
@@ -305,21 +291,7 @@ generate_mx <- function(gr, n_events = 1) {
 
   gr <- gr |>
     dplyr::filter(!key %in% c(pos_remove, neg_remove))
-
-  # re-rank the exons accordingly
-  gr <- gr |>
-    dplyr::group_by(tx_id) |>
-    dplyr::mutate(
-      exon_rank = seq_len(dplyr::n()),
-      exon_rank = dplyr::if_else(
-        strand == "-",
-        rev(exon_rank),
-        exon_rank
-      )
-    ) |>
-    dplyr::ungroup()
-  # update internal column and key nexons
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- rerank_exons(gr)
   return(gr)
 }
 
@@ -360,10 +332,6 @@ generate_retained_introns <- function(gr, n_events = 1) {
       end = ifelse(exon_rank == exon_idx, end[exon_rank == exon_idx + 1], end)
     ) |>
     dplyr::filter(!(exon_rank %in% c(exon_idx + 1))) |>
-    # re rank the exons accordingly
-    dplyr::mutate(
-      exon_rank = seq_len(dplyr::n())
-    ) |>
     dplyr::ungroup() |>
     plyranges::as_granges()
 
@@ -371,6 +339,7 @@ generate_retained_introns <- function(gr, n_events = 1) {
   gr <- gr |>
     dplyr::filter(!tx_id %in% ri_tx_ids) |>
     plyranges::bind_ranges(new_txps_with_ri)
+  gr <- rerank_exons(gr)
   return(gr)
 }
 
@@ -378,11 +347,15 @@ generate_retained_introns <- function(gr, n_events = 1) {
 #' @param gr A GRanges object with metadata columns: 'exon_rank'
 #' @return A GRanges object with re-ranked exons
 rerank_exons <- function(gr) {
-  # re-rank the exons accordingly
   gr <- gr |>
     dplyr::group_by(tx_id) |>
     dplyr::mutate(
-      exon_rank = seq_len(dplyr::n())
+      exon_rank = seq_len(dplyr::n()),
+      exon_rank = dplyr::if_else(
+        strand == "-",
+        rev(exon_rank),
+        exon_rank
+      )
     ) |>
     dplyr::ungroup()
   # recalculate internal column, key and  nexons
