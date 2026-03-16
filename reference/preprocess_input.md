@@ -32,3 +32,12 @@ preprocess_input(gr, coef_col, method_string = NULL)
 
 A GRanges object with added 'key', 'nexons', 'internal', and 'event'
 columns.
+
+## Examples
+
+``` r
+
+# create mock data and run preprocessing
+gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+ preprocess_input(coef_col = "coefs", method_string = "mock_method")
+```

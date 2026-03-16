@@ -48,8 +48,7 @@
 - [`find_matches_batch()`](https://thelovelab.github.io/splicelogic/reference/find_matches_batch.md)
   : Batch find overlaps between query and subject GRanges based on match
   type
-- [`generate_skipped_exons_restricted()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
-  [`generate_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+- [`generate_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_mx()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)

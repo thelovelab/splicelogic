@@ -102,4 +102,104 @@ calc_included_exons(gr, type = "boundary")
 #>       <Rle> <IRanges>  <Rle>
 #>   -------
 #>   seqinfo: no sequences
+
+
+# detect mutually exclusive exons
+gr_mx <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_mx(1)
+calc_mx_exons(gr_mx, type = "boundary")
+#> GRanges object with 2 ranges and 6 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank      coefs
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer>  <numeric>
+#>   [1]    chr12   111-115      + |         2         8         2 -0.0419509
+#>   [2]    chr12   121-125      + |         2         7         2  0.2729312
+#>                    event  tx_event
+#>              <character> <numeric>
+#>   [1] mutually_exclusive         7
+#>   [2] mutually_exclusive         8
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+
+# detect retained introns
+gr_ri <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_retained_introns(1)
+calc_retained_introns(gr_ri)
+#> GRanges object with 2 ranges and 6 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]    chr22     11-25      + |         1         4         2  0.426795
+#>   [2]    chr22     11-25      + |         1         4         2  0.426795
+#>                 event  tx_event
+#>           <character> <numeric>
+#>   [1] retained_intron         1
+#>   [2] retained_intron         3
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+
+# detect alternative 5' splice sites
+gr_a5 <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_a5ss(1)
+calc_a5ss(gr_a5)
+#> GRanges object with 3 ranges and 6 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]     chr3     21-27      + |         1         2         3  0.836454
+#>   [2]     chr3     21-27      + |         1         2         3  0.836454
+#>   [3]     chr3     21-27      + |         1         2         3  0.836454
+#>             event  tx_event
+#>       <character> <numeric>
+#>   [1]        a5ss         1
+#>   [2]        a5ss         3
+#>   [3]        a5ss         4
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+
+# detect alternative 3' splice sites
+gr_a3 <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_a3ss(1)
+calc_a3ss(gr_a3)
+#> GRanges object with 1 range and 6 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]    chr22   119-125      + |         2         6         3  0.128291
+#>             event  tx_event
+#>       <character> <numeric>
+#>   [1]        a3ss         5
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+
+# detect all event types at once
+gr_all <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
+  preprocess_input(coef_col = "coefs") |>
+  generate_skipped_exons(1)
+calc_all_events(gr_all, type = "boundary", verbose = FALSE)
+#> GRanges object with 2 ranges and 6 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]    chr19     21-25      + |         1         1         3 -0.394266
+#>   [2]    chr19     21-25      + |         1         4         3 -0.510564
+#>              event  tx_event
+#>        <character> <numeric>
+#>   [1] skipped_exon         2
+#>   [2] skipped_exon         2
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```

@@ -59,10 +59,12 @@
 <div class="section level1">
 <h1 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h1>
-<pre><code><span><span class="va">here</span></span>
-<span><span class="va">is</span></span>
-<span><span class="va">some</span></span>
-<span><span class="va">code</span></span></code></pre>
+<pre><code>exons &lt;- prepare_exons(txdb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+  dtu_table = &lt;DTU_TABLE&gt;,
+  coef_col = "estimate")
+
+processed_exons &lt;- preprocess_input(exons, coef_col = "estimate")
+events &lt;- processed_exons |&gt; calc_all_events()</code></pre>
 </div>
 <div class="section level1">
 <h1 id="feedback">Feedback<a class="anchor" aria-label="anchor" href="#feedback"></a>
