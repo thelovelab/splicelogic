@@ -70,7 +70,8 @@ calc_skipped_exons <- function(
     right_match_tbl |> dplyr::select(cand_idx, tx_id, r),
     by = c("cand_idx", "tx_id")
   ) |>
-    # for SE/included exon, the flanking exons must be adjacent (rank difference of 1)
+    # for SE/included exon, flanking exons must be
+    # adjacent (rank difference of 1)
     dplyr::filter(abs(l - r) == 1) |>
     dplyr::distinct(cand_idx, tx_id)
 
@@ -107,6 +108,16 @@ calc_included_exons <- function(gr, type = c("boundary", "over", "in")) {
 #' @rdname calc_events
 #' @return `calc_mx_exons()`: A GRanges object with an additional 'event'
 #' metadata column indicating mutually exclusive exons.
+#' @examples
+#'
+#' # detect mutually exclusive exons
+#' gr_mx <- create_mock_data(
+#'   n_genes = 2, n_tx = 4, n_exons = 4
+#' ) |>
+#'   preprocess_input(coef_col = "coefs") |>
+#'   generate_mx(1)
+#' calc_mx_exons(gr_mx, type = "boundary")
+#'
 #' @export
 calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
   type <- match.arg(type)
@@ -135,7 +146,8 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
     right_match_tbl |> dplyr::select(cand_idx, tx_id, r),
     by = c("cand_idx", "tx_id")
   ) |>
-    # for MX, the flanking exons must have a gap of exactly 2 (one exon in between)
+    # for MX, flanking exons must have a gap of
+    # exactly 2 (one exon in between)
     dplyr::filter(abs(l - r) == 2) |>
     dplyr::mutate(middle_rank = pmin(l, r) + 1L)
 
@@ -196,6 +208,16 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
 #' @rdname calc_events
 #' @return `calc_retained_introns()`: A GRanges object with an additional
 #' 'event' metadata column indicating retained introns.
+#' @examples
+#'
+#' # detect retained introns
+#' gr_ri <- create_mock_data(
+#'   n_genes = 2, n_tx = 4, n_exons = 4
+#' ) |>
+#'   preprocess_input(coef_col = "coefs") |>
+#'   generate_retained_introns(1)
+#' calc_retained_introns(gr_ri)
+#'
 #' @export
 calc_retained_introns <- function(gr) {
   # if preprocessing didn't happen
@@ -358,6 +380,16 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
 #' @rdname calc_events
 #' @return `calc_a5ss()`: A GRanges object with an additional 'event' metadata
 #' column indicating a5ss events.
+#' @examples
+#'
+#' # detect alternative 5' splice sites
+#' gr_a5 <- create_mock_data(
+#'   n_genes = 2, n_tx = 4, n_exons = 4
+#' ) |>
+#'   preprocess_input(coef_col = "coefs") |>
+#'   generate_a5ss(1)
+#' calc_a5ss(gr_a5)
+#'
 #' @export
 calc_a5ss <- function(gr) {
   calc_alt_ss(gr, by_start = TRUE)
@@ -366,6 +398,16 @@ calc_a5ss <- function(gr) {
 #' @rdname calc_events
 #' @return `calc_a3ss()`: A GRanges object with an additional 'event' metadata
 #' column indicating a3ss events.
+#' @examples
+#'
+#' # detect alternative 3' splice sites
+#' gr_a3 <- create_mock_data(
+#'   n_genes = 2, n_tx = 4, n_exons = 4
+#' ) |>
+#'   preprocess_input(coef_col = "coefs") |>
+#'   generate_a3ss(1)
+#' calc_a3ss(gr_a3)
+#'
 #' @export
 calc_a3ss <- function(gr) {
   calc_alt_ss(gr, by_start = FALSE)
@@ -375,6 +417,16 @@ calc_a3ss <- function(gr) {
 #' @param verbose If TRUE, prints progress messages. Default TRUE.
 #' @return `calc_all_events()`: A GRanges object combining all detected events,
 #' with an 'event' metadata column indicating the event type.
+#' @examples
+#'
+#' # detect all event types at once
+#' gr_all <- create_mock_data(
+#'   n_genes = 2, n_tx = 4, n_exons = 4
+#' ) |>
+#'   preprocess_input(coef_col = "coefs") |>
+#'   generate_skipped_exons(1)
+#' calc_all_events(gr_all, type = "boundary", verbose = FALSE)
+#'
 #' @export
 calc_all_events <- function(
   gr,

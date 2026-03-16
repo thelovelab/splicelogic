@@ -76,6 +76,12 @@ combine_gr_input <- function(gr1, gr2, coef_col) {
 #' @return A GRanges object with added 'key', 'nexons',
 #' 'internal', and 'event' columns.
 #' @export
+#' @examples
+#' 
+#' # create mock data and run preprocessing
+#' gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+#'  preprocess_input(coef_col = "coefs", method_string = "mock_method")
+#' 
 preprocess_input <- function(gr, coef_col, method_string = NULL) {
   check_input(gr, coef_col) # check metadata columns are present
 
