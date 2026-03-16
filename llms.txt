@@ -66,6 +66,9 @@ as part of the EOSS program.
   the 'type' parameter which can be "in", "over", or "boundary".
 - [`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md)
   : Create mock GRanges data for splicing event testing
+- [`find_candidates_and_flanks()`](https://thelovelab.github.io/splicelogic/reference/find_candidates_and_flanks.md)
+  : Find candidates and build flanking match tables for skipped/MX exon
+  detection
 - [`find_introns()`](https://thelovelab.github.io/splicelogic/reference/find_introns.md)
   : function to find introns given a GRanges object of exons
 - [`find_matches_batch()`](https://thelovelab.github.io/splicelogic/reference/find_matches_batch.md)
@@ -78,6 +81,9 @@ as part of the EOSS program.
   [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_a3ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   : Generate mock splice events in a GRanges object
+- [`match_left_right()`](https://thelovelab.github.io/splicelogic/reference/match_left_right.md)
+  : For a given candidate exon, find matching left and right exons in
+  pos_exons
 - [`mx_mock_data()`](https://thelovelab.github.io/splicelogic/reference/mx_mock_data.md)
   : Create a sample GRanges with one negative coef transcript and one
   positive coef transcripts This dataset is designed to include mutually

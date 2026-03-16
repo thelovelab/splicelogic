@@ -14,10 +14,12 @@
 <url><loc>https://thelovelab.github.io/splicelogic/reference/combine_gr_input.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/compute_matches.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/create_mock_data.html</loc></url>
+<url><loc>https://thelovelab.github.io/splicelogic/reference/find_candidates_and_flanks.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/find_introns.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/find_matches_batch.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/generate_events.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/index.html</loc></url>
+<url><loc>https://thelovelab.github.io/splicelogic/reference/match_left_right.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/mx_mock_data.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/no_event_mock_data.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/prepare_exons.html</loc></url>
