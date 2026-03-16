@@ -178,71 +178,6 @@ find_introns <- function(gr) {
   # eg create_mock_data(1,1,1) and check that the output
   # is an empty GRanges with the correct metadata columns
 }
-
-#' Filter candidates based on their presence in transcripts
-#' Then get the left and right exons for each candidate
-#' Return a named list with three GRanges objects: candidates, left_exons, right
-#' @param gr A GRanges object with all exons
-#' @param coef_col The name of the coefficient column in gr
-#' @return A named list with three GRanges objects:
-#' candidates, left_exons, right_exons.
-#' All are from the neg_exons set.
-candidates_by_presence <- function(gr, coef_col) {
-  coef <- rlang::sym(coef_col)
-
-  # filter internal exons and put n_txp per gene
-  gr_internal <- gr |>
-    dplyr::group_by(gene_id) |>
-    dplyr::mutate(n_txp = dplyr::n_distinct(tx_id)) |>
-    dplyr::ungroup()
-
-  # full data
-  keys <- data.frame(
-    seqnames = GenomicRanges::seqnames(gr_internal),
-    start = IRanges::start(gr_internal),
-    end = IRanges::end(gr_internal),
-    gene_id = gr_internal$gene_id,
-    n_txp = gr_internal$n_txp
-  )
-
-  # count occurrences of each exon
-  key_count <- vctrs::vec_count(keys) |>
-    dplyr::filter((count / key$n_txp) < 1)
-
-  # match it back to GRanges
-  candidates <- gr_internal[vctrs::vec_in(keys, key_count$key)] |>
-    dplyr::filter(internal & (!!coef < 0))
-
-  # early return: no candidates -> empty list with GRanges objects
-  if (length(candidates) == 0L) {
-    return(list(
-      candidates = candidates,
-      left_exons = GenomicRanges::GRanges(),
-      right_exons = GenomicRanges::GRanges()
-    ))
-  }
-  # keys of exons to the left and right of candidates
-  # TO DO: check if this works for - strand.
-  # ie would the left exon be exon_rank +1?
-  left_keys <- paste0(candidates$tx_id, "-", candidates$exon_rank - 1L)
-  right_keys <- paste0(candidates$tx_id, "-", candidates$exon_rank + 1L)
-
-  # get the actual exons for the candidates (preserves order)
-  # exon to the left of the candidates from neg_exons set
-  left_exons <- gr |> dplyr::slice(match(left_keys, key))
-  # exon to the right of the candidates from neg_exons set
-  right_exons <- gr |> dplyr::slice(match(right_keys, key))
-
-  # returns a list of GRanges of same length:
-  # ‘candidates’ - neg exons not overlapping pos, internal
-  # ‘left_exons’ - left exons of candidates
-  # ‘right_exons’ - right exons of candidates
-  list(
-    candidates = candidates,
-    left_exons = left_exons,
-    right_exons = right_exons
-  )
-}
 #’ Filter candidates based on their presence in transcripts
 #' Then get the left and right exons for each candidate
 #' Return a named list with three tibbles: candidates, left_exons, right_exons
@@ -251,7 +186,7 @@ candidates_by_presence <- function(gr, coef_col) {
 #' @param pos_exons A GRanges object with positive coefficient exons
 #' @return A named list with three granges: candidates, left_exons, right_exons
 #' candidates, left_exons, right_exons are all from neg_exons set
-candidates_by_presence_v2 <- function(gr, neg_exons, pos_exons) {
+candidates_by_presence <- function(gr, neg_exons, pos_exons) {
   pos_exons <- pos_exons |>
     dplyr::group_by(gene_id) |>
     dplyr::mutate(n_txp_pos = dplyr::n_distinct(tx_id)) |>
@@ -286,7 +221,7 @@ candidates_by_presence_v2 <- function(gr, neg_exons, pos_exons) {
   right_exons <- neg_exons |> dplyr::slice(match(right_keys, key))
 
   # returns a list of GRanges of same length:
-  # ‘candidates’ - neg exons that do not overlap any pos exons, and are internal
+  # ‘candidates’ - neg exons that do not overlap any pos exons & are internal
   # ‘left_exons’ - left exons of candidates
   # ‘right_exons’ - right exons of candidates
   list(
@@ -361,8 +296,8 @@ find_candidates_and_flanks <- function(
   pos_exons <- gr |> dplyr::filter(sign(estimates) == 1 * factor)
   neg_exons <- gr |> dplyr::filter(sign(estimates) == -1 * factor)
 
-  # candidates_by_presence_v2 returns GRanges
-  filter_results <- candidates_by_presence_v2(gr, neg_exons, pos_exons)
+  # candidates_by_presence returns GRanges
+  filter_results <- candidates_by_presence(gr, neg_exons, pos_exons)
 
   candidates <- filter_results$candidates
   left_exons <- filter_results$left_exons
