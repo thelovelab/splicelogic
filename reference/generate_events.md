@@ -147,9 +147,9 @@ generate_retained_introns(gr, n_events = 1)
 #>    ...         ...       ...       ...       ...
 #>   [27]         8-3         4      TRUE  0.355956
 #>   [28]         8-4         4     FALSE  0.355956
-#>   [29]         2-1         4     FALSE  0.959888
-#>   [30]         2-2         4      TRUE  0.959888
-#>   [31]         2-4         4     FALSE  0.959888
+#>   [29]         2-1         3     FALSE  0.959888
+#>   [30]         2-2         3      TRUE  0.959888
+#>   [31]         2-3         3     FALSE  0.959888
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 

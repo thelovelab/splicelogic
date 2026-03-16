@@ -10,14 +10,16 @@ following types of splicing events:
 
 - **Skipped exons (SE)** – exons present in one isoform but absent in
   another.
+- **Retained exons (RE)** – exons present in one isoform but absent in
+  another.
 - **Mutually exclusive exons (MXE)** – pairs of exons where one is
   included at the expense of the other.
 - **Retained introns (RI)** – intronic regions that are retained as part
   of an exon in an alternative isoform.
 - **Alternative 5’ (A5SS)** – exons that share the same 3’ splice site
-  but differ at the 5’ end.
+  but differ at the 5’ splice site.
 - **Alternative 3’ (A3SS)** – exons that share the same 5’ splice site
-  but differ at the 3’ end.
+  but differ at the 3’ splice site.
 
 ## Quick start
 
@@ -26,9 +28,8 @@ transcripts, one can use the following code to identify splice events:
 
 ``` r
 
-exons <- preprocess_input(exons, coef_col = "coefs")
+exons <- preprocess_input(exons, coef_col = "estimates")
 skipped <- exons |> calc_skipped_exons()
-mut_exc <- exons |> calc_mx_exons()
 # etc.
 ```
 
@@ -90,138 +91,33 @@ In the abstract, Jones *et al.* describe the experiment:
 > expression (DGE), differential transcript expression (DTE), and
 > differential transcript usage (DTU) across brain regions and by sex.
 
+### Loading data
+
 ``` r
 
 library(readr)
 # load DTU results 
 dir <- system.file("extdata", package="splicelogic")
 dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
-```
-
-    ## Rows: 49 Columns: 5
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: "\t"
-    ## chr (3): tx_id, gene_id, gene_name
-    ## dbl (2): estimate, padj
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 
 library(plyranges)
-```
-
-    ## Loading required package: BiocGenerics
-    ## Loading required package: generics
-    ## 
-    ## Attaching package: 'generics'
-    ## 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,
-    ##     setequal, union
-    ## 
-    ## 
-    ## Attaching package: 'BiocGenerics'
-    ## 
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     IQR, mad, sd, var, xtabs
-    ## 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
-    ##     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
-    ##     get, grep, grepl, is.unsorted, lapply, Map, mapply, match, mget,
-    ##     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
-    ##     rbind, Reduce, rownames, sapply, saveRDS, table, tapply, unique,
-    ##     unsplit, which.max, which.min
-    ## 
-    ## Loading required package: IRanges
-    ## Loading required package: S4Vectors
-    ## Loading required package: stats4
-    ## 
-    ## Attaching package: 'S4Vectors'
-    ## 
-    ## The following object is masked from 'package:utils':
-    ## 
-    ##     findMatches
-    ## 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     expand.grid, I, unname
-    ## 
-    ## Loading required package: GenomicRanges
-    ## Loading required package: Seqinfo
-    ## Loading required package: dplyr
-    ## 
-    ## Attaching package: 'dplyr'
-    ## 
-    ## The following objects are masked from 'package:GenomicRanges':
-    ## 
-    ##     intersect, setdiff, union
-    ## 
-    ## The following object is masked from 'package:Seqinfo':
-    ## 
-    ##     intersect
-    ## 
-    ## The following objects are masked from 'package:IRanges':
-    ## 
-    ##     collapse, desc, intersect, setdiff, slice, union
-    ## 
-    ## The following objects are masked from 'package:S4Vectors':
-    ## 
-    ##     first, intersect, rename, setdiff, setequal, union
-    ## 
-    ## The following objects are masked from 'package:BiocGenerics':
-    ## 
-    ##     combine, intersect, setdiff, setequal, union
-    ## 
-    ## The following object is masked from 'package:generics':
-    ## 
-    ##     explain
-    ## 
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-    ## 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-    ## 
-    ## 
-    ## Attaching package: 'plyranges'
-    ## 
-    ## The following objects are masked from 'package:dplyr':
-    ## 
-    ##     between, n, n_distinct
-
-``` r
-
 # load exon ranges and metadata, and set seqinfo
 exons <- read_bed(file.path(dir, "exons_M31.bed.gz"))
-mcols(exons) <- DataFrame(readr::read_delim(file.path(dir, "exons_mcols.tsv.gz")))
-```
-
-    ## Rows: 601 Columns: 4
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: "\t"
-    ## chr (2): exon_name, tx_id
-    ## dbl (2): exon_id, exon_rank
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
-
+mcols(exons) <- DataFrame(
+  readr::read_delim(file.path(dir, "exons_mcols.tsv.gz"))
+)
 # M31 is paired with GRCm39 / mm39
 si <- Seqinfo::Seqinfo(genome="mm39")
 seqlevels(exons) <- seqlevels(si)
 seqinfo(exons) <- si
 ```
 
-next we join the …
+Next, we join the DTU results into the exon GRanges metadata. This is
+necessary for the splicelogic functions to know which transcripts are up
+or downregulated, and to which gene they belong. The code below matches
+the transcript IDs in the exon metadata with those in the DTU results
+table, and adds the relevant columns from the DTU table to the exon
+metadata.
 
 ``` r
 
@@ -242,20 +138,208 @@ exons <- exons |>
   plyranges::join_mcols_left(dtu_table, by = "tx_id")
 ```
 
-splicelogic works on exons from significantly changed transcripts, so we
-first filter out transcripts that were not signficant:
+## How to start detecting splicing events
+
+`splicelogic` works on exons from significantly changed transcripts, so
+we first filter out transcripts that were not signficant:
 
 ``` r
 
 exons <- exons |> filter(padj < .05)
 ```
 
+### Preprocessing input data
+
+The first step is to run
+[`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md),
+which prepares the exon data for event detection. This function checks
+the input data, ensures that the necessary
+
 ``` r
 
 library(splicelogic)
-
 processed_exons <- preprocess_input(exons, coef_col = "estimate")
-calc_all_events(processed_exons)
+```
+
+### Calculate skipped exons
+
+After preprocessing, you can run the various functions to calculate
+different types of splicing events. To calculate skipped exons:
+
+``` r
+
+skipped_exons <- calc_skipped_exons(processed_exons)
+skipped_exons
+```
+
+    ## GRanges object with 1 range and 10 metadata columns:
+    ##       seqnames            ranges strand |   exon_id            exon_name
+    ##          <Rle>         <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr17 66647479-66647535      - |    480827 ENSMUSE00000443570.7
+    ##       exon_rank                 tx_id               gene_id   gene_name
+    ##       <numeric>           <character>           <character> <character>
+    ##   [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18       Mtcl1
+    ##        estimate       padj        event              tx_event
+    ##       <numeric>  <numeric>  <character>           <character>
+    ##   [1]   -2.9732 0.00970121 skipped_exon ENSMUST00000086693.12
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
+
+### calculate included exons
+
+``` r
+
+included_exons <- calc_included_exons(processed_exons)
+included_exons
+```
+
+    ## GRanges object with 2 ranges and 10 metadata columns:
+    ##       seqnames              ranges strand |   exon_id            exon_name
+    ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2
+    ##   [2]     chr8 120884207-120884236      + |    250989 ENSMUSE00001243257.2
+    ##       exon_rank                 tx_id               gene_id     gene_name
+    ##       <numeric>           <character>           <character>   <character>
+    ##   [1]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##   [2]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##        estimate        padj         event              tx_event
+    ##       <numeric>   <numeric>   <character>           <character>
+    ##   [1]   3.02406 0.018472554 included_exon ENSMUST00000065504.17
+    ##   [2]   4.14230 0.000995041 included_exon  ENSMUST00000108951.8
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
+
+### Calculate mutually exclusive exons
+
+``` r
+
+mx_exons <- calc_mx_exons(processed_exons)
+mx_exons
+```
+
+    ## GRanges object with 2 ranges and 10 metadata columns:
+    ##       seqnames            ranges strand |   exon_id            exon_name
+    ##          <Rle>         <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr12 91799829-91799996      - |    374021 ENSMUSE00001304078.2
+    ##   [2]    chr12 91798541-91798558      - |    374018 ENSMUSE00001473756.2
+    ##       exon_rank                 tx_id               gene_id   gene_name
+    ##       <numeric>           <character>           <character> <character>
+    ##   [1]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15       Sel1l
+    ##   [2]         4  ENSMUST00000178462.8 ENSMUSG00000020964.15       Sel1l
+    ##        estimate       padj              event              tx_event
+    ##       <numeric>  <numeric>        <character>           <character>
+    ##   [1]  -3.28535 0.00171934 mutually_exclusive  ENSMUST00000178462.8
+    ##   [2]   2.99384 0.00171934 mutually_exclusive ENSMUST00000021347.12
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
+
+### Calculate retained introns
+
+``` r
+
+retained_introns <- calc_retained_introns(processed_exons)
+retained_introns
+```
+
+    ## GRanges object with 0 ranges and 0 metadata columns:
+    ##    seqnames    ranges strand
+    ##       <Rle> <IRanges>  <Rle>
+    ##   -------
+    ##   seqinfo: no sequences
+
+### Calculate alternative 5’ splice sites
+
+``` r
+
+a5ss <- calc_a5ss(processed_exons)
+a5ss
+```
+
+    ## GRanges object with 4 ranges and 10 metadata columns:
+    ##       seqnames              ranges strand |   exon_id            exon_name
+    ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr14   20529963-20530189      - |    408097 ENSMUSE00000901772.3
+    ##   [2]     chr8 120887954-120892045      + |    250998 ENSMUSE00000446870.6
+    ##   [3]     chr9   21858242-21858348      + |    266133 ENSMUSE00001322549.2
+    ##   [4]     chr9   21858900-21860203      + |    266139 ENSMUSE00001327764.2
+    ##       exon_rank                 tx_id               gene_id     gene_name
+    ##       <numeric>           <character>           <character>   <character>
+    ##   [1]         1  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##   [2]        13 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##   [3]         7  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [4]         9  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##        estimate        padj       event              tx_event
+    ##       <numeric>   <numeric> <character>           <character>
+    ##   [1]   3.02406 0.018472554        a5ss ENSMUST00000065504.17
+    ##   [2]   4.14230 0.000995041        a5ss  ENSMUST00000108951.8
+    ##   [3]   6.33671 0.006078234        a5ss ENSMUST00000046371.13
+    ##   [4]   6.33671 0.006078234        a5ss ENSMUST00000046371.13
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
+
+### Calculate alternative 3’ splice sites
+
+``` r
+
+a3ss <- calc_a3ss(processed_exons)
+a3ss
+```
+
+    ## GRanges object with 7 ranges and 10 metadata columns:
+    ##       seqnames              ranges strand |   exon_id            exon_name
+    ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr14   20505329-20506669      - |    408059 ENSMUSE00000564348.6
+    ##   [2]     chr8 120840891-120841056      + |    250964 ENSMUSE00000678589.2
+    ##   [3]     chr8 112437109-112438026      - |    262490 ENSMUSE00001391518.2
+    ##   [4]     chr4 101504990-101505022      + |    107521 ENSMUSE00000631777.3
+    ##   [5]     chr4 101513375-101513492      + |    107524 ENSMUSE00000671573.2
+    ##   [6]     chr9   21849570-21849860      + |    266124 ENSMUSE00001334761.2
+    ##   [7]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2
+    ##       exon_rank                 tx_id               gene_id     gene_name
+    ##       <numeric>           <character>           <character>   <character>
+    ##   [1]        14  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##   [2]         1 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##   [3]         7  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1
+    ##   [4]         1  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [5]         3  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [6]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [7]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
+    ##        estimate        padj       event              tx_event
+    ##       <numeric>   <numeric> <character>           <character>
+    ##   [1]   3.02406 0.018472554        a3ss ENSMUST00000065504.17
+    ##   [2]   4.14230 0.000995041        a3ss  ENSMUST00000108951.8
+    ##   [3]   3.85659 0.027009405        a3ss  ENSMUST00000166232.4
+    ##   [4]   9.13055 0.018472554        a3ss ENSMUST00000030254.15
+    ##   [5]   9.13055 0.018472554        a3ss ENSMUST00000030254.15
+    ##   [6]   6.33671 0.006078234        a3ss ENSMUST00000046371.13
+    ##   [7]   2.88524 0.013967132        a3ss ENSMUST00000097291.10
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
+
+### Calculate all events
+
+``` r
+
+all_events <- calc_all_events(processed_exons)
+```
+
+    ## Calculating skipped exon events...
+
+    ## Calculating included exon events...
+
+    ## Calculating mutually exclusive exon events...
+
+    ## Calculating retained intron events...
+
+    ## Calculating alternative 5' splice site events...
+
+    ## Calculating alternative 3' splice site events...
+
+    ## Done! 16 events detected.
+
+``` r
+
+all_events
 ```
 
     ## GRanges object with 16 ranges and 10 metadata columns:
@@ -301,7 +385,12 @@ calc_all_events(processed_exons)
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
-### Obtaining exon ranges with prepare_exons
+## Upstream methods
+
+Something about what methods can be used for upstream DTU or switching
+analysis.
+
+## Obtaining exon ranges with prepare_exons
 
 [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
 extracts exon ranges from a *TxDb* object and merges them with your DTU
@@ -311,13 +400,66 @@ results table in a single call. It returns a flat *GRanges* ready for
 ``` r
 
 library(AnnotationHub)
+```
+
+    ## Loading required package: BiocFileCache
+
+    ## Loading required package: dbplyr
+
+    ## 
+    ## Attaching package: 'dbplyr'
+
+    ## The following objects are masked from 'package:dplyr':
+    ## 
+    ##     ident, sql
+
+``` r
+
 ah <- AnnotationHub()
 txdb <- ah[["AH75191"]]
+```
+
+    ## loading from cache
+
+    ## Loading required package: GenomicFeatures
+
+    ## Loading required package: AnnotationDbi
+
+    ## Loading required package: Biobase
+
+    ## Welcome to Bioconductor
+    ## 
+    ##     Vignettes contain introductory material; view with
+    ##     'browseVignettes()'. To cite Bioconductor, see
+    ##     'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+    ## 
+    ## Attaching package: 'Biobase'
+
+    ## The following object is masked from 'package:AnnotationHub':
+    ## 
+    ##     cache
+
+    ## 
+    ## Attaching package: 'AnnotationDbi'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     select
+
+``` r
+
 # extract transcript table as tibble
 txps <- txdb |>
   AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
   tibble::as_tibble() |>
   dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
+```
+
+    ## 'select()' returned 1:1 mapping between keys and columns
+
+``` r
+
 # simulate DTU results
 dtu_table <- txps |>
   dplyr::mutate(
@@ -326,6 +468,18 @@ dtu_table <- txps |>
   )
 
 exons <- prepare_exons(txdb, dtu_table, coef_col = "effect_est", verbose = TRUE)
+```
+
+    ## Extracting exons from TxDb...
+
+    ## Mapping transcript IDs...
+
+    ## Merging DTU results onto exons...
+
+    ## Done. Returned 1372308 exon ranges from 227462unique transcripts.
+
+``` r
+
 gr <- preprocess_input(exons, coef_col = "effect_est")
 ```
 
@@ -333,146 +487,6 @@ For a step-by-step breakdown of what
 [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
 does internally, see [Obtaining exon ranges
 manually](#obtaining-exon-ranges-manually).
-
-### Upstream methods
-
-Something about what methods can be used for upstream DTU or switching
-analysis.
-
-## How to start detecting splicing events
-
-### Preprocessing
-
-We can create mock data for demonstration purposes using the
-[`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md)
-function. This function generates a `GRanges` object with the required
-metadata columns and random coefficient values for each transcript,
-making sure that at least one transcript is upregulated (coef\>0) and
-one is downregulated (coef\<0) for each gene.
-
-``` r
-
-gr <- create_mock_data( n_genes = 2, n_tx = 4, n_exons = 6 )
-mcols(gr)
-```
-
-### Skipped exons
-
-[`calc_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-identifies exons that are present in downregulated transcripts but
-absent (skipped) in upregulated ones.
-
-Using the gr object generated by
-[`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md),
-we can generate skiped exon events with the
-[`generate_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
-function, which modifies the input `GRanges` object to include skipped
-exon events. Then we can run the detection function
-[`calc_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-on the modified `GRanges` object:
-
-``` r
-
-gr_se <- generate_skipped_exons(gr, n_se = 2)
-gr_se <- preprocess_input(gr_se, coef_col = "coefs")
-se_result <- calc_skipped_exons(gr_se)
-se_result
-```
-
-The result is a `GRanges` object containing only the exons flagged as
-skipped, with an `event` column set to `"skipped_exon"`. The `"tx_id"`
-refers to the transcript that includes the skipped exon, `"tx_event"`
-indicates the transcripts in respect to which the exon is skipped
-(i.e. the downregulated transcripts that do not include the exon).
-
-``` r
-
-mcols(se_result)[, c("gene_id", "tx_id", "n_txp", "event", "tx_event")]
-```
-
-### Mutually exclusive exons
-
-[`calc_mx_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-detects pairs of exons where one exon is included in one isoform and a
-different exon occupies the equivalent position in another isoform.
-
-The
-[`mx_mock_data()`](https://thelovelab.github.io/splicelogic/reference/mx_mock_data.md)
-dataset is designed to contain mutually exclusive exon events:
-
-``` r
-
-gr_mx <- mx_mock_data()
-gr_mx <- preprocess_input(gr_mx, coef_col = "coefs")
-mx_result <- calc_mx_exons(gr_mx)
-mx_result
-```
-
-``` r
-
-mcols(mx_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
-```
-
-### Retained introns
-
-[`calc_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-finds exons in upregulated transcripts that overlap intronic regions of
-downregulated transcripts, indicating intron retention.
-
-``` r
-
-gr_ri <- create_mock_data(3, 6, 3)
-gr_ri <- preprocess_input(gr_ri, coef_col = "coefs")
-gr_ri <- generate_retained_introns(gr_ri, n_ri = 3)
-ri_result <- calc_retained_introns(gr_ri)
-ri_result
-```
-
-``` r
-
-if (length(ri_result) > 0) {
-    mcols(ri_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
-}
-```
-
-### Alternative 3’ and 5’ splice sites
-
-**NOTE: I think it’s more common to list 5 then 3**
-
-[`calc_a3ss()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-detects exons that share one boundary (start or end) with an exon in
-another isoform but differ at the opposite end, indicating alternative
-splice site usage.
-
-``` r
-
-gr_ss <- create_mock_data(3, 3, 6)
-gr_ss <- preprocess_input(gr_ss, coef_col = "coefs")
-gr_ss <- generate_a3ss(gr_ss, n_a3ss = 3)
-ss_result <- calc_a3ss(gr_ss)
-ss_result
-```
-
-``` r
-
-if (length(ss_result) > 0) {
-    mcols(ss_result)[, c("gene_id", "tx_id", "exon_rank", "event")]
-}
-```
-
-## Handling cases with no events
-
-When the input data does not contain any splicing events, each detection
-function returns an empty `GRanges` object:
-
-``` r
-
-gr_none <- no_event_mock_data()
-gr_none <- preprocess_input(gr_none, coef_col = "coefs")
-
-calc_skipped_exons(gr_none)
-calc_mx_exons(gr_none)
-```
 
 ## Obtaining exon ranges manually
 
@@ -495,6 +509,8 @@ ah <- AnnotationHub()
 txdb <- ah[["AH75191"]]
 ```
 
+    ## loading from cache
+
 The following extracts the exons from the *TxDb*:
 
 ``` r
@@ -515,6 +531,8 @@ txps <- txdb |>
   dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
 ```
 
+    ## 'select()' returned 1:1 mapping between keys and columns
+
 Suppose we already have DTU results for transcripts:
 
 ``` r
@@ -531,6 +549,12 @@ dtu_table <- txps |>
 
 # check the concordance...
 all.equal(dtu_table$tx_num, as.integer(names(ebt)))
+```
+
+    ## [1] TRUE
+
+``` r
+
 # and if aligned, set new names for exons
 exons <- ebt
 names(exons) <- dtu_table$tx_id
@@ -588,45 +612,52 @@ sessionInfo()
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] splicelogic_0.0.67   plyranges_1.30.1     dplyr_1.2.0         
-    ##  [4] GenomicRanges_1.62.1 Seqinfo_1.0.0        IRanges_2.44.0      
-    ##  [7] S4Vectors_0.48.0     BiocGenerics_0.56.0  generics_0.1.4      
-    ## [10] readr_2.2.0         
+    ##  [1] tibble_3.3.1           GenomicFeatures_1.62.0 AnnotationDbi_1.72.0  
+    ##  [4] Biobase_2.70.0         AnnotationHub_4.0.0    BiocFileCache_3.0.0   
+    ##  [7] dbplyr_2.5.2           splicelogic_0.0.67     plyranges_1.30.1      
+    ## [10] dplyr_1.2.0            GenomicRanges_1.62.1   Seqinfo_1.0.0         
+    ## [13] IRanges_2.44.0         S4Vectors_0.48.0       BiocGenerics_0.56.0   
+    ## [16] generics_0.1.4         readr_2.2.0           
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] SummarizedExperiment_1.40.0 rjson_0.2.23               
-    ##  [3] xfun_0.56                   bslib_0.10.0               
-    ##  [5] htmlwidgets_1.6.4           Biobase_2.70.0             
-    ##  [7] lattice_0.22-9              tzdb_0.5.0                 
-    ##  [9] vctrs_0.7.1                 tools_4.5.2                
-    ## [11] bitops_1.0-9                curl_7.0.0                 
-    ## [13] parallel_4.5.2              tibble_3.3.1               
-    ## [15] pkgconfig_2.0.3             Matrix_1.7-4               
-    ## [17] desc_1.4.3                  cigarillo_1.0.0            
-    ## [19] lifecycle_1.0.5             compiler_4.5.2             
-    ## [21] Rsamtools_2.26.0            textshaping_1.0.5          
-    ## [23] Biostrings_2.78.0           codetools_0.2-20           
-    ## [25] GenomeInfoDb_1.46.2         htmltools_0.5.9            
-    ## [27] sass_0.4.10                 RCurl_1.98-1.17            
-    ## [29] yaml_2.3.12                 pillar_1.11.1              
-    ## [31] pkgdown_2.2.0               crayon_1.5.3               
-    ## [33] jquerylib_0.1.4             BiocParallel_1.44.0        
-    ## [35] cachem_1.1.0                DelayedArray_0.36.0        
-    ## [37] abind_1.4-8                 tidyselect_1.2.1           
-    ## [39] digest_0.6.39               restfulr_0.0.16            
-    ## [41] fastmap_1.2.0               grid_4.5.2                 
-    ## [43] cli_3.6.5                   SparseArray_1.10.9         
-    ## [45] magrittr_2.0.4              S4Arrays_1.10.1            
-    ## [47] XML_3.99-0.22               withr_3.0.2                
-    ## [49] UCSC.utils_1.6.1            bit64_4.6.0-1              
-    ## [51] httr_1.4.8                  rmarkdown_2.30             
-    ## [53] XVector_0.50.0              matrixStats_1.5.0          
-    ## [55] bit_4.6.0                   otel_0.2.0                 
-    ## [57] ragg_1.5.1                  hms_1.1.4                  
-    ## [59] evaluate_1.0.5              knitr_1.51                 
-    ## [61] BiocIO_1.20.0               rtracklayer_1.70.1         
-    ## [63] rlang_1.1.7                 glue_1.8.0                 
-    ## [65] vroom_1.7.0                 jsonlite_2.0.0             
-    ## [67] R6_2.6.1                    MatrixGenerics_1.22.0      
-    ## [69] GenomicAlignments_1.46.0    systemfonts_1.3.2          
-    ## [71] fs_1.6.7
+    ##  [1] tidyselect_1.2.1            blob_1.3.0                 
+    ##  [3] filelock_1.0.3              Biostrings_2.78.0          
+    ##  [5] bitops_1.0-9                fastmap_1.2.0              
+    ##  [7] RCurl_1.98-1.17             GenomicAlignments_1.46.0   
+    ##  [9] XML_3.99-0.22               digest_0.6.39              
+    ## [11] lifecycle_1.0.5             KEGGREST_1.50.0            
+    ## [13] RSQLite_2.4.6               magrittr_2.0.4             
+    ## [15] compiler_4.5.2              rlang_1.1.7                
+    ## [17] sass_0.4.10                 tools_4.5.2                
+    ## [19] yaml_2.3.12                 rtracklayer_1.70.1         
+    ## [21] knitr_1.51                  S4Arrays_1.10.1            
+    ## [23] htmlwidgets_1.6.4           bit_4.6.0                  
+    ## [25] curl_7.0.0                  DelayedArray_0.36.0        
+    ## [27] abind_1.4-8                 BiocParallel_1.44.0        
+    ## [29] purrr_1.2.1                 withr_3.0.2                
+    ## [31] desc_1.4.3                  grid_4.5.2                 
+    ## [33] SummarizedExperiment_1.40.0 cli_3.6.5                  
+    ## [35] rmarkdown_2.30              crayon_1.5.3               
+    ## [37] ragg_1.5.1                  otel_0.2.0                 
+    ## [39] httr_1.4.8                  tzdb_0.5.0                 
+    ## [41] rjson_0.2.23                DBI_1.3.0                  
+    ## [43] cachem_1.1.0                parallel_4.5.2             
+    ## [45] BiocManager_1.30.27         XVector_0.50.0             
+    ## [47] restfulr_0.0.16             matrixStats_1.5.0          
+    ## [49] vctrs_0.7.1                 Matrix_1.7-4               
+    ## [51] jsonlite_2.0.0              hms_1.1.4                  
+    ## [53] bit64_4.6.0-1               systemfonts_1.3.2          
+    ## [55] jquerylib_0.1.4             glue_1.8.0                 
+    ## [57] pkgdown_2.2.0               codetools_0.2-20           
+    ## [59] BiocVersion_3.22.0          GenomeInfoDb_1.46.2        
+    ## [61] BiocIO_1.20.0               UCSC.utils_1.6.1           
+    ## [63] pillar_1.11.1               rappdirs_0.3.4             
+    ## [65] htmltools_0.5.9             R6_2.6.1                   
+    ## [67] httr2_1.2.2                 textshaping_1.0.5          
+    ## [69] vroom_1.7.0                 evaluate_1.0.5             
+    ## [71] lattice_0.22-9              png_0.1-9                  
+    ## [73] Rsamtools_2.26.0            cigarillo_1.0.0            
+    ## [75] memoise_2.0.1               bslib_0.10.0               
+    ## [77] SparseArray_1.10.9          xfun_0.56                  
+    ## [79] fs_1.6.7                    MatrixGenerics_1.22.0      
+    ## [81] pkgconfig_2.0.3

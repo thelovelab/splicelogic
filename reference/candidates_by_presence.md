@@ -1,13 +1,12 @@
-# Filter candidates based on their presence in transcripts Then get the left and right exons for each candidate Return a named list with three GRanges objects: candidates, left_exons, right
+# Then get the left and right exons for each candidate Return a named list with three tibbles: candidates, left_exons, right_exons
 
-Filter candidates based on their presence in transcripts Then get the
-left and right exons for each candidate Return a named list with three
-GRanges objects: candidates, left_exons, right
+Then get the left and right exons for each candidate Return a named list
+with three tibbles: candidates, left_exons, right_exons
 
 ## Usage
 
 ``` r
-candidates_by_presence(gr, coef_col)
+candidates_by_presence(gr, neg_exons, pos_exons)
 ```
 
 ## Arguments
@@ -16,11 +15,15 @@ candidates_by_presence(gr, coef_col)
 
   A GRanges object with all exons
 
-- coef_col:
+- neg_exons:
 
-  The name of the coefficient column in gr
+  A GRanges object with negative coefficient exons
+
+- pos_exons:
+
+  A GRanges object with positive coefficient exons
 
 ## Value
 
-A named list with three GRanges objects: candidates, left_exons,
-right_exons. All are from the neg_exons set.
+A named list with three granges: candidates, left_exons, right_exons
+candidates, left_exons, right_exons are all from neg_exons set

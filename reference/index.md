@@ -17,10 +17,6 @@
   named list with three GRanges objects: candidates, left_exons,
   right_exons
 - [`candidates_by_presence()`](https://thelovelab.github.io/splicelogic/reference/candidates_by_presence.md)
-  : Filter candidates based on their presence in transcripts Then get
-  the left and right exons for each candidate Return a named list with
-  three GRanges objects: candidates, left_exons, right
-- [`candidates_by_presence_v2()`](https://thelovelab.github.io/splicelogic/reference/candidates_by_presence_v2.md)
   : Then get the left and right exons for each candidate Return a named
   list with three tibbles: candidates, left_exons, right_exons
 - [`check_input()`](https://thelovelab.github.io/splicelogic/reference/check_input.md)
