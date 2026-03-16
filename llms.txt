@@ -2,7 +2,7 @@
 
 # How to install
 
-*splicelogic* will be submitted to Bioconductor. For now you can test it
+`splicelogic` will be submitted to Bioconductor. For now you can test it
 by installing from GitHub:
 
     devtools::install_github("thelovelab/splicelogic")
@@ -23,8 +23,8 @@ GitHub](https://github.com/thelovelab/splicelogic/issues/new).
 
 # Funding
 
-splicelogic was supported by NHGRI R01-HG009937, and the Wellcome Trust
-as part of the EOSS program.
+`splicelogic` was supported by NHGRI R01-HG009937, and the Wellcome
+Trust as part of the EOSS program.
 
 # Package index
 
