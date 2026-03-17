@@ -5,6 +5,7 @@
 #' happening between both tx_id 2 and tx_id 3
 #' @return A GRanges object with two transcripts per gene
 #' @importFrom stats runif
+#' @noRd
 se_mock_data <- function() {
   df1 <- data.frame(
     seqnames = "chr1",
@@ -51,6 +52,7 @@ se_mock_data <- function() {
 #' of tx_id 2. There is also a skipped exon event at
 #' exon_rank 5 of tx_id 1.
 #' @return A GRanges object with two transcripts per gene and candidate logic
+#' @noRd
 mx_mock_data <- function() {
   df1 <- data.frame(
     seqnames = "chr1",
@@ -83,6 +85,7 @@ mx_mock_data <- function() {
 #' transcript and one positive coef transcripts
 #' This dataset is designed to include no splicing events
 #' @return A GRanges object with two transcripts per gene and no candidate logic
+#' @noRd
 no_event_mock_data <- function() {
   df1 <- data.frame(
     seqnames = "chr1",
@@ -346,6 +349,7 @@ generate_retained_introns <- function(gr, n_events = 1) {
 #' Re-rank exons in a GRanges object
 #' @param gr A GRanges object with metadata columns: 'exon_rank'
 #' @return A GRanges object with re-ranked exons
+#' @noRd
 rerank_exons <- function(gr) {
   gr <- gr |>
     dplyr::group_by(tx_id) |>
