@@ -5,6 +5,7 @@
 #' @param coef_col Name of the coefficient metadata column (string)
 #' @return TRUE if input is valid, otherwise throws an error
 #' @importFrom methods is
+#' @noRd
 check_input <- function(gr, coef_col) {
   if (!is(gr, "GRanges")) {
     stop("Input must be a GRanges object.")
@@ -40,6 +41,7 @@ check_input <- function(gr, coef_col) {
 #' @param gr2 A GRanges object (e.g., negative set)
 #' @param coef_col Name of the coefficient metadata column (string)
 #' @return A combined GRanges object with appropriate coef metadata
+#' @noRd
 combine_gr_input <- function(gr1, gr2, coef_col) {
   if (!is(gr1, "GRanges") || !is(gr2, "GRanges")) {
     stop("Both inputs must be GRanges objects.")

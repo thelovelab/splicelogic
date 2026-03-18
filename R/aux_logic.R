@@ -12,6 +12,7 @@
 #' 'match_left' and 'match_right' indicating the number of overlaps with
 #' the left and right exons, respectively.
 #' @importFrom magrittr %>%
+#' @noRd
 compute_matches <- function(
   gr,
   left_exon,
@@ -64,6 +65,7 @@ compute_matches <- function(
 #' @return A named list with three GRanges objects:
 #' candidates, left_exons, right_exons
 #' candidates, left_exons, right_exons are all from neg_exons set
+#' @noRd
 candidates_by_non_overlap_directed <- function(neg_exons, pos_exons, gr, type) {
   # filter candidates that do not overlap any pos_exons
   candidates <- neg_exons |>
@@ -113,6 +115,7 @@ candidates_by_non_overlap_directed <- function(neg_exons, pos_exons, gr, type) {
 #' @param type The type of overlap to consider when identifying matches.
 #' @return A list with two tibbles: left_tbl and right_tbl
 #' @importFrom magrittr %>%
+#' @noRd
 match_left_right <- function(pos_exons, left_exon, right_exon, type) {
   # check for matches to left and right exons in the pos_exons set
   pos_exons_matched <- compute_matches(
@@ -148,6 +151,7 @@ match_left_right <- function(pos_exons, left_exon, right_exon, type) {
 #' 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
 #' @return A GRanges object with introns as ranges and
 #' metadata (tx_id, gene_id)
+#' @noRd
 find_introns <- function(gr) {
   gr <- gr |> dplyr::arrange(tx_id, start)
   gr <- gr |> dplyr::arrange(tx_id, start)
@@ -186,6 +190,7 @@ find_introns <- function(gr) {
 #' @param pos_exons A GRanges object with positive coefficient exons
 #' @return A named list with three granges: candidates, left_exons, right_exons
 #' candidates, left_exons, right_exons are all from neg_exons set
+#' @noRd
 candidates_by_presence <- function(gr, neg_exons, pos_exons) {
   pos_exons <- pos_exons |>
     dplyr::group_by(gene_id) |>
@@ -238,6 +243,7 @@ candidates_by_presence <- function(gr, neg_exons, pos_exons) {
 #' @param type Match type: "over" for any overlap, "in" for exact match,
 #'   "boundary" for shared start or end coordinate
 #' @return A Hits object with queryHits and subjectHits indices
+#' @noRd
 find_matches_batch <- function(
   query,
   subject,
@@ -287,6 +293,7 @@ find_matches_batch <- function(
 #' @return A named list with pos_tbl, cand_tbl, left_match_tbl,
 #'   right_match_tbl tibbles for downstream processing.
 #'   Returns NULL if no candidates are found.
+#' @noRd
 find_candidates_and_flanks <- function(
   gr,
   type,

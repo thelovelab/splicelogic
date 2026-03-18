@@ -11,3 +11,19 @@ authors:
 template:
   bootstrap: 5
 
+reference:
+  - title: "Package overview"
+    contents:
+      - splicelogic-package
+  - title: "Input preprocessing"
+    contents:
+      - preprocess_input
+      - prepare_exons
+  - title: "Event detection"
+    contents:
+      - starts_with("calc_")
+  - title: "Mock data generation"
+    contents:
+      - create_mock_data
+      - starts_with("generate_")
+
