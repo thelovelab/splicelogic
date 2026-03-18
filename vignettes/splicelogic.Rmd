@@ -30,6 +30,12 @@ With DTU results attached to a *GRanges* of the exons from significant transcrip
 
 ```{r quick-start}
 #| eval: false
+exons <- prepare_exons(
+  txdb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+  dtu_table = <DTU_TABLE>,
+  coef_col = "estimate"
+  )
+
 exons <- preprocess_input(exons, coef_col = "estimates")
 skipped <- exons |> calc_skipped_exons()
 # etc.
@@ -149,7 +155,7 @@ Next we can run the various functions for calculating different types of splicin
 
 **Skipped exons**
 
-For example, we can calculate exons that are skipped in up-regulated transcripts relative to down-regulated transcripts, across all genes. As these are skipped in the up-regulated transcripts, it is expected that the exons returned below to down-regulated transcripts:
+For example, we can calculate exons that are skipped in up-regulated transcripts relative to down-regulated transcripts, across all genes. As these are skipped in the up-regulated transcripts, it is expected that the exons returned belong to down-regulated transcripts:
 
 
 ```{r calc-se}
@@ -173,6 +179,8 @@ mx
 
 **Retained introns**
 
+Here we do not find retained introns, and the function returns an empty vector.
+
 ```{r calc-ri}
 ri <- sig_exons |> calc_retained_introns()
 ri
@@ -194,9 +202,13 @@ all_events <- sig_exons |> calc_all_events()
 all_events
 ```
 
-```{r events-barplot, fig.alt="Barplot of event types"}
+```{r events-barplot}
+#| fig.alt: 'Barplot of event types'
 par(mar = c(5, 10, 4, 4))
-barplot(table(all_events$event), horiz=TRUE, las=1)
+barplot(
+  table(all_events$event), horiz=TRUE, las=1, 
+  xlab="exons participating in an event"
+)
 ```
 
 # Upstream methods
@@ -259,7 +271,11 @@ The following extracts the exons grouped by transcript from the *TxDb*:
 
 ```{r extract-exons}
 # extract exons as a GRangesList
-exons_list <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
+exons_list <- GenomicFeatures::exonsBy(
+  txdb,
+  filter = AnnotationFilter::TxIdFilter(unique(sim_dtu_table$tx_id)), 
+  by="tx"
+  )
 # Our DTU table aligns with txps, which aligns with the names of the GRangesList.
 # prepare_exons() handles this with alignment checks
 names(exons_list) <- sim_dtu_table$tx_id

@@ -171,7 +171,11 @@ prepare_exons <- function(
 
   # extract exons grouped by transcript
   msg("Extracting exons from TxDb...")
-  ebt <- GenomicFeatures::exonsBy(txdb, by = "tx")
+  ebt <- GenomicFeatures::exonsBy(
+    txdb,
+    filter = AnnotationFilter::TxIdFilter(unique(dtu_table[[tx_id_col]])),
+    by = "tx"
+  )
 
   # map TxDb internal TXID to TXNAME
   msg("Mapping transcript IDs...")
