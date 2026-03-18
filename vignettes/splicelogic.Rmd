@@ -15,20 +15,21 @@ vignette: |
 
 # Introduction
 
-`splicelogic` is an R/Bioconductor package for detecting alternative splicing events from exon-level data stored as `GRanges` objects. Given a set of exons annotated with a coefficient column indicating differential transcript usage (DTU), `splicelogic` identifies the following types of splicing events:
+_splicelogic_ is an R/Bioconductor package for detecting alternative splicing events from exon-level data stored as `GRanges` objects. Given a set of exons annotated with a coefficient column indicating differential transcript usage (DTU), `splicelogic` identifies the following types of splicing events:
 
--   **Skipped exons (SE)** -- exons present in one isoform but absent in another.
--   **Retained exons (RE)** -- exons present in one isoform but absent in another.
--   **Mutually exclusive exons (MXE)** -- pairs of exons where one is included at the expense of the other.
--   **Retained introns (RI)** -- intronic regions that are retained as part of an exon in an alternative isoform.
--   **Alternative 5' (A5SS)** -- exons that share the same 3' splice site but differ at the 5' splice site.
--   **Alternative 3' (A3SS)** -- exons that share the same 5' splice site but differ at the 3' splice site.
+-   **Skipped exons (SE)** -- exons skipped in up-regulated transcripts
+-   **Included exons (IE)** -- exons included in up-regulated transcripts
+-   **Mutually exclusive exons (MXE)** -- pairs of exons where one is included and another is excluded in up-regulated transcripts compared to down-regulated transcripts
+-   **Retained introns (RI)** -- intronic regions that are retained as part of an exon in up-regulated transcripts
+-   **Alternative 5' (A5SS)** -- exons in up-regulated transcripts that share the same 3' splice site but differ at the 5' splice site from exons in down-regulated transcripts 
+-   **Alternative 3' (A3SS)** -- as above, but differing in the 3' splice site
 
 # Quick start
 
 With DTU results attached to a *GRanges* of the exons from significant transcripts, one can use the following code to identify splice events:
 
-```{r eval=FALSE}
+```{r quick-start}
+#| eval: false
 exons <- preprocess_input(exons, coef_col = "estimates")
 skipped <- exons |> calc_skipped_exons()
 # etc.
@@ -77,7 +78,8 @@ We load the differential transcript usage analysis from the Jones *et al.* paper
 
 The DTU table for this example, and the exons for the differential transcripts have been saved in the `extdata` directory of _splicelogic_.
 
-```{r data, message=FALSE}
+```{r dtu-table}
+#| message: false
 library(readr)
 # load DTU results 
 dir <- system.file("extdata", package="splicelogic")
@@ -86,7 +88,8 @@ dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
 
 We load the 601 exons from GENCODE M31 annotation for the 49 differential transcripts, and attach the metadata columns.
 
-```{r load-exons, message=FALSE}
+```{r load-exons}
+#| message: false
 library(plyranges)
 exons_file <- "exons_M31.bed.gz"
 exons_mcols_file <- "exons_mcols.tsv.gz"
@@ -107,7 +110,6 @@ Next, we join the DTU results onto the `exons` GRanges. This is necessary for th
 The code below matches the transcript IDs in the `exons` metadata with the DTU results table, and then binds the two tables before assigning back to `exons`.
 
 ```{r merge-dtu}
-
 txp_idx <- match(exons$tx_id, dtu_table$tx_id)
 cols_to_add <- dtu_table[txp_idx, ] |> dplyr::select(-tx_id)
 merged_DF <- S4Vectors::cbind(mcols(exons), cols_to_add)
@@ -116,15 +118,16 @@ mcols(exons) <- merged_DF
 
 As of Bioc 3.23 and *plyranges* version 1.32, the above code to add metadata columns from an additional table can be replaced with the following:
 
-```{r eval=FALSE}
+```{r join-mcols}
+#| eval: false
 exons <- exons |> 
   plyranges::join_mcols_left(dtu_table, by = "tx_id")
 ```
 
-_splicelogic_ is designed to take as input the exons from significantly changed transcripts, so we first filter out transcripts that were not signficant at FDR 10%.
+_splicelogic_ is designed to take as input the exons from significantly changed transcripts, so we first filter out transcripts that were not signficant at FDR 50%. Here we use a permissive FDR threshold to provide more examples below.
 
 ```{r filter-sig}
-exons <- exons |> filter(padj < .1)
+sig_exons <- exons |> filter(padj < .5)
 ```
 
 # Detecting splicing events
@@ -133,69 +136,76 @@ exons <- exons |> filter(padj < .1)
 
 The first step is to run `preprocess_input()`, which prepares the `exons` for event detection. This function checks the input data, ensures that the necessary columns are present:
 
-```{r setup, message = FALSE}
+```{r preprocess}
+#| message: false
 library(splicelogic)
-exons <- exons |> 
+sig_exons <- sig_exons |> 
   preprocess_input(coef_col = "estimate")
 ```
 
 ## Individual events
 
-Next we can run the various functions for calculating different types of splicing events. E.g. to calculate exons which are skipped in up-regulated transcripts relative to down-regulated transcripts, across all genes:
+Next we can run the various functions for calculating different types of splicing events. 
 
 **Skipped exons**
 
+For example, we can calculate exons that are skipped in up-regulated transcripts relative to down-regulated transcripts, across all genes. As these are skipped in the up-regulated transcripts, it is expected that the exons returned below to down-regulated transcripts:
+
+
 ```{r calc-se}
-skipped <- exons |> calc_skipped_exons()
+skipped <- sig_exons |> calc_skipped_exons()
 skipped
 ```
 
 **Included exons**
 
 ```{r calc-re}
-included <- exons |> calc_included_exons()
+included <- sig_exons |> calc_included_exons()
 included
 ```
 
 **Mutually exclusive exons**
 
 ```{r calc-mx}
-mx <- exons |> calc_mx_exons()
+mx <- sig_exons |> calc_mx_exons()
 mx
 ```
 
 **Retained introns**
 
 ```{r calc-ri}
-ri <- exons |> calc_retained_introns()
+ri <- sig_exons |> calc_retained_introns()
 ri
 ```
 
 **Alternative 5' and 3' splice sites**
 
 ```{r calc-a5-a3-ss}
-a5ss <- exons |> calc_a5ss()
+a5ss <- sig_exons |> calc_a5ss()
 a5ss
-a3ss <- exons |> calc_a3ss()
+a3ss <- sig_exons |> calc_a3ss()
 a3ss
 ```
 
 ## Calculate all events
 
 ```{r calc-all}
-all_events <- exons |> calc_all_events()
+all_events <- sig_exons |> calc_all_events()
 all_events
 ```
 
-```{r}
-barplot(table(all_events$event))
+```{r events-barplot, fig.alt="Barplot of event types"}
+par(mar = c(5, 10, 4, 4))
+barplot(table(all_events$event), horiz=TRUE, las=1)
 ```
 
-# Upstream methods {#upstream-methods}
+# Upstream methods
 
 Something about what methods can be used for upstream DTU or switching analysis.
 
-# Obtaining exon ranges with prepare_exons
+# Obtaining exon ranges
+
+## Using `prepare_exons()`
 
 `prepare_exons()` extracts exon ranges from a *TxDb* object and merges them with your DTU results table in a single call. It returns a flat *GRanges* ready for `preprocess_input()`. We demonstrate using GENCODE v32 (human genes).
 
@@ -204,6 +214,8 @@ The first step is to load a _TxDb_ object. Typically, a user would supply their 
 ```{r ahub}
 suppressPackageStartupMessages({
   library(AnnotationHub)
+  library(AnnotationDbi)
+  library(GenomicFeatures)
 })
 ah <- AnnotationHub()
 txdb <- ah[["AH75191"]] # GENCODE v32 (human)
@@ -211,7 +223,6 @@ txdb <- ah[["AH75191"]] # GENCODE v32 (human)
 
 ```{r get-txps}
 suppressPackageStartupMessages({
-  library(AnnotationDbi)
   library(tibble)
 })
 txps <- txdb |>
@@ -223,54 +234,53 @@ txps
 
 ```{r sim-dtu}
 # simulate DTU results
-dtu_table <- txps |>
+sim_dtu_table <- txps |>
   dplyr::mutate(
     padj = runif(dplyr::n()),
     effect_est = rnorm(dplyr::n())
   )
+sim_dtu_table
 ```
+
+Here we name this output `human_exons` to not collide with the example above for the mouse dataset.
 
 ```{r prepare-exons}
-exons <- prepare_exons(txdb, dtu_table, coef_col = "effect_est", verbose = TRUE)
-exons |> preprocess_input(coef_col = "effect_est")
-# followed by calculation of splicing events
+human_exons <- prepare_exons(txdb, sim_dtu_table, coef_col = "effect_est", verbose = TRUE)
+human_exons <- human_exons |>
+  filter(padj < .01) |>
+  preprocess_input(coef_col = "effect_est")
 ```
 
-The following section details what `prepare_exons()` does internally.
-
-# Obtaining exon ranges manually
+## Manual construction
 
 This section walks through the steps that `prepare_exons()` performs internally. This is useful if you need more control over the process or want to understand how exon ranges are built from a *TxDb*.
 
 The following extracts the exons grouped by transcript from the *TxDb*:
 
 ```{r extract-exons}
-suppressPackageStartupMessages({
-  library(GenomicFeatures)
-})
 # extract exons as a GRangesList
 exons_list <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
-# dtu_table aligns with txps, which aligns with the names of the GRangesList.
+# Our DTU table aligns with txps, which aligns with the names of the GRangesList.
 # prepare_exons() handles this with alignment checks
-names(exons_list) <- dtu_table$tx_id
+names(exons_list) <- sim_dtu_table$tx_id
 ```
 
-Next flattening the exons:
+Next flattening the exons (here using a new name `flat_exons` to not collide with the `exons` mouse dataset above):
 
 ```{r flatten-exons}
-exons <- unlist(exons_list)
+flat_exons <- unlist(exons_list)
 # swap tx_id with exon_name as the names of the GRanges
-exons$tx_id <- names(exons) # store transcript ids
-names(exons) <- exons$exon_name
+flat_exons$tx_id <- names(flat_exons) # store transcript ids
+names(flat_exons) <- flat_exons$exon_name
 ```
 
 Adding DTU results and gene ID:
 
 ```{r add-dtu}
-txp_idx <- match(exons$tx_id, dtu_table$tx_id)
-cols_to_add <- dtu_table[txp_idx,] |> dplyr::select(-c(tx_id, tx_num))
-merged_DF <- cbind(mcols(exons), cols_to_add)
-mcols(exons) <- merged_DF
+txp_idx <- match(flat_exons$tx_id, sim_dtu_table$tx_id)
+cols_to_add <- sim_dtu_table[txp_idx,] |> dplyr::select(-c(tx_id, tx_num))
+merged_DF <- cbind(mcols(flat_exons), cols_to_add)
+mcols(flat_exons) <- merged_DF
 ```
 
 # Session info
