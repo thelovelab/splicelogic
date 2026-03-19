@@ -468,8 +468,50 @@ types](splicelogic_files/figure-html/events-barplot-1.png)
 
 ## Upstream methods
 
-Something about what methods can be used for upstream DTU or switching
-analysis.
+`splicelogic` is designed to operate downstream of **differential
+transcript usage (DTU)**. DTU methods test whether the **relative
+proportions of transcripts within a gene** differ between experimental
+conditions.
+
+In general, any upstream method that produces **transcript-resolved
+differential usage statistics** can be used with `splicelogic`, provided
+that results include:
+
+1.  a **per-transcript directional effect estimate** (e.g. a model
+    coefficient, change in isoform fraction), and  
+2.  an **adjusted p-value** (or equivalent significance metric).
+
+Common upstream methods include:
+
+- **satuRn** — fits **quasi-binomial generalized linear models** to
+  transcript usage proportions and performs scalable transcript-level
+  DTU testing. Particularly well suited to larger datasets and can use
+  an empirical null distribution for improved calibration in single-cell
+  datasets. Available on
+  [Bioconductor](https://bioconductor.org/packages/satuRn).
+
+- **DRIMSeq** — models transcript proportions within genes using a
+  **Dirichlet-multinomial** framework, with both gene-level and
+  transcript-level testing (the latter reduces to a one-vs-rest
+  comparison for individual transcripts). Available on
+  [Bioconductor](https://bioconductor.org/packages/DRIMSeq).
+
+- **BANDITS** — a **Bayesian hierarchical DTU** method that models
+  transcript usage with a Dirichlet-multinomial and explicitly accounts
+  for **mapping uncertainty** using equivalence classes. Produces both
+  gene- and transcript-level DTU results. Available on
+  [Bioconductor](https://bioconductor.org/packages/BANDITS).
+
+Regardless of which method is used, the per-transcript DTU statistics
+(effect estimates and adjusted p-values) have to be mapped onto the
+individual exons of each transcript to produce an exon-level GRanges.
+This annotated GRanges is the starting point for `splicelogic` ,
+beginning with
+[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
+and then followed by event-specific functions
+([`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+etc.).
 
 ## Obtaining exon ranges
 
