@@ -473,8 +473,8 @@ transcript usage (DTU)**. DTU methods test whether the **relative
 proportions of transcripts within a gene** differ between experimental
 conditions.
 
-In general, any upstream method that produces **transcript-resolved
-differential usage statistics** can be used with `splicelogic`, provided
+In general, any upstream method that produces transcript-resolved
+differential usage statistics can be used with `splicelogic`, provided
 that results include:
 
 1.  a **per-transcript directional effect estimate** (e.g. a model
@@ -483,7 +483,7 @@ that results include:
 
 Common upstream methods include:
 
-- **satuRn** — fits **quasi-binomial generalized linear models** to
+- **satuRn** — fits quasi-binomial generalized linear models to
   transcript usage proportions and performs scalable transcript-level
   DTU testing. Particularly well suited to larger datasets and can use
   an empirical null distribution for improved calibration in single-cell
@@ -491,22 +491,22 @@ Common upstream methods include:
   [Bioconductor](https://bioconductor.org/packages/satuRn).
 
 - **DRIMSeq** — models transcript proportions within genes using a
-  **Dirichlet-multinomial** framework, with both gene-level and
+  Dirichlet-multinomial framework, with both gene-level and
   transcript-level testing (the latter reduces to a one-vs-rest
   comparison for individual transcripts). Available on
   [Bioconductor](https://bioconductor.org/packages/DRIMSeq).
 
-- **BANDITS** — a **Bayesian hierarchical DTU** method that models
+- **BANDITS** — a Bayesian hierarchical DTU method that models
   transcript usage with a Dirichlet-multinomial and explicitly accounts
-  for **mapping uncertainty** using equivalence classes. Produces both
-  gene- and transcript-level DTU results. Available on
+  for mapping uncertainty using equivalence classes. Produces both gene-
+  and transcript-level DTU results. Available on
   [Bioconductor](https://bioconductor.org/packages/BANDITS).
 
 Regardless of which method is used, the per-transcript DTU statistics
 (effect estimates and adjusted p-values) have to be mapped onto the
-individual exons of each transcript to produce an exon-level GRanges.
-This annotated GRanges is the starting point for `splicelogic` ,
-beginning with
+individual exons of each transcript to produce an exon-level GRanges
+(see [Obtaining exon ranges](#obtaining-exon-ranges)). This annotated
+GRanges is the starting point for `splicelogic` , beginning with
 [`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
 and then followed by event-specific functions
 ([`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),

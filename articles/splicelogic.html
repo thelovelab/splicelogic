@@ -493,10 +493,9 @@ empty vector.</p>
 <strong>differential transcript usage (DTU)</strong>. DTU methods test
 whether the <strong>relative proportions of transcripts within a
 gene</strong> differ between experimental conditions.</p>
-<p>In general, any upstream method that produces
-<strong>transcript-resolved differential usage statistics</strong> can
-be used with <code>splicelogic</code>, provided that results
-include:</p>
+<p>In general, any upstream method that produces transcript-resolved
+differential usage statistics can be used with <code>splicelogic</code>,
+provided that results include:</p>
 <ol style="list-style-type: decimal">
 <li>a <strong>per-transcript directional effect estimate</strong>
 (e.g. a model coefficient, change in isoform fraction), and<br>
@@ -506,29 +505,29 @@ metric).</li>
 </ol>
 <p>Common upstream methods include:</p>
 <ul>
-<li><p><strong>satuRn</strong> — fits <strong>quasi-binomial generalized
-linear models</strong> to transcript usage proportions and performs
-scalable transcript-level DTU testing. Particularly well suited to
-larger datasets and can use an empirical null distribution for improved
+<li><p><strong>satuRn</strong> — fits quasi-binomial generalized linear
+models to transcript usage proportions and performs scalable
+transcript-level DTU testing. Particularly well suited to larger
+datasets and can use an empirical null distribution for improved
 calibration in single-cell datasets. Available on <a href="https://bioconductor.org/packages/satuRn" class="external-link">Bioconductor</a>.</p></li>
 <li><p><strong>DRIMSeq</strong> — models transcript proportions within
-genes using a <strong>Dirichlet-multinomial</strong> framework, with
-both gene-level and transcript-level testing (the latter reduces to a
-one-vs-rest comparison for individual transcripts). Available on <a href="https://bioconductor.org/packages/DRIMSeq" class="external-link">Bioconductor</a>.</p></li>
-<li><p><strong>BANDITS</strong> — a <strong>Bayesian hierarchical
-DTU</strong> method that models transcript usage with a
-Dirichlet-multinomial and explicitly accounts for <strong>mapping
-uncertainty</strong> using equivalence classes. Produces both gene- and
-transcript-level DTU results. Available on <a href="https://bioconductor.org/packages/BANDITS" class="external-link">Bioconductor</a>.</p></li>
+genes using a Dirichlet-multinomial framework, with both gene-level and
+transcript-level testing (the latter reduces to a one-vs-rest comparison
+for individual transcripts). Available on <a href="https://bioconductor.org/packages/DRIMSeq" class="external-link">Bioconductor</a>.</p></li>
+<li><p><strong>BANDITS</strong> — a Bayesian hierarchical DTU method
+that models transcript usage with a Dirichlet-multinomial and explicitly
+accounts for mapping uncertainty using equivalence classes. Produces
+both gene- and transcript-level DTU results. Available on <a href="https://bioconductor.org/packages/BANDITS" class="external-link">Bioconductor</a>.</p></li>
 </ul>
 <!-- - **DEXSeq** — primarily a **differential exon usage (DEU)** method based on **negative binomial GLMs**, but commonly used in transcript-level DTU workflows and isoform-switch pipelines. While not a native transcript-usage model, its outputs can be incorporated into `splicelogic` when transcript-level statistics are available. Available on [Bioconductor](https://bioconductor.org/packages/DEXSeq).
 
 - **edgeR (`diffSplice` / `diffSpliceDGE`)** — can be used for transcript- or exon-resolved differential usage analyses in count-based workflows, providing gene and transcript-level statistics in suitable DTU setups. Available on [Bioconductor](https://bioconductor.org/packages/edgeR). --><p>Regardless of which method is used, the per-transcript DTU statistics
 (effect estimates and adjusted p-values) have to be mapped onto the
-individual exons of each transcript to produce an exon-level GRanges.
-This annotated GRanges is the starting point for
-<code>splicelogic</code> , beginning with <code><a href="../reference/preprocess.html">preprocess()</a></code> and
-then followed by event-specific functions (<code><a href="../reference/find_events.html">find_se()</a></code>,
+individual exons of each transcript to produce an exon-level GRanges
+(see <a href="#obtaining-exon-ranges">Obtaining exon ranges</a>). This
+annotated GRanges is the starting point for <code>splicelogic</code> ,
+beginning with <code><a href="../reference/preprocess.html">preprocess()</a></code> and then followed by
+event-specific functions (<code><a href="../reference/find_events.html">find_se()</a></code>,
 <code><a href="../reference/find_events.html">find_mxe()</a></code>, etc.).</p>
 </div>
 <div class="section level2">
