@@ -62,8 +62,9 @@ check_input <- function(gr, coef_col) {
 preprocess <- function(gr, coef_col, method_string = NULL) {
   check_input(gr, coef_col) # check metadata columns are present
 
-  # include key nexons and internal columns
-  gr <- gr |>
+  gr_seqinfo <- GenomicRanges::seqinfo(gr)
+  # include key nexons and internal columns using tibble for faster group_by and mutate
+  tbl <- gr |> tibble::as_tibble()  |>
     dplyr::group_by(tx_id) |>
     dplyr::mutate(
       key = paste0(tx_id, "-", exon_rank),
@@ -75,11 +76,20 @@ preprocess <- function(gr, coef_col, method_string = NULL) {
     ) |>
     dplyr::ungroup()
 
+  keep_cols <- setdiff(names(tbl), c("seqnames", "start", "end",
+                                      "width", "strand"))
+  gr <- GenomicRanges::GRanges(
+    seqnames = tbl$seqnames,
+    ranges = IRanges::IRanges(start = tbl$start, end = tbl$end),
+    strand = tbl$strand,
+    tbl[, keep_cols]
+  )
+  GenomicRanges::seqinfo(gr) <- gr_seqinfo
+
   S4Vectors::metadata(gr)$splicelogic_preprocessed <- TRUE
   if (!is.null(method_string)) {
     S4Vectors::metadata(gr)$method_string <- method_string
   }
-  S4Vectors::metadata(gr)$splicelogic_preprocessed <- TRUE
   return(gr)
 }
 
