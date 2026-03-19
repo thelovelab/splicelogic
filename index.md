@@ -26,8 +26,9 @@ by installing from GitHub:
 - Support detection of additional event types, such as consecutive
   skipped exons or loss of retained introns.
 - Extraction and labelling of the specific splice junctions associated
-  with each event, to easily establish whether the junction is canonical
-  or not for downstream interpretation.
+  with each event, adding two metadata columns: the donor–acceptor
+  dinucleotide sequence (e.g. AG-GT) and a logical indicating whether
+  the junction is canonical, for downstream interpretation.
 
 # Feedback
 
