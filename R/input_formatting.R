@@ -148,7 +148,7 @@ prepare_exons <- function(
   msg("Extracting exons from TxDb...")
   ebt <- GenomicFeatures::exonsBy(
     txdb,
-    filter = AnnotationFilter::TxIdFilter(unique(dtu_table[[tx_id_col]])),
+    # filter = AnnotationFilter::TxIdFilter(unique(dtu_table[[tx_id_col]])),
     by = "tx"
   )
 
