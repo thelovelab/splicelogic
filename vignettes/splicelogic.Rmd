@@ -37,7 +37,7 @@ exons <- prepare_exons(
   )
 
 exons <- preprocess(exons, coef_col = "estimates")
-skipped <- exons |> calc_skipped_exons()
+skipped <- exons |> find_se()
 # etc.
 ```
 
@@ -159,21 +159,21 @@ For example, we can calculate exons that are skipped in up-regulated transcripts
 
 
 ```{r calc-se}
-skipped <- sig_exons |> calc_skipped_exons()
+skipped <- sig_exons |> find_se()
 skipped
 ```
 
 **Included exons**
 
 ```{r calc-re}
-included <- sig_exons |> calc_included_exons()
+included <- sig_exons |> find_ie()
 included
 ```
 
 **Mutually exclusive exons**
 
 ```{r calc-mx}
-mx <- sig_exons |> calc_mx_exons()
+mx <- sig_exons |> find_mxe()
 mx
 ```
 
@@ -182,23 +182,23 @@ mx
 Here we do not find retained introns, and the function returns an empty vector.
 
 ```{r calc-ri}
-ri <- sig_exons |> calc_retained_introns()
+ri <- sig_exons |> find_ri()
 ri
 ```
 
 **Alternative 5' and 3' splice sites**
 
 ```{r calc-a5-a3-ss}
-a5ss <- sig_exons |> calc_a5ss()
+a5ss <- sig_exons |> find_a5ss()
 a5ss
-a3ss <- sig_exons |> calc_a3ss()
+a3ss <- sig_exons |> find_a3ss()
 a3ss
 ```
 
 ## Calculate all events
 
 ```{r calc-all}
-all_events <- sig_exons |> calc_all_events()
+all_events <- sig_exons |> find_all_events()
 all_events
 ```
 

@@ -282,7 +282,7 @@ find_matches_batch <- function(
 #' Find candidates and build flanking match tables
 #' for skipped/MX exon detection
 #'
-#' Shared setup for calc_skipped_exons and calc_mx_exons:
+#' Shared setup for find_se and find_mxe:
 #' splits pos/neg exons, finds candidates, runs batch
 #' overlap matching, and gene-filters the results.
 #'

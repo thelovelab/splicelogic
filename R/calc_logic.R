@@ -1,7 +1,7 @@
-#' @rdname calc_events
-#' @name calc_events
+#' @rdname find_events
+#' @name find_events
 #'
-#' @title Calculate splice events from a GRanges object
+#' @title Find splice events from a GRanges object
 #'
 #' @description Functions to detect different types of alternative splicing
 #' events from preprocessed GRanges exon data.
@@ -11,12 +11,12 @@
 
 NULL
 
-#' @rdname calc_events
+#' @rdname find_events
 #' @param type The type of overlap to consider when
 #' identifying events.
 #' @param inverse If TRUE, identifies included exons
 #' instead of skipped exons.
-#' @return `calc_skipped_exons()`: A GRanges object with
+#' @return `find_se()`: A GRanges object with
 #' an additional 'event' metadata column indicating
 #' skipped exons.
 #' @export
@@ -28,11 +28,11 @@ NULL
 #'   generate_skipped_exons(1)
 #'
 #' # this should find the skipped exon events we generated
-#' calc_skipped_exons(gr, type = "boundary")
+#' find_se(gr, type = "boundary")
 #'
-#' calc_included_exons(gr, type = "boundary")
+#' find_ie(gr, type = "boundary")
 #'
-calc_skipped_exons <- function(
+find_se <- function(
   gr,
   type = c("boundary", "over", "in"),
   inverse = FALSE
@@ -97,16 +97,16 @@ calc_skipped_exons <- function(
   res
 }
 
-#' @rdname calc_events
-#' @return `calc_included_exons()`: A GRanges object with an additional 'event'
+#' @rdname find_events
+#' @return `find_ie()`: A GRanges object with an additional 'event'
 #' metadata column indicating included exons.
 #' @export
-calc_included_exons <- function(gr, type = c("boundary", "over", "in")) {
-  calc_skipped_exons(gr, type, inverse = TRUE)
+find_ie <- function(gr, type = c("boundary", "over", "in")) {
+  find_se(gr, type, inverse = TRUE)
 }
 
-#' @rdname calc_events
-#' @return `calc_mx_exons()`: A GRanges object with an additional 'event'
+#' @rdname find_events
+#' @return `find_mxe()`: A GRanges object with an additional 'event'
 #' metadata column indicating mutually exclusive exons.
 #' @examples
 #'
@@ -116,10 +116,10 @@ calc_included_exons <- function(gr, type = c("boundary", "over", "in")) {
 #' ) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_mx(1)
-#' calc_mx_exons(gr_mx, type = "boundary")
+#' find_mxe(gr_mx, type = "boundary")
 #'
 #' @export
-calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
+find_mxe <- function(gr, type = c("boundary", "in", "over")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
   check_preprocessed(gr)
@@ -205,8 +205,8 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
   res
 }
 
-#' @rdname calc_events
-#' @return `calc_retained_introns()`: A GRanges object with an additional
+#' @rdname find_events
+#' @return `find_ri()`: A GRanges object with an additional
 #' 'event' metadata column indicating retained introns.
 #' @examples
 #'
@@ -216,10 +216,10 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
 #' ) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_retained_introns(1)
-#' calc_retained_introns(gr_ri)
+#' find_ri(gr_ri)
 #'
 #' @export
-calc_retained_introns <- function(gr) {
+find_ri <- function(gr) {
   # if preprocessing didn't happen
   check_preprocessed(gr)
   keep_cols <- setdiff(
@@ -284,12 +284,13 @@ calc_retained_introns <- function(gr) {
 }
 
 
-#' @rdname calc_events
+#' @rdname find_events
 #' @param by_start If TRUE, detects a5ss (same exon start, different end).
 #' If FALSE, detects a3ss (same end, different start).
-#' @return `calc_alt_ss()`: A GRanges object with annotated events for
+#' @return `find_alt_ss()`: A GRanges object with annotated events for
 #' alternative splice sites.
-calc_alt_ss <- function(gr, by_start = TRUE) {
+#' @noRd 
+find_alt_ss <- function(gr, by_start = TRUE) {
   # if preprocessing didn't happen
   check_preprocessed(gr)
   keep_cols <- setdiff(
@@ -377,8 +378,8 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
 }
 
 
-#' @rdname calc_events
-#' @return `calc_a5ss()`: A GRanges object with an additional 'event' metadata
+#' @rdname find_events
+#' @return `find_a5ss()`: A GRanges object with an additional 'event' metadata
 #' column indicating a5ss events.
 #' @examples
 #'
@@ -388,15 +389,15 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
 #' ) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_a5ss(1)
-#' calc_a5ss(gr_a5)
+#' find_a5ss(gr_a5)
 #'
 #' @export
-calc_a5ss <- function(gr) {
-  calc_alt_ss(gr, by_start = TRUE)
+find_a5ss <- function(gr) {
+  find_alt_ss(gr, by_start = TRUE)
 }
 
-#' @rdname calc_events
-#' @return `calc_a3ss()`: A GRanges object with an additional 'event' metadata
+#' @rdname find_events
+#' @return `find_a3ss()`: A GRanges object with an additional 'event' metadata
 #' column indicating a3ss events.
 #' @examples
 #'
@@ -406,16 +407,16 @@ calc_a5ss <- function(gr) {
 #' ) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_a3ss(1)
-#' calc_a3ss(gr_a3)
+#' find_a3ss(gr_a3)
 #'
 #' @export
-calc_a3ss <- function(gr) {
-  calc_alt_ss(gr, by_start = FALSE)
+find_a3ss <- function(gr) {
+  find_alt_ss(gr, by_start = FALSE)
 }
 
-#' @rdname calc_events
+#' @rdname find_events
 #' @param verbose If TRUE, prints progress messages. Default TRUE.
-#' @return `calc_all_events()`: A GRanges object combining all detected events,
+#' @return `find_all_events()`: A GRanges object combining all detected events,
 #' with an 'event' metadata column indicating the event type.
 #' @examples
 #'
@@ -425,10 +426,10 @@ calc_a3ss <- function(gr) {
 #' ) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_skipped_exons(1)
-#' calc_all_events(gr_all, type = "boundary", verbose = FALSE)
+#' find_all_events(gr_all, type = "boundary", verbose = FALSE)
 #'
 #' @export
-calc_all_events <- function(
+find_all_events <- function(
   gr,
   type = c("boundary", "over", "in"),
   verbose = TRUE
@@ -440,22 +441,22 @@ calc_all_events <- function(
   results <- list()
 
   msg("Calculating skipped exon events...")
-  results$se <- calc_skipped_exons(gr, type)
+  results$se <- find_se(gr, type)
 
   msg("Calculating included exon events...")
-  results$ie <- calc_included_exons(gr, type)
+  results$ie <- find_ie(gr, type)
 
   msg("Calculating mutually exclusive exon events...")
-  results$mx <- calc_mx_exons(gr, type)
+  results$mx <- find_mxe(gr, type)
 
   msg("Calculating retained intron events...")
-  results$ri <- calc_retained_introns(gr)
+  results$ri <- find_ri(gr)
 
   msg("Calculating alternative 5' splice site events...")
-  results$a5ss <- calc_a5ss(gr)
+  results$a5ss <- find_a5ss(gr)
 
   msg("Calculating alternative 3' splice site events...")
-  results$a3ss <- calc_a3ss(gr)
+  results$a3ss <- find_a3ss(gr)
 
   # keep only non-empty results
   results <- Filter(function(x) length(x) > 0L, results)

@@ -19,7 +19,7 @@ exons <- prepare_exons(
   )
 
 processed_exons <- preprocess(exons, coef_col = "estimate")
-events <- processed_exons |> calc_all_events()
+events <- processed_exons |> find_all_events()
 ```
 
 # Feedback

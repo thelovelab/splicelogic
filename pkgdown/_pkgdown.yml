@@ -21,7 +21,8 @@ reference:
       - prepare_exons
   - title: "Event detection"
     contents:
-      - starts_with("calc_")
+      - starts_with("find_")
+      - find_all_events
   - title: "Mock data generation"
     contents:
       - create_mock_data
