@@ -81,7 +81,7 @@ candidates_by_non_overlap_directed <- function(neg_exons, pos_exons, gr, type) {
   }
   # filter candidates that are internal (have both left and right exons)
   candidates <- candidates |>
-    dplyr::filter(internal) #internal col is added in preprocess_input
+    dplyr::filter(internal) #internal col is added in preprocess
 
   # keys of exons to the left and right of candidates
   # TO DO: check if this works for - strand.

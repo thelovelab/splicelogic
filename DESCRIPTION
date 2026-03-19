@@ -29,7 +29,8 @@ Imports:
     rlang,
     vctrs,
     methods,
-    stats
+    stats,
+    AnnotationFilter
 Suggests: 
     knitr,
     rmarkdown,

@@ -33,31 +33,6 @@ check_input <- function(gr, coef_col) {
   TRUE
 }
 
-#' Combine two GRanges objects into one for splicing event analysis
-#' This function takes two GRanges objects, typically representing
-#' positive and negative sets of exons, and combines them into
-#' a single GRanges object.
-#' @param gr1 A GRanges object (e.g., positive set)
-#' @param gr2 A GRanges object (e.g., negative set)
-#' @param coef_col Name of the coefficient metadata column (string)
-#' @return A combined GRanges object with appropriate coef metadata
-#' @noRd
-combine_gr_input <- function(gr1, gr2, coef_col) {
-  if (!is(gr1, "GRanges") || !is(gr2, "GRanges")) {
-    stop("Both inputs must be GRanges objects.")
-  }
-  coef <- rlang::sym(coef_col)
-  #check if they have coef metadata column, add it if missing
-  if (!coef_col %in% names(GenomicRanges::mcols(gr1))) {
-    GenomicRanges::mcols(gr1)[[coef_col]] <- +1 #gr1 is the contrast
-  }
-  if (!coef_col %in% names(GenomicRanges::mcols(gr2))) {
-    GenomicRanges::mcols(gr2)[[coef_col]] <- -1 #gr2 is the reference
-  }
-
-  gr <- plyranges::bind_ranges(gr1, gr2)
-  return(gr)
-}
 
 #' Preprocess input GRanges object for splicing event calculation
 #'
@@ -82,9 +57,9 @@ combine_gr_input <- function(gr1, gr2, coef_col) {
 #' 
 #' # create mock data and run preprocessing
 #' gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
-#'  preprocess_input(coef_col = "coefs", method_string = "mock_method")
+#'  preprocess(coef_col = "coefs", method_string = "mock_method")
 #' 
-preprocess_input <- function(gr, coef_col, method_string = NULL) {
+preprocess <- function(gr, coef_col, method_string = NULL) {
   check_input(gr, coef_col) # check metadata columns are present
 
   # include key nexons and internal columns
@@ -112,8 +87,8 @@ preprocess_input <- function(gr, coef_col, method_string = NULL) {
 check_preprocessed <- function(gr) {
   if (!isTRUE(S4Vectors::metadata(gr)$splicelogic_preprocessed)) {
     stop(
-      "Input has not been preprocessed with preprocess_input().\n",
-      "  Please run preprocess_input() on your GRanges object before\n",
+      "Input has not been preprocessed with preprocess().\n",
+      "  Please run preprocess() on your GRanges object before\n",
       "  calculating splicing events."
     )
   }
@@ -123,7 +98,7 @@ check_preprocessed <- function(gr) {
 #'
 #' Extracts exon ranges from a TxDb object, merges them with
 #' differential transcript usage (DTU) results, and returns a flat
-#' GRanges ready for \code{\link{preprocess_input}}.
+#' GRanges ready for \code{\link{preprocess}}.
 #'
 #' @param txdb A \code{TxDb} object (from GenomicFeatures).
 #' @param dtu_table A data.frame or tibble with DTU results. Must
@@ -227,7 +202,7 @@ prepare_exons <- function(
   )
   GenomicRanges::mcols(exons) <- merged_DF
 
-  # rename to standard column names expected by preprocess_input
+  # rename to standard column names expected by preprocess
   if (gene_id_col != "gene_id") {
     col_names <- names(GenomicRanges::mcols(exons))
     col_names[col_names == gene_id_col] <- "gene_id"
@@ -239,7 +214,7 @@ prepare_exons <- function(
     length(exons),
     " exon ranges from ",
     length(unique(exons$tx_id)),
-    "unique transcripts."
+    " unique transcripts."
   )
   exons
 }

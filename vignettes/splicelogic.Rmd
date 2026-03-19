@@ -36,7 +36,7 @@ exons <- prepare_exons(
   coef_col = "estimate"
   )
 
-exons <- preprocess_input(exons, coef_col = "estimates")
+exons <- preprocess(exons, coef_col = "estimates")
 skipped <- exons |> calc_skipped_exons()
 # etc.
 ```
@@ -58,7 +58,7 @@ Required columns for exons:
 | `exon_rank` | Exon rank within the transcript |
 | `coef_col = "<user supplied>"` | differential effect estimate for the transcript |
 
-The differential effect estimate column is specified by the user in `preprocess_input()`. This should be the differential effect estimate associated with the specific transcript containing the exon, and minimally could indicate the direction of effect with `+1/-1`. Positive values indicate up-regulated exons and negative values indicate down-regulated exons. All exons from the same transcript will share the same value for this column.
+The differential effect estimate column is specified by the user in `preprocess()`. This should be the differential effect estimate associated with the specific transcript containing the exon, and minimally could indicate the direction of effect with `+1/-1`. Positive values indicate up-regulated exons and negative values indicate down-regulated exons. All exons from the same transcript will share the same value for this column.
 
 ## Jones et al mouse long read dataset
 
@@ -140,13 +140,13 @@ sig_exons <- exons |> filter(padj < .5)
 
 ## Preprocessing input data
 
-The first step is to run `preprocess_input()`, which prepares the `exons` for event detection. This function checks the input data, ensures that the necessary columns are present:
+The first step is to run `preprocess()`, which prepares the `exons` for event detection. This function checks the input data, ensures that the necessary columns are present:
 
 ```{r preprocess}
 #| message: false
 library(splicelogic)
 sig_exons <- sig_exons |> 
-  preprocess_input(coef_col = "estimate")
+  preprocess(coef_col = "estimate")
 ```
 
 ## Individual events
@@ -219,7 +219,7 @@ Something about what methods can be used for upstream DTU or switching analysis.
 
 ## Using `prepare_exons()`
 
-`prepare_exons()` extracts exon ranges from a *TxDb* object and merges them with your DTU results table in a single call. It returns a flat *GRanges* ready for `preprocess_input()`. We demonstrate using GENCODE v32 (human genes).
+`prepare_exons()` extracts exon ranges from a *TxDb* object and merges them with your DTU results table in a single call. It returns a flat *GRanges* ready for `preprocess()`. We demonstrate using GENCODE v32 (human genes).
 
 The first step is to load a _TxDb_ object. Typically, a user would supply their own GTF to txdbmaker::makeTxDbFromGFF() to generate this. For this demonstration we will load a pre-constructed _TxDb_ from Bioconductor's AnnotationHub.
 
@@ -260,7 +260,7 @@ Here we name this output `human_exons` to not collide with the example above for
 human_exons <- prepare_exons(txdb, sim_dtu_table, coef_col = "effect_est", verbose = TRUE)
 human_exons <- human_exons |>
   filter(padj < .01) |>
-  preprocess_input(coef_col = "effect_est")
+  preprocess(coef_col = "effect_est")
 ```
 
 ## Manual construction

@@ -199,7 +199,7 @@ create_mock_data <- function(
 
   # Convert to GRanges
   gr <- plyranges::as_granges(data)
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
 
   return(gr)
 }
@@ -363,7 +363,7 @@ rerank_exons <- function(gr) {
     ) |>
     dplyr::ungroup()
   # recalculate internal column, key and  nexons
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   return(gr)
 }
 
@@ -387,7 +387,7 @@ generate_a5ss <- function(gr, n_events = 1) {
         names(GenomicRanges::mcols(gr))
     )
   ) {
-    gr <- preprocess_input(gr, coef_col = "coefs")
+    gr <- preprocess(gr, coef_col = "coefs")
   }
 
   # generate a5ss by modifying end() of random internal
@@ -430,7 +430,7 @@ generate_a3ss <- function(gr, n_events = 1) {
         names(GenomicRanges::mcols(gr))
     )
   ) {
-    gr <- preprocess_input(gr, coef_col = "coefs")
+    gr <- preprocess(gr, coef_col = "coefs")
   }
 
   # generate a3ss by modifying start() of random internal

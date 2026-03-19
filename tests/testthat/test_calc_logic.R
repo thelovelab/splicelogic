@@ -1,7 +1,7 @@
 # Test for calc_skipped_exons from calc_logic.R
-test_that("calc_skipped_exons works with se_mock_data and preprocess_input", {
+test_that("calc_skipped_exons works with se_mock_data and preprocess", {
   gr <- se_mock_data()
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   result <- calc_skipped_exons(gr)
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
@@ -20,7 +20,7 @@ test_that("calc_skipped_exons works with se_mock_data and preprocess_input", {
 # Test for no event detected in skipped exon
 test_that("calc_skipped_exons returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   result <- calc_skipped_exons(gr)
 
   expect_s4_class(result, "GRanges")
@@ -30,7 +30,7 @@ test_that("calc_skipped_exons returns empty GRanges if no events", {
 # Test for skipped exon detection in mx_mock_data
 test_that("calc_skipped_exons detects single skipped exon in mx_mock_data", {
   gr <- mx_mock_data()
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   result <- calc_skipped_exons(gr)
 
   expect_s4_class(result, "GRanges")
@@ -47,7 +47,7 @@ test_that("calc_skipped_exons detects single skipped exon in mx_mock_data", {
 # Test for mutually exclusive detection in mx_mock_data
 test_that("calc_mx_exons detects mutually exclusive exons in mx_mock_data", {
   gr <- mx_mock_data()
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   result <- calc_mx_exons(gr)
 
   expect_s4_class(result, "GRanges")
@@ -69,7 +69,7 @@ test_that("calc_mx_exons detects mutually exclusive exons in mx_mock_data", {
 # Test for no event detected in mx
 test_that("calc_mx_exons returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   result <- calc_mx_exons(gr)
 
   expect_s4_class(result, "GRanges")
@@ -79,7 +79,7 @@ test_that("calc_mx_exons returns empty GRanges if no events", {
 # Test for calc retained introns
 test_that("calc_retained_introns test", {
   gr <- create_mock_data(3, 6, 3)
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   gr <- generate_retained_introns(gr, n_events = 3)
 
   result <- calc_retained_introns(gr)
@@ -92,7 +92,7 @@ test_that("calc_retained_introns test", {
 # Test for calc_a3ss
 test_that("calc_a3ss test", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   gr <- generate_a3ss(gr, n_events = 3)
 
   result <- calc_a3ss(gr)
@@ -106,7 +106,7 @@ test_that("calc_a3ss test", {
 # Test for calc_a5ss
 test_that("calc_a5ss test", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   gr <- generate_a5ss(gr, n_events = 3)
 
   result <- calc_a5ss(gr)
@@ -119,7 +119,7 @@ test_that("calc_a5ss test", {
 # Test for calc_skipped_exons with new mock data
 test_that("calc_skipped_exons test with generate_skipped_exons", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   gr <- generate_skipped_exons(gr, n_events = 1)
 
   result <- calc_skipped_exons(gr)
@@ -132,7 +132,7 @@ test_that("calc_skipped_exons test with generate_skipped_exons", {
 # Test for calc_all_events
 test_that("calc_all_events returns combined GRanges with multiple event types", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
   gr <- generate_skipped_exons(gr, n_events = 1)
   gr <- generate_a3ss(gr, n_events = 1)
   gr <- generate_a5ss(gr, n_events = 1)
@@ -147,7 +147,7 @@ test_that("calc_all_events returns combined GRanges with multiple event types", 
 
 test_that("calc_all_events returns empty GRanges when no events exist", {
   gr <- no_event_mock_data()
-  gr <- preprocess_input(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "coefs")
 
   result <- calc_all_events(gr, verbose = FALSE)
 

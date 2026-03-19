@@ -38,5 +38,5 @@ additional columns from \code{dtu_table}.
 \description{
 Extracts exon ranges from a TxDb object, merges them with
 differential transcript usage (DTU) results, and returns a flat
-GRanges ready for \code{\link{preprocess_input}}.
+GRanges ready for \code{\link{preprocess}}.
 }

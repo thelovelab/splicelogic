@@ -18,7 +18,7 @@ exons <- prepare_exons(
   coef_col = "estimate"
   )
 
-processed_exons <- preprocess_input(exons, coef_col = "estimate")
+processed_exons <- preprocess(exons, coef_col = "estimate")
 events <- processed_exons |> calc_all_events()
 ```
 

@@ -17,7 +17,7 @@ reference:
       - splicelogic-package
   - title: "Input preprocessing"
     contents:
-      - preprocess_input
+      - preprocess
       - prepare_exons
   - title: "Event detection"
     contents:

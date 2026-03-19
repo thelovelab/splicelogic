@@ -7,7 +7,7 @@
 #' events from preprocessed GRanges exon data.
 #'
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
-#' and 'coef_col' metadata columns and preprocessed with preprocess_input().
+#' and 'coef_col' metadata columns and preprocessed with preprocess().
 
 NULL
 
@@ -24,7 +24,7 @@ NULL
 #'
 #' # make some mock data and run the function
 #' gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
-#'   preprocess_input(coef_col = "coefs") |>
+#'   preprocess(coef_col = "coefs") |>
 #'   generate_skipped_exons(1)
 #'
 #' # this should find the skipped exon events we generated
@@ -114,7 +114,7 @@ calc_included_exons <- function(gr, type = c("boundary", "over", "in")) {
 #' gr_mx <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' ) |>
-#'   preprocess_input(coef_col = "coefs") |>
+#'   preprocess(coef_col = "coefs") |>
 #'   generate_mx(1)
 #' calc_mx_exons(gr_mx, type = "boundary")
 #'
@@ -214,7 +214,7 @@ calc_mx_exons <- function(gr, type = c("boundary", "in", "over")) {
 #' gr_ri <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' ) |>
-#'   preprocess_input(coef_col = "coefs") |>
+#'   preprocess(coef_col = "coefs") |>
 #'   generate_retained_introns(1)
 #' calc_retained_introns(gr_ri)
 #'
@@ -386,7 +386,7 @@ calc_alt_ss <- function(gr, by_start = TRUE) {
 #' gr_a5 <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' ) |>
-#'   preprocess_input(coef_col = "coefs") |>
+#'   preprocess(coef_col = "coefs") |>
 #'   generate_a5ss(1)
 #' calc_a5ss(gr_a5)
 #'
@@ -404,7 +404,7 @@ calc_a5ss <- function(gr) {
 #' gr_a3 <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' ) |>
-#'   preprocess_input(coef_col = "coefs") |>
+#'   preprocess(coef_col = "coefs") |>
 #'   generate_a3ss(1)
 #' calc_a3ss(gr_a3)
 #'
@@ -423,7 +423,7 @@ calc_a3ss <- function(gr) {
 #' gr_all <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' ) |>
-#'   preprocess_input(coef_col = "coefs") |>
+#'   preprocess(coef_col = "coefs") |>
 #'   generate_skipped_exons(1)
 #' calc_all_events(gr_all, type = "boundary", verbose = FALSE)
 #'
