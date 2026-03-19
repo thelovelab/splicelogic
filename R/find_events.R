@@ -47,10 +47,10 @@ find_se <- function(
   )
   if (inverse) {
     factor <- -1
-    event_name <- "included_exon"
+    event_name <- "ie" # included exon
   } else {
     factor <- 1
-    event_name <- "skipped_exon"
+    event_name <- "se" # skipped exon
   }
 
   matches <- find_candidates_and_flanks(gr, type, factor)
@@ -178,14 +178,14 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
   # build candidate hit rows
   cand_hits <- cand_tbl[pairs$cand_idx, ] |>
     dplyr::mutate(
-      event = "mutually_exclusive",
+      event = "mxe", # mutually exclusive exon
       tx_event = pairs$tx_id
     )
 
   # build middle pos exon hit rows
   pos_hits <- pos_tbl[pairs$pos_row, ] |>
     dplyr::mutate(
-      event = "mutually_exclusive",
+      event = "mxe", # mutually exclusive exon
       tx_event = cand_tbl$tx_id[pairs$cand_idx]
     )
   # interleave candidate and pos hits (cand1, pos1, cand2, pos2, ...)
@@ -267,7 +267,7 @@ find_ri <- function(gr) {
   # build result: one row per (pos exon, intron transcript) pair
   hits_tbl <- pos_tbl[match_tbl$pos_idx, ] |>
     dplyr::mutate(
-      event = "retained_intron",
+      event = "ri", # retained intron
       tx_event = match_tbl$tx_id_intron
     )
 

@@ -5,7 +5,7 @@ test_that("find_se works with se_mock_data and preprocess", {
   result <- find_se(gr)
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event == "skipped_exon"))
+  expect_true(any(result$event == "se"))
 })
 
 # # Test for invalid coef column input in find_se
@@ -40,7 +40,7 @@ test_that("find_se detects single skipped exon in mx_mock_data", {
   expect_equal(length(result), 1L)
   expect_equal(as.integer(GenomicRanges::mcols(result)$tx_id), 1L)
   expect_equal(as.integer(GenomicRanges::mcols(result)$exon_rank), 5L)
-  expect_equal(as.character(GenomicRanges::mcols(result)$event), "skipped_exon")
+  expect_equal(as.character(GenomicRanges::mcols(result)$event), "se")
 })
 
 
@@ -62,7 +62,7 @@ test_that("find_mxe detects mutually exclusive exons in mx_mock_data", {
   )
   expect_equal(
     as.character(GenomicRanges::mcols(result)$event),
-    rep("mutually_exclusive", 4L)
+    rep("mxe", 4L)
   )
 })
 
@@ -86,7 +86,7 @@ test_that("find_ri test", {
 
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event == "retained_intron"))
+  expect_true(any(result$event == "ri"))
 })
 
 # Test for find_a3ss
@@ -126,7 +126,7 @@ test_that("find_se test with generate_skipped_exons", {
 
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event == "skipped_exon"))
+  expect_true(any(result$event == "se"))
 })
 
 # Test for find_all_events
@@ -142,7 +142,7 @@ test_that("find_all_events returns combined GRanges with multiple event types", 
   expect_s4_class(result, "GRanges")
   expect_true(length(result) > 0L)
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true("skipped_exon" %in% result$event)
+  expect_true("se" %in% result$event)
 })
 
 test_that("find_all_events returns empty GRanges when no events exist", {
