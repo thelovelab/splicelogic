@@ -222,10 +222,10 @@ skipped
     ##       <numeric>           <character>           <character> <character>
     ##   [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18       Mtcl1
     ##   [2]         6  ENSMUST00000047321.9  ENSMUSG00000055116.9       Bmal1
-    ##        estimate       padj        event              tx_event
-    ##       <numeric>  <numeric>  <character>           <character>
-    ##   [1]  -2.97320 0.00970121 skipped_exon ENSMUST00000086693.12
-    ##   [2]  -1.56845 0.04279143 skipped_exon  ENSMUST00000210074.2
+    ##        estimate       padj       event              tx_event
+    ##       <numeric>  <numeric> <character>           <character>
+    ##   [1]  -2.97320 0.00970121          se ENSMUST00000086693.12
+    ##   [2]  -1.56845 0.04279143          se  ENSMUST00000210074.2
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -248,11 +248,11 @@ included
     ##   [1]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
     ##   [2]        20 ENSMUST00000077642.12 ENSMUSG00000026585.14        Kifap3
     ##   [3]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
-    ##        estimate        padj         event              tx_event
-    ##       <numeric>   <numeric>   <character>           <character>
-    ##   [1]   3.02406 0.018472554 included_exon ENSMUST00000065504.17
-    ##   [2]   1.04389 0.010395185 included_exon  ENSMUST00000027877.7
-    ##   [3]   4.14230 0.000995041 included_exon  ENSMUST00000108951.8
+    ##        estimate        padj       event              tx_event
+    ##       <numeric>   <numeric> <character>           <character>
+    ##   [1]   3.02406 0.018472554          ie ENSMUST00000065504.17
+    ##   [2]   1.04389 0.010395185          ie  ENSMUST00000027877.7
+    ##   [3]   4.14230 0.000995041          ie  ENSMUST00000108951.8
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -273,10 +273,10 @@ mx
     ##       <numeric>           <character>           <character> <character>
     ##   [1]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15       Sel1l
     ##   [2]         4  ENSMUST00000178462.8 ENSMUSG00000020964.15       Sel1l
-    ##        estimate       padj              event              tx_event
-    ##       <numeric>  <numeric>        <character>           <character>
-    ##   [1]  -3.28535 0.00171934 mutually_exclusive  ENSMUST00000178462.8
-    ##   [2]   2.99384 0.00171934 mutually_exclusive ENSMUST00000021347.12
+    ##        estimate       padj       event              tx_event
+    ##       <numeric>  <numeric> <character>           <character>
+    ##   [1]  -3.28535 0.00171934         mxe  ENSMUST00000178462.8
+    ##   [2]   2.99384 0.00171934         mxe ENSMUST00000021347.12
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -438,19 +438,19 @@ all_events
     ##   [25]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
     ##   [26]         1  ENSMUST00000210074.2  ENSMUSG00000055116.9         Bmal1
     ##   [27]         1 ENSMUST00000120005.10 ENSMUSG00000062044.17         Lmtk3
-    ##         estimate        padj         event              tx_event
-    ##        <numeric>   <numeric>   <character>           <character>
-    ##    [1]  -2.97320 0.009701213  skipped_exon ENSMUST00000086693.12
-    ##    [2]  -1.56845 0.042791429  skipped_exon  ENSMUST00000210074.2
-    ##    [3]   3.02406 0.018472554 included_exon ENSMUST00000065504.17
-    ##    [4]   1.04389 0.010395185 included_exon  ENSMUST00000027877.7
-    ##    [5]   4.14230 0.000995041 included_exon  ENSMUST00000108951.8
-    ##    ...       ...         ...           ...                   ...
-    ##   [23]   3.33998  0.04279143          a3ss ENSMUST00000028220.10
-    ##   [24]   6.33671  0.00607823          a3ss ENSMUST00000046371.13
-    ##   [25]   2.88524  0.01396713          a3ss ENSMUST00000097291.10
-    ##   [26]   3.14714  0.14453992          a3ss  ENSMUST00000047321.9
-    ##   [27]   3.31534  0.04279143          a3ss  ENSMUST00000209617.2
+    ##         estimate        padj       event              tx_event
+    ##        <numeric>   <numeric> <character>           <character>
+    ##    [1]  -2.97320 0.009701213          se ENSMUST00000086693.12
+    ##    [2]  -1.56845 0.042791429          se  ENSMUST00000210074.2
+    ##    [3]   3.02406 0.018472554          ie ENSMUST00000065504.17
+    ##    [4]   1.04389 0.010395185          ie  ENSMUST00000027877.7
+    ##    [5]   4.14230 0.000995041          ie  ENSMUST00000108951.8
+    ##    ...       ...         ...         ...                   ...
+    ##   [23]   3.33998  0.04279143        a3ss ENSMUST00000028220.10
+    ##   [24]   6.33671  0.00607823        a3ss ENSMUST00000046371.13
+    ##   [25]   2.88524  0.01396713        a3ss ENSMUST00000097291.10
+    ##   [26]   3.14714  0.14453992        a3ss  ENSMUST00000047321.9
+    ##   [27]   3.31534  0.04279143        a3ss  ENSMUST00000209617.2
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 

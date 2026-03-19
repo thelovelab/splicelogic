@@ -78,9 +78,9 @@ find_se(gr, type = "boundary")
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
 #>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>   [1]    chr21     11-15      + |         1         1         2 -0.525766
-#>              event  tx_event
-#>        <character> <numeric>
-#>   [1] skipped_exon         2
+#>             event  tx_event
+#>       <character> <numeric>
+#>   [1]          se         2
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -104,10 +104,10 @@ find_mxe(gr_mx, type = "boundary")
 #>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>   [1]    chr20     11-15      + |         1         3         2 -0.012726
 #>   [2]    chr20     21-25      + |         1         2         2  0.285811
-#>                    event  tx_event
-#>              <character> <numeric>
-#>   [1] mutually_exclusive         2
-#>   [2] mutually_exclusive         3
+#>             event  tx_event
+#>       <character> <numeric>
+#>   [1]         mxe         2
+#>   [2]         mxe         3
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -124,10 +124,10 @@ find_ri(gr_ri)
 #>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>   [1]    chr10   111-125      + |         2         7         2  0.840011
 #>   [2]    chr10   111-125      + |         2         7         2  0.840011
-#>                 event  tx_event
-#>           <character> <numeric>
-#>   [1] retained_intron         5
-#>   [2] retained_intron         8
+#>             event  tx_event
+#>       <character> <numeric>
+#>   [1]          ri         5
+#>   [2]          ri         8
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -181,9 +181,9 @@ find_all_events(gr_all, type = "boundary", verbose = FALSE)
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
 #>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>   [1]    chr13     21-25      + |         1         1         3 -0.285458
-#>              event  tx_event
-#>        <character> <numeric>
-#>   [1] skipped_exon         2
+#>             event  tx_event
+#>       <character> <numeric>
+#>   [1]          se         2
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```
