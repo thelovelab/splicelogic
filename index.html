@@ -70,6 +70,15 @@ processed_exons &lt;- preprocess(exons, coef_col = "estimate")
 events &lt;- processed_exons |&gt; find_all_events()</code></pre>
 </div>
 <div class="section level1">
+<h1 id="future-directions">Future directions<a class="anchor" aria-label="anchor" href="#future-directions"></a>
+</h1>
+<ul>
+<li>Support detection of alternative UTR events (alternative 5’ and 3’ UTRs), when the reference annotation includes UTR coordinates (e.g. GENCODE).</li>
+<li>Support detection of additional event types, such as consecutive skipped exons or loss of retained introns.</li>
+<li>Extraction and labelling of the specific splice junctions associated with each event, to easily establish whether the junction is canonical or not for downstream interpretation.</li>
+</ul>
+</div>
+<div class="section level1">
 <h1 id="feedback">Feedback<a class="anchor" aria-label="anchor" href="#feedback"></a>
 </h1>
 <p>We would love to hear your feedback. Please post to an <a href="https://github.com/thelovelab/splicelogic/issues/new" class="external-link">Issue on GitHub</a>.</p>
