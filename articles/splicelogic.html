@@ -57,7 +57,7 @@ Campillo</h4>
                                     <h4 data-toc-skip class="author">Michael
 I. Love</h4>
                         
-            <h4 data-toc-skip class="date">03/18/2026</h4>
+            <h4 data-toc-skip class="date">03/19/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/thelovelab/splicelogic/blob/devel/vignettes/splicelogic.Rmd" class="external-link"><code>vignettes/splicelogic.Rmd</code></a></small>
       <div class="d-none name"><code>splicelogic.Rmd</code></div>
@@ -103,10 +103,15 @@ the 3’ splice site</li>
 <p>With DTU results attached to a <em>GRanges</em> of the exons from
 significant transcripts, one can use the following code to identify
 splice events:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span><span class="va">exons</span>, coef_col <span class="op">=</span> <span class="st">"estimates"</span><span class="op">)</span></span>
-<span><span class="va">skipped</span> <span class="op">&lt;-</span> <span class="va">exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_events.html">calc_skipped_exons</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co"># etc.</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>exons <span class="ot">&lt;-</span> <span class="fu">prepare_exons</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="at">txdb =</span> TxDb.Hsapiens.UCSC.hg38.knownGene,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">dtu_table =</span> <span class="sc">&lt;</span>DTU_TABLE<span class="sc">&gt;</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">coef_col =</span> <span class="st">"estimate"</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  )</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>exons <span class="ot">&lt;-</span> <span class="fu">preprocess</span>(exons, <span class="at">coef_col =</span> <span class="st">"estimates"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>skipped <span class="ot">&lt;-</span> exons <span class="sc">|&gt;</span> <span class="fu">find_se</span>()</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># etc.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="input-data">Input data<a class="anchor" aria-label="anchor" href="#input-data"></a>
@@ -152,7 +157,7 @@ from the differential analysis.</p>
 </tbody>
 </table>
 <p>The differential effect estimate column is specified by the user in
-<code><a href="../reference/preprocess_input.html">preprocess_input()</a></code>. This should be the differential effect
+<code><a href="../reference/preprocess.html">preprocess()</a></code>. This should be the differential effect
 estimate associated with the specific transcript containing the exon,
 and minimally could indicate the direction of effect with
 <code>+1/-1</code>. Positive values indicate up-regulated exons and
@@ -248,14 +253,13 @@ threshold to provide more examples below.</p>
 <div class="section level3">
 <h3 id="preprocessing-input-data">Preprocessing input data<a class="anchor" aria-label="anchor" href="#preprocessing-input-data"></a>
 </h3>
-<p>The first step is to run <code><a href="../reference/preprocess_input.html">preprocess_input()</a></code>, which
-prepares the <code>exons</code> for event detection. This function
-checks the input data, ensures that the necessary columns are
-present:</p>
+<p>The first step is to run <code><a href="../reference/preprocess.html">preprocess()</a></code>, which prepares
+the <code>exons</code> for event detection. This function checks the
+input data, ensures that the necessary columns are present:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thelovelab/splicelogic" class="external-link">splicelogic</a></span><span class="op">)</span></span>
 <span><span class="va">sig_exons</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="individual-events">Individual events<a class="anchor" aria-label="anchor" href="#individual-events"></a>
@@ -266,9 +270,9 @@ of splicing events.</p>
 <p>For example, we can calculate exons that are skipped in up-regulated
 transcripts relative to down-regulated transcripts, across all genes. As
 these are skipped in the up-regulated transcripts, it is expected that
-the exons returned below to down-regulated transcripts:</p>
+the exons returned belong to down-regulated transcripts:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">skipped</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_events.html">calc_skipped_exons</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">skipped</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_se</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">skipped</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 2 ranges and 10 metadata columns:</span></span>
 <span><span class="co">##       seqnames              ranges strand |   exon_id            exon_name</span></span>
@@ -287,7 +291,7 @@ the exons returned below to down-regulated transcripts:</p>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 <p><strong>Included exons</strong></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">included</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_events.html">calc_included_exons</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">included</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_ie</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">included</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 3 ranges and 10 metadata columns:</span></span>
 <span><span class="co">##       seqnames              ranges strand |   exon_id            exon_name</span></span>
@@ -309,7 +313,7 @@ the exons returned below to down-regulated transcripts:</p>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 <p><strong>Mutually exclusive exons</strong></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mx</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_events.html">calc_mx_exons</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">mx</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_mxe</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mx</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 2 ranges and 10 metadata columns:</span></span>
 <span><span class="co">##       seqnames            ranges strand |   exon_id            exon_name</span></span>
@@ -327,8 +331,10 @@ the exons returned below to down-regulated transcripts:</p>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 <p><strong>Retained introns</strong></p>
+<p>Here we do not find retained introns, and the function returns an
+empty vector.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ri</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_events.html">calc_retained_introns</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">ri</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_ri</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">ri</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 0 ranges and 0 metadata columns:</span></span>
 <span><span class="co">##    seqnames    ranges strand</span></span>
@@ -337,7 +343,7 @@ the exons returned below to down-regulated transcripts:</p>
 <span><span class="co">##   seqinfo: no sequences</span></span></code></pre>
 <p><strong>Alternative 5’ and 3’ splice sites</strong></p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a5ss</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_events.html">calc_a5ss</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">a5ss</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_a5ss</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">a5ss</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 7 ranges and 10 metadata columns:</span></span>
 <span><span class="co">##       seqnames              ranges strand |   exon_id            exon_name</span></span>
@@ -370,7 +376,7 @@ the exons returned below to down-regulated transcripts:</p>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a3ss</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_events.html">calc_a3ss</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">a3ss</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_a3ss</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">a3ss</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 13 ranges and 10 metadata columns:</span></span>
 <span><span class="co">##        seqnames              ranges strand |   exon_id            exon_name</span></span>
@@ -419,7 +425,7 @@ the exons returned below to down-regulated transcripts:</p>
 <h3 id="calculate-all-events">Calculate all events<a class="anchor" aria-label="anchor" href="#calculate-all-events"></a>
 </h3>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">all_events</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/calc_events.html">calc_all_events</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">all_events</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_all_events</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Calculating skipped exon events...</span></span></code></pre>
 <pre><code><span><span class="co">## Calculating included exon events...</span></span></code></pre>
 <pre><code><span><span class="co">## Calculating mutually exclusive exon events...</span></span></code></pre>
@@ -473,7 +479,10 @@ the exons returned below to down-regulated transcripts:</p>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">all_events</span><span class="op">$</span><span class="va">event</span><span class="op">)</span>, horiz<span class="op">=</span><span class="cn">TRUE</span>, las<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">all_events</span><span class="op">$</span><span class="va">event</span><span class="op">)</span>, horiz<span class="op">=</span><span class="cn">TRUE</span>, las<span class="op">=</span><span class="fl">1</span>, </span>
+<span>  xlab<span class="op">=</span><span class="st">"exons participating in an event"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="splicelogic_files/figure-html/events-barplot-1.png" class="r-plt" alt="Barplot of event types" width="700"></p>
 </div>
 </div>
@@ -492,7 +501,7 @@ switching analysis.</p>
 <p><code><a href="../reference/prepare_exons.html">prepare_exons()</a></code> extracts exon ranges from a
 <em>TxDb</em> object and merges them with your DTU results table in a
 single call. It returns a flat <em>GRanges</em> ready for
-<code><a href="../reference/preprocess_input.html">preprocess_input()</a></code>. We demonstrate using GENCODE v32 (human
+<code><a href="../reference/preprocess.html">preprocess()</a></code>. We demonstrate using GENCODE v32 (human
 genes).</p>
 <p>The first step is to load a <em>TxDb</em> object. Typically, a user
 would supply their own GTF to txdbmaker::makeTxDbFromGFF() to generate
@@ -561,11 +570,11 @@ the example above for the mouse dataset.</p>
 <pre><code><span><span class="co">## Extracting exons from TxDb...</span></span></code></pre>
 <pre><code><span><span class="co">## Mapping transcript IDs...</span></span></code></pre>
 <pre><code><span><span class="co">## Merging DTU results onto exons...</span></span></code></pre>
-<pre><code><span><span class="co">## Done. Returned 1372308 exon ranges from 227462unique transcripts.</span></span></code></pre>
+<pre><code><span><span class="co">## Done. Returned 1372308 exon ranges from 227462 unique transcripts.</span></span></code></pre>
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_exons</span> <span class="op">&lt;-</span> <span class="va">human_exons</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">padj</span> <span class="op">&lt;</span> <span class="fl">.01</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/preprocess_input.html">preprocess_input</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"effect_est"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"effect_est"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="manual-construction">Manual construction<a class="anchor" aria-label="anchor" href="#manual-construction"></a>
@@ -578,7 +587,11 @@ are built from a <em>TxDb</em>.</p>
 <em>TxDb</em>:</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract exons as a GRangesList</span></span>
-<span><span class="va">exons_list</span> <span class="op">&lt;-</span> <span class="fu">GenomicFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcriptsBy.html" class="external-link">exonsBy</a></span><span class="op">(</span><span class="va">txdb</span>, by<span class="op">=</span><span class="st">"tx"</span><span class="op">)</span> <span class="co"># exon id, name, and rank</span></span>
+<span><span class="va">exons_list</span> <span class="op">&lt;-</span> <span class="fu">GenomicFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcriptsBy.html" class="external-link">exonsBy</a></span><span class="op">(</span></span>
+<span>  <span class="va">txdb</span>,</span>
+<span>  <span class="co"># filter = AnnotationFilter::TxIdFilter(unique(sim_dtu_table$tx_id)), </span></span>
+<span>  by<span class="op">=</span><span class="st">"tx"</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="co"># Our DTU table aligns with txps, which aligns with the names of the GRangesList.</span></span>
 <span><span class="co"># prepare_exons() handles this with alignment checks</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">exons_list</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">sim_dtu_table</span><span class="op">$</span><span class="va">tx_id</span></span></code></pre></div>

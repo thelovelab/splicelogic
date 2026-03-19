@@ -27,9 +27,14 @@ With DTU results attached to a *GRanges* of the exons from significant
 transcripts, one can use the following code to identify splice events:
 
 ``` r
+exons <- prepare_exons(
+  txdb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+  dtu_table = <DTU_TABLE>,
+  coef_col = "estimate"
+  )
 
-exons <- preprocess_input(exons, coef_col = "estimates")
-skipped <- exons |> calc_skipped_exons()
+exons <- preprocess(exons, coef_col = "estimates")
+skipped <- exons |> find_se()
 # etc.
 ```
 
@@ -60,7 +65,7 @@ Required columns for exons:
 | `coef_col = "<user supplied>"` | differential effect estimate for the transcript |
 
 The differential effect estimate column is specified by the user in
-[`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md).
+[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md).
 This should be the differential effect estimate associated with the
 specific transcript containing the exon, and minimally could indicate
 the direction of effect with `+1/-1`. Positive values indicate
@@ -179,7 +184,7 @@ sig_exons <- exons |> filter(padj < .5)
 ### Preprocessing input data
 
 The first step is to run
-[`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md),
+[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md),
 which prepares the `exons` for event detection. This function checks the
 input data, ensures that the necessary columns are present:
 
@@ -187,7 +192,7 @@ input data, ensures that the necessary columns are present:
 
 library(splicelogic)
 sig_exons <- sig_exons |> 
-  preprocess_input(coef_col = "estimate")
+  preprocess(coef_col = "estimate")
 ```
 
 ### Individual events
@@ -200,11 +205,11 @@ splicing events.
 For example, we can calculate exons that are skipped in up-regulated
 transcripts relative to down-regulated transcripts, across all genes. As
 these are skipped in the up-regulated transcripts, it is expected that
-the exons returned below to down-regulated transcripts:
+the exons returned belong to down-regulated transcripts:
 
 ``` r
 
-skipped <- sig_exons |> calc_skipped_exons()
+skipped <- sig_exons |> find_se()
 skipped
 ```
 
@@ -228,7 +233,7 @@ skipped
 
 ``` r
 
-included <- sig_exons |> calc_included_exons()
+included <- sig_exons |> find_ie()
 included
 ```
 
@@ -255,7 +260,7 @@ included
 
 ``` r
 
-mx <- sig_exons |> calc_mx_exons()
+mx <- sig_exons |> find_mxe()
 mx
 ```
 
@@ -277,9 +282,12 @@ mx
 
 **Retained introns**
 
+Here we do not find retained introns, and the function returns an empty
+vector.
+
 ``` r
 
-ri <- sig_exons |> calc_retained_introns()
+ri <- sig_exons |> find_ri()
 ri
 ```
 
@@ -293,7 +301,7 @@ ri
 
 ``` r
 
-a5ss <- sig_exons |> calc_a5ss()
+a5ss <- sig_exons |> find_a5ss()
 a5ss
 ```
 
@@ -330,7 +338,7 @@ a5ss
 
 ``` r
 
-a3ss <- sig_exons |> calc_a3ss()
+a3ss <- sig_exons |> find_a3ss()
 a3ss
 ```
 
@@ -381,7 +389,7 @@ a3ss
 
 ``` r
 
-all_events <- sig_exons |> calc_all_events()
+all_events <- sig_exons |> find_all_events()
 ```
 
     ## Calculating skipped exon events...
@@ -449,7 +457,10 @@ all_events
 ``` r
 
 par(mar = c(5, 10, 4, 4))
-barplot(table(all_events$event), horiz=TRUE, las=1)
+barplot(
+  table(all_events$event), horiz=TRUE, las=1, 
+  xlab="exons participating in an event"
+)
 ```
 
 ![Barplot of event
@@ -467,7 +478,7 @@ analysis.
 [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
 extracts exon ranges from a *TxDb* object and merges them with your DTU
 results table in a single call. It returns a flat *GRanges* ready for
-[`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md).
+[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md).
 We demonstrate using GENCODE v32 (human genes).
 
 The first step is to load a *TxDb* object. Typically, a user would
@@ -561,13 +572,13 @@ human_exons <- prepare_exons(txdb, sim_dtu_table, coef_col = "effect_est", verbo
 
     ## Merging DTU results onto exons...
 
-    ## Done. Returned 1372308 exon ranges from 227462unique transcripts.
+    ## Done. Returned 1372308 exon ranges from 227462 unique transcripts.
 
 ``` r
 
 human_exons <- human_exons |>
   filter(padj < .01) |>
-  preprocess_input(coef_col = "effect_est")
+  preprocess(coef_col = "effect_est")
 ```
 
 ### Manual construction
@@ -582,7 +593,11 @@ The following extracts the exons grouped by transcript from the *TxDb*:
 ``` r
 
 # extract exons as a GRangesList
-exons_list <- GenomicFeatures::exonsBy(txdb, by="tx") # exon id, name, and rank
+exons_list <- GenomicFeatures::exonsBy(
+  txdb,
+  # filter = AnnotationFilter::TxIdFilter(unique(sim_dtu_table$tx_id)), 
+  by="tx"
+  )
 # Our DTU table aligns with txps, which aligns with the names of the GRangesList.
 # prepare_exons() handles this with alignment checks
 names(exons_list) <- sim_dtu_table$tx_id

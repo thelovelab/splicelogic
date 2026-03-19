@@ -8,22 +8,21 @@
 
 ## Input preprocessing
 
-- [`preprocess_input()`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md)
+- [`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
   : Preprocess input GRanges object for splicing event calculation
 - [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
   : Prepare exon ranges from a TxDb and DTU results table
 
 ## Event detection
 
-- [`calc_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-  [`calc_included_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-  [`calc_mx_exons()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-  [`calc_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-  [`calc_alt_ss()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-  [`calc_a5ss()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-  [`calc_a3ss()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-  [`calc_all_events()`](https://thelovelab.github.io/splicelogic/reference/calc_events.md)
-  : Calculate splice events from a GRanges object
+- [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  : Find splice events from a GRanges object
 
 ## Mock data generation
 

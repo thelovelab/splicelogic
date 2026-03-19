@@ -2,7 +2,7 @@
 
 Extracts exon ranges from a TxDb object, merges them with differential
 transcript usage (DTU) results, and returns a flat GRanges ready for
-[`preprocess_input`](https://thelovelab.github.io/splicelogic/reference/preprocess_input.md).
+[`preprocess`](https://thelovelab.github.io/splicelogic/reference/preprocess.md).
 
 ## Usage
 
