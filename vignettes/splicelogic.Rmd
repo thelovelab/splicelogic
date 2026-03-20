@@ -1,5 +1,5 @@
 ---
-title: "Introduction to splicelogic"
+title: "splicelogic: differential transcripts to splice events"
 author:
     - name: Beatriz Campillo
       orcid: 0000-0001-7323-9125
@@ -15,7 +15,7 @@ vignette: |
 
 # Introduction
 
-_splicelogic_ is an R/Bioconductor package for detecting alternative splicing events from exon-level data stored as `GRanges` objects. Given a set of exons annotated with a coefficient column indicating differential transcript usage (DTU), `splicelogic` identifies the following types of splicing events:
+_splicelogic_ is an R/Bioconductor package for detecting alternative splicing events from exon-level data stored as _GRanges_ objects. Given a set of exons annotated with a coefficient column indicating differential transcript usage (DTU), _splicelogic_ identifies the following types of splicing events:
 
 -   **Skipped exons (SE)** -- exons skipped in up-regulated transcripts
 -   **Included exons (IE)** -- exons included in up-regulated transcripts
@@ -23,6 +23,8 @@ _splicelogic_ is an R/Bioconductor package for detecting alternative splicing ev
 -   **Retained introns (RI)** -- intronic regions that are retained as part of an exon in up-regulated transcripts
 -   **Alternative 5' (A5SS)** -- exons in up-regulated transcripts that share the same 3' splice site but differ at the 5' splice site from exons in down-regulated transcripts 
 -   **Alternative 3' (A3SS)** -- as above, but differing in the 3' splice site
+
+These are detected using a series of functions, e.g. `find_se()`, `find_ie()`, etc. described below.
 
 # Quick start
 
@@ -44,7 +46,7 @@ skipped <- exons |> find_se()
 
 # Input data
 
-`splicelogic` assumes the user has run a differential transcript usage (DTU) or differential splicing analysis providing an error bound (e.g. adjusted p-value / FDR) and and effect estimate with direction (e.g. GLM estimated coefficient or deltaPSI) (see [upstream methods](#upstream-methods)).
+_splicelogic_ assumes the user has run a differential transcript usage (DTU) or differential splicing analysis providing an error bound (e.g. adjusted p-value / FDR) and and effect estimate with direction (e.g. GLM estimated coefficient or deltaPSI) (see [upstream methods](#upstream-methods)).
 
 It also assumes the user has obtained genomic ranges representing the exon structure of each transcript being analyzed (see [obtaining exon ranges](#obtaining-exon-ranges)).
 
@@ -63,13 +65,13 @@ The differential effect estimate column is specified by the user in `preprocess(
 
 ## Jones et al mouse long read dataset
 
-We will use a published long read dataset and its reported splicing changes to demonstrate some of the functionality in *splicelogic*.
+For demonstration, we will use a published mouse long read dataset and its reported splicing changes.
 
 The citation is:
 
 > Emma F. Jones, Timothy C. Howton, Victoria L. Flanary, Amanda D. Clark, Brittany N. Lasseigne Long-read RNA sequencing identifies region- and sex-specific C57BL/6J mouse brain mRNA isoform expression and usage **Mol Brain** 17, 40 (2024). [doi: 10.1186/s13041-024-01112-7](https://doi.org/10.1186/s13041-024-01112-7)
 
-And information about the paper, including code and publicly available data can be found at this URL:
+Information about the paper, including code and publicly available data can be found at this URL:
 
 <https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv>
 
@@ -77,11 +79,14 @@ In the abstract, Jones *et al.* describe the experiment:
 
 > To assess differences in AS across the cerebellum, cortex, hippocampus, and striatum by sex, we generated and analyzed Oxford Nanopore Technologies (ONT) long-read RNA sequencing (lrRNA-Seq) C57BL/6J mouse brain cDNA libraries. From \> 85 million reads that passed quality control metrics, we calculated differential gene expression (DGE), differential transcript expression (DTE), and differential transcript usage (DTU) across brain regions and by sex.
 
-## Loading data
+Here we will focus on the cortex-specific sex comparison, comparing female to male mice.
 
-We load the differential transcript usage analysis from the Jones *et al.* paper. Specifically, we use the cortex-specific sex comparison (F vs M) that identified the following transcripts as DTU:
+## Loading example data
 
-<https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv/blob/main/results/dtu_transcripts/cortex_sex_sig_features.csv>
+In this section we load the small example dataset that has been prepared for this vignette. Note that in a typical _splicelogic_ workflow, the exons _GRanges_ would be loaded from a *TxDb*. See the [obtaining exon ranges](#obtaining-exon-ranges) section below for further details.
+
+We load the differential transcript usage analysis from the Jones *et al.* paper. Specifically, we load the transcripts found to exhibit DTU in the 
+[F vs M comparison in cortex](https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv/blob/main/results/dtu_transcripts/cortex_sex_sig_features.csv).
 
 The DTU table for this example, and the exons for the differential transcripts have been saved in the `extdata` directory of _splicelogic_.
 
@@ -93,7 +98,7 @@ dir <- system.file("extdata", package="splicelogic")
 dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
 ```
 
-We load the 601 exons from GENCODE M31 annotation for the 49 differential transcripts, and attach the metadata columns.
+We load from BED file the 601 exons from GENCODE M31 annotation for the 49 differential transcripts, and attach the metadata columns.
 
 ```{r load-exons}
 #| message: false
@@ -131,10 +136,10 @@ exons <- exons |>
   plyranges::join_mcols_left(dtu_table, by = "tx_id")
 ```
 
-_splicelogic_ is designed to take as input the exons from significantly changed transcripts, so we first filter out transcripts that were not signficant at FDR 50%. Here we use a permissive FDR threshold to provide more examples below.
+_splicelogic_ is designed to take as input the exons from significantly changed transcripts, so we first filter out transcripts that were not signficant at FDR 10%.
 
 ```{r filter-sig}
-sig_exons <- exons |> filter(padj < .5)
+sig_exons <- exons |> filter(padj < .1)
 ```
 
 # Finding splicing events
@@ -157,7 +162,6 @@ Next we can run the various functions for calculating different types of splicin
 **Skipped exons (SE)**
 
 For example, we can calculate exons that are skipped in up-regulated transcripts relative to down-regulated transcripts, across all genes. As these are skipped in the up-regulated transcripts, it is expected that the exons returned belong to down-regulated transcripts:
-
 
 ```{r calc-se}
 skipped <- sig_exons |> find_se()
@@ -207,7 +211,6 @@ all_events
 
 ```{r events-barplot}
 #| fig.alt: 'Barplot of event types'
-par(mar = c(5, 10, 4, 4))
 barplot(
   table(all_events$event), horiz=TRUE, las=1, 
   xlab="exons participating in an event"
@@ -231,20 +234,19 @@ Common upstream methods include:
 
 - [BANDITS](https://bioconductor.org/packages/BANDITS) — a Bayesian hierarchical DTU method that models transcript usage with a Dirichlet-multinomial and explicitly accounts for mapping uncertainty using equivalence classes, with both gene-level and transcript-level testing.
 
-- [DEXSeq](https://bioconductor.org/packages/DEXSeq) — primarily a differential exon usage (DEU)method based on **negative binomial GLMs**, but commonly used in transcript-level DTU workflows and isoform-switch pipelines. While not a native transcript-usage model, its outputs can be incorporated into `splicelogic` when transcript-level statistics are available.
+- [DEXSeq](https://bioconductor.org/packages/DEXSeq) — primarily a differential exon usage (DEU) method based on negative binomial GLMs, but commonly used in transcript-level DTU workflows. The log2FC coefficients from DEXSeq can be used directly with _splicelogic_.
 
-- **edgeR (`diffSplice` / `diffSpliceDGE`)** — can be used for transcript- or exon-resolved differential usage analyses in count-based workflows, providing gene and transcript-level statistics in suitable DTU setups. Available on [Bioconductor](https://bioconductor.org/packages/edgeR). -->
+- [limma](https://bioconductor.org/packages/limma) and [edgeR](https://bioconductor.org/packages/edgeR) (`diffSplice` / `diffSpliceDGE`) — can be used for DTU analyses (as well as exon-level), with both gene-level and transcript-level testing.
 
-
-Regardless of which method is used, the per-transcript DTU statistics (effect estimates and adjusted p-values) have to be mapped onto the individual exons of each transcript to produce an exon-level GRanges (see [Obtaining exon ranges](#obtaining-exon-ranges)). This annotated GRanges is the starting point for `splicelogic` , beginning with `preprocess()` and then followed by event-specific functions (`find_se()`, `find_mxe()`, etc.).
+Regardless of which method is used, the per-transcript DTU statistics (effect estimates and adjusted p-values) have to be mapped onto the individual exons of each transcript to produce an exon-level _GRanges_ (see [Obtaining exon ranges](#obtaining-exon-ranges)). This annotated _GRanges_ is the starting point for _splicelogic_, beginning with `preprocess()` and then followed by event-specific functions (`find_se()`, `find_ie()`, etc.).
 
 # Obtaining exon ranges
 
 ## Using `prepare_exons()`
 
-`prepare_exons()` extracts exon ranges from a *TxDb* object and merges them with your DTU results table in a single call. It returns a flat *GRanges* ready for `preprocess()`. We demonstrate using GENCODE v32 (human genes).
+`prepare_exons()` extracts exon ranges from a *TxDb* object and merges them with your DTU results table. It returns a flat *GRanges* ready for `preprocess()` and the `find_*` functions. functions. We demonstrate using GENCODE v32 (human genes).
 
-The first step is to load a _TxDb_ object. Typically, a user would supply their own GTF to txdbmaker::makeTxDbFromGFF() to generate this. For this demonstration we will load a pre-constructed _TxDb_ from Bioconductor's AnnotationHub.
+The first step is to load a _TxDb_ object. Typically, a user would supply their own GTF to `txdbmaker::makeTxDbFromGFF()` to generate this. For this demonstration we will load a pre-constructed _TxDb_ from Bioconductor's _AnnotationHub_.
 
 ```{r ahub}
 suppressPackageStartupMessages({

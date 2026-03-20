@@ -116,18 +116,21 @@ no_event_mock_data <- function() {
 }
 
 #' Create mock GRanges data for splicing event testing
+#' 
 #' @param n_genes Number of genes to simulate
 #' @param n_tx_per_gene Number of transcripts per gene
 #' @param n_exons_per_tx Number of exons per transcript
 #' @param coef_range Range of coefficient values to sample from
+#' 
 #' @return A GRanges object with simulated transcripts and exons
-#' @export
+#' 
 #' @examples
 #' 
 #' # create mock data with 2 genes, 4 transcripts
 #' # per gene, and 4 exons per transcript
 #' gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4)
 #' 
+#' @export
 create_mock_data <- function(
   n_genes = 1,
   n_tx_per_gene = 2,
@@ -141,7 +144,7 @@ create_mock_data <- function(
     exon_rank = seq_len(n_exons_per_tx)
   )
 
-  data <- data %>%
+  data <- data |>
     dplyr::arrange(gene_id, tx_id, exon_rank)
 
   # Calculate transcript IDs globally
@@ -152,9 +155,6 @@ create_mock_data <- function(
       # start positions shifted by gene_id so they dont overlap
       start = (exon_rank - 1) * 10 + 1 + (gene_id - 1) * 100,
       width = 5, # Fixed width
-      #strand = rep(sample(c("+", "-"), n_genes *
-      #  n_tx_per_gene, replace = TRUE),
-      #  each = n_exons_per_tx)
       strand = "+" # Fixed strand for simplicity TO DO
     )
 

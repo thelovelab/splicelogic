@@ -13,6 +13,7 @@ For more details on the features of plryanges, read the vignette:
 Useful links:
 \itemize{
   \item \url{https://github.com/thelovelab/splicelogic}
+  \item \url{https://thelovelab.github.io/splicelogic}
   \item Report bugs at \url{https://github.com/thelovelab/splicelogic/issues}
 }
 
