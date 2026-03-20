@@ -48,8 +48,9 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="splicelogic-differential-transcripts-to-splice-events">splicelogic: differential transcripts to splice events<a class="anchor" aria-label="anchor" href="#splicelogic-differential-transcripts-to-splice-events"></a>
+<div class="page-header"><h1 id="splicelogic-dtu-to-splice-events">splicelogic: DTU to splice events<a class="anchor" aria-label="anchor" href="#splicelogic-dtu-to-splice-events"></a>
 </h1></div>
+<p><em>splicelogic</em> is an R/Bioconductor package for detecting alternative splicing events from exon-level data stored as <em>GRanges</em> objects. Given a set of exons annotated with a coefficient column indicating differential transcript usage (DTU), <em>splicelogic</em> can be used to identify a variety of splicing events. See the <a href="articles/splicelogic.html">vignette</a> for more details.</p>
 </div>
 <div class="section level1">
 <h1 id="how-to-install">How to install<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
@@ -60,14 +61,21 @@
 <div class="section level1">
 <h1 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h1>
-<pre><code>exons &lt;- prepare_exons(
-  txdb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+<pre><code># prepare exons from a TxDb and DTU results
+exons &lt;- prepare_exons(
+  txdb = &lt;A TxDB OBJECT&gt;,
   dtu_table = &lt;DTU_TABLE&gt;,
   coef_col = "estimate"
-  )
+)
 
-processed_exons &lt;- preprocess(exons, coef_col = "estimate")
-events &lt;- processed_exons |&gt; find_all_events()</code></pre>
+# preprocess for further analysis
+exons &lt;- preprocess(exons, coef_col = "estimate")
+
+# find skipped exons
+skipped &lt;- exons |&gt; find_se()
+
+# find all splicing events
+all_events &lt;- exons |&gt; find_all_events()</code></pre>
 </div>
 <div class="section level1">
 <h1 id="future-directions">Future directions<a class="anchor" aria-label="anchor" href="#future-directions"></a>
@@ -75,7 +83,9 @@ events &lt;- processed_exons |&gt; find_all_events()</code></pre>
 <ul>
 <li>Support detection of alternative UTR events (alternative 5’ and 3’ UTRs), when the reference annotation includes UTR coordinates (e.g. GENCODE).</li>
 <li>Support detection of additional event types, such as consecutive skipped exons or loss of retained introns.</li>
-<li>Extraction and labelling of the specific splice junctions associated with each event, adding two metadata columns: the donor–acceptor dinucleotide sequence (e.g. AG-GT) and a logical indicating whether the junction is canonical, for downstream interpretation.</li>
+<li>Extraction and labelling of the specific splice junctions associated with each event, adding metadata columns such as the donor–acceptor dinucleotide sequence (e.g. AG-GT) and a logical indicating whether the junction is canonical, for downstream interpretation.</li>
+<li>Facilitating RNA-binding protein (RBP) motif detection</li>
+<li>Facilitating interpretation of downstream structural consequences</li>
 </ul>
 </div>
 <div class="section level1">
@@ -86,7 +96,7 @@ events &lt;- processed_exons |&gt; find_all_events()</code></pre>
 <div class="section level1">
 <h1 id="funding">Funding<a class="anchor" aria-label="anchor" href="#funding"></a>
 </h1>
-<p><code>splicelogic</code> was supported by NHGRI R01-HG009937, and the Wellcome Trust as part of the EOSS program.</p>
+<p><em>splicelogic</em> is supported by NHGRI R01-HG009937, and the Wellcome Trust as part of the EOSS program.</p>
 </div>
 
   </main><aside class="col-md-3"><div class="links">

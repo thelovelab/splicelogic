@@ -1,4 +1,12 @@
-# splicelogic: differential transcripts to splice events
+# splicelogic: DTU to splice events
+
+*splicelogic* is an R/Bioconductor package for detecting alternative
+splicing events from exon-level data stored as *GRanges* objects. Given
+a set of exons annotated with a coefficient column indicating
+differential transcript usage (DTU), *splicelogic* can be used to
+identify a variety of splicing events. See the
+[vignette](https://thelovelab.github.io/splicelogic/articles/splicelogic.md)
+for more details.
 
 # How to install
 
@@ -9,14 +17,21 @@ by installing from GitHub:
 
 # Quick start
 
+    # prepare exons from a TxDb and DTU results
     exons <- prepare_exons(
-      txdb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+      txdb = <A TxDB OBJECT>,
       dtu_table = <DTU_TABLE>,
       coef_col = "estimate"
-      )
+    )
 
-    processed_exons <- preprocess(exons, coef_col = "estimate")
-    events <- processed_exons |> find_all_events()
+    # preprocess for further analysis
+    exons <- preprocess(exons, coef_col = "estimate")
+
+    # find skipped exons
+    skipped <- exons |> find_se()
+
+    # find all splicing events
+    all_events <- exons |> find_all_events()
 
 # Future directions
 
@@ -26,9 +41,11 @@ by installing from GitHub:
 - Support detection of additional event types, such as consecutive
   skipped exons or loss of retained introns.
 - Extraction and labelling of the specific splice junctions associated
-  with each event, adding two metadata columns: the donor–acceptor
+  with each event, adding metadata columns such as the donor–acceptor
   dinucleotide sequence (e.g. AG-GT) and a logical indicating whether
   the junction is canonical, for downstream interpretation.
+- Facilitating RNA-binding protein (RBP) motif detection
+- Facilitating interpretation of downstream structural consequences
 
 # Feedback
 
@@ -37,5 +54,5 @@ GitHub](https://github.com/thelovelab/splicelogic/issues/new).
 
 # Funding
 
-`splicelogic` was supported by NHGRI R01-HG009937, and the Wellcome
-Trust as part of the EOSS program.
+*splicelogic* is supported by NHGRI R01-HG009937, and the Wellcome Trust
+as part of the EOSS program.

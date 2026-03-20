@@ -1,11 +1,11 @@
-# Introduction to splicelogic
+# splicelogic: differential transcripts to splice events
 
 ## Introduction
 
 *splicelogic* is an R/Bioconductor package for detecting alternative
-splicing events from exon-level data stored as `GRanges` objects. Given
+splicing events from exon-level data stored as *GRanges* objects. Given
 a set of exons annotated with a coefficient column indicating
-differential transcript usage (DTU), `splicelogic` identifies the
+differential transcript usage (DTU), *splicelogic* identifies the
 following types of splicing events:
 
 - **Skipped exons (SE)** – exons skipped in up-regulated transcripts
@@ -20,6 +20,11 @@ following types of splicing events:
   exons in down-regulated transcripts
 - **Alternative 3’ (A3SS)** – as above, but differing in the 3’ splice
   site
+
+These are detected using a series of functions,
+e.g. [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+etc. described below.
 
 ## Quick start
 
@@ -41,7 +46,7 @@ skipped <- exons |> find_se()
 
 ## Input data
 
-`splicelogic` assumes the user has run a differential transcript usage
+*splicelogic* assumes the user has run a differential transcript usage
 (DTU) or differential splicing analysis providing an error bound
 (e.g. adjusted p-value / FDR) and and effect estimate with direction
 (e.g. GLM estimated coefficient or deltaPSI) (see [upstream
@@ -76,8 +81,8 @@ column.
 
 ### Jones et al mouse long read dataset
 
-We will use a published long read dataset and its reported splicing
-changes to demonstrate some of the functionality in *splicelogic*.
+For demonstration, we will use a published mouse long read dataset and
+its reported splicing changes.
 
 The citation is:
 
@@ -87,8 +92,8 @@ The citation is:
 > and usage **Mol Brain** 17, 40 (2024). [doi:
 > 10.1186/s13041-024-01112-7](https://doi.org/10.1186/s13041-024-01112-7)
 
-And information about the paper, including code and publicly available
-data can be found at this URL:
+Information about the paper, including code and publicly available data
+can be found at this URL:
 
 <https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv>
 
@@ -102,13 +107,20 @@ In the abstract, Jones *et al.* describe the experiment:
 > expression (DGE), differential transcript expression (DTE), and
 > differential transcript usage (DTU) across brain regions and by sex.
 
-### Loading data
+Here we will focus on the cortex-specific sex comparison, comparing
+female to male mice.
+
+### Loading example data
+
+In this section we load the small example dataset that has been prepared
+for this vignette. Note that in a typical *splicelogic* workflow, the
+exons *GRanges* would be loaded from a *TxDb*. See the [obtaining exon
+ranges](#obtaining-exon-ranges) section below for further details.
 
 We load the differential transcript usage analysis from the Jones *et
-al.* paper. Specifically, we use the cortex-specific sex comparison (F
-vs M) that identified the following transcripts as DTU:
-
-<https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv/blob/main/results/dtu_transcripts/cortex_sex_sig_features.csv>
+al.* paper. Specifically, we load the transcripts found to exhibit DTU
+in the [F vs M comparison in
+cortex](https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv/blob/main/results/dtu_transcripts/cortex_sex_sig_features.csv).
 
 The DTU table for this example, and the exons for the differential
 transcripts have been saved in the `extdata` directory of *splicelogic*.
@@ -121,8 +133,8 @@ dir <- system.file("extdata", package="splicelogic")
 dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
 ```
 
-We load the 601 exons from GENCODE M31 annotation for the 49
-differential transcripts, and attach the metadata columns.
+We load from BED file the 601 exons from GENCODE M31 annotation for the
+49 differential transcripts, and attach the metadata columns.
 
 ``` r
 
@@ -172,12 +184,11 @@ exons <- exons |>
 
 *splicelogic* is designed to take as input the exons from significantly
 changed transcripts, so we first filter out transcripts that were not
-signficant at FDR 50%. Here we use a permissive FDR threshold to provide
-more examples below.
+signficant at FDR 10%.
 
 ``` r
 
-sig_exons <- exons |> filter(padj < .5)
+sig_exons <- exons |> filter(padj < .1)
 ```
 
 ## Finding splicing events
@@ -214,19 +225,16 @@ skipped <- sig_exons |> find_se()
 skipped
 ```
 
-    ## GRanges object with 2 ranges and 10 metadata columns:
-    ##       seqnames              ranges strand |   exon_id            exon_name
-    ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
-    ##   [1]    chr17   66647479-66647535      - |    480827 ENSMUSE00000443570.7
-    ##   [2]     chr7 112882464-112882502      + |    209996 ENSMUSE00000302465.4
+    ## GRanges object with 1 range and 10 metadata columns:
+    ##       seqnames            ranges strand |   exon_id            exon_name
+    ##          <Rle>         <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr17 66647479-66647535      - |    480827 ENSMUSE00000443570.7
     ##       exon_rank                 tx_id               gene_id   gene_name
     ##       <numeric>           <character>           <character> <character>
     ##   [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18       Mtcl1
-    ##   [2]         6  ENSMUST00000047321.9  ENSMUSG00000055116.9       Bmal1
     ##        estimate       padj       event              tx_event
     ##       <numeric>  <numeric> <character>           <character>
-    ##   [1]  -2.97320 0.00970121          se ENSMUST00000086693.12
-    ##   [2]  -1.56845 0.04279143          se  ENSMUST00000210074.2
+    ##   [1]   -2.9732 0.00970121          se ENSMUST00000086693.12
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -306,34 +314,28 @@ a5ss <- sig_exons |> find_a5ss()
 a5ss
 ```
 
-    ## GRanges object with 7 ranges and 10 metadata columns:
+    ## GRanges object with 5 ranges and 10 metadata columns:
     ##       seqnames              ranges strand |   exon_id            exon_name
     ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
     ##   [1]    chr10   88081618-88081868      + |    304334 ENSMUSE00001310024.2
-    ##   [2]    chr10   75355148-75355700      + |    301043 ENSMUSE00001328456.2
-    ##   [3]    chr14   20529963-20530189      - |    408097 ENSMUSE00000901772.3
-    ##   [4]     chr8 120887954-120892045      + |    250998 ENSMUSE00000446870.6
-    ##   [5]     chr2   34712570-34713193      - |     59844 ENSMUSE00000694203.2
-    ##   [6]     chr9   21858242-21858348      + |    266133 ENSMUSE00001322549.2
-    ##   [7]     chr9   21858900-21860203      + |    266139 ENSMUSE00001327764.2
+    ##   [2]    chr14   20529963-20530189      - |    408097 ENSMUSE00000901772.3
+    ##   [3]     chr8 120887954-120892045      + |    250998 ENSMUSE00000446870.6
+    ##   [4]     chr9   21858242-21858348      + |    266133 ENSMUSE00001322549.2
+    ##   [5]     chr9   21858900-21860203      + |    266139 ENSMUSE00001327764.2
     ##       exon_rank                 tx_id               gene_id     gene_name
     ##       <numeric>           <character>           <character>   <character>
     ##   [1]         7  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3
-    ##   [2]         2  ENSMUST00000191097.2 ENSMUSG00000020180.11        Snrpd3
-    ##   [3]         1  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
-    ##   [4]        13 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
-    ##   [5]         1  ENSMUST00000113078.8 ENSMUSG00000035949.16         Fbxw2
-    ##   [6]         7  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
-    ##   [7]         9  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [2]         1  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##   [3]        13 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##   [4]         7  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [5]         9  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
     ##        estimate        padj       event              tx_event
     ##       <numeric>   <numeric> <character>           <character>
     ##   [1]   9.19059 0.086737576        a5ss ENSMUST00000020248.16
-    ##   [2]   3.16925 0.346834598        a5ss ENSMUST00000020397.11
-    ##   [3]   3.02406 0.018472554        a5ss ENSMUST00000065504.17
-    ##   [4]   4.14230 0.000995041        a5ss  ENSMUST00000108951.8
-    ##   [5]   3.33998 0.042791429        a5ss ENSMUST00000028220.10
-    ##   [6]   6.33671 0.006078234        a5ss ENSMUST00000046371.13
-    ##   [7]   6.33671 0.006078234        a5ss ENSMUST00000046371.13
+    ##   [2]   3.02406 0.018472554        a5ss ENSMUST00000065504.17
+    ##   [3]   4.14230 0.000995041        a5ss  ENSMUST00000108951.8
+    ##   [4]   6.33671 0.006078234        a5ss ENSMUST00000046371.13
+    ##   [5]   6.33671 0.006078234        a5ss ENSMUST00000046371.13
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -343,46 +345,40 @@ a3ss <- sig_exons |> find_a3ss()
 a3ss
 ```
 
-    ## GRanges object with 13 ranges and 10 metadata columns:
-    ##        seqnames              ranges strand |   exon_id            exon_name
-    ##           <Rle>           <IRanges>  <Rle> | <numeric>          <character>
-    ##    [1]    chr10   88037014-88037154      + |    304312 ENSMUSE00001309977.2
-    ##    [2]    chr10   88055115-88055222      + |    304327 ENSMUSE00001223513.2
-    ##    [3]    chr10   75353848-75353959      + |    301040 ENSMUSE00000642609.5
-    ##    [4]    chr14   20505329-20506669      - |    408059 ENSMUSE00000564348.6
-    ##    [5]     chr8 120840891-120841056      + |    250964 ENSMUSE00000678589.2
-    ##    ...      ...                 ...    ... .       ...                  ...
-    ##    [9]     chr2   34695350-34696011      - |     59823 ENSMUSE00000694202.2
-    ##   [10]     chr9   21849570-21849860      + |    266124 ENSMUSE00001334761.2
-    ##   [11]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2
-    ##   [12]     chr7 112806733-112806851      + |    209986 ENSMUSE00001388227.2
-    ##   [13]     chr7   45434804-45435105      + |    202899 ENSMUSE00000718506.2
-    ##        exon_rank                 tx_id               gene_id     gene_name
-    ##        <numeric>           <character>           <character>   <character>
-    ##    [1]         1  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3
-    ##    [2]         5  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3
-    ##    [3]         1  ENSMUST00000191097.2 ENSMUSG00000020180.11        Snrpd3
-    ##    [4]        14  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
-    ##    [5]         1 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
-    ##    ...       ...                   ...                   ...           ...
-    ##    [9]         6  ENSMUST00000113078.8 ENSMUSG00000035949.16         Fbxw2
-    ##   [10]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
-    ##   [11]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
-    ##   [12]         1  ENSMUST00000210074.2  ENSMUSG00000055116.9         Bmal1
-    ##   [13]         1 ENSMUST00000120005.10 ENSMUSG00000062044.17         Lmtk3
-    ##         estimate        padj       event              tx_event
-    ##        <numeric>   <numeric> <character>           <character>
-    ##    [1]   9.19059 0.086737576        a3ss ENSMUST00000020248.16
-    ##    [2]   9.19059 0.086737576        a3ss ENSMUST00000020248.16
-    ##    [3]   3.16925 0.346834598        a3ss ENSMUST00000020397.11
-    ##    [4]   3.02406 0.018472554        a3ss ENSMUST00000065504.17
-    ##    [5]   4.14230 0.000995041        a3ss  ENSMUST00000108951.8
-    ##    ...       ...         ...         ...                   ...
-    ##    [9]   3.33998  0.04279143        a3ss ENSMUST00000028220.10
-    ##   [10]   6.33671  0.00607823        a3ss ENSMUST00000046371.13
-    ##   [11]   2.88524  0.01396713        a3ss ENSMUST00000097291.10
-    ##   [12]   3.14714  0.14453992        a3ss  ENSMUST00000047321.9
-    ##   [13]   3.31534  0.04279143        a3ss  ENSMUST00000209617.2
+    ## GRanges object with 9 ranges and 10 metadata columns:
+    ##       seqnames              ranges strand |   exon_id            exon_name
+    ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr10   88037014-88037154      + |    304312 ENSMUSE00001309977.2
+    ##   [2]    chr10   88055115-88055222      + |    304327 ENSMUSE00001223513.2
+    ##   [3]    chr14   20505329-20506669      - |    408059 ENSMUSE00000564348.6
+    ##   [4]     chr8 120840891-120841056      + |    250964 ENSMUSE00000678589.2
+    ##   [5]     chr8 112437109-112438026      - |    262490 ENSMUSE00001391518.2
+    ##   [6]     chr4 101504990-101505022      + |    107521 ENSMUSE00000631777.3
+    ##   [7]     chr4 101513375-101513492      + |    107524 ENSMUSE00000671573.2
+    ##   [8]     chr9   21849570-21849860      + |    266124 ENSMUSE00001334761.2
+    ##   [9]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2
+    ##       exon_rank                 tx_id               gene_id     gene_name
+    ##       <numeric>           <character>           <character>   <character>
+    ##   [1]         1  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3
+    ##   [2]         5  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3
+    ##   [3]        14  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##   [4]         1 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##   [5]         7  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1
+    ##   [6]         1  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [7]         3  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [8]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [9]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
+    ##        estimate        padj       event              tx_event
+    ##       <numeric>   <numeric> <character>           <character>
+    ##   [1]   9.19059 0.086737576        a3ss ENSMUST00000020248.16
+    ##   [2]   9.19059 0.086737576        a3ss ENSMUST00000020248.16
+    ##   [3]   3.02406 0.018472554        a3ss ENSMUST00000065504.17
+    ##   [4]   4.14230 0.000995041        a3ss  ENSMUST00000108951.8
+    ##   [5]   3.85659 0.027009405        a3ss  ENSMUST00000166232.4
+    ##   [6]   9.13055 0.018472554        a3ss ENSMUST00000030254.15
+    ##   [7]   9.13055 0.018472554        a3ss ENSMUST00000030254.15
+    ##   [8]   6.33671 0.006078234        a3ss ENSMUST00000046371.13
+    ##   [9]   2.88524 0.013967132        a3ss ENSMUST00000097291.10
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -407,59 +403,58 @@ all_events <- sig_exons |> find_all_events()
 
     ## Calculating alternative 3' splice site events...
 
-    ## Done! 27 events detected.
+    ## Done! 20 events detected.
 
 ``` r
 
 all_events
 ```
 
-    ## GRanges object with 27 ranges and 10 metadata columns:
+    ## GRanges object with 20 ranges and 10 metadata columns:
     ##        seqnames              ranges strand |   exon_id            exon_name
     ##           <Rle>           <IRanges>  <Rle> | <numeric>          <character>
     ##    [1]    chr17   66647479-66647535      - |    480827 ENSMUSE00000443570.7
-    ##    [2]     chr7 112882464-112882502      + |    209996 ENSMUSE00000302465.4
-    ##    [3]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2
-    ##    [4]     chr1 163739641-163739706      + |     12966 ENSMUSE00000368805.4
-    ##    [5]     chr8 120884207-120884236      + |    250989 ENSMUSE00001243257.2
+    ##    [2]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2
+    ##    [3]     chr1 163739641-163739706      + |     12966 ENSMUSE00000368805.4
+    ##    [4]     chr8 120884207-120884236      + |    250989 ENSMUSE00001243257.2
+    ##    [5]    chr12   91799829-91799996      - |    374021 ENSMUSE00001304078.2
     ##    ...      ...                 ...    ... .       ...                  ...
-    ##   [23]     chr2   34695350-34696011      - |     59823 ENSMUSE00000694202.2
-    ##   [24]     chr9   21849570-21849860      + |    266124 ENSMUSE00001334761.2
-    ##   [25]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2
-    ##   [26]     chr7 112806733-112806851      + |    209986 ENSMUSE00001388227.2
-    ##   [27]     chr7   45434804-45435105      + |    202899 ENSMUSE00000718506.2
+    ##   [16]     chr8 112437109-112438026      - |    262490 ENSMUSE00001391518.2
+    ##   [17]     chr4 101504990-101505022      + |    107521 ENSMUSE00000631777.3
+    ##   [18]     chr4 101513375-101513492      + |    107524 ENSMUSE00000671573.2
+    ##   [19]     chr9   21849570-21849860      + |    266124 ENSMUSE00001334761.2
+    ##   [20]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2
     ##        exon_rank                 tx_id               gene_id     gene_name
     ##        <numeric>           <character>           <character>   <character>
     ##    [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18         Mtcl1
-    ##    [2]         6  ENSMUST00000047321.9  ENSMUSG00000055116.9         Bmal1
-    ##    [3]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
-    ##    [4]        20 ENSMUST00000077642.12 ENSMUSG00000026585.14        Kifap3
-    ##    [5]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##    [2]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##    [3]        20 ENSMUST00000077642.12 ENSMUSG00000026585.14        Kifap3
+    ##    [4]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##    [5]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15         Sel1l
     ##    ...       ...                   ...                   ...           ...
-    ##   [23]         6  ENSMUST00000113078.8 ENSMUSG00000035949.16         Fbxw2
-    ##   [24]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
-    ##   [25]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
-    ##   [26]         1  ENSMUST00000210074.2  ENSMUSG00000055116.9         Bmal1
-    ##   [27]         1 ENSMUST00000120005.10 ENSMUSG00000062044.17         Lmtk3
+    ##   [16]         7  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1
+    ##   [17]         1  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [18]         3  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [19]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [20]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
     ##         estimate        padj       event              tx_event
     ##        <numeric>   <numeric> <character>           <character>
     ##    [1]  -2.97320 0.009701213          se ENSMUST00000086693.12
-    ##    [2]  -1.56845 0.042791429          se  ENSMUST00000210074.2
-    ##    [3]   3.02406 0.018472554          ie ENSMUST00000065504.17
-    ##    [4]   1.04389 0.010395185          ie  ENSMUST00000027877.7
-    ##    [5]   4.14230 0.000995041          ie  ENSMUST00000108951.8
+    ##    [2]   3.02406 0.018472554          ie ENSMUST00000065504.17
+    ##    [3]   1.04389 0.010395185          ie  ENSMUST00000027877.7
+    ##    [4]   4.14230 0.000995041          ie  ENSMUST00000108951.8
+    ##    [5]  -3.28535 0.001719345         mxe  ENSMUST00000178462.8
     ##    ...       ...         ...         ...                   ...
-    ##   [23]   3.33998  0.04279143        a3ss ENSMUST00000028220.10
-    ##   [24]   6.33671  0.00607823        a3ss ENSMUST00000046371.13
-    ##   [25]   2.88524  0.01396713        a3ss ENSMUST00000097291.10
-    ##   [26]   3.14714  0.14453992        a3ss  ENSMUST00000047321.9
-    ##   [27]   3.31534  0.04279143        a3ss  ENSMUST00000209617.2
+    ##   [16]   3.85659  0.02700941        a3ss  ENSMUST00000166232.4
+    ##   [17]   9.13055  0.01847255        a3ss ENSMUST00000030254.15
+    ##   [18]   9.13055  0.01847255        a3ss ENSMUST00000030254.15
+    ##   [19]   6.33671  0.00607823        a3ss ENSMUST00000046371.13
+    ##   [20]   2.88524  0.01396713        a3ss ENSMUST00000097291.10
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
 ``` r
 
-par(mar = c(5, 10, 4, 4))
 barplot(
   table(all_events$event), horiz=TRUE, las=1, 
   xlab="exons participating in an event"
@@ -503,27 +498,24 @@ Common upstream methods include:
   testing.
 
 - [DEXSeq](https://bioconductor.org/packages/DEXSeq) — primarily a
-  differential exon usage (DEU)method based on **negative binomial
-  GLMs**, but commonly used in transcript-level DTU workflows and
-  isoform-switch pipelines. While not a native transcript-usage model,
-  its outputs can be incorporated into `splicelogic` when
-  transcript-level statistics are available.
+  differential exon usage (DEU) method based on negative binomial GLMs,
+  but commonly used in transcript-level DTU workflows. The log2FC
+  coefficients from DEXSeq can be used directly with *splicelogic*.
 
-- **edgeR (`diffSplice` / `diffSpliceDGE`)** — can be used for
-  transcript- or exon-resolved differential usage analyses in
-  count-based workflows, providing gene and transcript-level statistics
-  in suitable DTU setups. Available on
-  [Bioconductor](https://bioconductor.org/packages/edgeR). –\>
+- [limma](https://bioconductor.org/packages/limma) and
+  [edgeR](https://bioconductor.org/packages/edgeR) (`diffSplice` /
+  `diffSpliceDGE`) — can be used for DTU analyses (as well as
+  exon-level), with both gene-level and transcript-level testing.
 
 Regardless of which method is used, the per-transcript DTU statistics
 (effect estimates and adjusted p-values) have to be mapped onto the
-individual exons of each transcript to produce an exon-level GRanges
+individual exons of each transcript to produce an exon-level *GRanges*
 (see [Obtaining exon ranges](#obtaining-exon-ranges)). This annotated
-GRanges is the starting point for `splicelogic` , beginning with
+*GRanges* is the starting point for *splicelogic*, beginning with
 [`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
 and then followed by event-specific functions
 ([`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-[`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 etc.).
 
 ## Obtaining exon ranges
@@ -532,14 +524,15 @@ etc.).
 
 [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
 extracts exon ranges from a *TxDb* object and merges them with your DTU
-results table in a single call. It returns a flat *GRanges* ready for
-[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md).
-We demonstrate using GENCODE v32 (human genes).
+results table. It returns a flat *GRanges* ready for
+[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
+and the `find_*` functions. functions. We demonstrate using GENCODE v32
+(human genes).
 
 The first step is to load a *TxDb* object. Typically, a user would
-supply their own GTF to txdbmaker::makeTxDbFromGFF() to generate this.
+supply their own GTF to `txdbmaker::makeTxDbFromGFF()` to generate this.
 For this demonstration we will load a pre-constructed *TxDb* from
-Bioconductor’s AnnotationHub.
+Bioconductor’s *AnnotationHub*.
 
 ``` r
 

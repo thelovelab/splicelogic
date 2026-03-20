@@ -1,7 +1,9 @@
-# Find splice events from a GRanges object
+# Find splice events from annotated exons
 
-Functions to detect different types of alternative splicing events from
-preprocessed GRanges exon data.
+Functions to find different types of alternative splicing events from
+preprocessed GRanges exon data. Events include skipped exon (se),
+included exon (ie), mutatualy exclusive exons (mxe), retained intron
+(ri), and alternative 5' and 3' splice sites (a5ss / a3ss).
 
 ## Usage
 
@@ -42,26 +44,21 @@ find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 
 ## Value
 
-`find_se()`: A GRanges object with an additional 'event' metadata column
-indicating skipped exons.
+A GRanges object with an additional column `event` indicating:
 
-`find_ie()`: A GRanges object with an additional 'event' metadata column
-indicating included exons.
+`find_se()`: skipped exons
 
-`find_mxe()`: A GRanges object with an additional 'event' metadata
-column indicating mutually exclusive exons.
+`find_ie()`: included exons
 
-`find_ri()`: A GRanges object with an additional 'event' metadata column
-indicating retained introns.
+`find_mxe()`: mutually exclusive exons
 
-`find_a5ss()`: A GRanges object with an additional 'event' metadata
-column indicating a5ss events.
+`find_ri()`: retained introns
 
-`find_a3ss()`: A GRanges object with an additional 'event' metadata
-column indicating a3ss events.
+`find_a5ss()`: alternative 5' splice sites
 
-`find_all_events()`: A GRanges object combining all detected events,
-with an 'event' metadata column indicating the event type.
+`find_a3ss()`: : alternative 3' splice sites
+
+`find_all_events()`: all detected events
 
 ## Examples
 
@@ -93,11 +90,10 @@ find_ie(gr, type = "boundary")
 
 
 # detect mutually exclusive exons
-gr_mx <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
-) |>
+gr_mx <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
   preprocess(coef_col = "coefs") |>
   generate_mx(1)
+
 find_mxe(gr_mx, type = "boundary")
 #> GRanges object with 2 ranges and 6 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
@@ -113,11 +109,10 @@ find_mxe(gr_mx, type = "boundary")
 
 
 # detect retained introns
-gr_ri <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
-) |>
+gr_ri <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
   preprocess(coef_col = "coefs") |>
   generate_retained_introns(1)
+
 find_ri(gr_ri)
 #> GRanges object with 2 ranges and 6 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
@@ -133,11 +128,10 @@ find_ri(gr_ri)
 
 
 # detect alternative 5' splice sites
-gr_a5 <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
-) |>
+gr_a5 <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
   preprocess(coef_col = "coefs") |>
   generate_a5ss(1)
+
 find_a5ss(gr_a5)
 #> GRanges object with 1 range and 6 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
@@ -171,11 +165,10 @@ find_a3ss(gr_a3)
 
 
 # detect all event types at once
-gr_all <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
-) |>
+gr_all <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
   preprocess(coef_col = "coefs") |>
   generate_skipped_exons(1)
+
 find_all_events(gr_all, type = "boundary", verbose = FALSE)
 #> GRanges object with 1 range and 6 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs

@@ -9,6 +9,8 @@ Useful links:
 
 - <https://github.com/thelovelab/splicelogic>
 
+- <https://thelovelab.github.io/splicelogic>
+
 - Report bugs at <https://github.com/thelovelab/splicelogic/issues>
 
 ## Author

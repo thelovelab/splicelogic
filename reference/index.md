@@ -22,7 +22,7 @@
   [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
-  : Find splice events from a GRanges object
+  : Find splice events from annotated exons
 
 ## Mock data generation
 
