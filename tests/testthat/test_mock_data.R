@@ -4,16 +4,16 @@ test_that("se_mock_data returns a GRanges and has required metadata columns", {
   gr <- se_mock_data()
   expect_s4_class(gr, "GRanges")
 
-  required_cols <- c("exon_rank", "gene_id", "tx_id", "coefs")
+  required_cols <- c("exon_rank", "gene_id", "tx_id", "estimate")
   expect_true(all(required_cols %in% names(GenomicRanges::mcols(gr))))
 })
 
-test_that("coefs metadata is numeric and within [-1, 1]", {
+test_that("estimate metadata is numeric and within [-1, 1]", {
   gr <- se_mock_data()
-  coefs <- GenomicRanges::mcols(gr)$coefs
-  expect_true(is.numeric(coefs))
-  expect_true(all(!is.na(coefs)))
-  expect_true(all(coefs >= -1 & coefs <= 1))
+  estimate <- GenomicRanges::mcols(gr)$estimate
+  expect_true(is.numeric(estimate))
+  expect_true(all(!is.na(estimate)))
+  expect_true(all(estimate >= -1 & estimate <= 1))
 })
 
 test_that("check metadata column types", {

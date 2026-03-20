@@ -68,7 +68,7 @@ events from preprocessed GRanges exon data.
 
 # make some mock data and run the function
 gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
-  preprocess(coef_col = "coefs") |>
+  preprocess(coef_col = "estimate") |>
   generate_skipped_exons(1)
 
 # this should find the skipped exon events we generated
@@ -81,7 +81,7 @@ find_ie(gr, type = "boundary")
 gr_mx <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
-  preprocess(coef_col = "coefs") |>
+  preprocess(coef_col = "estimate") |>
   generate_mx(1)
 find_mxe(gr_mx, type = "boundary")
 
@@ -90,7 +90,7 @@ find_mxe(gr_mx, type = "boundary")
 gr_ri <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
-  preprocess(coef_col = "coefs") |>
+  preprocess(coef_col = "estimate") |>
   generate_retained_introns(1)
 find_ri(gr_ri)
 
@@ -99,7 +99,7 @@ find_ri(gr_ri)
 gr_a5 <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
-  preprocess(coef_col = "coefs") |>
+  preprocess(coef_col = "estimate") |>
   generate_a5ss(1)
 find_a5ss(gr_a5)
 
@@ -108,7 +108,7 @@ find_a5ss(gr_a5)
 gr_a3 <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
-  preprocess(coef_col = "coefs") |>
+  preprocess(coef_col = "estimate") |>
   generate_a3ss(1)
 find_a3ss(gr_a3)
 
@@ -117,7 +117,7 @@ find_a3ss(gr_a3)
 gr_all <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
-  preprocess(coef_col = "coefs") |>
+  preprocess(coef_col = "estimate") |>
   generate_skipped_exons(1)
 find_all_events(gr_all, type = "boundary", verbose = FALSE)
 

@@ -21,7 +21,7 @@ generate_a3ss(gr, n_events = 1)
 }
 \arguments{
 \item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id',
-'tx_id', and 'coefs'.}
+'tx_id', and 'estimate'.}
 
 \item{n_events}{Number of events to generate}
 }

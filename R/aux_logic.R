@@ -148,7 +148,7 @@ match_left_right <- function(pos_exons, left_exon, right_exon, type) {
 
 #' function to find introns given a GRanges object of exons
 #' @param gr A GRanges object with metadata columns:
-#' 'exon_rank', 'gene_id', 'tx_id', and 'coefs'.
+#' 'exon_rank', 'gene_id', 'tx_id', and 'estimate'.
 #' @return A GRanges object with introns as ranges and
 #' metadata (tx_id, gene_id)
 #' @noRd

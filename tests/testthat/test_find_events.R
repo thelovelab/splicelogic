@@ -1,7 +1,7 @@
 # Test for find_se from calc_logic.R
 test_that("find_se works with se_mock_data and preprocess", {
   gr <- se_mock_data()
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   result <- find_se(gr)
   expect_s4_class(result, "GRanges")
   expect_true("event" %in% names(GenomicRanges::mcols(result)))
@@ -20,7 +20,7 @@ test_that("find_se works with se_mock_data and preprocess", {
 # Test for no event detected in skipped exon
 test_that("find_se returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   result <- find_se(gr)
 
   expect_s4_class(result, "GRanges")
@@ -30,7 +30,7 @@ test_that("find_se returns empty GRanges if no events", {
 # Test for skipped exon detection in mx_mock_data
 test_that("find_se detects single skipped exon in mx_mock_data", {
   gr <- mx_mock_data()
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   result <- find_se(gr)
 
   expect_s4_class(result, "GRanges")
@@ -47,7 +47,7 @@ test_that("find_se detects single skipped exon in mx_mock_data", {
 # Test for mutually exclusive detection in mx_mock_data
 test_that("find_mxe detects mutually exclusive exons in mx_mock_data", {
   gr <- mx_mock_data()
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   result <- find_mxe(gr)
 
   expect_s4_class(result, "GRanges")
@@ -69,7 +69,7 @@ test_that("find_mxe detects mutually exclusive exons in mx_mock_data", {
 # Test for no event detected in mx
 test_that("find_mxe returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   result <- find_mxe(gr)
 
   expect_s4_class(result, "GRanges")
@@ -79,7 +79,7 @@ test_that("find_mxe returns empty GRanges if no events", {
 # Test for calc retained introns
 test_that("find_ri test", {
   gr <- create_mock_data(3, 6, 3)
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   gr <- generate_retained_introns(gr, n_events = 3)
 
   result <- find_ri(gr)
@@ -92,7 +92,7 @@ test_that("find_ri test", {
 # Test for find_a3ss
 test_that("find_a3ss test", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   gr <- generate_a3ss(gr, n_events = 3)
 
   result <- find_a3ss(gr)
@@ -106,7 +106,7 @@ test_that("find_a3ss test", {
 # Test for find_a5ss
 test_that("find_a5ss test", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   gr <- generate_a5ss(gr, n_events = 3)
 
   result <- find_a5ss(gr)
@@ -119,7 +119,7 @@ test_that("find_a5ss test", {
 # Test for find_se with new mock data
 test_that("find_se test with generate_skipped_exons", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   gr <- generate_skipped_exons(gr, n_events = 1)
 
   result <- find_se(gr)
@@ -132,7 +132,7 @@ test_that("find_se test with generate_skipped_exons", {
 # Test for find_all_events
 test_that("find_all_events returns combined GRanges with multiple event types", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   gr <- generate_skipped_exons(gr, n_events = 1)
   gr <- generate_a3ss(gr, n_events = 1)
   gr <- generate_a5ss(gr, n_events = 1)
@@ -147,7 +147,7 @@ test_that("find_all_events returns combined GRanges with multiple event types", 
 
 test_that("find_all_events returns empty GRanges when no events exist", {
   gr <- no_event_mock_data()
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
 
   result <- find_all_events(gr, verbose = FALSE)
 

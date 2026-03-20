@@ -14,7 +14,7 @@ se_mock_data <- function() {
     strand = "+",
     exon_rank = seq_len(7),
     gene_id = rep(1, 7),
-    coefs = rep(runif(1, min = -1, max = 0), 7)
+    estimate = rep(runif(1, min = -1, max = 0), 7)
   )
   df2 <- data.frame(
     seqnames = "chr1",
@@ -23,7 +23,7 @@ se_mock_data <- function() {
     strand = "+",
     exon_rank = seq_len(6),
     gene_id = rep(1, 6),
-    coefs = rep(runif(1, min = 0, max = 1), 6)
+    estimate = rep(runif(1, min = 0, max = 1), 6)
   )
   df3 <- data.frame(
     seqnames = "chr1",
@@ -32,7 +32,7 @@ se_mock_data <- function() {
     strand = "+",
     exon_rank = seq_len(6),
     gene_id = rep(1, 6),
-    coefs = rep(runif(1, min = 0, max = 1), 6)
+    estimate = rep(runif(1, min = 0, max = 1), 6)
   )
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
@@ -61,7 +61,7 @@ mx_mock_data <- function() {
     strand = "+",
     exon_rank = seq_len(9),
     gene_id = rep(1, 9),
-    coefs = rep(runif(1, min = -1, max = 0), 9)
+    estimate = rep(runif(1, min = -1, max = 0), 9)
   )
   df2 <- data.frame(
     seqnames = "chr1",
@@ -70,7 +70,7 @@ mx_mock_data <- function() {
     strand = "+",
     exon_rank = seq_len(8),
     gene_id = rep(1, 8),
-    coefs = rep(runif(1, min = 0, max = 1), 8)
+    estimate = rep(runif(1, min = 0, max = 1), 8)
   )
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
@@ -94,7 +94,7 @@ no_event_mock_data <- function() {
     strand = "+",
     exon_rank = seq_len(3),
     gene_id = rep(1, 3),
-    coefs = rep(runif(1, min = -1, max = 0), 3)
+    estimate = rep(runif(1, min = -1, max = 0), 3)
   )
   df2 <- data.frame(
     seqnames = "chr1",
@@ -103,7 +103,7 @@ no_event_mock_data <- function() {
     strand = "+",
     exon_rank = seq_len(3),
     gene_id = rep(1, 3),
-    coefs = rep(runif(1, min = 0, max = 1), 3)
+    estimate = rep(runif(1, min = 0, max = 1), 3)
   )
   gr1 <- plyranges::as_granges(df1)
   gr2 <- plyranges::as_granges(df2)
@@ -166,40 +166,40 @@ create_mock_data <- function(
     ) |>
     dplyr::ungroup()
 
-  # Assign coefs per tx_id ensuring at least 1 neg and 1 pos per gene
-  # Create a lookup table for tx coefs:
+  # Assign estimate per tx_id ensuring at least 1 neg and 1 pos per gene
+  # Create a lookup table for tx estimate:
   # first tx gets negative, second gets positive, rest random
-  tx_coefs <- data |>
+  tx_estimate <- data |>
     dplyr::distinct(gene_id, tx_id) |>
     dplyr::group_by(gene_id) |>
     dplyr::mutate(tx_order = dplyr::row_number()) |>
     dplyr::ungroup()
 
-  n_tx <- nrow(tx_coefs)
-  # Generate all random coefs first, then override first two per gene
-  tx_coefs <- tx_coefs |>
+  n_tx <- nrow(tx_estimate)
+  # Generate all random estimate first, then override first two per gene
+  tx_estimate <- tx_estimate |>
     dplyr::mutate(
-      coefs = runif(n_tx, min = coef_range[1], max = coef_range[2]),
-      coefs = dplyr::if_else(
+      estimate = runif(n_tx, min = coef_range[1], max = coef_range[2]),
+      estimate = dplyr::if_else(
         tx_order == 1,
         runif(n_tx, min = coef_range[1], max = -0.01),
-        coefs
+        estimate
       ),
-      coefs = dplyr::if_else(
+      estimate = dplyr::if_else(
         tx_order == 2,
         runif(n_tx, min = 0.01, max = coef_range[2]),
-        coefs
+        estimate
       )
     ) |>
-    dplyr::select(tx_id, coefs)
+    dplyr::select(tx_id, estimate)
 
-  # Join coefs back to data
+  # Join estimate back to data
   data <- data |>
-    dplyr::left_join(tx_coefs, by = "tx_id")
+    dplyr::left_join(tx_estimate, by = "tx_id")
 
   # Convert to GRanges
   gr <- plyranges::as_granges(data)
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
 
   return(gr)
 }
@@ -213,7 +213,7 @@ create_mock_data <- function(
 #' events into mock GRanges data for testing purposes.
 #'
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
-#' 'tx_id', and 'coefs'.
+#' 'tx_id', and 'estimate'.
 NULL
 
 #' @rdname generate_events
@@ -230,10 +230,10 @@ NULL
 #'
 generate_skipped_exons <- function(gr, n_events = 1) {
   # generate skipped exons by modifying random internal
-  # exons in transcripts with coefs > 0
+  # exons in transcripts with estimate > 0
   se_exons_key <- gr |>
     as.data.frame() |>
-    dplyr::filter(coefs > 0 & internal == TRUE) |>
+    dplyr::filter(estimate > 0 & internal == TRUE) |>
     dplyr::distinct(key) |>
     dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
@@ -261,7 +261,7 @@ generate_mx <- function(gr, n_events = 1) {
   # Both rank k and rank k+1 must be internal
   neg_internal <- gr |>
     as.data.frame() |>
-    dplyr::filter(coefs < 0 & internal == TRUE)
+    dplyr::filter(estimate < 0 & internal == TRUE)
 
   # Find rank k where rank k+1 is also internal in same transcript
   mx_candidates <- neg_internal |>
@@ -275,7 +275,7 @@ generate_mx <- function(gr, n_events = 1) {
   gr_df <- as.data.frame(gr)
 
   pos_txs <- gr_df |>
-    dplyr::filter(coefs > 0) |>
+    dplyr::filter(estimate > 0) |>
     dplyr::distinct(gene_id, tx_id)
 
   mx_pairs <- mx_candidates |>
@@ -313,13 +313,13 @@ generate_mx <- function(gr, n_events = 1) {
 generate_retained_introns <- function(gr, n_events = 1) {
   # generate retained introns by creating a new exon that
   # starts with exonrank x and ends at exons rank x+1 for each transcript
-  # only in transcripts with coefs > 0
+  # only in transcripts with estimate > 0
   # then remove the original exons being retained and
-  # add the new retained intron exon with coefs = 0
+  # add the new retained intron exon with estimate = 0
   # and re-rank accordingly
   ri_tx_ids <- gr |>
     as.data.frame() |>
-    dplyr::filter(coefs > 0) |>
+    dplyr::filter(estimate > 0) |>
     dplyr::distinct(tx_id) |>
     dplyr::slice_sample(n = n_events) |>
     dplyr::pull(tx_id)
@@ -363,7 +363,7 @@ rerank_exons <- function(gr) {
     ) |>
     dplyr::ungroup()
   # recalculate internal column, key and  nexons
-  gr <- preprocess(gr, coef_col = "coefs")
+  gr <- preprocess(gr, coef_col = "estimate")
   return(gr)
 }
 
@@ -387,15 +387,15 @@ generate_a5ss <- function(gr, n_events = 1) {
         names(GenomicRanges::mcols(gr))
     )
   ) {
-    gr <- preprocess(gr, coef_col = "coefs")
+    gr <- preprocess(gr, coef_col = "estimate")
   }
 
   # generate a5ss by modifying end() of random internal
-  # exons in transcripts with coefs > 0
+  # exons in transcripts with estimate > 0
   a5ss_exon_key <- gr |>
     as.data.frame() |>
     # TO DO: include first and last exons
-    dplyr::filter(coefs > 0 & internal == TRUE) |>
+    dplyr::filter(estimate > 0 & internal == TRUE) |>
     dplyr::distinct(key) |>
     dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
@@ -408,6 +408,7 @@ generate_a5ss <- function(gr, n_events = 1) {
         end
       ) # TO DO : include - strand case (start instead of end)
     )
+  gr_with_a5ss <- preprocess(gr_with_a5ss, coef_col = "estimate")
   return(gr_with_a5ss)
 }
 #' @rdname generate_events
@@ -430,14 +431,14 @@ generate_a3ss <- function(gr, n_events = 1) {
         names(GenomicRanges::mcols(gr))
     )
   ) {
-    gr <- preprocess(gr, coef_col = "coefs")
+    gr <- preprocess(gr, coef_col = "estimate")
   }
 
   # generate a3ss by modifying start() of random internal
-  # exons in transcripts with coefs > 0
+  # exons in transcripts with estimate > 0
   a3ss_exon_key <- gr |>
     as.data.frame() |>
-    dplyr::filter(coefs > 0 & internal == TRUE) |>
+    dplyr::filter(estimate > 0 & internal == TRUE) |>
     dplyr::distinct(key) |>
     dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
@@ -450,5 +451,6 @@ generate_a3ss <- function(gr, n_events = 1) {
         start
       )
     ) # TO DO : include - strand case (end instead of start)
+  gr_with_a3ss <- preprocess(gr_with_a3ss, coef_col = "estimate")
   return(gr_with_a3ss)
 }
