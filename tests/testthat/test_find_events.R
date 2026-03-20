@@ -8,15 +8,6 @@ test_that("find_se works with se_mock_data and preprocess", {
   expect_true(any(result$event == "se"))
 })
 
-# # Test for invalid coef column input in find_se
-# test_that("find_se errors if coef_col is invalid", {
-#   gr <- se_mock_data()
-#   expect_error(
-#     find_se(gr),
-#     regexp = "Missing required metadata columns: foo"
-#   )
-# })
-
 # Test for no event detected in skipped exon
 test_that("find_se returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
