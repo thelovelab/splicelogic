@@ -80,7 +80,7 @@ test_that("find_mxe returns empty GRanges if no events", {
 test_that("find_ri test", {
   gr <- create_mock_data(3, 6, 3)
   gr <- preprocess(gr, coef_col = "estimate")
-  gr <- generate_retained_introns(gr, n_events = 3)
+  gr <- generate_ri(gr, n_events = 3)
 
   result <- find_ri(gr)
 
@@ -117,10 +117,10 @@ test_that("find_a5ss test", {
 })
 
 # Test for find_se with new mock data
-test_that("find_se test with generate_skipped_exons", {
+test_that("find_se test with generate_se", {
   gr <- create_mock_data(3, 3, 6)
   gr <- preprocess(gr, coef_col = "estimate")
-  gr <- generate_skipped_exons(gr, n_events = 1)
+  gr <- generate_se(gr, n_events = 1)
 
   result <- find_se(gr)
 
@@ -133,7 +133,7 @@ test_that("find_se test with generate_skipped_exons", {
 test_that("find_all_events returns combined GRanges with multiple event types", {
   gr <- create_mock_data(3, 3, 6)
   gr <- preprocess(gr, coef_col = "estimate")
-  gr <- generate_skipped_exons(gr, n_events = 1)
+  gr <- generate_se(gr, n_events = 1)
   gr <- generate_a3ss(gr, n_events = 1)
   gr <- generate_a5ss(gr, n_events = 1)
 

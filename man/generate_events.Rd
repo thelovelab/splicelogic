@@ -2,18 +2,18 @@
 % Please edit documentation in R/mock_data.R
 \name{generate_events}
 \alias{generate_events}
-\alias{generate_skipped_exons}
-\alias{generate_mx}
-\alias{generate_retained_introns}
+\alias{generate_se}
+\alias{generate_mxe}
+\alias{generate_ri}
 \alias{generate_a5ss}
 \alias{generate_a3ss}
 \title{Generate mock splice events in a GRanges object}
 \usage{
-generate_skipped_exons(gr, n_events = 1)
+generate_se(gr, n_events = 1)
 
-generate_mx(gr, n_events = 1)
+generate_mxe(gr, n_events = 1)
 
-generate_retained_introns(gr, n_events = 1)
+generate_ri(gr, n_events = 1)
 
 generate_a5ss(gr, n_events = 1)
 
@@ -26,13 +26,13 @@ generate_a3ss(gr, n_events = 1)
 \item{n_events}{Number of events to generate}
 }
 \value{
-\code{generate_skipped_exons()}: A GRanges object with skipped exon
+\code{generate_se()}: A GRanges object with skipped exon
 events introduced
 
-\code{generate_mx()}: A GRanges object with mutually exclusive exon
+\code{generate_mxe()}: A GRanges object with mutually exclusive exon
 events introduced
 
-\code{generate_retained_introns()}: A GRanges object with retained intron
+\code{generate_ri()}: A GRanges object with retained intron
 events introduced
 
 \code{generate_a5ss()}: A GRanges object with alternative 5' splice site
@@ -50,19 +50,19 @@ events into mock GRanges data for testing purposes.
 gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
-generate_skipped_exons(gr, n_events = 1)
+generate_se(gr, n_events = 1)
 
 
 gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
-generate_mx(gr, n_events = 1)
+generate_mxe(gr, n_events = 1)
 
 
 gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
-generate_retained_introns(gr, n_events = 1)
+generate_ri(gr, n_events = 1)
 
 
 gr <- create_mock_data(

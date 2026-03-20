@@ -218,7 +218,7 @@ NULL
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
-#' @return `generate_skipped_exons()`: A GRanges object with skipped exon
+#' @return `generate_se()`: A GRanges object with skipped exon
 #' events introduced
 #' @export
 #' @examples
@@ -226,9 +226,9 @@ NULL
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' )
-#' generate_skipped_exons(gr, n_events = 1)
+#' generate_se(gr, n_events = 1)
 #'
-generate_skipped_exons <- function(gr, n_events = 1) {
+generate_se <- function(gr, n_events = 1) {
   # generate skipped exons by modifying random internal
   # exons in transcripts with estimate > 0
   se_exons_key <- gr |>
@@ -246,7 +246,7 @@ generate_skipped_exons <- function(gr, n_events = 1) {
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
-#' @return `generate_mx()`: A GRanges object with mutually exclusive exon
+#' @return `generate_mxe()`: A GRanges object with mutually exclusive exon
 #' events introduced
 #' @export
 #' @examples
@@ -254,9 +254,9 @@ generate_skipped_exons <- function(gr, n_events = 1) {
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' )
-#' generate_mx(gr, n_events = 1)
+#' generate_mxe(gr, n_events = 1)
 #'
-generate_mx <- function(gr, n_events = 1) {
+generate_mxe <- function(gr, n_events = 1) {
   # Find consecutive pairs of internal exons from neg transcripts
   # Both rank k and rank k+1 must be internal
   neg_internal <- gr |>
@@ -300,17 +300,17 @@ generate_mx <- function(gr, n_events = 1) {
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
-#' @return `generate_retained_introns()`: A GRanges object with retained intron
+#' @return `generate_ri()`: A GRanges object with retained intron
 #' events introduced
 #' @examples
 #'
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx = 4, n_exons = 4
 #' )
-#' generate_retained_introns(gr, n_events = 1)
+#' generate_ri(gr, n_events = 1)
 #'
 #' @export
-generate_retained_introns <- function(gr, n_events = 1) {
+generate_ri <- function(gr, n_events = 1) {
   # generate retained introns by creating a new exon that
   # starts with exonrank x and ends at exons rank x+1 for each transcript
   # only in transcripts with estimate > 0
