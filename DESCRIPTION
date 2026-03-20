@@ -22,7 +22,7 @@ biocViews:
     RNASeq, LongRead, Annotation, FunctionalGenomics
 BugReports: https://github.com/thelovelab/splicelogic/issues
 Depends:
-    R >= 4.1.0
+    R (>= 4.1.0)
 Imports:
     dplyr,
     magrittr,
