@@ -25,8 +25,8 @@ compute_matches <- function(
     "over" = {
       gr %>%
         dplyr::mutate(
-          match_left = GenomicRanges::overlapsAny(., left_exon),
-          match_right = GenomicRanges::overlapsAny(., right_exon)
+          match_left = IRanges::overlapsAny(., left_exon),
+          match_right = IRanges::overlapsAny(., right_exon)
         ) |>
         tibble::as_tibble()
     },
