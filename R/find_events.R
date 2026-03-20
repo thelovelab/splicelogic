@@ -43,10 +43,7 @@ find_se <- function(
   # if preprocessing didn't happen
   check_preprocessed(gr)
   # keep user's original metadata columns (minus preprocessing intermediates)
-  keep_cols <- setdiff(
-    names(GenomicRanges::mcols(gr)),
-    c("key", "nexons", "internal", "estimate")
-  )
+  keep_cols <- keep_cols(gr)
   if (inverse) {
     factor <- -1
     event_name <- "ie" # included exon
@@ -124,10 +121,7 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
   check_preprocessed(gr)
-  keep_cols <- setdiff(
-    names(GenomicRanges::mcols(gr)),
-    c("key", "nexons", "internal", "estimate")
-  )
+  keep_cols <- keep_cols(gr)
 
   matches <- find_candidates_and_flanks(gr, type, 1)
 
@@ -223,10 +217,7 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
 find_ri <- function(gr) {
   # if preprocessing didn't happen
   check_preprocessed(gr)
-  keep_cols <- setdiff(
-    names(GenomicRanges::mcols(gr)),
-    c("key", "nexons", "internal", "estimate")
-  )
+  keep_cols <- keep_cols(gr)
 
   # find introns in the negative coef transcripts
   neg_exons <- gr |> dplyr::filter(sign(estimate) == -1)
@@ -293,10 +284,7 @@ find_ri <- function(gr) {
 find_alt_ss <- function(gr, by_start = TRUE) {
   # if preprocessing didn't happen
   check_preprocessed(gr)
-  keep_cols <- setdiff(
-    names(GenomicRanges::mcols(gr)),
-    c("key", "nexons", "internal", "estimate")
-  )
+  keep_cols <- keep_cols(gr)
 
   event_name <- if (by_start) "a5ss" else "a3ss"
 

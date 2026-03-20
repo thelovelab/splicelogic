@@ -360,3 +360,11 @@ find_candidates_and_flanks <- function(
     right_match_tbl = right_match_tbl
   )
 }
+
+#' Get user's metadata column names from a preprocessed GRanges
+#' @param gr A preprocessed GRanges object
+#' @return Character vector of column names excluding internal preprocessing columns
+#' @noRd
+keep_cols <- function(gr) {
+    setdiff(names(GenomicRanges::mcols(gr)), c("key", "nexons", "internal"))
+}
