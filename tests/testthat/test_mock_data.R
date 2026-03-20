@@ -1,5 +1,4 @@
-# test_that
-# --- se_mock_data ---
+# Test for se_mock_data
 test_that("se_mock_data returns a GRanges and has required metadata columns", {
   gr <- se_mock_data()
   expect_s4_class(gr, "GRanges")
@@ -24,7 +23,7 @@ test_that("check metadata column types", {
   expect_true(is.numeric(md$gene_id) || is.integer(md$gene_id))
 })
 
-# --- mx_mock_data ---
+# Test for mx_mock_data
 test_that("mx_mock_data returns GRanges with required columns", {
   gr <- mx_mock_data()
   expect_s4_class(gr, "GRanges")
@@ -34,7 +33,7 @@ test_that("mx_mock_data returns GRanges with required columns", {
   expect_true(any(gr$estimate < 0) && any(gr$estimate > 0))
 })
 
-# --- no_event_mock_data ---
+# Test for no_event_mock_data
 test_that("no_event_mock_data returns GRanges with matching exon structure", {
   gr <- no_event_mock_data()
   expect_s4_class(gr, "GRanges")
@@ -46,7 +45,7 @@ test_that("no_event_mock_data returns GRanges with matching exon structure", {
   expect_equal(tx1, tx2)
 })
 
-# --- create_mock_data ---
+# Test for create_mock_data
 test_that("create_mock_data returns correct dimensions", {
   gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 3, n_exons_per_tx = 4)
   expect_s4_class(gr, "GRanges")
@@ -70,7 +69,7 @@ test_that("create_mock_data is preprocessed", {
   expect_true(all(preprocess_cols %in% names(GenomicRanges::mcols(gr))))
 })
 
-# --- generate_se ---
+# Test for generate_se
 test_that("generate_se removes exons", {
   gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 3, n_exons_per_tx = 6)
   original_len <- length(gr)
@@ -79,7 +78,7 @@ test_that("generate_se removes exons", {
   expect_true(length(gr_se) < original_len)
 })
 
-# --- generate_mxe ---
+# Test for generate_mxe
 test_that("generate_mxe removes exons pairwise", {
   gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 3, n_exons_per_tx = 6)
   original_len <- length(gr)
@@ -88,7 +87,7 @@ test_that("generate_mxe removes exons pairwise", {
   expect_true(length(gr_mx) < original_len)
 })
 
-# --- generate_ri ---
+# Test for generate_ri
 test_that("generate_ri merges exons", {
   gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 3, n_exons_per_tx = 6)
   original_len <- length(gr)
@@ -97,7 +96,7 @@ test_that("generate_ri merges exons", {
   expect_true(length(gr_ri) < original_len)
 })
 
-# --- generate_a5ss ---
+# Test for generate_a5ss
 test_that("generate_a5ss modifies exon ends", {
   gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 3, n_exons_per_tx = 6)
   gr_a5 <- generate_a5ss(gr, n_events = 1)
@@ -106,7 +105,7 @@ test_that("generate_a5ss modifies exon ends", {
   expect_false(all(GenomicRanges::end(gr_a5) == GenomicRanges::end(gr)))
 })
 
-# --- generate_a3ss ---
+# Test for generate_a3ss
 test_that("generate_a3ss modifies exon starts", {
   gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 3, n_exons_per_tx = 6)
   gr_a3 <- generate_a3ss(gr, n_events = 1)
