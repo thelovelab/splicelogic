@@ -25,8 +25,8 @@ compute_matches <- function(
     "over" = {
       gr %>%
         dplyr::mutate(
-          match_left = plyranges::count_overlaps(., left_exon) >= 1,
-          match_right = plyranges::count_overlaps(., right_exon) >= 1
+          match_left = GenomicRanges::overlapsAny(., left_exon),
+          match_right = GenomicRanges::overlapsAny(., right_exon)
         ) |>
         tibble::as_tibble()
     },
@@ -41,7 +41,8 @@ compute_matches <- function(
     "boundary" = {
       gr %>%
         dplyr::mutate(
-          match_left = GenomicRanges::end(.) %in% GenomicRanges::end(left_exon),
+          match_left = GenomicRanges::end(.) %in% 
+            GenomicRanges::end(left_exon),
           match_right = GenomicRanges::start(.) %in%
             GenomicRanges::start(right_exon)
         ) |>
@@ -114,7 +115,6 @@ candidates_by_non_overlap_directed <- function(neg_exons, pos_exons, gr, type) {
 #' @param right_exon A GRanges object with the right exon to match
 #' @param type The type of overlap to consider when identifying matches.
 #' @return A list with two tibbles: left_tbl and right_tbl
-#' @importFrom magrittr %>%
 #' @noRd
 match_left_right <- function(pos_exons, left_exon, right_exon, type) {
   # check for matches to left and right exons in the pos_exons set

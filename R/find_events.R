@@ -1,10 +1,12 @@
 #' @rdname find_events
 #' @name find_events
 #'
-#' @title Find splice events from a GRanges object
+#' @title Find splice events from annotated exons
 #'
-#' @description Functions to detect different types of alternative splicing
-#' events from preprocessed GRanges exon data.
+#' @description Functions to find different types of alternative splicing
+#' events from preprocessed GRanges exon data. Events include skipped exon (se),
+#' included exon (ie), mutatualy exclusive exons (mxe), retained intron (ri),
+#' and alternative 5' and 3' splice sites (a5ss / a3ss).
 #'
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
 #' and 'coef_col' metadata columns and preprocessed with preprocess().
@@ -16,9 +18,9 @@ NULL
 #' identifying events.
 #' @param inverse If TRUE, identifies included exons
 #' instead of skipped exons.
-#' @return `find_se()`: A GRanges object with
-#' an additional 'event' metadata column indicating
-#' skipped exons.
+#' @return A GRanges object with an additional column `event` indicating:
+#' 
+#' `find_se()`: skipped exons
 #' @export
 #' @examples
 #'
@@ -98,24 +100,21 @@ find_se <- function(
 }
 
 #' @rdname find_events
-#' @return `find_ie()`: A GRanges object with an additional 'event'
-#' metadata column indicating included exons.
+#' @return `find_ie()`: included exons
 #' @export
 find_ie <- function(gr, type = c("boundary", "over", "in")) {
   find_se(gr, type, inverse = TRUE)
 }
 
 #' @rdname find_events
-#' @return `find_mxe()`: A GRanges object with an additional 'event'
-#' metadata column indicating mutually exclusive exons.
+#' @return `find_mxe()`: mutually exclusive exons
 #' @examples
 #'
 #' # detect mutually exclusive exons
-#' gr_mx <- create_mock_data(
-#'   n_genes = 2, n_tx = 4, n_exons = 4
-#' ) |>
+#' gr_mx <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_mx(1)
+#' 
 #' find_mxe(gr_mx, type = "boundary")
 #'
 #' @export
@@ -206,16 +205,14 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
 }
 
 #' @rdname find_events
-#' @return `find_ri()`: A GRanges object with an additional
-#' 'event' metadata column indicating retained introns.
+#' @return `find_ri()`: retained introns
 #' @examples
 #'
 #' # detect retained introns
-#' gr_ri <- create_mock_data(
-#'   n_genes = 2, n_tx = 4, n_exons = 4
-#' ) |>
+#' gr_ri <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_retained_introns(1)
+#' 
 #' find_ri(gr_ri)
 #'
 #' @export
@@ -287,8 +284,7 @@ find_ri <- function(gr) {
 #' @rdname find_events
 #' @param by_start If TRUE, detects a5ss (same exon start, different end).
 #' If FALSE, detects a3ss (same end, different start).
-#' @return `find_alt_ss()`: A GRanges object with annotated events for
-#' alternative splice sites.
+#' @return `find_alt_ss()`: alternative splice sites
 #' @noRd 
 find_alt_ss <- function(gr, by_start = TRUE) {
   # if preprocessing didn't happen
@@ -379,16 +375,14 @@ find_alt_ss <- function(gr, by_start = TRUE) {
 
 
 #' @rdname find_events
-#' @return `find_a5ss()`: A GRanges object with an additional 'event' metadata
-#' column indicating a5ss events.
+#' @return `find_a5ss()`: alternative 5' splice sites
 #' @examples
 #'
 #' # detect alternative 5' splice sites
-#' gr_a5 <- create_mock_data(
-#'   n_genes = 2, n_tx = 4, n_exons = 4
-#' ) |>
+#' gr_a5 <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_a5ss(1)
+#' 
 #' find_a5ss(gr_a5)
 #'
 #' @export
@@ -397,8 +391,7 @@ find_a5ss <- function(gr) {
 }
 
 #' @rdname find_events
-#' @return `find_a3ss()`: A GRanges object with an additional 'event' metadata
-#' column indicating a3ss events.
+#' @return `find_a3ss()`: : alternative 3' splice sites
 #' @examples
 #'
 #' # detect alternative 3' splice sites
@@ -416,16 +409,15 @@ find_a3ss <- function(gr) {
 
 #' @rdname find_events
 #' @param verbose If TRUE, prints progress messages. Default TRUE.
-#' @return `find_all_events()`: A GRanges object combining all detected events,
-#' with an 'event' metadata column indicating the event type.
+#' @return `find_all_events()`: all detected events
+#' 
 #' @examples
 #'
 #' # detect all event types at once
-#' gr_all <- create_mock_data(
-#'   n_genes = 2, n_tx = 4, n_exons = 4
-#' ) |>
+#' gr_all <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
 #'   preprocess(coef_col = "coefs") |>
 #'   generate_skipped_exons(1)
+#' 
 #' find_all_events(gr_all, type = "boundary", verbose = FALSE)
 #'
 #' @export
@@ -436,7 +428,7 @@ find_all_events <- function(
 ) {
   type <- match.arg(type)
   check_preprocessed(gr)
-  msg <- if (verbose) message else function(...) invisible(NULL)
+  msg <- if (verbose) message else function(...) invisible (NULL)
 
   results <- list()
 

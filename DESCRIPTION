@@ -14,9 +14,12 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-URL: https://github.com/thelovelab/splicelogic
-biocViews: AlternativeSplicing, DifferentialSplicing, Transcriptomics, 
-            RNASeq, LongRead, Annotation, FunctionalGenomics
+URL: 
+    https://github.com/thelovelab/splicelogic, 
+    https://thelovelab.github.io/splicelogic
+biocViews: 
+    AlternativeSplicing, DifferentialSplicing, Transcriptomics, 
+    RNASeq, LongRead, Annotation, FunctionalGenomics
 BugReports: https://github.com/thelovelab/splicelogic/issues
 Imports:
     dplyr,
