@@ -6,11 +6,11 @@ into mock GRanges data for testing purposes.
 ## Usage
 
 ``` r
-generate_skipped_exons(gr, n_events = 1)
+generate_se(gr, n_events = 1)
 
-generate_mx(gr, n_events = 1)
+generate_mxe(gr, n_events = 1)
 
-generate_retained_introns(gr, n_events = 1)
+generate_ri(gr, n_events = 1)
 
 generate_a5ss(gr, n_events = 1)
 
@@ -30,14 +30,12 @@ generate_a3ss(gr, n_events = 1)
 
 ## Value
 
-`generate_skipped_exons()`: A GRanges object with skipped exon events
+`generate_se()`: A GRanges object with skipped exon events introduced
+
+`generate_mxe()`: A GRanges object with mutually exclusive exon events
 introduced
 
-`generate_mx()`: A GRanges object with mutually exclusive exon events
-introduced
-
-`generate_retained_introns()`: A GRanges object with retained intron
-events introduced
+`generate_ri()`: A GRanges object with retained intron events introduced
 
 `generate_a5ss()`: A GRanges object with alternative 5' splice site
 events introduced
@@ -52,7 +50,7 @@ events introduced
 gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
-generate_skipped_exons(gr, n_events = 1)
+generate_se(gr, n_events = 1)
 #> GRanges object with 31 ranges and 7 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
@@ -87,7 +85,7 @@ generate_skipped_exons(gr, n_events = 1)
 gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
-generate_mx(gr, n_events = 1)
+generate_mxe(gr, n_events = 1)
 #> GRanges object with 30 ranges and 7 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
@@ -122,7 +120,7 @@ generate_mx(gr, n_events = 1)
 gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
-generate_retained_introns(gr, n_events = 1)
+generate_ri(gr, n_events = 1)
 #> GRanges object with 31 ranges and 7 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>

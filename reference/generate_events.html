@@ -43,11 +43,11 @@ events into mock GRanges data for testing purposes.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_skipped_exons</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_se</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">generate_mx</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu">generate_mxe</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">generate_retained_introns</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu">generate_ri</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">generate_a5ss</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -69,11 +69,11 @@ events into mock GRanges data for testing purposes.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p><code>generate_skipped_exons()</code>: A GRanges object with skipped exon
+    <p><code>generate_se()</code>: A GRanges object with skipped exon
 events introduced</p>
-<p><code>generate_mx()</code>: A GRanges object with mutually exclusive exon
+<p><code>generate_mxe()</code>: A GRanges object with mutually exclusive exon
 events introduced</p>
-<p><code>generate_retained_introns()</code>: A GRanges object with retained intron
+<p><code>generate_ri()</code>: A GRanges object with retained intron
 events introduced</p>
 <p><code>generate_a5ss()</code>: A GRanges object with alternative 5' splice site
 events introduced</p>
@@ -87,7 +87,7 @@ events introduced</p>
 <span class="r-in"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx <span class="op">=</span> <span class="fl">4</span>, n_exons <span class="op">=</span> <span class="fl">4</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">generate_skipped_exons</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">generate_se</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 31 ranges and 7 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
@@ -122,7 +122,7 @@ events introduced</p>
 <span class="r-in"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx <span class="op">=</span> <span class="fl">4</span>, n_exons <span class="op">=</span> <span class="fl">4</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">generate_mx</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">generate_mxe</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 30 ranges and 7 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
@@ -157,7 +157,7 @@ events introduced</p>
 <span class="r-in"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx <span class="op">=</span> <span class="fl">4</span>, n_exons <span class="op">=</span> <span class="fl">4</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">generate_retained_introns</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">generate_ri</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 31 ranges and 7 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>

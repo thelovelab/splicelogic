@@ -67,7 +67,7 @@ A GRanges object with an additional column `event` indicating:
 # make some mock data and run the function
 gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
   preprocess(coef_col = "estimate") |>
-  generate_skipped_exons(1)
+  generate_se(n_events = 1)
 
 # this should find the skipped exon events we generated
 find_se(gr, type = "boundary")
@@ -94,7 +94,7 @@ gr_mx <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
   preprocess(coef_col = "estimate") |>
-  generate_mx(1)
+  generate_mxe(n_events = 1)
 
 find_mxe(gr_mx, type = "boundary")
 #> GRanges object with 2 ranges and 6 metadata columns:
@@ -115,7 +115,7 @@ gr_ri <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
   preprocess(coef_col = "estimate") |>
-  generate_retained_introns(1)
+  generate_ri(n_events = 1)
 
 find_ri(gr_ri)
 #> GRanges object with 2 ranges and 6 metadata columns:
@@ -136,7 +136,7 @@ gr_a5 <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
   preprocess(coef_col = "estimate") |>
-  generate_a5ss(1)
+  generate_a5ss(n_events = 1)
 
 find_a5ss(gr_a5)
 #> GRanges object with 1 range and 6 metadata columns:
@@ -155,7 +155,7 @@ gr_a3 <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
   preprocess(coef_col = "estimate") |>
-  generate_a3ss(1)
+  generate_a3ss(n_events = 1)
 find_a3ss(gr_a3)
 #> GRanges object with 2 ranges and 6 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
@@ -175,7 +175,7 @@ gr_all <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 ) |>
   preprocess(coef_col = "estimate") |>
-  generate_skipped_exons(1)
+  generate_se(n_events = 1)
 
 find_all_events(gr_all, type = "boundary", verbose = FALSE)
 #> GRanges object with 1 range and 6 metadata columns:

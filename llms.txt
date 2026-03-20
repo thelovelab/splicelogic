@@ -87,9 +87,9 @@ as part of the EOSS program.
 
 - [`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md)
   : Create mock GRanges data for splicing event testing
-- [`generate_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
-  [`generate_mx()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
-  [`generate_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+- [`generate_se()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_mxe()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_ri()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_a3ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   : Generate mock splice events in a GRanges object
