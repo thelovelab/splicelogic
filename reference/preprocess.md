@@ -39,5 +39,5 @@ columns.
 
 # create mock data and run preprocessing
 gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
- preprocess(coef_col = "coefs", method_string = "mock_method")
+ preprocess(coef_col = "estimate", method_string = "mock_method")
 ```

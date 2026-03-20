@@ -22,7 +22,7 @@ generate_a3ss(gr, n_events = 1)
 - gr:
 
   A GRanges object with metadata columns: 'exon_rank', 'gene_id',
-  'tx_id', and 'coefs'.
+  'tx_id', and 'estimate'.
 
 - n_events:
 
@@ -53,8 +53,8 @@ gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
 generate_skipped_exons(gr, n_events = 1)
-#> GRanges object with 31 ranges and 8 metadata columns:
-#>        seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#> GRanges object with 31 ranges and 7 metadata columns:
+#>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>    [1]    chr10       1-5      + |         1         1         1 -0.103009
 #>    [2]    chr10     11-15      + |         1         1         2 -0.103009
@@ -67,19 +67,19 @@ generate_skipped_exons(gr, n_events = 1)
 #>   [29]    chr10   111-115      + |         2         8         2 -0.798687
 #>   [30]    chr10   121-125      + |         2         8         3 -0.798687
 #>   [31]    chr10   131-135      + |         2         8         4 -0.798687
-#>                key    nexons  internal estimates
-#>        <character> <integer> <logical> <numeric>
-#>    [1]         1-1         4     FALSE -0.103009
-#>    [2]         1-2         4      TRUE -0.103009
-#>    [3]         1-3         4      TRUE -0.103009
-#>    [4]         1-4         4     FALSE -0.103009
-#>    [5]         2-1         3     FALSE  0.855840
-#>    ...         ...       ...       ...       ...
-#>   [27]         7-4         4     FALSE  0.656029
-#>   [28]         8-1         4     FALSE -0.798687
-#>   [29]         8-2         4      TRUE -0.798687
-#>   [30]         8-3         4      TRUE -0.798687
-#>   [31]         8-4         4     FALSE -0.798687
+#>                key    nexons  internal
+#>        <character> <integer> <logical>
+#>    [1]         1-1         4     FALSE
+#>    [2]         1-2         4      TRUE
+#>    [3]         1-3         4      TRUE
+#>    [4]         1-4         4     FALSE
+#>    [5]         2-1         3     FALSE
+#>    ...         ...       ...       ...
+#>   [27]         7-4         4     FALSE
+#>   [28]         8-1         4     FALSE
+#>   [29]         8-2         4      TRUE
+#>   [30]         8-3         4      TRUE
+#>   [31]         8-4         4     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -88,8 +88,8 @@ gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
 generate_mx(gr, n_events = 1)
-#> GRanges object with 30 ranges and 8 metadata columns:
-#>        seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#> GRanges object with 30 ranges and 7 metadata columns:
+#>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>    [1]     chr9       1-5      + |         1         1         1 -0.404016
 #>    [2]     chr9     11-15      + |         1         1         2 -0.404016
@@ -102,19 +102,19 @@ generate_mx(gr, n_events = 1)
 #>   [28]     chr9   101-105      + |         2         8         1  0.311965
 #>   [29]     chr9   121-125      + |         2         8         2  0.311965
 #>   [30]     chr9   131-135      + |         2         8         3  0.311965
-#>                key    nexons  internal estimates
-#>        <character> <integer> <logical> <numeric>
-#>    [1]         1-1         4     FALSE -0.404016
-#>    [2]         1-2         4      TRUE -0.404016
-#>    [3]         1-3         4      TRUE -0.404016
-#>    [4]         1-4         4     FALSE -0.404016
-#>    [5]         2-1         4     FALSE  0.395668
-#>    ...         ...       ...       ...       ...
-#>   [26]         7-2         3      TRUE -0.838310
-#>   [27]         7-3         3     FALSE -0.838310
-#>   [28]         8-1         3     FALSE  0.311965
-#>   [29]         8-2         3      TRUE  0.311965
-#>   [30]         8-3         3     FALSE  0.311965
+#>                key    nexons  internal
+#>        <character> <integer> <logical>
+#>    [1]         1-1         4     FALSE
+#>    [2]         1-2         4      TRUE
+#>    [3]         1-3         4      TRUE
+#>    [4]         1-4         4     FALSE
+#>    [5]         2-1         4     FALSE
+#>    ...         ...       ...       ...
+#>   [26]         7-2         3      TRUE
+#>   [27]         7-3         3     FALSE
+#>   [28]         8-1         3     FALSE
+#>   [29]         8-2         3      TRUE
+#>   [30]         8-3         3     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -123,8 +123,8 @@ gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
 generate_retained_introns(gr, n_events = 1)
-#> GRanges object with 31 ranges and 8 metadata columns:
-#>        seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#> GRanges object with 31 ranges and 7 metadata columns:
+#>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>    [1]     chr8       1-5      + |         1         1         1 -0.586908
 #>    [2]     chr8     11-15      + |         1         1         2 -0.586908
@@ -137,19 +137,19 @@ generate_retained_introns(gr, n_events = 1)
 #>   [29]     chr8       1-5      + |         1         4         1 0.3303049
 #>   [30]     chr8     11-25      + |         1         4         2 0.3303049
 #>   [31]     chr8     31-35      + |         1         4         3 0.3303049
-#>                key    nexons  internal estimates
-#>        <character> <integer> <logical> <numeric>
-#>    [1]         1-1         4     FALSE -0.586908
-#>    [2]         1-2         4      TRUE -0.586908
-#>    [3]         1-3         4      TRUE -0.586908
-#>    [4]         1-4         4     FALSE -0.586908
-#>    [5]         2-1         4     FALSE  0.134598
-#>    ...         ...       ...       ...       ...
-#>   [27]         8-3         4      TRUE 0.0177871
-#>   [28]         8-4         4     FALSE 0.0177871
-#>   [29]         4-1         3     FALSE 0.3303049
-#>   [30]         4-2         3      TRUE 0.3303049
-#>   [31]         4-3         3     FALSE 0.3303049
+#>                key    nexons  internal
+#>        <character> <integer> <logical>
+#>    [1]         1-1         4     FALSE
+#>    [2]         1-2         4      TRUE
+#>    [3]         1-3         4      TRUE
+#>    [4]         1-4         4     FALSE
+#>    [5]         2-1         4     FALSE
+#>    ...         ...       ...       ...
+#>   [27]         8-3         4      TRUE
+#>   [28]         8-4         4     FALSE
+#>   [29]         4-1         3     FALSE
+#>   [30]         4-2         3      TRUE
+#>   [31]         4-3         3     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -158,8 +158,8 @@ gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
 generate_a5ss(gr, n_events = 1)
-#> GRanges object with 32 ranges and 8 metadata columns:
-#>        seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#> GRanges object with 32 ranges and 7 metadata columns:
+#>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>    [1]    chr20       1-5      + |         1         1         1 -0.478438
 #>    [2]    chr20     11-15      + |         1         1         2 -0.478438
@@ -172,19 +172,19 @@ generate_a5ss(gr, n_events = 1)
 #>   [30]    chr20   111-115      + |         2         8         2 -0.858070
 #>   [31]    chr20   121-125      + |         2         8         3 -0.858070
 #>   [32]    chr20   131-135      + |         2         8         4 -0.858070
-#>                key    nexons  internal estimates
-#>        <character> <integer> <logical> <numeric>
-#>    [1]         1-1         4     FALSE -0.478438
-#>    [2]         1-2         4      TRUE -0.478438
-#>    [3]         1-3         4      TRUE -0.478438
-#>    [4]         1-4         4     FALSE -0.478438
-#>    [5]         2-1         4     FALSE  0.886854
-#>    ...         ...       ...       ...       ...
-#>   [28]         7-4         4     FALSE  0.629192
-#>   [29]         8-1         4     FALSE -0.858070
-#>   [30]         8-2         4      TRUE -0.858070
-#>   [31]         8-3         4      TRUE -0.858070
-#>   [32]         8-4         4     FALSE -0.858070
+#>                key    nexons  internal
+#>        <character> <integer> <logical>
+#>    [1]         1-1         4     FALSE
+#>    [2]         1-2         4      TRUE
+#>    [3]         1-3         4      TRUE
+#>    [4]         1-4         4     FALSE
+#>    [5]         2-1         4     FALSE
+#>    ...         ...       ...       ...
+#>   [28]         7-4         4     FALSE
+#>   [29]         8-1         4     FALSE
+#>   [30]         8-2         4      TRUE
+#>   [31]         8-3         4      TRUE
+#>   [32]         8-4         4     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -193,8 +193,8 @@ gr <- create_mock_data(
   n_genes = 2, n_tx = 4, n_exons = 4
 )
 generate_a3ss(gr, n_events = 1)
-#> GRanges object with 32 ranges and 8 metadata columns:
-#>        seqnames    ranges strand |   gene_id     tx_id exon_rank     coefs
+#> GRanges object with 32 ranges and 7 metadata columns:
+#>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
 #>    [1]    chr14       1-5      + |         1         1         1 -0.741426
 #>    [2]    chr14     11-15      + |         1         1         2 -0.741426
@@ -207,19 +207,19 @@ generate_a3ss(gr, n_events = 1)
 #>   [30]    chr14   111-115      + |         2         8         2 -0.744885
 #>   [31]    chr14   121-125      + |         2         8         3 -0.744885
 #>   [32]    chr14   131-135      + |         2         8         4 -0.744885
-#>                key    nexons  internal estimates
-#>        <character> <integer> <logical> <numeric>
-#>    [1]         1-1         4     FALSE -0.741426
-#>    [2]         1-2         4      TRUE -0.741426
-#>    [3]         1-3         4      TRUE -0.741426
-#>    [4]         1-4         4     FALSE -0.741426
-#>    [5]         2-1         4     FALSE  0.367170
-#>    ...         ...       ...       ...       ...
-#>   [28]         7-4         4     FALSE  0.655003
-#>   [29]         8-1         4     FALSE -0.744885
-#>   [30]         8-2         4      TRUE -0.744885
-#>   [31]         8-3         4      TRUE -0.744885
-#>   [32]         8-4         4     FALSE -0.744885
+#>                key    nexons  internal
+#>        <character> <integer> <logical>
+#>    [1]         1-1         4     FALSE
+#>    [2]         1-2         4      TRUE
+#>    [3]         1-3         4      TRUE
+#>    [4]         1-4         4     FALSE
+#>    [5]         2-1         4     FALSE
+#>    ...         ...       ...       ...
+#>   [28]         7-4         4     FALSE
+#>   [29]         8-1         4     FALSE
+#>   [30]         8-2         4      TRUE
+#>   [31]         8-3         4      TRUE
+#>   [32]         8-4         4     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```
