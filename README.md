@@ -35,8 +35,8 @@ all_events <- exons |> find_all_events()
 - Support detection of alternative UTR events (alternative 5' and 3' UTRs), when the reference annotation includes UTR coordinates (e.g. GENCODE).
 - Support detection of additional event types, such as consecutive skipped exons or loss of retained introns.
 - Extraction and labelling of the specific splice junctions associated with each event, adding metadata columns such as the donor–acceptor dinucleotide sequence (e.g. AG-GT) and a logical indicating whether the junction is canonical, for downstream interpretation.
-- Facilitating RNA-binding protein (RBP) motif detection
-- Facilitating interpretation of downstream structural consequences
+- Facilitating RNA-binding protein (RBP) motif detection.
+- Facilitating interpretation of downstream structural consequences.
 
 # Feedback
 
