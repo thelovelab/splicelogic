@@ -2,8 +2,8 @@
 
 ## Authors
 
-- **Beatriz Campillo**. Author, maintainer.
-  [](https://orcid.org/0000-0001-7323-9125)
+- **[Beatriz Campillo](https://github.com/beamimc)**. Author,
+  maintainer. [](https://orcid.org/0000-0001-7323-9125)
 
 - **[Michael Love](https://mikelove.github.io)**. Author.
   [](https://orcid.org/0000-0001-8401-0545)
