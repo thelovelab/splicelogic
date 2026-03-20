@@ -44,8 +44,8 @@ by installing from GitHub:
   with each event, adding metadata columns such as the donor–acceptor
   dinucleotide sequence (e.g. AG-GT) and a logical indicating whether
   the junction is canonical, for downstream interpretation.
-- Facilitating RNA-binding protein (RBP) motif detection
-- Facilitating interpretation of downstream structural consequences
+- Facilitating RNA-binding protein (RBP) motif detection.
+- Facilitating interpretation of downstream structural consequences.
 
 # Feedback
 
