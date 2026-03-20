@@ -43,7 +43,7 @@ find_se <- function(
   # keep user's original metadata columns (minus preprocessing intermediates)
   keep_cols <- setdiff(
     names(GenomicRanges::mcols(gr)),
-    c("key", "nexons", "internal", "estimates")
+    c("key", "nexons", "internal", "estimate")
   )
   if (inverse) {
     factor <- -1
@@ -125,7 +125,7 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
   check_preprocessed(gr)
   keep_cols <- setdiff(
     names(GenomicRanges::mcols(gr)),
-    c("key", "nexons", "internal", "estimates")
+    c("key", "nexons", "internal", "estimate")
   )
 
   matches <- find_candidates_and_flanks(gr, type, 1)
@@ -224,12 +224,12 @@ find_ri <- function(gr) {
   check_preprocessed(gr)
   keep_cols <- setdiff(
     names(GenomicRanges::mcols(gr)),
-    c("key", "nexons", "internal", "estimates")
+    c("key", "nexons", "internal", "estimate")
   )
 
   # find introns in the negative coef transcripts
-  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
-  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
+  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1)
+  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1)
   introns <- neg_exons |> find_introns()
 
   if (length(introns) == 0L || length(pos_exons) == 0L) {
@@ -295,14 +295,14 @@ find_alt_ss <- function(gr, by_start = TRUE) {
   check_preprocessed(gr)
   keep_cols <- setdiff(
     names(GenomicRanges::mcols(gr)),
-    c("key", "nexons", "internal", "estimates")
+    c("key", "nexons", "internal", "estimate")
   )
 
   event_name <- if (by_start) "a5ss" else "a3ss"
 
   # separate positive and negative exons
-  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1)
-  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1)
+  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1)
+  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1)
 
   # candidates: pos exons not exactly identical to any neg exon,
   # but overlapping at least one neg exon (directed)

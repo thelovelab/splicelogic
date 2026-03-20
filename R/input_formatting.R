@@ -70,9 +70,9 @@ preprocess <- function(gr, coef_col, method_string = NULL) {
       key = paste0(tx_id, "-", exon_rank),
       nexons = length(exon_rank),
       internal = exon_rank > 1 & exon_rank < nexons,
-      # always use "estimates" as the column name
+      # always use "estimate" as the column name
       # for coef values in downstream functions
-      estimates = !!rlang::sym(coef_col)
+      estimate = !!rlang::sym(coef_col)
     ) |>
     dplyr::ungroup()
 

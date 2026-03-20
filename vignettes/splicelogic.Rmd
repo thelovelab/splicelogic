@@ -36,7 +36,7 @@ exons <- prepare_exons(
   coef_col = "estimate"
 )
 
-exons <- preprocess(exons, coef_col = "estimates")
+exons <- preprocess(exons, coef_col = "estimate")
 
 # find skipped exons:
 skipped <- exons |> find_se()

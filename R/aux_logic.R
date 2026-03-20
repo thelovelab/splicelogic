@@ -175,7 +175,7 @@ find_introns <- function(gr) {
     strand = GenomicRanges::strand(gr),
     gene_id = gr$gene_id,
     tx_id = gr$tx_id,
-    estimates = gr$estimates,
+    estimate = gr$estimate,
     intron = TRUE
   )
   # TO DO: include case where no introns are found
@@ -300,8 +300,8 @@ find_candidates_and_flanks <- function(
   factor
 ) {
   # separate positive and negative exons
-  pos_exons <- gr |> dplyr::filter(sign(estimates) == 1 * factor)
-  neg_exons <- gr |> dplyr::filter(sign(estimates) == -1 * factor)
+  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1 * factor)
+  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1 * factor)
 
   # candidates_by_presence returns GRanges
   filter_results <- candidates_by_presence(gr, neg_exons, pos_exons)
