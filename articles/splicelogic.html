@@ -57,7 +57,7 @@ Campillo</h4>
                                     <h4 data-toc-skip class="author">Michael
 I. Love</h4>
                         
-            <h4 data-toc-skip class="date">03/19/2026</h4>
+            <h4 data-toc-skip class="date">03/20/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/thelovelab/splicelogic/blob/devel/vignettes/splicelogic.Rmd" class="external-link"><code>vignettes/splicelogic.Rmd</code></a></small>
       <div class="d-none name"><code>splicelogic.Rmd</code></div>
@@ -104,14 +104,15 @@ the 3’ splice site</li>
 significant transcripts, one can use the following code to identify
 splice events:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>exons <span class="ot">&lt;-</span> <span class="fu">prepare_exons</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="at">txdb =</span> TxDb.Hsapiens.UCSC.hg38.knownGene,</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="at">txdb =</span> <span class="sc">&lt;</span>A TxDB OBJECT<span class="sc">&gt;</span>,</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">dtu_table =</span> <span class="sc">&lt;</span>DTU_TABLE<span class="sc">&gt;</span>,</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">coef_col =</span> <span class="st">"estimate"</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  )</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>)</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>exons <span class="ot">&lt;-</span> <span class="fu">preprocess</span>(exons, <span class="at">coef_col =</span> <span class="st">"estimates"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>skipped <span class="ot">&lt;-</span> exons <span class="sc">|&gt;</span> <span class="fu">find_se</span>()</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># etc.</span></span></code></pre></div>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># find skipped exons:</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>skipped <span class="ot">&lt;-</span> exons <span class="sc">|&gt;</span> <span class="fu">find_se</span>()</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="input-data">Input data<a class="anchor" aria-label="anchor" href="#input-data"></a>
@@ -248,7 +249,7 @@ threshold to provide more examples below.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="detecting-splicing-events">Detecting splicing events<a class="anchor" aria-label="anchor" href="#detecting-splicing-events"></a>
+<h2 id="finding-splicing-events">Finding splicing events<a class="anchor" aria-label="anchor" href="#finding-splicing-events"></a>
 </h2>
 <div class="section level3">
 <h3 id="preprocessing-input-data">Preprocessing input data<a class="anchor" aria-label="anchor" href="#preprocessing-input-data"></a>
@@ -262,11 +263,11 @@ input data, ensures that the necessary columns are present:</p>
 <span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="individual-events">Individual events<a class="anchor" aria-label="anchor" href="#individual-events"></a>
+<h3 id="finding-individual-events">Finding individual events<a class="anchor" aria-label="anchor" href="#finding-individual-events"></a>
 </h3>
 <p>Next we can run the various functions for calculating different types
 of splicing events.</p>
-<p><strong>Skipped exons</strong></p>
+<p><strong>Skipped exons (SE)</strong></p>
 <p>For example, we can calculate exons that are skipped in up-regulated
 transcripts relative to down-regulated transcripts, across all genes. As
 these are skipped in the up-regulated transcripts, it is expected that
@@ -289,7 +290,7 @@ the exons returned belong to down-regulated transcripts:</p>
 <span><span class="co">##   [2]  -1.56845 0.04279143          se  ENSMUST00000210074.2</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
-<p><strong>Included exons</strong></p>
+<p><strong>Included exons (IE)</strong></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">included</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_ie</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">included</span></span></code></pre></div>
@@ -311,7 +312,7 @@ the exons returned belong to down-regulated transcripts:</p>
 <span><span class="co">##   [3]   4.14230 0.000995041          ie  ENSMUST00000108951.8</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
-<p><strong>Mutually exclusive exons</strong></p>
+<p><strong>Mutually exclusive exons (MXE)</strong></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mx</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_mxe</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mx</span></span></code></pre></div>
@@ -330,7 +331,7 @@ the exons returned belong to down-regulated transcripts:</p>
 <span><span class="co">##   [2]   2.99384 0.00171934         mxe ENSMUST00000021347.12</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
-<p><strong>Retained introns</strong></p>
+<p><strong>Retained introns (RI)</strong></p>
 <p>Here we do not find retained introns, and the function returns an
 empty vector.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -341,7 +342,7 @@ empty vector.</p>
 <span><span class="co">##       &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: no sequences</span></span></code></pre>
-<p><strong>Alternative 5’ and 3’ splice sites</strong></p>
+<p><strong>Alternative 5’ and 3’ splice sites (A5/3SS)</strong></p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a5ss</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_a5ss</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">a5ss</span></span></code></pre></div>
@@ -422,8 +423,9 @@ empty vector.</p>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 </div>
 <div class="section level3">
-<h3 id="calculate-all-events">Calculate all events<a class="anchor" aria-label="anchor" href="#calculate-all-events"></a>
+<h3 id="finding-all-events">Finding all events<a class="anchor" aria-label="anchor" href="#finding-all-events"></a>
 </h3>
+<p>The following function wraps the above ones to find all events.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">all_events</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_all_events</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Calculating skipped exon events...</span></span></code></pre>
@@ -498,30 +500,41 @@ differential usage statistics can be used with <code>splicelogic</code>,
 provided that results include:</p>
 <ol style="list-style-type: decimal">
 <li>a <strong>per-transcript directional effect estimate</strong>
-(e.g. a model coefficient, change in isoform fraction), and<br>
+(e.g. a model coefficient, change in isoform fraction, deltaPSI, etc.),
+and<br>
 </li>
 <li>an <strong>adjusted p-value</strong> (or equivalent significance
-metric).</li>
+metric by thresholding).</li>
 </ol>
 <p>Common upstream methods include:</p>
 <ul>
-<li><p><strong>satuRn</strong> — fits quasi-binomial generalized linear
-models to transcript usage proportions and performs scalable
-transcript-level DTU testing. Particularly well suited to larger
-datasets and can use an empirical null distribution for improved
-calibration in single-cell datasets. Available on <a href="https://bioconductor.org/packages/satuRn" class="external-link">Bioconductor</a>.</p></li>
-<li><p><strong>DRIMSeq</strong> — models transcript proportions within
-genes using a Dirichlet-multinomial framework, with both gene-level and
-transcript-level testing (the latter reduces to a one-vs-rest comparison
-for individual transcripts). Available on <a href="https://bioconductor.org/packages/DRIMSeq" class="external-link">Bioconductor</a>.</p></li>
-<li><p><strong>BANDITS</strong> — a Bayesian hierarchical DTU method
-that models transcript usage with a Dirichlet-multinomial and explicitly
-accounts for mapping uncertainty using equivalence classes. Produces
-both gene- and transcript-level DTU results. Available on <a href="https://bioconductor.org/packages/BANDITS" class="external-link">Bioconductor</a>.</p></li>
+<li><p><a href="https://bioconductor.org/packages/satuRn" class="external-link">satuRn</a> —
+fits quasi-binomial generalized linear models to transcript usage
+proportions and performs scalable transcript-level DTU testing.
+Particularly well suited to larger datasets.</p></li>
+<li><p><a href="https://bioconductor.org/packages/DRIMSeq" class="external-link">DRIMSeq</a> —
+models transcript proportions within genes using a Dirichlet-multinomial
+framework, with both gene-level and transcript-level testing.</p></li>
+<li><p><a href="https://bioconductor.org/packages/BANDITS" class="external-link">BANDITS</a> —
+a Bayesian hierarchical DTU method that models transcript usage with a
+Dirichlet-multinomial and explicitly accounts for mapping uncertainty
+using equivalence classes, with both gene-level and transcript-level
+testing.</p></li>
+<li><p><a href="https://bioconductor.org/packages/DEXSeq" class="external-link">DEXSeq</a> —
+primarily a differential exon usage (DEU)method based on
+<strong>negative binomial GLMs</strong>, but commonly used in
+transcript-level DTU workflows and isoform-switch pipelines. While not a
+native transcript-usage model, its outputs can be incorporated into
+<code>splicelogic</code> when transcript-level statistics are
+available.</p></li>
+<li><p><strong>edgeR (<code>diffSplice</code> /
+<code>diffSpliceDGE</code>)</strong> — can be used for transcript- or
+exon-resolved differential usage analyses in count-based workflows,
+providing gene and transcript-level statistics in suitable DTU setups.
+Available on <a href="https://bioconductor.org/packages/edgeR" class="external-link">Bioconductor</a>.
+–&gt;</p></li>
 </ul>
-<!-- - **DEXSeq** — primarily a **differential exon usage (DEU)** method based on **negative binomial GLMs**, but commonly used in transcript-level DTU workflows and isoform-switch pipelines. While not a native transcript-usage model, its outputs can be incorporated into `splicelogic` when transcript-level statistics are available. Available on [Bioconductor](https://bioconductor.org/packages/DEXSeq).
-
-- **edgeR (`diffSplice` / `diffSpliceDGE`)** — can be used for transcript- or exon-resolved differential usage analyses in count-based workflows, providing gene and transcript-level statistics in suitable DTU setups. Available on [Bioconductor](https://bioconductor.org/packages/edgeR). --><p>Regardless of which method is used, the per-transcript DTU statistics
+<p>Regardless of which method is used, the per-transcript DTU statistics
 (effect estimates and adjusted p-values) have to be mapped onto the
 individual exons of each transcript to produce an exon-level GRanges
 (see <a href="#obtaining-exon-ranges">Obtaining exon ranges</a>). This

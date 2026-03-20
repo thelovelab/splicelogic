@@ -28,14 +28,15 @@ transcripts, one can use the following code to identify splice events:
 
 ``` r
 exons <- prepare_exons(
-  txdb = TxDb.Hsapiens.UCSC.hg38.knownGene,
+  txdb = <A TxDB OBJECT>,
   dtu_table = <DTU_TABLE>,
   coef_col = "estimate"
-  )
+)
 
 exons <- preprocess(exons, coef_col = "estimates")
+
+# find skipped exons:
 skipped <- exons |> find_se()
-# etc.
 ```
 
 ## Input data
@@ -179,7 +180,7 @@ more examples below.
 sig_exons <- exons |> filter(padj < .5)
 ```
 
-## Detecting splicing events
+## Finding splicing events
 
 ### Preprocessing input data
 
@@ -195,12 +196,12 @@ sig_exons <- sig_exons |>
   preprocess(coef_col = "estimate")
 ```
 
-### Individual events
+### Finding individual events
 
 Next we can run the various functions for calculating different types of
 splicing events.
 
-**Skipped exons**
+**Skipped exons (SE)**
 
 For example, we can calculate exons that are skipped in up-regulated
 transcripts relative to down-regulated transcripts, across all genes. As
@@ -229,7 +230,7 @@ skipped
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
-**Included exons**
+**Included exons (IE)**
 
 ``` r
 
@@ -256,7 +257,7 @@ included
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
-**Mutually exclusive exons**
+**Mutually exclusive exons (MXE)**
 
 ``` r
 
@@ -280,7 +281,7 @@ mx
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
-**Retained introns**
+**Retained introns (RI)**
 
 Here we do not find retained introns, and the function returns an empty
 vector.
@@ -297,7 +298,7 @@ ri
     ##   -------
     ##   seqinfo: no sequences
 
-**Alternative 5’ and 3’ splice sites**
+**Alternative 5’ and 3’ splice sites (A5/3SS)**
 
 ``` r
 
@@ -385,7 +386,9 @@ a3ss
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
-### Calculate all events
+### Finding all events
+
+The following function wraps the above ones to find all events.
 
 ``` r
 
@@ -478,29 +481,39 @@ differential usage statistics can be used with `splicelogic`, provided
 that results include:
 
 1.  a **per-transcript directional effect estimate** (e.g. a model
-    coefficient, change in isoform fraction), and  
-2.  an **adjusted p-value** (or equivalent significance metric).
+    coefficient, change in isoform fraction, deltaPSI, etc.), and  
+2.  an **adjusted p-value** (or equivalent significance metric by
+    thresholding).
 
 Common upstream methods include:
 
-- **satuRn** — fits quasi-binomial generalized linear models to
-  transcript usage proportions and performs scalable transcript-level
-  DTU testing. Particularly well suited to larger datasets and can use
-  an empirical null distribution for improved calibration in single-cell
-  datasets. Available on
-  [Bioconductor](https://bioconductor.org/packages/satuRn).
+- [satuRn](https://bioconductor.org/packages/satuRn) — fits
+  quasi-binomial generalized linear models to transcript usage
+  proportions and performs scalable transcript-level DTU testing.
+  Particularly well suited to larger datasets.
 
-- **DRIMSeq** — models transcript proportions within genes using a
-  Dirichlet-multinomial framework, with both gene-level and
-  transcript-level testing (the latter reduces to a one-vs-rest
-  comparison for individual transcripts). Available on
-  [Bioconductor](https://bioconductor.org/packages/DRIMSeq).
+- [DRIMSeq](https://bioconductor.org/packages/DRIMSeq) — models
+  transcript proportions within genes using a Dirichlet-multinomial
+  framework, with both gene-level and transcript-level testing.
 
-- **BANDITS** — a Bayesian hierarchical DTU method that models
-  transcript usage with a Dirichlet-multinomial and explicitly accounts
-  for mapping uncertainty using equivalence classes. Produces both gene-
-  and transcript-level DTU results. Available on
-  [Bioconductor](https://bioconductor.org/packages/BANDITS).
+- [BANDITS](https://bioconductor.org/packages/BANDITS) — a Bayesian
+  hierarchical DTU method that models transcript usage with a
+  Dirichlet-multinomial and explicitly accounts for mapping uncertainty
+  using equivalence classes, with both gene-level and transcript-level
+  testing.
+
+- [DEXSeq](https://bioconductor.org/packages/DEXSeq) — primarily a
+  differential exon usage (DEU)method based on **negative binomial
+  GLMs**, but commonly used in transcript-level DTU workflows and
+  isoform-switch pipelines. While not a native transcript-usage model,
+  its outputs can be incorporated into `splicelogic` when
+  transcript-level statistics are available.
+
+- **edgeR (`diffSplice` / `diffSpliceDGE`)** — can be used for
+  transcript- or exon-resolved differential usage analyses in
+  count-based workflows, providing gene and transcript-level statistics
+  in suitable DTU setups. Available on
+  [Bioconductor](https://bioconductor.org/packages/edgeR). –\>
 
 Regardless of which method is used, the per-transcript DTU statistics
 (effect estimates and adjusted p-values) have to be mapped onto the
