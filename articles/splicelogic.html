@@ -628,7 +628,6 @@ are built from a <em>TxDb</em>.</p>
 <code class="sourceCode R"><span><span class="co"># extract exons as a GRangesList</span></span>
 <span><span class="va">exons_list</span> <span class="op">&lt;-</span> <span class="fu">GenomicFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcriptsBy.html" class="external-link">exonsBy</a></span><span class="op">(</span></span>
 <span>  <span class="va">txdb</span>,</span>
-<span>  <span class="co"># filter = AnnotationFilter::TxIdFilter(unique(sim_dtu_table$tx_id)), </span></span>
 <span>  by<span class="op">=</span><span class="st">"tx"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="co"># Our DTU table aligns with txps, which aligns with the names of the GRangesList.</span></span>

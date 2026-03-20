@@ -643,7 +643,6 @@ The following extracts the exons grouped by transcript from the *TxDb*:
 # extract exons as a GRangesList
 exons_list <- GenomicFeatures::exonsBy(
   txdb,
-  # filter = AnnotationFilter::TxIdFilter(unique(sim_dtu_table$tx_id)), 
   by="tx"
   )
 # Our DTU table aligns with txps, which aligns with the names of the GRangesList.
