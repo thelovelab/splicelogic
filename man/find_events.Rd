@@ -74,7 +74,9 @@ find_ie(gr, type = "boundary")
 
 
 # detect mutually exclusive exons
-gr_mx <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+gr_mx <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
   preprocess(coef_col = "estimate") |>
   generate_mx(1)
 
@@ -82,7 +84,9 @@ find_mxe(gr_mx, type = "boundary")
 
 
 # detect retained introns
-gr_ri <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+gr_ri <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
   preprocess(coef_col = "estimate") |>
   generate_retained_introns(1)
 
@@ -90,7 +94,9 @@ find_ri(gr_ri)
 
 
 # detect alternative 5' splice sites
-gr_a5 <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+gr_a5 <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
   preprocess(coef_col = "estimate") |>
   generate_a5ss(1)
 
@@ -107,7 +113,9 @@ find_a3ss(gr_a3)
 
 
 # detect all event types at once
-gr_all <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+gr_all <- create_mock_data(
+  n_genes = 2, n_tx = 4, n_exons = 4
+) |>
   preprocess(coef_col = "estimate") |>
   generate_skipped_exons(1)
 
