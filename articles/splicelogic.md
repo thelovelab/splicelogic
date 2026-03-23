@@ -466,18 +466,18 @@ types](splicelogic_files/figure-html/events-barplot-1.png)
 
 ## Upstream methods
 
-`splicelogic` is designed to operate downstream of **differential
-transcript usage (DTU)**. DTU methods test whether the **relative
-proportions of transcripts within a gene** differ between experimental
+*splicelogic* is designed to operate downstream of differential
+transcript usage (DTU). DTU methods test whether the relative
+proportions of transcripts within a gene differ between experimental
 conditions.
 
 In general, any upstream method that produces transcript-resolved
-differential usage statistics can be used with `splicelogic`, provided
+differential usage statistics can be used with *splicelogic*, provided
 that results include:
 
-1.  a **per-transcript directional effect estimate** (e.g. a model
+1.  a per-transcript directional effect estimate (e.g. a model
     coefficient, change in isoform fraction, deltaPSI, etc.), and  
-2.  an **adjusted p-value** (or equivalent significance metric by
+2.  an adjusted p-value (or equivalent significance metric by
     thresholding).
 
 Common upstream methods include:
@@ -485,22 +485,24 @@ Common upstream methods include:
 - [satuRn](https://bioconductor.org/packages/satuRn) — fits
   quasi-binomial generalized linear models to transcript usage
   proportions and performs scalable transcript-level DTU testing.
-  Particularly well suited to larger datasets.
+  Particularly well suited to larger datasets. Gene-level testing
+  recommended via *stageR*.
 
 - [DRIMSeq](https://bioconductor.org/packages/DRIMSeq) — models
-  transcript proportions within genes using a Dirichlet-multinomial
+  transcript proportions within genes using a Dirichlet-Multinomial
   framework, with both gene-level and transcript-level testing.
 
 - [BANDITS](https://bioconductor.org/packages/BANDITS) — a Bayesian
-  hierarchical DTU method that models transcript usage with a
-  Dirichlet-multinomial and explicitly accounts for mapping uncertainty
+  hierarchical DTU method that models transcript usage using a
+  Dirichlet-Multinomial and explicitly accounts for mapping uncertainty
   using equivalence classes, with both gene-level and transcript-level
   testing.
 
 - [DEXSeq](https://bioconductor.org/packages/DEXSeq) — primarily a
   differential exon usage (DEU) method based on negative binomial GLMs,
-  but commonly used in transcript-level DTU workflows. The log2FC
-  coefficients from DEXSeq can be used directly with *splicelogic*.
+  but commonly used in transcript-level DTU workflows (e.g. the
+  *rnaseqDTU* Bioconductor 2018 workflow). The log2 fold change
+  coefficients from *DEXSeq* can be used directly with *splicelogic*.
 
 - [limma](https://bioconductor.org/packages/limma) and
   [edgeR](https://bioconductor.org/packages/edgeR) (`diffSplice` /
@@ -713,8 +715,8 @@ sessionInfo()
     ##  [1] tidyselect_1.2.1            blob_1.3.0                 
     ##  [3] filelock_1.0.3              Biostrings_2.78.0          
     ##  [5] bitops_1.0-9                fastmap_1.2.0              
-    ##  [7] RCurl_1.98-1.17             GenomicAlignments_1.46.0   
-    ##  [9] XML_3.99-0.22               digest_0.6.39              
+    ##  [7] RCurl_1.98-1.18             GenomicAlignments_1.46.0   
+    ##  [9] XML_3.99-0.23               digest_0.6.39              
     ## [11] lifecycle_1.0.5             KEGGREST_1.50.0            
     ## [13] RSQLite_2.4.6               magrittr_2.0.4             
     ## [15] compiler_4.5.2              rlang_1.1.7                
@@ -734,8 +736,8 @@ sessionInfo()
     ## [43] DBI_1.3.0                   cachem_1.1.0               
     ## [45] parallel_4.5.2              BiocManager_1.30.27        
     ## [47] XVector_0.50.0              restfulr_0.0.16            
-    ## [49] matrixStats_1.5.0           vctrs_0.7.1                
-    ## [51] Matrix_1.7-4                jsonlite_2.0.0             
+    ## [49] matrixStats_1.5.0           vctrs_0.7.2                
+    ## [51] Matrix_1.7-5                jsonlite_2.0.0             
     ## [53] hms_1.1.4                   bit64_4.6.0-1              
     ## [55] systemfonts_1.3.2           jquerylib_0.1.4            
     ## [57] glue_1.8.0                  pkgdown_2.2.0              
@@ -749,5 +751,5 @@ sessionInfo()
     ## [73] png_0.1-9                   Rsamtools_2.26.0           
     ## [75] cigarillo_1.0.0             memoise_2.0.1              
     ## [77] bslib_0.10.0                SparseArray_1.10.9         
-    ## [79] xfun_0.56                   fs_1.6.7                   
+    ## [79] xfun_0.57                   fs_2.0.0                   
     ## [81] MatrixGenerics_1.22.0       pkgconfig_2.0.3

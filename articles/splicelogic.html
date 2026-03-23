@@ -57,7 +57,7 @@ Campillo</h4>
                                     <h4 data-toc-skip class="author">Michael
 I. Love</h4>
                         
-            <h4 data-toc-skip class="date">03/20/2026</h4>
+            <h4 data-toc-skip class="date">03/23/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/thelovelab/splicelogic/blob/devel/vignettes/splicelogic.Rmd" class="external-link"><code>vignettes/splicelogic.Rmd</code></a></small>
       <div class="d-none name"><code>splicelogic.Rmd</code></div>
@@ -482,39 +482,40 @@ empty vector.</p>
 <div class="section level2">
 <h2 id="upstream-methods">Upstream methods<a class="anchor" aria-label="anchor" href="#upstream-methods"></a>
 </h2>
-<p><code>splicelogic</code> is designed to operate downstream of
-<strong>differential transcript usage (DTU)</strong>. DTU methods test
-whether the <strong>relative proportions of transcripts within a
-gene</strong> differ between experimental conditions.</p>
+<p><em>splicelogic</em> is designed to operate downstream of
+differential transcript usage (DTU). DTU methods test whether the
+relative proportions of transcripts within a gene differ between
+experimental conditions.</p>
 <p>In general, any upstream method that produces transcript-resolved
-differential usage statistics can be used with <code>splicelogic</code>,
+differential usage statistics can be used with <em>splicelogic</em>,
 provided that results include:</p>
 <ol style="list-style-type: decimal">
-<li>a <strong>per-transcript directional effect estimate</strong>
-(e.g. a model coefficient, change in isoform fraction, deltaPSI, etc.),
-and<br>
+<li>a per-transcript directional effect estimate (e.g. a model
+coefficient, change in isoform fraction, deltaPSI, etc.), and<br>
 </li>
-<li>an <strong>adjusted p-value</strong> (or equivalent significance
-metric by thresholding).</li>
+<li>an adjusted p-value (or equivalent significance metric by
+thresholding).</li>
 </ol>
 <p>Common upstream methods include:</p>
 <ul>
 <li><p><a href="https://bioconductor.org/packages/satuRn" class="external-link">satuRn</a> —
 fits quasi-binomial generalized linear models to transcript usage
 proportions and performs scalable transcript-level DTU testing.
-Particularly well suited to larger datasets.</p></li>
+Particularly well suited to larger datasets. Gene-level testing
+recommended via <em>stageR</em>.</p></li>
 <li><p><a href="https://bioconductor.org/packages/DRIMSeq" class="external-link">DRIMSeq</a> —
-models transcript proportions within genes using a Dirichlet-multinomial
+models transcript proportions within genes using a Dirichlet-Multinomial
 framework, with both gene-level and transcript-level testing.</p></li>
 <li><p><a href="https://bioconductor.org/packages/BANDITS" class="external-link">BANDITS</a> —
-a Bayesian hierarchical DTU method that models transcript usage with a
-Dirichlet-multinomial and explicitly accounts for mapping uncertainty
+a Bayesian hierarchical DTU method that models transcript usage using a
+Dirichlet-Multinomial and explicitly accounts for mapping uncertainty
 using equivalence classes, with both gene-level and transcript-level
 testing.</p></li>
 <li><p><a href="https://bioconductor.org/packages/DEXSeq" class="external-link">DEXSeq</a> —
 primarily a differential exon usage (DEU) method based on negative
-binomial GLMs, but commonly used in transcript-level DTU workflows. The
-log2FC coefficients from DEXSeq can be used directly with
+binomial GLMs, but commonly used in transcript-level DTU workflows
+(e.g. the <em>rnaseqDTU</em> Bioconductor 2018 workflow). The log2 fold
+change coefficients from <em>DEXSeq</em> can be used directly with
 <em>splicelogic</em>.</p></li>
 <li><p><a href="https://bioconductor.org/packages/limma" class="external-link">limma</a> and
 <a href="https://bioconductor.org/packages/edgeR" class="external-link">edgeR</a>
@@ -689,8 +690,8 @@ dataset above):</p>
 <span><span class="co">##  [1] tidyselect_1.2.1            blob_1.3.0                 </span></span>
 <span><span class="co">##  [3] filelock_1.0.3              Biostrings_2.78.0          </span></span>
 <span><span class="co">##  [5] bitops_1.0-9                fastmap_1.2.0              </span></span>
-<span><span class="co">##  [7] RCurl_1.98-1.17             GenomicAlignments_1.46.0   </span></span>
-<span><span class="co">##  [9] XML_3.99-0.22               digest_0.6.39              </span></span>
+<span><span class="co">##  [7] RCurl_1.98-1.18             GenomicAlignments_1.46.0   </span></span>
+<span><span class="co">##  [9] XML_3.99-0.23               digest_0.6.39              </span></span>
 <span><span class="co">## [11] lifecycle_1.0.5             KEGGREST_1.50.0            </span></span>
 <span><span class="co">## [13] RSQLite_2.4.6               magrittr_2.0.4             </span></span>
 <span><span class="co">## [15] compiler_4.5.2              rlang_1.1.7                </span></span>
@@ -710,8 +711,8 @@ dataset above):</p>
 <span><span class="co">## [43] DBI_1.3.0                   cachem_1.1.0               </span></span>
 <span><span class="co">## [45] parallel_4.5.2              BiocManager_1.30.27        </span></span>
 <span><span class="co">## [47] XVector_0.50.0              restfulr_0.0.16            </span></span>
-<span><span class="co">## [49] matrixStats_1.5.0           vctrs_0.7.1                </span></span>
-<span><span class="co">## [51] Matrix_1.7-4                jsonlite_2.0.0             </span></span>
+<span><span class="co">## [49] matrixStats_1.5.0           vctrs_0.7.2                </span></span>
+<span><span class="co">## [51] Matrix_1.7-5                jsonlite_2.0.0             </span></span>
 <span><span class="co">## [53] hms_1.1.4                   bit64_4.6.0-1              </span></span>
 <span><span class="co">## [55] systemfonts_1.3.2           jquerylib_0.1.4            </span></span>
 <span><span class="co">## [57] glue_1.8.0                  pkgdown_2.2.0              </span></span>
@@ -725,7 +726,7 @@ dataset above):</p>
 <span><span class="co">## [73] png_0.1-9                   Rsamtools_2.26.0           </span></span>
 <span><span class="co">## [75] cigarillo_1.0.0             memoise_2.0.1              </span></span>
 <span><span class="co">## [77] bslib_0.10.0                SparseArray_1.10.9         </span></span>
-<span><span class="co">## [79] xfun_0.56                   fs_1.6.7                   </span></span>
+<span><span class="co">## [79] xfun_0.57                   fs_2.0.0                   </span></span>
 <span><span class="co">## [81] MatrixGenerics_1.22.0       pkgconfig_2.0.3</span></span></code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
