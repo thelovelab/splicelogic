@@ -18,13 +18,13 @@ Source:
 [`DESCRIPTION`](https://github.com/thelovelab/splicelogic/blob/devel/DESCRIPTION)
 
 Campillo B, Love M (2026). *splicelogic: splicelogic: differential
-transcripts to splice events*. R package version 0.99.0,
+transcripts to splice events*. R package version 0.99.1,
 <https://github.com/thelovelab/splicelogic>.
 
     @Manual{,
       title = {splicelogic: splicelogic: differential transcripts to splice events},
       author = {Beatriz Campillo and Michael Love},
       year = {2026},
-      note = {R package version 0.99.0},
+      note = {R package version 0.99.1},
       url = {https://github.com/thelovelab/splicelogic},
     }
