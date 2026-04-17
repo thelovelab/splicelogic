@@ -115,6 +115,9 @@ no_event_mock_data <- function() {
   return(gr)
 }
 
+# for create_mock_data
+utils::globalVariables(c("gene_id", "strand", "tx_order", "estimate"))
+
 #' Create mock GRanges data for splicing event testing
 #' 
 #' @param n_genes Number of genes to simulate
@@ -216,6 +219,9 @@ create_mock_data <- function(
 #' 'tx_id', and 'estimate'.
 NULL
 
+# for generate_se
+utils::globalVariables(c("estimate", "internal", "key"))
+
 #' @rdname generate_events
 #' @param n_events Number of events to generate
 #' @return `generate_se()`: A GRanges object with skipped exon
@@ -243,6 +249,11 @@ generate_se <- function(gr, n_events = 1) {
   gr <- rerank_exons(gr)
   return(gr)
 }
+
+# for generate_mxe
+utils::globalVariables(c(
+  "estimate", "internal", "next_key", "gene_id", "neg_tx_id", "key"
+))
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
@@ -298,6 +309,9 @@ generate_mxe <- function(gr, n_events = 1) {
   return(gr)
 }
 
+# for generate_ri
+utils::globalVariables(c("estimate"))
+
 #' @rdname generate_events
 #' @param n_events Number of events to generate
 #' @return `generate_ri()`: A GRanges object with retained intron
@@ -346,6 +360,9 @@ generate_ri <- function(gr, n_events = 1) {
   return(gr)
 }
 
+# for rerank_exons
+utils::globalVariables(c("strand"))
+
 #' Re-rank exons in a GRanges object
 #' @param gr A GRanges object with metadata columns: 'exon_rank'
 #' @return A GRanges object with re-ranked exons
@@ -366,6 +383,9 @@ rerank_exons <- function(gr) {
   gr <- preprocess(gr, coef_col = "estimate")
   return(gr)
 }
+
+# for generate_a5ss
+utils::globalVariables(c("estimate", "internal", "key"))
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
@@ -411,6 +431,9 @@ generate_a5ss <- function(gr, n_events = 1) {
   gr_with_a5ss <- preprocess(gr_with_a5ss, coef_col = "estimate")
   return(gr_with_a5ss)
 }
+# for generate_a3ss
+utils::globalVariables(c("estimate", "internal", "key"))
+
 #' @rdname generate_events
 #' @param n_events Number of events to generate
 #' @return `generate_a3ss()`: A GRanges object with alternative 3' splice site

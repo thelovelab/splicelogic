@@ -13,6 +13,9 @@
 
 NULL
 
+# for find_se
+utils::globalVariables(c("cand_idx", "l", "r", "event", "tx_event"))
+
 #' @rdname find_events
 #' @param type The type of overlap to consider when
 #' identifying events.
@@ -102,6 +105,11 @@ find_se <- function(
 find_ie <- function(gr, type = c("boundary", "over", "in")) {
   find_se(gr, type, inverse = TRUE)
 }
+
+# for find_mxe
+utils::globalVariables(c(
+  "cand_idx", "l", "r", "pos_row", ".pair_order", "event", "tx_event"
+))
 
 #' @rdname find_events
 #' @return `find_mxe()`: mutually exclusive exons
@@ -200,6 +208,12 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
   res
 }
 
+# for find_ri
+utils::globalVariables(c(
+  "estimate", "intron_idx", "pos_idx", "gene_id_intron",
+  "gene_id_pos", "tx_id_intron", "event", "tx_event"
+))
+
 #' @rdname find_events
 #' @return `find_ri()`: retained introns
 #' @examples
@@ -275,6 +289,12 @@ find_ri <- function(gr) {
   res
 }
 
+
+# for find_alt_ss
+utils::globalVariables(c(
+  "estimate", "cand_idx", "neg_idx", "gene_id_cand", "gene_id_neg",
+  "tx_id_neg", "n", "match_start", "match_end", "event", "tx_event"
+))
 
 #' @rdname find_events
 #' @param by_start If TRUE, detects a5ss (same exon start, different end).

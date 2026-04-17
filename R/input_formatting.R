@@ -34,6 +34,9 @@ check_input <- function(gr, coef_col) {
 }
 
 
+# for preprocess
+utils::globalVariables(c("nexons"))
+
 #' Preprocess input GRanges object for splicing event calculation
 #'
 #' This function checks that the input is a valid GRanges

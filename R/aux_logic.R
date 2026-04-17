@@ -1,3 +1,6 @@
+# for compute_matches
+utils::globalVariables(c("."))
+
 #' Takes a GRanges object and left/right exons to compute matches.
 #' i.e takes the pos_exons (GRanges) and left and right exons and returns
 #' a tibble that is the same as pos_exons but with two additional columns
@@ -150,6 +153,9 @@ match_left_right <- function(pos_exons, left_exon, right_exon, type) {
 }
 
 
+# for find_introns
+utils::globalVariables(c("gene_id", "intron_start", "intron_end"))
+
 #' function to find introns given a GRanges object of exons
 #' @param gr A GRanges object with metadata columns:
 #' 'exon_rank', 'gene_id', 'tx_id', and 'estimate'.
@@ -186,6 +192,9 @@ find_introns <- function(gr) {
   # eg create_mock_data(1,1,1) and check that the output
   # is an empty GRanges with the correct metadata columns
 }
+# for candidates_by_presence
+utils::globalVariables(c("overlap_count", "n_txp_pos"))
+
 #’ Filter candidates based on their presence in transcripts
 #' Then get the left and right exons for each candidate
 #' Return a named list with three tibbles: candidates, left_exons, right_exons
@@ -240,6 +249,9 @@ candidates_by_presence <- function(gr, neg_exons, pos_exons) {
   )
 }
 
+# for find_matches_batch
+utils::globalVariables(c("queryHits", "subjectHits"))
+
 #' Batch find overlaps between query and subject GRanges based on match type
 #' @param query A GRanges object (e.g. pos_exons)
 #' @param subject A GRanges object (e.g. all left or right
@@ -282,6 +294,9 @@ find_matches_batch <- function(
     }
   )
 }
+
+# for find_candidates_and_flanks
+utils::globalVariables(c("estimate", "pos_idx", "gene_id_pos", "cand_idx"))
 
 #' Find candidates and build flanking match tables
 #' for skipped/MX exon detection
