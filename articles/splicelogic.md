@@ -108,7 +108,14 @@ In the abstract, Jones *et al.* describe the experiment:
 > differential transcript usage (DTU) across brain regions and by sex.
 
 Here we will focus on the cortex-specific sex comparison, comparing
-female to male mice.
+female to male mice. For demonstration in the vignette, we have saved a
+small subset of the results from this [Zenodo
+entry](https://zenodo.org/records/10381745). The dataset was made
+available under an MIT license. For information on how the DTU table was
+saved, this is noted in `inst/scripts/dtu_table.tsv`. Generating the
+exons BED file is also described there, which was downloaded and parsed
+from the GENCODE M31 GTF file (comprehensive gene annotation). See below
+for more details on how to prepare exons for use with *splicelogic*.
 
 ### Loading example data
 
