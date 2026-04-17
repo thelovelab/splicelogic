@@ -33,7 +33,7 @@ transcripts, one can use the following code to identify splice events:
 
 ``` r
 exons <- prepare_exons(
-  txdb = <A TxDB OBJECT>,
+  txdb = <A TxDb OBJECT>,
   dtu_table = <DTU_TABLE>,
   coef_col = "estimate"
 )
@@ -572,7 +572,8 @@ suppressPackageStartupMessages({
 txps <- txdb |>
   AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
   tibble::as_tibble() |>
-  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID)
+  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID) |>
+  dplyr::filter(!is.na(gene_id))
 ```
 
     ## 'select()' returned 1:1 mapping between keys and columns
