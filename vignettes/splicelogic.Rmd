@@ -80,6 +80,12 @@ In the abstract, Jones *et al.* describe the experiment:
 > To assess differences in AS across the cerebellum, cortex, hippocampus, and striatum by sex, we generated and analyzed Oxford Nanopore Technologies (ONT) long-read RNA sequencing (lrRNA-Seq) C57BL/6J mouse brain cDNA libraries. From \> 85 million reads that passed quality control metrics, we calculated differential gene expression (DGE), differential transcript expression (DTE), and differential transcript usage (DTU) across brain regions and by sex.
 
 Here we will focus on the cortex-specific sex comparison, comparing female to male mice.
+For demonstration in the vignette, we have saved a small subset of the results from this 
+[Zenodo entry](https://zenodo.org/records/10381745). The dataset was made available under an 
+MIT license. For information on how the DTU table was saved, this is noted in
+`inst/scripts/dtu_table.tsv`. Generating the exons BED file is also described there, which was
+downloaded and parsed from the GENCODE M31 GTF file (comprehensive gene annotation).
+See below for more details on how to prepare exons for use with _splicelogic_.
 
 ## Loading example data
 

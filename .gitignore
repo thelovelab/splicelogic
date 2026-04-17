@@ -5,7 +5,6 @@
 .DS_Store
 .quarto
 *.rds
-/inst/
 /doc/
 /Meta/
 docs
