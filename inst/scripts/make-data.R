@@ -26,8 +26,8 @@ dat |> filter(gene_switch_q_value < .05)
 
 # get exons grouped by transcript
 ebt <- exonsBy(txdb, by="tx")
-txp <- transcripts(txdb)
-names(ebt) <- txp$tx_name
+txps <- transcripts(txdb)
+names(ebt) <- txps$tx_name
 exons <- unlist(ebt)
 exons$tx_id <- names(exons)
 

@@ -16,7 +16,7 @@ devtools::install_github("thelovelab/splicelogic")
 ```
 # prepare exons from a TxDb and DTU results
 exons <- prepare_exons(
-  txdb = <A TxDB OBJECT>,
+  txdb = <A TxDb OBJECT>,
   dtu_table = <DTU_TABLE>,
   coef_col = "estimate"
 )

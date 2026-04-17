@@ -201,7 +201,7 @@ prepare_exons <- function(
   # flatten GRangesList to GRanges
   exons <- unlist(ebt)
   exons$tx_id <- names(exons)
-  names(exons) <- exons$exon_name
+  names(exons) <- paste0(exons$tx_id, "-exon", exons$exon_rank)
 
   # merge dtu_table columns onto exons by tx_id
   msg("Merging DTU results onto exons...")
