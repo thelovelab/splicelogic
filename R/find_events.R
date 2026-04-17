@@ -83,20 +83,9 @@ find_se <- function(
 
   # build result tibble: one row per (candidate, tx_event) pair
   hits_tbl <- cand_tbl[pairs$cand_idx, ] |>
-    dplyr::mutate(
-      event = event_name,
-      tx_event = pairs$tx_id
-    )
+    dplyr::mutate(event = event_name, tx_event = pairs$tx_id)
   # convert back to GRanges for return
-  res <- GenomicRanges::GRanges(
-    seqnames = hits_tbl$seqnames,
-    ranges = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
-    strand = hits_tbl$strand,
-    hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
-  )
-  # preserve seqinfo from input
-  GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
-  res
+  tbl_to_granges(hits_tbl, keep_cols, gr)
 }
 
 #' @rdname find_events
@@ -197,15 +186,7 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
     dplyr::arrange(.pair_order) |>
     dplyr::select(-.pair_order)
   # convert back to GRanges for return
-  res <- GenomicRanges::GRanges(
-    seqnames = hits_tbl$seqnames,
-    ranges = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
-    strand = hits_tbl$strand,
-    hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
-  )
-  # preserve seqinfo from input
-  GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
-  res
+  tbl_to_granges(hits_tbl, keep_cols, gr)
 }
 
 # for find_ri
@@ -278,15 +259,7 @@ find_ri <- function(gr) {
     )
 
   # convert back to GRanges for return
-  res <- GenomicRanges::GRanges(
-    seqnames = hits_tbl$seqnames,
-    ranges = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
-    strand = hits_tbl$strand,
-    hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
-  )
-  # preserve seqinfo from input
-  GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
-  res
+  tbl_to_granges(hits_tbl, keep_cols, gr)
 }
 
 
@@ -368,21 +341,9 @@ find_alt_ss <- function(gr, by_start = TRUE) {
 
   # build result: one row per (candidate, neg exon match)
   hits_tbl <- cand_tbl[match_tbl$cand_idx, ] |>
-    dplyr::mutate(
-      event = match_tbl$event,
-      tx_event = match_tbl$tx_id_neg
-    )
-
+    dplyr::mutate(event = match_tbl$event, tx_event = match_tbl$tx_id_neg)
   # convert back to GRanges for return
-  res <- GenomicRanges::GRanges(
-    seqnames = hits_tbl$seqnames,
-    ranges = IRanges::IRanges(start = hits_tbl$start, end = hits_tbl$end),
-    strand = hits_tbl$strand,
-    hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
-  )
-  # preserve seqinfo from input
-  GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
-  res
+  tbl_to_granges(hits_tbl, keep_cols, gr)
 }
 
 

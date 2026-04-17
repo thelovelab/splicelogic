@@ -239,7 +239,7 @@ candidates_by_presence <- function(gr, neg_exons, pos_exons) {
   right_exons <- neg_exons |> dplyr::slice(match(right_keys, key))
 
   # returns a list of GRanges of same length:
-  # ‘candidates’ - neg exons that do not overlap any pos exons & are internal
+  # ‘candidates’ - neg exons not overlapping any pos exons & are internal
   # ‘left_exons’ - left exons of candidates
   # ‘right_exons’ - right exons of candidates
   list(
@@ -334,37 +334,16 @@ find_candidates_and_flanks <- function(
     return(list())
   }
 
-  # batch findOverlaps: match pos_exons against all left/right exons at once
-  ##############################################################
-  # returns Hits object with queryHits = pos_exons index,
-  # subjectHits = left_exons index
   left_hits <- find_matches_batch(pos_exons, left_exons, type)
   right_hits <- find_matches_batch(pos_exons, right_exons, type)
   pos_tbl <- tibble::as_tibble(pos_exons)
   cand_tbl <- tibble::as_tibble(candidates)
   cand_tbl$cand_idx <- seq_len(nrow(cand_tbl))
 
-  # build tibbles from overlap hits:
-  # pos_exon index -> (tx_id, exon_rank, cand_idx)
-  left_match_tbl <- tibble::tibble(
-    pos_idx = S4Vectors::queryHits(left_hits),
-    cand_idx = S4Vectors::subjectHits(left_hits)
-  ) |>
-    dplyr::mutate(
-      tx_id = pos_tbl$tx_id[pos_idx],
-      l = pos_tbl$exon_rank[pos_idx],
-      gene_id_pos = pos_tbl$gene_id[pos_idx]
-    )
-
-  right_match_tbl <- tibble::tibble(
-    pos_idx = S4Vectors::queryHits(right_hits),
-    cand_idx = S4Vectors::subjectHits(right_hits)
-  ) |>
-    dplyr::mutate(
-      tx_id = pos_tbl$tx_id[pos_idx],
-      r = pos_tbl$exon_rank[pos_idx],
-      gene_id_pos = pos_tbl$gene_id[pos_idx]
-    )
+  left_match_tbl <- build_flank_match_tbl(left_hits, pos_tbl) |>
+    dplyr::rename(l = exon_rank)
+  right_match_tbl <- build_flank_match_tbl(right_hits, pos_tbl) |>
+    dplyr::rename(r = exon_rank)
 
   # restrict matches to same gene as candidate
   left_match_tbl <- left_match_tbl |>
@@ -382,8 +361,37 @@ find_candidates_and_flanks <- function(
 
 #' Get user's metadata column names from a preprocessed GRanges
 #' @param gr A preprocessed GRanges object
-#' @return Character vector of column names excluding internal preprocessing columns
+#' @return Character vector of column names excluding internal
+#'   preprocessing columns
 #' @noRd
 keep_cols <- function(gr) {
     setdiff(names(GenomicRanges::mcols(gr)), c("key", "nexons", "internal"))
+}
+
+#' @noRd
+tbl_to_granges <- function(hits_tbl, keep_cols, gr) {
+  res <- GenomicRanges::GRanges(
+    seqnames = hits_tbl$seqnames,
+    ranges = IRanges::IRanges(
+      start = hits_tbl$start, end = hits_tbl$end
+    ),
+    strand = hits_tbl$strand,
+    hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
+  )
+  # preserve seqinfo from input
+  GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)
+  res
+}
+
+#' @noRd
+build_flank_match_tbl <- function(hits, pos_tbl) {
+  tibble::tibble(
+    pos_idx = S4Vectors::queryHits(hits),
+    cand_idx = S4Vectors::subjectHits(hits)
+  ) |>
+    dplyr::mutate(
+      tx_id = pos_tbl$tx_id[pos_idx],
+      exon_rank = pos_tbl$exon_rank[pos_idx],
+      gene_id_pos = pos_tbl$gene_id[pos_idx]
+    )
 }
