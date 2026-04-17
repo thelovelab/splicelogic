@@ -12,6 +12,7 @@
 #' 'match_left' and 'match_right' indicating the number of overlaps with
 #' the left and right exons, respectively.
 #' @importFrom magrittr %>%
+#' @importFrom GenomicRanges start end
 #' @noRd
 compute_matches <- function(
   gr,
@@ -106,6 +107,9 @@ candidates_by_non_overlap_directed <- function(neg_exons, pos_exons, gr, type) {
     right_exons = right_exons
   )
 }
+
+# for match_left_right
+utils::globalVariables(c("match_left", "match_right", "tx_id", "exon_rank"))
 
 #' For a given candidate exon, find matching left and right
 #' exons in pos_exons
