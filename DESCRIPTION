@@ -1,6 +1,6 @@
 Package: splicelogic
 Title: splicelogic: differential transcripts to splice events
-Version: 0.99.0
+Version: 0.99.1
 Authors@R: c(
     person("Beatriz", "Campillo", email = "beatrizcampillo29@gmail.com", role = c("aut", "cre"),
     comment = c(ORCID = "0000-0001-7323-9125")),
@@ -22,7 +22,7 @@ biocViews:
     RNASeq, LongRead, Annotation, FunctionalGenomics
 BugReports: https://github.com/thelovelab/splicelogic/issues
 Depends:
-    R (>= 4.1.0)
+    R (>= 4.5.0)
 Imports:
     dplyr,
     magrittr,
