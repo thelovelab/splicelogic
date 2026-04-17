@@ -707,8 +707,8 @@ sessionInfo()
     ##  [1] tibble_3.3.1           GenomicFeatures_1.62.0 AnnotationDbi_1.72.0  
     ##  [4] Biobase_2.70.0         AnnotationHub_4.0.0    BiocFileCache_3.0.0   
     ##  [7] dbplyr_2.5.2           splicelogic_0.99.0     plyranges_1.30.1      
-    ## [10] dplyr_1.2.0            GenomicRanges_1.62.1   Seqinfo_1.0.0         
-    ## [13] IRanges_2.44.0         S4Vectors_0.48.0       BiocGenerics_0.56.0   
+    ## [10] dplyr_1.2.1            GenomicRanges_1.62.1   Seqinfo_1.0.0         
+    ## [13] IRanges_2.44.0         S4Vectors_0.49.1-1     BiocGenerics_0.56.0   
     ## [16] generics_0.1.4         readr_2.2.0           
     ## 
     ## loaded via a namespace (and not attached):
@@ -718,25 +718,25 @@ sessionInfo()
     ##  [7] RCurl_1.98-1.18             GenomicAlignments_1.46.0   
     ##  [9] XML_3.99-0.23               digest_0.6.39              
     ## [11] lifecycle_1.0.5             KEGGREST_1.50.0            
-    ## [13] RSQLite_2.4.6               magrittr_2.0.4             
-    ## [15] compiler_4.5.2              rlang_1.1.7                
+    ## [13] RSQLite_2.4.6               magrittr_2.0.5             
+    ## [15] compiler_4.5.2              rlang_1.2.0                
     ## [17] sass_0.4.10                 tools_4.5.2                
     ## [19] utf8_1.2.6                  yaml_2.3.12                
     ## [21] rtracklayer_1.70.1          knitr_1.51                 
     ## [23] S4Arrays_1.10.1             htmlwidgets_1.6.4          
     ## [25] bit_4.6.0                   curl_7.0.0                 
-    ## [27] DelayedArray_0.36.0         abind_1.4-8                
-    ## [29] BiocParallel_1.44.0         purrr_1.2.1                
+    ## [27] DelayedArray_0.36.1         abind_1.4-8                
+    ## [29] BiocParallel_1.44.0         purrr_1.2.2                
     ## [31] withr_3.0.2                 desc_1.4.3                 
     ## [33] grid_4.5.2                  SummarizedExperiment_1.40.0
-    ## [35] cli_3.6.5                   rmarkdown_2.30             
-    ## [37] crayon_1.5.3                ragg_1.5.1                 
+    ## [35] cli_3.6.6                   rmarkdown_2.31             
+    ## [37] crayon_1.5.3                ragg_1.5.2                 
     ## [39] otel_0.2.0                  httr_1.4.8                 
     ## [41] tzdb_0.5.0                  rjson_0.2.23               
     ## [43] DBI_1.3.0                   cachem_1.1.0               
     ## [45] parallel_4.5.2              BiocManager_1.30.27        
     ## [47] XVector_0.50.0              restfulr_0.0.16            
-    ## [49] matrixStats_1.5.0           vctrs_0.7.2                
+    ## [49] matrixStats_1.5.0           vctrs_0.7.3                
     ## [51] Matrix_1.7-5                jsonlite_2.0.0             
     ## [53] hms_1.1.4                   bit64_4.6.0-1              
     ## [55] systemfonts_1.3.2           jquerylib_0.1.4            
@@ -746,10 +746,10 @@ sessionInfo()
     ## [63] UCSC.utils_1.6.1            pillar_1.11.1              
     ## [65] rappdirs_0.3.4              htmltools_0.5.9            
     ## [67] R6_2.6.1                    httr2_1.2.2                
-    ## [69] textshaping_1.0.5           vroom_1.7.0                
+    ## [69] textshaping_1.0.5           vroom_1.7.1                
     ## [71] evaluate_1.0.5              lattice_0.22-9             
     ## [73] png_0.1-9                   Rsamtools_2.26.0           
     ## [75] cigarillo_1.0.0             memoise_2.0.1              
-    ## [77] bslib_0.10.0                SparseArray_1.10.9         
-    ## [79] xfun_0.57                   fs_2.0.0                   
+    ## [77] bslib_0.10.0                SparseArray_1.10.10        
+    ## [79] xfun_0.57                   fs_2.0.1                   
     ## [81] MatrixGenerics_1.22.0       pkgconfig_2.0.3
