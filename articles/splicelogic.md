@@ -12,12 +12,11 @@ context. By comparing up- and down-regulated transcripts, *splicelogic*
 can detect skipped exons, included exons, mutually exclusive exons,
 retained introns, and alternative 5’ and 3’ splice sites. Because it
 takes transcript-level effect estimates as input, it is compatible with
-any upstream DTU method (including DRIMSeq, DEXSeq, satuRn, and edgeR),
-supporting flexible experimental designs.
+any upstream DTU method (including *DRIMSeq*, *DEXSeq*, *satuRn*, and
+*edgeR*), supporting flexible experimental designs.
 
-*splicelogic* is an R/Bioconductor package for detecting alternative
-splicing events from exon-level data stored as *GRanges* objects. Given
-a set of exons annotated with a coefficient column indicating
+*splicelogic* operates on exon-level data stored as *GRanges* objects.
+Given a set of exons annotated with a coefficient column indicating
 differential transcript usage (DTU), *splicelogic* identifies the
 following types of splicing events:
 
@@ -60,24 +59,25 @@ and analyzing its consequences.
   and functional interpretation pipeline for pre-computed differential
   transcript expression results. It organizes transcripts by biotype
   (protein-coding, lncRNA, NMD, etc.) and provides expression profile
-  plots and functional enrichment analysis. It does not perform DTU
-  testing or classify splicing event types.
+  plots and functional enrichment analysis.
 
 *splicelogic* differs in its main input and focus: it does not perform
 DTU testing, and also does not take pre-computed splicing events as
 input. Instead, it takes transcript-level DTU results (effect estimates
 and adjusted p-values from any upstream method) already mapped onto exon
 structures, and directly classifies the type of splicing event from the
-comparison of up- and down-regulated isoforms. Rather than assessing
-sequence-level or functional consequences, it provides a lightweight,
-method-agnostic bridge between DTU results and alternative splicing
-event classification. By operating on exon-level *GRanges* with attached
-DTU statistics, it provides a flexible framework for users to identify
-and interpret splicing events in the context of their specific
-experimental design and choice of DTU method. *GRanges* are a common
-data structure in Bioconductor for representing genomic data, making
-*splicelogic* compatible with a wide range of already available tools
-and existingworkflows for RNA-seq analysis.
+comparison of up- and down-regulated isoforms.
+
+By operating on exon-level *GRanges* with attached DTU statistics,
+*splicelogic* provides a flexible framework for users to identify and
+interpret splicing events in the context of their specific experimental
+design and choice of DTU method. *GRanges* are a common data structure
+in Bioconductor for representing genomic features such as exons and
+introns, making *splicelogic* compatible with a wide range of already
+available tools and existing workflows. For example, it can be combined
+with *plyranges* for dplyr-like operations on exons/introns following
+identification of regulated exon and introns, and *Biostrings* for
+extraction of sequence surrounding splice events.
 
 ## Quick start
 
@@ -165,10 +165,10 @@ female to male mice. For demonstration in the vignette, we have saved a
 small subset of the results from this [Zenodo
 entry](https://zenodo.org/records/10381745). The dataset was made
 available under an MIT license. For information on how the DTU table was
-saved, this is noted in `inst/scripts/dtu_table.tsv`. Generating the
-exons BED file is also described there, which was downloaded and parsed
-from the GENCODE M31 GTF file (comprehensive gene annotation). See below
-for more details on how to prepare exons for use with *splicelogic*.
+saved, this is noted in `inst/scripts/make-data.R`. Generating the exons
+BED file is also described there, which was downloaded and parsed from
+the GENCODE M31 GTF file (comprehensive gene annotation). See below for
+more details on how to prepare exons for use with *splicelogic*.
 
 ### Loading example data
 
@@ -784,7 +784,7 @@ sessionInfo()
     ## other attached packages:
     ##  [1] tibble_3.3.1           GenomicFeatures_1.62.0 AnnotationDbi_1.72.0  
     ##  [4] Biobase_2.70.0         AnnotationHub_4.0.0    BiocFileCache_3.0.0   
-    ##  [7] dbplyr_2.5.2           splicelogic_0.99.1     plyranges_1.30.1      
+    ##  [7] dbplyr_2.5.2           splicelogic_0.99.2     plyranges_1.30.1      
     ## [10] dplyr_1.2.1            GenomicRanges_1.62.1   Seqinfo_1.0.0         
     ## [13] IRanges_2.44.0         S4Vectors_0.49.1-1     BiocGenerics_0.56.0   
     ## [16] generics_0.1.4         readr_2.2.0           
@@ -818,7 +818,7 @@ sessionInfo()
     ## [51] Matrix_1.7-5                jsonlite_2.0.0             
     ## [53] hms_1.1.4                   bit64_4.6.0-1              
     ## [55] systemfonts_1.3.2           jquerylib_0.1.4            
-    ## [57] glue_1.8.0                  pkgdown_2.2.0              
+    ## [57] glue_1.8.1                  pkgdown_2.2.0              
     ## [59] codetools_0.2-20            BiocVersion_3.22.0         
     ## [61] GenomeInfoDb_1.46.2         BiocIO_1.20.0              
     ## [63] UCSC.utils_1.6.1            pillar_1.11.1              

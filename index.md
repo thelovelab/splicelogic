@@ -13,11 +13,10 @@ takes transcript-level effect estimates as input, it is compatible with
 any upstream DTU method (including DRIMSeq, DEXSeq, satuRn, and edgeR),
 supporting flexible experimental designs.
 
-*splicelogic* is included as a R/Bioconductor package for detecting
-alternative splicing events from exon-level data stored as *GRanges*
-objects. Given a set of exons annotated with a coefficient column
-indicating differential transcript usage (DTU), *splicelogic* can be
-used to identify a variety of splicing events. See the
+*splicelogic* operates on exon-level data stored as *GRanges* objects
+within R/Bioconductor. Given a set of exons annotated with a coefficient
+column indicating differential transcript usage (DTU), *splicelogic* can
+be used to identify a variety of splicing events. See the
 [vignette](https://thelovelab.github.io/splicelogic/articles/splicelogic.html)
 for more details.
 
