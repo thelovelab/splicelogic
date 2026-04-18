@@ -51,8 +51,8 @@ These are detected using a series of functions, e.g. `find_se()`,
 
 ## Related methods
 
-Several tools exist for detecting alternative splicing or isoform
-switching from RNA-seq data.
+Several tools exist for detecting alternative splicing from
+RNA-seq data and analyzing its consequences.
 
 -   [IsoformSwitchAnalyzeR](https://www.bioconductor.org/packages/IsoformSwitchAnalyzeR)
     — a comprehensive workflow that performs DTU testing, annotates
