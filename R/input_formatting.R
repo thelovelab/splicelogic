@@ -66,7 +66,7 @@ preprocess <- function(gr, coef_col, method_string = NULL) {
   check_input(gr, coef_col) # check metadata columns are present
 
   gr_seqinfo <- GenomicRanges::seqinfo(gr)
-  # include key nexons and internal columns using tibble for faster group_by and mutate
+  # use tibble for faster group_by/mutate to add key, nexons, internal
   tbl <- gr |> tibble::as_tibble()  |>
     dplyr::group_by(tx_id) |>
     dplyr::mutate(
@@ -107,6 +107,95 @@ check_preprocessed <- function(gr) {
   }
 }
 
+#' @noRd
+check_bioc_packages <- function() {
+  if (!requireNamespace("GenomicFeatures", quietly = TRUE)) {
+    stop(
+      "Package 'GenomicFeatures' is required. ",
+      "Install with: BiocManager::install('GenomicFeatures')"
+    )
+  }
+  if (!requireNamespace("AnnotationDbi", quietly = TRUE)) {
+    stop(
+      "Package 'AnnotationDbi' is required. ",
+      "Install with: BiocManager::install('AnnotationDbi')"
+    )
+  }
+}
+
+#' @noRd
+check_dtu_cols <- function(dtu_table, tx_id_col, gene_id_col, coef_col) {
+  required <- c(tx_id_col, gene_id_col, coef_col)
+  missing_cols <- setdiff(required, colnames(dtu_table))
+  if (length(missing_cols) > 0) {
+    stop(
+      "Missing columns in dtu_table: ",
+      paste(missing_cols, collapse = ", ")
+    )
+  }
+}
+
+#' @noRd
+extract_named_ebt <- function(txdb) {
+  ebt <- GenomicFeatures::exonsBy(txdb, by = "tx")
+  tx_map <- AnnotationDbi::select(
+    txdb,
+    keys = AnnotationDbi::keys(txdb, "TXID"),
+    columns = "TXNAME",
+    keytype = "TXID"
+  ) |>
+    tibble::as_tibble()
+  idx <- match(names(ebt), tx_map$TXID)
+  names(ebt) <- tx_map$TXNAME[idx]
+  ebt
+}
+
+#' @noRd
+filter_ebt <- function(ebt, dtu_table, tx_id_col, msg) {
+  keep <- names(ebt) %in% dtu_table[[tx_id_col]]
+  if (!any(keep)) {
+    stop(
+      "No matching transcript IDs between TxDb and dtu_table$",
+      tx_id_col,
+      ". Check that tx_id_col contains TXNAME values ",
+      "(e.g. ENST...), not internal TXID integers."
+    )
+  }
+  n_missing <- sum(!dtu_table[[tx_id_col]] %in% names(ebt))
+  if (n_missing > 0) {
+    msg(
+      n_missing,
+      " transcript(s) in dtu_table not found in TxDb ",
+      "and will be excluded."
+    )
+  }
+  ebt[keep]
+}
+
+#' @noRd
+flatten_and_merge <- function(ebt, dtu_table, tx_id_col, gene_id_col) {
+  exons <- unlist(ebt)
+  exons$tx_id <- names(exons)
+  names(exons) <- paste0(exons$tx_id, "-exon", exons$exon_rank)
+  txp_idx <- match(exons$tx_id, dtu_table[[tx_id_col]])
+  keep_idx <- !is.na(txp_idx)
+  exons <- exons[keep_idx]
+  txp_idx <- txp_idx[keep_idx]
+  add_cols <- dtu_table[txp_idx, ] |>
+    dplyr::select(-dplyr::any_of(tx_id_col))
+  merged_DF <- cbind(
+    GenomicRanges::mcols(exons),
+    S4Vectors::DataFrame(add_cols)
+  )
+  GenomicRanges::mcols(exons) <- merged_DF
+  if (gene_id_col != "gene_id") {
+    col_names <- names(GenomicRanges::mcols(exons))
+    col_names[col_names == gene_id_col] <- "gene_id"
+    names(GenomicRanges::mcols(exons)) <- col_names
+  }
+  exons
+}
+
 #' Prepare exon ranges from a TxDb and DTU results table
 #'
 #' Extracts exon ranges from a TxDb object, merges them with
@@ -126,6 +215,34 @@ check_preprocessed <- function(gr) {
 #' @return A GRanges object with metadata columns: \code{gene_id},
 #'   \code{tx_id}, \code{exon_rank}, the coefficient column, and any
 #'   additional columns from \code{dtu_table}.
+#' @examples
+#'
+#' library(AnnotationHub)
+#' library(AnnotationDbi)
+#' library(GenomicFeatures)
+#' library(tibble)
+#'
+#' ah <- AnnotationHub()
+#' txdb <- ah[["AH84134"]] # fly TxDb (Drosophila melanogaster)
+#'
+#' # build a simulated DTU table from the TxDb transcripts
+#' txps <- txdb |>
+#'   AnnotationDbi::select(
+#'     keys(txdb, "TXID"), c("TXNAME", "GENEID"), "TXID"
+#'   ) |>
+#'   tibble::as_tibble() |>
+#'   dplyr::select(tx_id = TXNAME, gene_id = GENEID)|>
+#'   dplyr::filter(!is.na(gene_id))
+#'
+#' sim_dtu_table <- txps |>
+#'   dplyr::mutate(
+#'     padj = runif(dplyr::n()),
+#'     effect_est = rnorm(dplyr::n())
+#'   )
+#'
+#' fly_exons <- prepare_exons(
+#'   txdb, sim_dtu_table, coef_col = "effect_est", verbose = TRUE
+#' )
 #' @export
 prepare_exons <- function(
   txdb,
@@ -136,90 +253,17 @@ prepare_exons <- function(
   verbose = TRUE
 ) {
   msg <- if (verbose) message else function(...) invisible(NULL)
-
-  if (!requireNamespace("GenomicFeatures", quietly = TRUE)) {
-    stop(
-      "Package 'GenomicFeatures' is required. ",
-      "Install with: BiocManager::install('GenomicFeatures')"
-    )
-  }
-  if (!requireNamespace("AnnotationDbi", quietly = TRUE)) {
-    stop(
-      "Package 'AnnotationDbi' is required. ",
-      "Install with: BiocManager::install('AnnotationDbi')"
-    )
-  }
-
+  check_bioc_packages()
   dtu_table <- tibble::as_tibble(dtu_table)
-  required <- c(tx_id_col, gene_id_col, coef_col)
-  missing_cols <- setdiff(required, colnames(dtu_table))
-  if (length(missing_cols) > 0) {
-    stop("Missing columns in dtu_table: ", paste(missing_cols, collapse = ", "))
-  }
+  check_dtu_cols(dtu_table, tx_id_col, gene_id_col, coef_col)
 
-  # extract exons grouped by transcript
   msg("Extracting exons from TxDb...")
-  ebt <- GenomicFeatures::exonsBy(
-    txdb,
-    by = "tx"
-  )
-
-  # map TxDb internal TXID to TXNAME
+  ebt <- extract_named_ebt(txdb)
   msg("Mapping transcript IDs...")
-  tx_map <- suppressMessages(AnnotationDbi::select(
-    txdb,
-    keys = AnnotationDbi::keys(txdb, "TXID"),
-    columns = "TXNAME",
-    keytype = "TXID"
-  )) |>
-    tibble::as_tibble()
+  ebt <- filter_ebt(ebt, dtu_table, tx_id_col, msg)
 
-  # map TXID to TXNAME
-  idx <- match(names(ebt), tx_map$TXID)
-  names(ebt) <- tx_map$TXNAME[idx]
-
-  # check that dtu_table tx_ids match TxDb transcript names
-  keep <- names(ebt) %in% dtu_table[[tx_id_col]]
-  if (!any(keep)) {
-    stop(
-      "No matching transcript IDs between TxDb and dtu_table$",
-      tx_id_col,
-      ". Check that tx_id_col contains TXNAME values ",
-      "(e.g. ENST...), not internal TXID integers."
-    )
-  }
-  n_missing <- sum(!dtu_table[[tx_id_col]] %in% names(ebt))
-  if (n_missing > 0) {
-    msg(
-      n_missing,
-      " transcript(s) in dtu_table not found in TxDb ",
-      "and will be excluded."
-    )
-  }
-  ebt <- ebt[keep]
-
-  # flatten GRangesList to GRanges
-  exons <- unlist(ebt)
-  exons$tx_id <- names(exons)
-  names(exons) <- paste0(exons$tx_id, "-exon", exons$exon_rank)
-
-  # merge dtu_table columns onto exons by tx_id
   msg("Merging DTU results onto exons...")
-  txp_idx <- match(exons$tx_id, dtu_table[[tx_id_col]])
-  add_cols <- dtu_table[txp_idx, ] |>
-    dplyr::select(-dplyr::any_of(tx_id_col))
-  merged_DF <- cbind(
-    GenomicRanges::mcols(exons),
-    S4Vectors::DataFrame(add_cols)
-  )
-  GenomicRanges::mcols(exons) <- merged_DF
-
-  # rename to standard column names expected by preprocess
-  if (gene_id_col != "gene_id") {
-    col_names <- names(GenomicRanges::mcols(exons))
-    col_names[col_names == gene_id_col] <- "gene_id"
-    names(GenomicRanges::mcols(exons)) <- col_names
-  }
+  exons <- flatten_and_merge(ebt, dtu_table, tx_id_col, gene_id_col)
 
   msg(
     "Done. Returned ",

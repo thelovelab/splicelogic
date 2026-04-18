@@ -40,3 +40,32 @@ Extracts exon ranges from a TxDb object, merges them with
 differential transcript usage (DTU) results, and returns a flat
 GRanges ready for \code{\link{preprocess}}.
 }
+\examples{
+
+library(AnnotationHub)
+library(AnnotationDbi)
+library(GenomicFeatures)
+library(tibble)
+
+ah <- AnnotationHub()
+txdb <- ah[["AH84134"]] # fly TxDb (Drosophila melanogaster)
+
+# build a simulated DTU table from the TxDb transcripts
+txps <- txdb |>
+  AnnotationDbi::select(
+    keys(txdb, "TXID"), c("TXNAME", "GENEID"), "TXID"
+  ) |>
+  tibble::as_tibble() |>
+  dplyr::select(tx_id = TXNAME, gene_id = GENEID)|>
+  dplyr::filter(!is.na(gene_id))
+
+sim_dtu_table <- txps |>
+  dplyr::mutate(
+    padj = runif(dplyr::n()),
+    effect_est = rnorm(dplyr::n())
+  )
+
+fly_exons <- prepare_exons(
+  txdb, sim_dtu_table, coef_col = "effect_est", verbose = TRUE
+)
+}
