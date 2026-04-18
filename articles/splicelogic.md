@@ -48,7 +48,7 @@ skipped <- exons |> find_se()
 
 *splicelogic* assumes the user has run a differential transcript usage
 (DTU) or differential splicing analysis providing an error bound
-(e.g. adjusted p-value / FDR) and and effect estimate with direction
+(e.g. adjusted p-value / FDR) and an effect estimate with direction
 (e.g. GLM estimated coefficient or deltaPSI) (see [upstream
 methods](#upstream-methods)).
 
@@ -102,7 +102,7 @@ In the abstract, Jones *et al.* describe the experiment:
 > To assess differences in AS across the cerebellum, cortex,
 > hippocampus, and striatum by sex, we generated and analyzed Oxford
 > Nanopore Technologies (ONT) long-read RNA sequencing (lrRNA-Seq)
-> C57BL/6J mouse brain cDNA libraries. From \> 85 million reads that
+> C57BL/6J mouse brain cDNA libraries. From \> 85 million reads that
 > passed quality control metrics, we calculated differential gene
 > expression (DGE), differential transcript expression (DTE), and
 > differential transcript usage (DTU) across brain regions and by sex.
@@ -143,7 +143,7 @@ associated with each transcript.
 ``` r
 
 library(readr)
-# load DTU results 
+# load DTU results
 dir <- system.file("extdata", package="splicelogic")
 dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
 ```
@@ -157,7 +157,9 @@ library(plyranges)
 exons_file <- "exons_M31.bed.gz"
 exons_mcols_file <- "exons_mcols.tsv.gz"
 exons <- plyranges::read_bed(file.path(dir, exons_file))
-mcols(exons) <- DataFrame(readr::read_delim(file.path(dir, exons_mcols_file)))
+mcols(exons) <- DataFrame(
+  readr::read_delim(file.path(dir, exons_mcols_file))
+)
 ```
 
 Finally, we add `Seqinfo` for mm49, the reference mouse genome for
@@ -193,7 +195,7 @@ following:
 
 ``` r
 
-exons <- exons |> 
+exons <- exons |>
   plyranges::join_mcols_left(dtu_table, by = "tx_id")
 ```
 
@@ -218,7 +220,7 @@ input data, ensures that the necessary columns are present:
 ``` r
 
 library(splicelogic)
-sig_exons <- sig_exons |> 
+sig_exons <- sig_exons |>
   preprocess(coef_col = "estimate")
 ```
 
@@ -471,7 +473,7 @@ all_events
 ``` r
 
 barplot(
-  table(all_events$event), horiz=TRUE, las=1, 
+  table(all_events$event), horiz=TRUE, las=1,
   xlab="exons participating in an event"
 )
 ```
@@ -543,8 +545,8 @@ etc.).
 extracts exon ranges from a *TxDb* object and merges them with your DTU
 results table. It returns a flat *GRanges* ready for
 [`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
-and the `find_*` functions. functions. We demonstrate using GENCODE v32
-(human genes).
+and the `find_*` functions. We demonstrate using GENCODE v32 (human
+genes).
 
 The first step is to load a *TxDb* object. Typically, a user would
 supply their own GTF to `txdbmaker::makeTxDbFromGFF()` to generate this.
@@ -570,7 +572,9 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 txps <- txdb |>
-  AnnotationDbi::select(keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID") |>
+  AnnotationDbi::select(
+    keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID"
+  ) |>
   tibble::as_tibble() |>
   dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID) |>
   dplyr::filter(!is.na(gene_id))
@@ -629,7 +633,9 @@ above for the mouse dataset.
 
 ``` r
 
-human_exons <- prepare_exons(txdb, sim_dtu_table, coef_col = "effect_est", verbose = TRUE)
+human_exons <- prepare_exons(
+  txdb, sim_dtu_table, coef_col = "effect_est", verbose = TRUE
+)
 ```
 
     ## Extracting exons from TxDb...
@@ -665,8 +671,8 @@ exons_list <- GenomicFeatures::exonsBy(
   txdb,
   by="tx"
   )
-# Our DTU table aligns with txps, which aligns with the names of the GRangesList.
-# prepare_exons() handles this with alignment checks
+# Our DTU table aligns with txps, which aligns with the names
+# of the GRangesList. prepare_exons() handles alignment checks.
 names(exons_list) <- sim_dtu_table$tx_id
 ```
 
@@ -686,7 +692,8 @@ Adding DTU results and gene ID:
 ``` r
 
 txp_idx <- match(flat_exons$tx_id, sim_dtu_table$tx_id)
-cols_to_add <- sim_dtu_table[txp_idx,] |> dplyr::select(-c(tx_id, tx_num))
+cols_to_add <- sim_dtu_table[txp_idx,] |>
+  dplyr::select(-c(tx_id, tx_num))
 merged_DF <- cbind(mcols(flat_exons), cols_to_add)
 mcols(flat_exons) <- merged_DF
 ```

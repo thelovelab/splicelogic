@@ -122,7 +122,7 @@ splice events:</p>
 </h2>
 <p><em>splicelogic</em> assumes the user has run a differential
 transcript usage (DTU) or differential splicing analysis providing an
-error bound (e.g. adjusted p-value / FDR) and and effect estimate with
+error bound (e.g. adjusted p-value / FDR) and an effect estimate with
 direction (e.g. GLM estimated coefficient or deltaPSI) (see <a href="#upstream-methods">upstream methods</a>).</p>
 <p>It also assumes the user has obtained genomic ranges representing the
 exon structure of each transcript being analyzed (see <a href="#obtaining-exon-ranges">obtaining exon ranges</a>).</p>
@@ -188,7 +188,7 @@ data can be found at this URL:</p>
 <p>To assess differences in AS across the cerebellum, cortex,
 hippocampus, and striatum by sex, we generated and analyzed Oxford
 Nanopore Technologies (ONT) long-read RNA sequencing (lrRNA-Seq)
-C57BL/6J mouse brain cDNA libraries. From &gt; 85 million reads that
+C57BL/6J mouse brain cDNA libraries. From &gt; 85 million reads that
 passed quality control metrics, we calculated differential gene
 expression (DGE), differential transcript expression (DTE), and
 differential transcript usage (DTU) across brain regions and by sex.</p>
@@ -228,7 +228,7 @@ value indicating the direction of change associated with each
 transcript.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org" class="external-link">readr</a></span><span class="op">)</span></span>
-<span><span class="co"># load DTU results </span></span>
+<span><span class="co"># load DTU results</span></span>
 <span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package<span class="op">=</span><span class="st">"splicelogic"</span><span class="op">)</span></span>
 <span><span class="va">dtu_table</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_delim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"dtu_table.tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We load from BED file the 601 exons from GENCODE M31 annotation for
@@ -238,7 +238,9 @@ the 49 differential transcripts, and attach the metadata columns.</p>
 <span><span class="va">exons_file</span> <span class="op">&lt;-</span> <span class="st">"exons_M31.bed.gz"</span></span>
 <span><span class="va">exons_mcols_file</span> <span class="op">&lt;-</span> <span class="st">"exons_mcols.tsv.gz"</span></span>
 <span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/io-bed-read.html" class="external-link">read_bed</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="va">exons_file</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_delim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="va">exons_mcols_file</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span></span>
+<span>  <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_delim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="va">exons_mcols_file</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we add <code>Seqinfo</code> for mm49, the reference mouse
 genome for GENCODE M31.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -261,7 +263,7 @@ before assigning back to <code>exons</code>.</p>
 to add metadata columns from an additional table can be replaced with
 the following:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="va">exons</span> <span class="op">|&gt;</span> </span>
+<code class="sourceCode R"><span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="va">exons</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">plyranges</span><span class="fu">::</span><span class="fu">join_mcols_left</span><span class="op">(</span><span class="va">dtu_table</span>, by <span class="op">=</span> <span class="st">"tx_id"</span><span class="op">)</span></span></code></pre></div>
 <p><em>splicelogic</em> is designed to take as input the exons from
 significantly changed transcripts, so we first filter out transcripts
@@ -281,7 +283,7 @@ the <code>exons</code> for event detection. This function checks the
 input data, ensures that the necessary columns are present:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thelovelab/splicelogic" class="external-link">splicelogic</a></span><span class="op">)</span></span>
-<span><span class="va">sig_exons</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> </span>
+<span><span class="va">sig_exons</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -488,7 +490,7 @@ empty vector.</p>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">all_events</span><span class="op">$</span><span class="va">event</span><span class="op">)</span>, horiz<span class="op">=</span><span class="cn">TRUE</span>, las<span class="op">=</span><span class="fl">1</span>, </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">all_events</span><span class="op">$</span><span class="va">event</span><span class="op">)</span>, horiz<span class="op">=</span><span class="cn">TRUE</span>, las<span class="op">=</span><span class="fl">1</span>,</span>
 <span>  xlab<span class="op">=</span><span class="st">"exons participating in an event"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="splicelogic_files/figure-html/events-barplot-1.png" class="r-plt" alt="Barplot of event types" width="700"></p>
@@ -556,8 +558,8 @@ followed by event-specific functions (<code><a href="../reference/find_events.ht
 <p><code><a href="../reference/prepare_exons.html">prepare_exons()</a></code> extracts exon ranges from a
 <em>TxDb</em> object and merges them with your DTU results table. It
 returns a flat <em>GRanges</em> ready for <code><a href="../reference/preprocess.html">preprocess()</a></code> and
-the <code>find_*</code> functions. functions. We demonstrate using
-GENCODE v32 (human genes).</p>
+the <code>find_*</code> functions. We demonstrate using GENCODE v32
+(human genes).</p>
 <p>The first step is to load a <em>TxDb</em> object. Typically, a user
 would supply their own GTF to <code>txdbmaker::makeTxDbFromGFF()</code>
 to generate this. For this demonstration we will load a pre-constructed
@@ -576,7 +578,9 @@ to generate this. For this demonstration we will load a pre-constructed
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="va">txps</span> <span class="op">&lt;-</span> <span class="va">txdb</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">keys</a></span><span class="op">(</span><span class="va">txdb</span>, <span class="st">"TXID"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TXNAME"</span>,<span class="st">"GENEID"</span><span class="op">)</span>, <span class="st">"TXID"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">keys</a></span><span class="op">(</span><span class="va">txdb</span>, <span class="st">"TXID"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TXNAME"</span>,<span class="st">"GENEID"</span><span class="op">)</span>, <span class="st">"TXID"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>tx_num <span class="op">=</span> <span class="va">TXID</span>, tx_id <span class="op">=</span> <span class="va">TXNAME</span>, gene_id <span class="op">=</span> <span class="va">GENEID</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">gene_id</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -622,7 +626,9 @@ to generate this. For this demonstration we will load a pre-constructed
 <p>Here we name this output <code>human_exons</code> to not collide with
 the example above for the mouse dataset.</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">human_exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_exons.html">prepare_exons</a></span><span class="op">(</span><span class="va">txdb</span>, <span class="va">sim_dtu_table</span>, coef_col <span class="op">=</span> <span class="st">"effect_est"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">human_exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_exons.html">prepare_exons</a></span><span class="op">(</span></span>
+<span>  <span class="va">txdb</span>, <span class="va">sim_dtu_table</span>, coef_col <span class="op">=</span> <span class="st">"effect_est"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Extracting exons from TxDb...</span></span></code></pre>
 <pre><code><span><span class="co">## 'select()' returned 1:1 mapping between keys and columns</span></span></code></pre>
 <pre><code><span><span class="co">## Mapping transcript IDs...</span></span></code></pre>
@@ -648,8 +654,8 @@ are built from a <em>TxDb</em>.</p>
 <span>  <span class="va">txdb</span>,</span>
 <span>  by<span class="op">=</span><span class="st">"tx"</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="co"># Our DTU table aligns with txps, which aligns with the names of the GRangesList.</span></span>
-<span><span class="co"># prepare_exons() handles this with alignment checks</span></span>
+<span><span class="co"># Our DTU table aligns with txps, which aligns with the names</span></span>
+<span><span class="co"># of the GRangesList. prepare_exons() handles alignment checks.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">exons_list</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">sim_dtu_table</span><span class="op">$</span><span class="va">tx_id</span></span></code></pre></div>
 <p>Next flattening the exons (here using a new name
 <code>flat_exons</code> to not collide with the <code>exons</code> mouse
@@ -662,7 +668,8 @@ dataset above):</p>
 <p>Adding DTU results and gene ID:</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">txp_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">$</span><span class="va">tx_id</span>, <span class="va">sim_dtu_table</span><span class="op">$</span><span class="va">tx_id</span><span class="op">)</span></span>
-<span><span class="va">cols_to_add</span> <span class="op">&lt;-</span> <span class="va">sim_dtu_table</span><span class="op">[</span><span class="va">txp_idx</span>,<span class="op">]</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">tx_num</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cols_to_add</span> <span class="op">&lt;-</span> <span class="va">sim_dtu_table</span><span class="op">[</span><span class="va">txp_idx</span>,<span class="op">]</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">tx_num</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">merged_DF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">)</span>, <span class="va">cols_to_add</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">merged_DF</span></span></code></pre></div>
 </div>
