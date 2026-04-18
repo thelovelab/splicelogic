@@ -1,6 +1,10 @@
 # splicelogic: DTU to splice events
 
-_splicelogic_ is an R/Bioconductor package for detecting alternative splicing events from exon-level data stored as _GRanges_ objects. Given a set of exons annotated with a coefficient column indicating differential transcript usage (DTU), _splicelogic_ can be used to identify a variety of splicing events. See the [vignette](articles/splicelogic.html) for more details.
+_splicelogic_ allows users to find alternative splicing events after performing differential transcript usage (DTU) analysis.
+Unlike event-based tools that work at the junction level, _splicelogic_ operates on whole transcript structures: each transcript and all its exons are annotated with a DTU effect estimate, allowing splicing events to be derived directly from transcript quantification with full isoform context. By comparing up- and down-regulated transcripts, _splicelogic_ can detect skipped exons, included exons, mutually exclusive exons, retained introns, and alternative 5' and 3'splice sites. 
+Because it takes transcript-level effect estimates as input, it is compatible with any upstream DTU method (including DRIMSeq, DEXSeq, satuRn, and edgeR), supporting flexible experimental designs.
+
+_splicelogic_ is included as a R/Bioconductor package for detecting alternative splicing events from exon-level data stored as _GRanges_ objects. Given a set of exons annotated with a coefficient column indicating differential transcript usage (DTU), _splicelogic_ can be used to identify a variety of splicing events. See the [vignette](https://thelovelab.github.io/splicelogic/articles/splicelogic.html) for more details.
 
 # How to install
 

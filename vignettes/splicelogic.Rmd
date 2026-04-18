@@ -14,6 +14,18 @@ vignette: |
 ---
 
 # Introduction
+*splicelogic* allows users to find alternative splicing events after 
+performing differential transcript usage (DTU) analysis.
+Unlike event-based tools that work at the junction level, 
+*splicelogic* operates on whole transcript structures: each transcript 
+and all its exons are annotated with a DTU effect estimate, allowing 
+splicing events to be derived directly from transcript quantification 
+with full isoform context. By comparing up- and down-regulated 
+transcripts, *splicelogic* can detect skipped exons, included exons,
+mutually exclusive exons, retained introns, and alternative 5' and 3'
+splice sites. Because it takes transcript-level effect estimates as input, 
+it is compatible with any upstream DTU method (including DRIMSeq, DEXSeq, 
+satuRn, and edgeR), supporting flexible experimental designs.
 
 *splicelogic* is an R/Bioconductor package for detecting alternative
 splicing events from exon-level data stored as *GRanges* objects.
@@ -36,6 +48,48 @@ following types of splicing events:
 
 These are detected using a series of functions, e.g. `find_se()`,
 `find_ie()`, etc. described below.
+
+## Related methods
+
+Several tools exist for detecting alternative splicing or isoform
+switching from RNA-seq data.
+
+-   [IsoformSwitchAnalyzeR](https://www.bioconductor.org/packages/IsoformSwitchAnalyzeR)
+    — a comprehensive workflow that performs DTU testing, annotates
+    the resulting isoform switches with splicing event types, and
+    predicts functional consequences such as domain loss and NMD.
+
+-   [GeneStructureTools](https://www.bioconductor.org/packages/GeneStructureTools)
+    — takes differential splicing results from read-based tools such
+    as Whippet or leafcutter (which detect splicing events from
+    junction counts), classifies the event types, and assesses their
+    structural and functional consequences such as ORF changes, NMD
+    potential, and UTR structure.
+
+-   [isoformic](https://github.com/luciorq/isoformic)
+    — a visualization and functional interpretation pipeline for
+    pre-computed differential transcript expression results. It
+    organizes transcripts by biotype (protein-coding, lncRNA, NMD,
+    etc.) and provides expression profile plots and functional
+    enrichment analysis. It does not perform DTU testing or classify
+    splicing event types.
+
+*splicelogic* differs in its main input and focus: it does not perform 
+DTU testing, and also does not take pre-computed splicing events as input.
+Instead, it takes transcript-level DTU results (effect estimates
+and adjusted p-values from any upstream method) already mapped
+onto exon structures, and directly classifies the type of splicing
+event from the comparison of up- and down-regulated isoforms.
+Rather than assessing sequence-level or functional consequences,
+it provides a lightweight, method-agnostic bridge between DTU
+results and alternative splicing event classification. By operating on 
+exon-level *GRanges* with attached DTU statistics, it provides a 
+flexible framework for users to identify and interpret splicing 
+events in the context of their specific experimental design and 
+choice of DTU method. *GRanges* are a common data structure in 
+Bioconductor for representing genomic data, making *splicelogic*
+compatible with a wide range of already available tools and 
+existingworkflows for RNA-seq analysis.
 
 # Quick start
 
