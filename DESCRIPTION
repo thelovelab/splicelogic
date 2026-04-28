@@ -1,6 +1,6 @@
 Package: splicelogic
 Title: splicelogic: differential transcripts to splice events
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: c(
     person("Beatriz", "Campillo", email = "beatrizcampillo29@gmail.com", role = c("aut", "cre"),
     comment = c(ORCID = "0000-0001-7323-9125")),
