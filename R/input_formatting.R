@@ -59,7 +59,7 @@ utils::globalVariables(c("nexons"))
 #' @examples
 #' 
 #' # create mock data and run preprocessing
-#' gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+#' gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4) |>
 #'  preprocess(coef_col = "estimate", method_string = "mock_method")
 #' 
 preprocess <- function(gr, coef_col, method_string = NULL) {
