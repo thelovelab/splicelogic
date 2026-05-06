@@ -63,7 +63,7 @@ and alternative 5' and 3' splice sites (a5ss / a3ss).
 \examples{
 
 # make some mock data and run the function
-gr <- create_mock_data(n_genes = 2, n_tx = 4, n_exons = 4) |>
+gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4) |>
   preprocess(coef_col = "estimate") |>
   generate_se(n_events = 1)
 
@@ -75,7 +75,7 @@ find_ie(gr, type = "boundary")
 
 # detect mutually exclusive exons
 gr_mx <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
   preprocess(coef_col = "estimate") |>
   generate_mxe(n_events = 1)
@@ -85,7 +85,7 @@ find_mxe(gr_mx, type = "boundary")
 
 # detect retained introns
 gr_ri <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
   preprocess(coef_col = "estimate") |>
   generate_ri(n_events = 1)
@@ -95,7 +95,7 @@ find_ri(gr_ri)
 
 # detect alternative 5' splice sites
 gr_a5 <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
   preprocess(coef_col = "estimate") |>
   generate_a5ss(n_events = 1)
@@ -105,7 +105,7 @@ find_a5ss(gr_a5)
 
 # detect alternative 3' splice sites
 gr_a3 <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
   preprocess(coef_col = "estimate") |>
   generate_a3ss(n_events = 1)
@@ -114,7 +114,7 @@ find_a3ss(gr_a3)
 
 # detect all event types at once
 gr_all <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
   preprocess(coef_col = "estimate") |>
   generate_se(n_events = 1)

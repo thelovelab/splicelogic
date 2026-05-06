@@ -48,31 +48,31 @@ events into mock GRanges data for testing purposes.
 \examples{
 
 gr <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 )
 generate_se(gr, n_events = 1)
 
 
 gr <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 )
 generate_mxe(gr, n_events = 1)
 
 
 gr <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 )
 generate_ri(gr, n_events = 1)
 
 
 gr <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 )
 generate_a5ss(gr, n_events = 1)
 
 
 gr <- create_mock_data(
-  n_genes = 2, n_tx = 4, n_exons = 4
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 )
 generate_a3ss(gr, n_events = 1)
 
