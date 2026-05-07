@@ -784,9 +784,9 @@ sessionInfo()
     ## other attached packages:
     ##  [1] tibble_3.3.1           GenomicFeatures_1.62.0 AnnotationDbi_1.72.0  
     ##  [4] Biobase_2.70.0         AnnotationHub_4.0.0    BiocFileCache_3.0.0   
-    ##  [7] dbplyr_2.5.2           splicelogic_0.99.2     plyranges_1.30.1      
+    ##  [7] dbplyr_2.5.2           splicelogic_1.1.0      plyranges_1.30.1      
     ## [10] dplyr_1.2.1            GenomicRanges_1.62.1   Seqinfo_1.0.0         
-    ## [13] IRanges_2.44.0         S4Vectors_0.49.1-1     BiocGenerics_0.56.0   
+    ## [13] IRanges_2.44.0         S4Vectors_0.48.1       BiocGenerics_0.56.0   
     ## [16] generics_0.1.4         readr_2.2.0           
     ## 
     ## loaded via a namespace (and not attached):
@@ -802,7 +802,7 @@ sessionInfo()
     ## [19] utf8_1.2.6                  yaml_2.3.12                
     ## [21] rtracklayer_1.70.1          knitr_1.51                 
     ## [23] S4Arrays_1.10.1             htmlwidgets_1.6.4          
-    ## [25] bit_4.6.0                   curl_7.0.0                 
+    ## [25] bit_4.6.0                   curl_7.1.0                 
     ## [27] DelayedArray_0.36.1         abind_1.4-8                
     ## [29] BiocParallel_1.44.0         purrr_1.2.2                
     ## [31] withr_3.0.2                 desc_1.4.3                 
@@ -816,7 +816,7 @@ sessionInfo()
     ## [47] XVector_0.50.0              restfulr_0.0.16            
     ## [49] matrixStats_1.5.0           vctrs_0.7.3                
     ## [51] Matrix_1.7-5                jsonlite_2.0.0             
-    ## [53] hms_1.1.4                   bit64_4.6.0-1              
+    ## [53] hms_1.1.4                   bit64_4.8.0                
     ## [55] systemfonts_1.3.2           jquerylib_0.1.4            
     ## [57] glue_1.8.1                  pkgdown_2.2.0              
     ## [59] codetools_0.2-20            BiocVersion_3.22.0         
@@ -829,5 +829,5 @@ sessionInfo()
     ## [73] png_0.1-9                   Rsamtools_2.26.0           
     ## [75] cigarillo_1.0.0             memoise_2.0.1              
     ## [77] bslib_0.10.0                SparseArray_1.10.10        
-    ## [79] xfun_0.57                   fs_2.0.1                   
+    ## [79] xfun_0.57                   fs_2.1.0                   
     ## [81] MatrixGenerics_1.22.0       pkgconfig_2.0.3
