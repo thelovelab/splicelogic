@@ -135,6 +135,10 @@ preprocess <- function(gr, coef_col, method_string = NULL,
 #'   the downregulated partition (assigned \code{estimate = -1}).
 #' @param txdb A \code{TxDb} object (from GenomicFeatures). Required when
 #'   \code{up} and \code{down} are character vectors of transcript IDs.
+#' @param tx_id_col The keytype in \code{txdb} matching the transcript IDs
+#'   in \code{up} and \code{down}. Default \code{"TXNAME"}. Only used when
+#'   \code{up} and \code{down} are character vectors. See
+#'   \code{AnnotationDbi::keytypes(txdb)} for available options.
 #' @param verbose Whether to print progress messages. Default \code{TRUE}.
 #' @return A combined GRanges object with an \code{estimate} column
 #'   (\code{+1} for \code{up}, \code{-1} for \code{down}),
@@ -150,7 +154,8 @@ preprocess <- function(gr, coef_col, method_string = NULL,
 #' prepare_exons_by_partition(gr_up, gr_down) |>
 #'   preprocess(coef_col = "estimate")
 #'
-prepare_exons_by_partition <- function(up, down, txdb = NULL, verbose = TRUE) {
+prepare_exons_by_partition <- function(up, down, txdb = NULL,
+                                       tx_id_col = "TXNAME", verbose = TRUE) {
   both_gr   <- methods::is(up, "GRanges") && methods::is(down, "GRanges")
   both_char <- is.character(up) && is.character(down)
   if (!both_gr && !both_char) {
@@ -179,18 +184,19 @@ prepare_exons_by_partition <- function(up, down, txdb = NULL, verbose = TRUE) {
         txdb,
         keys    = c(up, down),
         columns = "GENEID",
-        keytype = "TXNAME"
-      ) |> tibble::as_tibble()
+        keytype = tx_id_col
+      ) |>
+        tibble::as_tibble() |>
+        dplyr::select(tx_id = dplyr::all_of(tx_id_col), gene_id = "GENEID")
+
       # create a combined table of transcript IDs, gene IDs, and estimate values
       # for up (+1) and down (-1) partitions, and join with tx_gene to get gene IDs
       dtu_table <- tibble::tibble(
         tx_id    = c(up, down),
         estimate = c(rep(1L, length(up)), rep(-1L, length(down)))
       ) |>
-        dplyr::left_join(
-          dplyr::rename(tx_gene, tx_id = TXNAME, gene_id = GENEID),
-          by = "tx_id"
-        )
+        dplyr::left_join(tx_gene, by = "tx_id")
+
       # call prepare_exons to extract exon ranges given the txdb and dtu_table
       prepare_exons(
         txdb, dtu_table,

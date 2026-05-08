@@ -4,7 +4,13 @@
 \alias{prepare_exons_by_partition}
 \title{Prepare exons from two transcript partitions}
 \usage{
-prepare_exons_by_partition(up, down, txdb = NULL, verbose = TRUE)
+prepare_exons_by_partition(
+  up,
+  down,
+  txdb = NULL,
+  tx_id_col = "TXNAME",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{up}{A GRanges object or character vector of transcript IDs for
@@ -15,6 +21,11 @@ the downregulated partition (assigned \code{estimate = -1}).}
 
 \item{txdb}{A \code{TxDb} object (from GenomicFeatures). Required when
 \code{up} and \code{down} are character vectors of transcript IDs.}
+
+\item{tx_id_col}{The keytype in \code{txdb} matching the transcript IDs
+in \code{up} and \code{down}. Default \code{"TXNAME"}. Only used when
+\code{up} and \code{down} are character vectors. See
+\code{AnnotationDbi::keytypes(txdb)} for available options.}
 
 \item{verbose}{Whether to print progress messages. Default \code{TRUE}.}
 }
