@@ -377,7 +377,7 @@ find_a5ss <- function(gr) {
 }
 
 #' @rdname find_events
-#' @return `find_a3ss()`: : alternative 3' splice sites
+#' @return `find_a3ss()`: alternative 3' splice sites
 #' @examples
 #'
 #' # detect alternative 3' splice sites
