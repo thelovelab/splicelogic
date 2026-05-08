@@ -11,7 +11,13 @@ with `coef_col = "estimate"`.
 ## Usage
 
 ``` r
-prepare_exons_by_partition(up, down, txdb = NULL, verbose = TRUE)
+prepare_exons_by_partition(
+  up,
+  down,
+  txdb = NULL,
+  tx_id_col = "TXNAME",
+  verbose = TRUE
+)
 ```
 
 ## Arguments
@@ -30,6 +36,12 @@ prepare_exons_by_partition(up, down, txdb = NULL, verbose = TRUE)
 
   A `TxDb` object (from GenomicFeatures). Required when `up` and `down`
   are character vectors of transcript IDs.
+
+- tx_id_col:
+
+  The keytype in `txdb` matching the transcript IDs in `up` and `down`.
+  Default `"TXNAME"`. Only used when `up` and `down` are character
+  vectors. See `AnnotationDbi::keytypes(txdb)` for available options.
 
 - verbose:
 

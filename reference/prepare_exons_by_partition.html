@@ -55,7 +55,13 @@ with <code>coef_col = "estimate"</code>.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">prepare_exons_by_partition</span><span class="op">(</span><span class="va">up</span>, <span class="va">down</span>, txdb <span class="op">=</span> <span class="cn">NULL</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">prepare_exons_by_partition</span><span class="op">(</span></span>
+<span>  <span class="va">up</span>,</span>
+<span>  <span class="va">down</span>,</span>
+<span>  txdb <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tx_id_col <span class="op">=</span> <span class="st">"TXNAME"</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,6 +81,13 @@ the downregulated partition (assigned <code>estimate = -1</code>).</p></dd>
 <dt id="arg-txdb">txdb<a class="anchor" aria-label="anchor" href="#arg-txdb"></a></dt>
 <dd><p>A <code>TxDb</code> object (from GenomicFeatures). Required when
 <code>up</code> and <code>down</code> are character vectors of transcript IDs.</p></dd>
+
+
+<dt id="arg-tx-id-col">tx_id_col<a class="anchor" aria-label="anchor" href="#arg-tx-id-col"></a></dt>
+<dd><p>The keytype in <code>txdb</code> matching the transcript IDs
+in <code>up</code> and <code>down</code>. Default <code>"TXNAME"</code>. Only used when
+<code>up</code> and <code>down</code> are character vectors. See
+<code>AnnotationDbi::keytypes(txdb)</code> for available options.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
