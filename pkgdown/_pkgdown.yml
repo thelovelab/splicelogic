@@ -19,6 +19,7 @@ reference:
     contents:
       - preprocess
       - prepare_exons
+      - prepare_exons_by_partition
   - title: "Event detection"
     contents:
       - starts_with("find_")
