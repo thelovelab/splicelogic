@@ -2,13 +2,12 @@
 
 This function checks that the input is a valid GRanges object with
 required metadata columns, then adds a unique key, the number of exons
-per transcript, and an 'internal' flag for each exon. It also
-initializes an 'event' column for downstream splicing event annotation.
+per transcript, and an 'internal' flag for each exon.
 
 ## Usage
 
 ``` r
-preprocess(gr, coef_col, method_string = NULL)
+preprocess(gr, coef_col, method_string = NULL, additional_columns = NULL)
 ```
 
 ## Arguments
@@ -28,10 +27,14 @@ preprocess(gr, coef_col, method_string = NULL)
   The Differential Transcript Usage (DTU) method used to obtain the
   coef_col, for annotation purposes (optional).
 
+- additional_columns:
+
+  A character vector of metadata column names to record for downstream
+  use. Stored in `metadata(result)$additional_columns` (optional).
+
 ## Value
 
-A GRanges object with added 'key', 'nexons', 'internal', and 'event'
-columns.
+A GRanges object with added 'key', 'nexons', and 'internal' columns.
 
 ## Examples
 
@@ -39,5 +42,5 @@ columns.
 
 # create mock data and run preprocessing
 gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4) |>
- preprocess(coef_col = "estimate", method_string = "mock_method")
+  preprocess(coef_col = "estimate", method_string = "mock_method")
 ```

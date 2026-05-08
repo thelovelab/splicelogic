@@ -295,16 +295,16 @@ skipped <- sig_exons |> find_se()
 skipped
 ```
 
-    ## GRanges object with 1 range and 10 metadata columns:
+    ## GRanges object with 1 range and 11 metadata columns:
     ##       seqnames            ranges strand |   exon_id            exon_name
     ##          <Rle>         <IRanges>  <Rle> | <numeric>          <character>
     ##   [1]    chr17 66647479-66647535      - |    480827 ENSMUSE00000443570.7
     ##       exon_rank                 tx_id               gene_id   gene_name
     ##       <numeric>           <character>           <character> <character>
     ##   [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18       Mtcl1
-    ##        estimate       padj       event              tx_event
-    ##       <numeric>  <numeric> <character>           <character>
-    ##   [1]   -2.9732 0.00970121          se ENSMUST00000086693.12
+    ##        estimate       padj  event_type           event_tx_id event_estimate
+    ##       <numeric>  <numeric> <character>           <character>      <numeric>
+    ##   [1]   -2.9732 0.00970121          se ENSMUST00000086693.12        2.88524
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -316,7 +316,7 @@ included <- sig_exons |> find_ie()
 included
 ```
 
-    ## GRanges object with 3 ranges and 10 metadata columns:
+    ## GRanges object with 3 ranges and 11 metadata columns:
     ##       seqnames              ranges strand |   exon_id            exon_name
     ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
     ##   [1]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2
@@ -327,11 +327,11 @@ included
     ##   [1]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
     ##   [2]        20 ENSMUST00000077642.12 ENSMUSG00000026585.14        Kifap3
     ##   [3]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
-    ##        estimate        padj       event              tx_event
-    ##       <numeric>   <numeric> <character>           <character>
-    ##   [1]   3.02406 0.018472554          ie ENSMUST00000065504.17
-    ##   [2]   1.04389 0.010395185          ie  ENSMUST00000027877.7
-    ##   [3]   4.14230 0.000995041          ie  ENSMUST00000108951.8
+    ##        estimate        padj  event_type           event_tx_id event_estimate
+    ##       <numeric>   <numeric> <character>           <character>      <numeric>
+    ##   [1]   3.02406 0.018472554          ie ENSMUST00000065504.17       -3.34894
+    ##   [2]   1.04389 0.010395185          ie  ENSMUST00000027877.7       -1.70708
+    ##   [3]   4.14230 0.000995041          ie  ENSMUST00000108951.8       -3.42759
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -343,7 +343,7 @@ mx <- sig_exons |> find_mxe()
 mx
 ```
 
-    ## GRanges object with 2 ranges and 10 metadata columns:
+    ## GRanges object with 2 ranges and 11 metadata columns:
     ##       seqnames            ranges strand |   exon_id            exon_name
     ##          <Rle>         <IRanges>  <Rle> | <numeric>          <character>
     ##   [1]    chr12 91799829-91799996      - |    374021 ENSMUSE00001304078.2
@@ -352,10 +352,10 @@ mx
     ##       <numeric>           <character>           <character> <character>
     ##   [1]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15       Sel1l
     ##   [2]         4  ENSMUST00000178462.8 ENSMUSG00000020964.15       Sel1l
-    ##        estimate       padj       event              tx_event
-    ##       <numeric>  <numeric> <character>           <character>
-    ##   [1]  -3.28535 0.00171934         mxe  ENSMUST00000178462.8
-    ##   [2]   2.99384 0.00171934         mxe ENSMUST00000021347.12
+    ##        estimate       padj  event_type           event_tx_id event_estimate
+    ##       <numeric>  <numeric> <character>           <character>      <numeric>
+    ##   [1]  -3.28535 0.00171934         mxe  ENSMUST00000178462.8        2.99384
+    ##   [2]   2.99384 0.00171934         mxe ENSMUST00000021347.12       -3.28535
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -384,7 +384,7 @@ a5ss <- sig_exons |> find_a5ss()
 a5ss
 ```
 
-    ## GRanges object with 5 ranges and 10 metadata columns:
+    ## GRanges object with 5 ranges and 11 metadata columns:
     ##       seqnames              ranges strand |   exon_id            exon_name
     ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
     ##   [1]    chr10   88081618-88081868      + |    304334 ENSMUSE00001310024.2
@@ -399,13 +399,13 @@ a5ss
     ##   [3]        13 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
     ##   [4]         7  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
     ##   [5]         9  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
-    ##        estimate        padj       event              tx_event
-    ##       <numeric>   <numeric> <character>           <character>
-    ##   [1]   9.19059 0.086737576        a5ss ENSMUST00000020248.16
-    ##   [2]   3.02406 0.018472554        a5ss ENSMUST00000065504.17
-    ##   [3]   4.14230 0.000995041        a5ss  ENSMUST00000108951.8
-    ##   [4]   6.33671 0.006078234        a5ss ENSMUST00000046371.13
-    ##   [5]   6.33671 0.006078234        a5ss ENSMUST00000046371.13
+    ##        estimate        padj  event_type           event_tx_id event_estimate
+    ##       <numeric>   <numeric> <character>           <character>      <numeric>
+    ##   [1]   9.19059 0.086737576        a5ss ENSMUST00000020248.16      -0.264716
+    ##   [2]   3.02406 0.018472554        a5ss ENSMUST00000065504.17      -3.348940
+    ##   [3]   4.14230 0.000995041        a5ss  ENSMUST00000108951.8      -3.427593
+    ##   [4]   6.33671 0.006078234        a5ss ENSMUST00000046371.13      -0.694010
+    ##   [5]   6.33671 0.006078234        a5ss ENSMUST00000046371.13      -0.694010
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -415,7 +415,7 @@ a3ss <- sig_exons |> find_a3ss()
 a3ss
 ```
 
-    ## GRanges object with 9 ranges and 10 metadata columns:
+    ## GRanges object with 9 ranges and 11 metadata columns:
     ##       seqnames              ranges strand |   exon_id            exon_name
     ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
     ##   [1]    chr10   88037014-88037154      + |    304312 ENSMUSE00001309977.2
@@ -438,17 +438,17 @@ a3ss
     ##   [7]         3  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
     ##   [8]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
     ##   [9]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
-    ##        estimate        padj       event              tx_event
-    ##       <numeric>   <numeric> <character>           <character>
-    ##   [1]   9.19059 0.086737576        a3ss ENSMUST00000020248.16
-    ##   [2]   9.19059 0.086737576        a3ss ENSMUST00000020248.16
-    ##   [3]   3.02406 0.018472554        a3ss ENSMUST00000065504.17
-    ##   [4]   4.14230 0.000995041        a3ss  ENSMUST00000108951.8
-    ##   [5]   3.85659 0.027009405        a3ss  ENSMUST00000166232.4
-    ##   [6]   9.13055 0.018472554        a3ss ENSMUST00000030254.15
-    ##   [7]   9.13055 0.018472554        a3ss ENSMUST00000030254.15
-    ##   [8]   6.33671 0.006078234        a3ss ENSMUST00000046371.13
-    ##   [9]   2.88524 0.013967132        a3ss ENSMUST00000097291.10
+    ##        estimate        padj  event_type           event_tx_id event_estimate
+    ##       <numeric>   <numeric> <character>           <character>      <numeric>
+    ##   [1]   9.19059 0.086737576        a3ss ENSMUST00000020248.16      -0.264716
+    ##   [2]   9.19059 0.086737576        a3ss ENSMUST00000020248.16      -0.264716
+    ##   [3]   3.02406 0.018472554        a3ss ENSMUST00000065504.17      -3.348940
+    ##   [4]   4.14230 0.000995041        a3ss  ENSMUST00000108951.8      -3.427593
+    ##   [5]   3.85659 0.027009405        a3ss  ENSMUST00000166232.4      -3.477749
+    ##   [6]   9.13055 0.018472554        a3ss ENSMUST00000030254.15      -2.405394
+    ##   [7]   9.13055 0.018472554        a3ss ENSMUST00000030254.15      -2.405394
+    ##   [8]   6.33671 0.006078234        a3ss ENSMUST00000046371.13      -0.694010
+    ##   [9]   2.88524 0.013967132        a3ss ENSMUST00000097291.10      -2.973204
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -480,7 +480,7 @@ all_events <- sig_exons |> find_all_events()
 all_events
 ```
 
-    ## GRanges object with 20 ranges and 10 metadata columns:
+    ## GRanges object with 20 ranges and 11 metadata columns:
     ##        seqnames              ranges strand |   exon_id            exon_name
     ##           <Rle>           <IRanges>  <Rle> | <numeric>          <character>
     ##    [1]    chr17   66647479-66647535      - |    480827 ENSMUSE00000443570.7
@@ -507,26 +507,26 @@ all_events
     ##   [18]         3  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
     ##   [19]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
     ##   [20]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
-    ##         estimate        padj       event              tx_event
-    ##        <numeric>   <numeric> <character>           <character>
-    ##    [1]  -2.97320 0.009701213          se ENSMUST00000086693.12
-    ##    [2]   3.02406 0.018472554          ie ENSMUST00000065504.17
-    ##    [3]   1.04389 0.010395185          ie  ENSMUST00000027877.7
-    ##    [4]   4.14230 0.000995041          ie  ENSMUST00000108951.8
-    ##    [5]  -3.28535 0.001719345         mxe  ENSMUST00000178462.8
-    ##    ...       ...         ...         ...                   ...
-    ##   [16]   3.85659  0.02700941        a3ss  ENSMUST00000166232.4
-    ##   [17]   9.13055  0.01847255        a3ss ENSMUST00000030254.15
-    ##   [18]   9.13055  0.01847255        a3ss ENSMUST00000030254.15
-    ##   [19]   6.33671  0.00607823        a3ss ENSMUST00000046371.13
-    ##   [20]   2.88524  0.01396713        a3ss ENSMUST00000097291.10
+    ##         estimate        padj  event_type           event_tx_id event_estimate
+    ##        <numeric>   <numeric> <character>           <character>      <numeric>
+    ##    [1]  -2.97320 0.009701213          se ENSMUST00000086693.12        2.88524
+    ##    [2]   3.02406 0.018472554          ie ENSMUST00000065504.17       -3.34894
+    ##    [3]   1.04389 0.010395185          ie  ENSMUST00000027877.7       -1.70708
+    ##    [4]   4.14230 0.000995041          ie  ENSMUST00000108951.8       -3.42759
+    ##    [5]  -3.28535 0.001719345         mxe  ENSMUST00000178462.8        2.99384
+    ##    ...       ...         ...         ...                   ...            ...
+    ##   [16]   3.85659  0.02700941        a3ss  ENSMUST00000166232.4       -3.47775
+    ##   [17]   9.13055  0.01847255        a3ss ENSMUST00000030254.15       -2.40539
+    ##   [18]   9.13055  0.01847255        a3ss ENSMUST00000030254.15       -2.40539
+    ##   [19]   6.33671  0.00607823        a3ss ENSMUST00000046371.13       -0.69401
+    ##   [20]   2.88524  0.01396713        a3ss ENSMUST00000097291.10       -2.97320
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
 ``` r
 
 barplot(
-  table(all_events$event), horiz=TRUE, las=1,
+  table(all_events$event_type), horiz=TRUE, las=1,
   xlab="exons participating in an event"
 )
 ```
