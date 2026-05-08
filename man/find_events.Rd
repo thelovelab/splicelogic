@@ -38,7 +38,18 @@ instead of skipped exons.}
 \item{verbose}{If TRUE, prints progress messages. Default TRUE.}
 }
 \value{
-A GRanges object with an additional column \code{event} indicating:
+A GRanges object with the detected exon ranges and the following
+additional metadata columns:
+\describe{
+\item{\code{event_type}}{The type of splicing event detected (e.g.
+\code{"se"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"}, \code{"a3ss"}).}
+\item{\code{event_tx_id}}{Transcript ID of the paired transcript
+involved in the event.}
+\item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
+\item{\code{event_<col>}}{One column per name in
+\code{metadata(gr)$additional_columns}, prefixed with \code{event_},
+carrying the corresponding value from the paired transcript.}
+}
 
 \code{find_se()}: skipped exons
 

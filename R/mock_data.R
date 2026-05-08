@@ -403,7 +403,7 @@ generate_a5ss <- function(gr, n_events = 1) {
   # if preprocessing didn't happen
   if (
     !all(
-      c("key", "nexons", "internal", "event") %in%
+      c("key", "nexons", "internal") %in%
         names(GenomicRanges::mcols(gr))
     )
   ) {
@@ -450,7 +450,7 @@ generate_a3ss <- function(gr, n_events = 1) {
   # if preprocessing didn't happen
   if (
     !all(
-      c("key", "nexons", "internal", "event") %in%
+      c("key", "nexons", "internal") %in%
         names(GenomicRanges::mcols(gr))
     )
   ) {

@@ -368,15 +368,51 @@ keep_cols <- function(gr) {
     setdiff(names(GenomicRanges::mcols(gr)), c("key", "nexons", "internal"))
 }
 
+# for tbl_to_granges
+utils::globalVariables(c("tx_id", "estimate"))
+
 #' @noRd
 tbl_to_granges <- function(hits_tbl, keep_cols, gr) {
+  # build per-tx_id lookup from gr - only keeping one row per tx_id
+  # this asumes that the additional_columns values are the same for all exons
+  # of a given tx_id ie they are transcript-level annotations
+  tx_lookup_base <- tibble::as_tibble(gr) |>
+    dplyr::distinct(tx_id, .keep_all = TRUE)
+
+  # always add event_estimate from the tx_event transcript
+  event_extra_cols <- "event_estimate"
+  hits_tbl <- dplyr::left_join(
+    hits_tbl,
+    tx_lookup_base |>
+      dplyr::select(tx_id, estimate) |>
+      dplyr::rename(event_estimate = estimate),
+    by = c("event_tx_id" = "tx_id")
+  )
+  # add any additional_columns, skipping estimate (already added above)
+  add_cols <- setdiff(
+    S4Vectors::metadata(gr)$additional_columns, "estimate"
+  )
+  if (length(add_cols) > 0) {
+    hits_tbl <- dplyr::left_join(
+      hits_tbl,
+      tx_lookup_base |>
+        dplyr::select(tx_id, dplyr::all_of(add_cols)) |>
+        dplyr::rename_with(~paste0("event_", .), dplyr::all_of(add_cols)),
+      by = c("event_tx_id" = "tx_id")
+    )
+    event_extra_cols <- c(event_extra_cols, paste0("event_", add_cols))
+  }
+
   res <- GenomicRanges::GRanges(
     seqnames = hits_tbl$seqnames,
     ranges = IRanges::IRanges(
       start = hits_tbl$start, end = hits_tbl$end
     ),
     strand = hits_tbl$strand,
-    hits_tbl |> dplyr::select(dplyr::all_of(keep_cols), event, tx_event)
+    hits_tbl |> dplyr::select(
+      dplyr::all_of(keep_cols), event_type, event_tx_id,
+      dplyr::all_of(event_extra_cols)
+    )
   )
   # preserve seqinfo from input
   GenomicRanges::seqinfo(res) <- GenomicRanges::seqinfo(gr)

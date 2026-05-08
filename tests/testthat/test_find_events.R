@@ -4,8 +4,8 @@ test_that("find_se works with se_mock_data and preprocess", {
   gr <- preprocess(gr, coef_col = "estimate")
   result <- find_se(gr)
   expect_s4_class(result, "GRanges")
-  expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event == "se"))
+  expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event_type == "se"))
 })
 
 # Test for no event detected in skipped exon
@@ -25,13 +25,13 @@ test_that("find_se detects single skipped exon in mx_mock_data", {
   result <- find_se(gr)
 
   expect_s4_class(result, "GRanges")
-  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+  expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
 
   # expect exactly one detected event on exon_rank = 5 of tx_id 1
   expect_equal(length(result), 1L)
   expect_equal(as.integer(GenomicRanges::mcols(result)$tx_id), 1L)
   expect_equal(as.integer(GenomicRanges::mcols(result)$exon_rank), 5L)
-  expect_equal(as.character(GenomicRanges::mcols(result)$event), "se")
+  expect_equal(as.character(GenomicRanges::mcols(result)$event_type), "se")
 })
 
 
@@ -42,7 +42,7 @@ test_that("find_mxe detects mutually exclusive exons in mx_mock_data", {
   result <- find_mxe(gr)
 
   expect_s4_class(result, "GRanges")
-  expect_true("event" %in% names(GenomicRanges::mcols(result)))
+  expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
 
   # expect exactly one detected event on exon_rank = 5 of tx_id 1
   expect_equal(length(result), 4L)
@@ -52,7 +52,7 @@ test_that("find_mxe detects mutually exclusive exons in mx_mock_data", {
     c(3, 3, 8, 7)
   )
   expect_equal(
-    as.character(GenomicRanges::mcols(result)$event),
+    as.character(GenomicRanges::mcols(result)$event_type),
     rep("mxe", 4L)
   )
 })
@@ -76,8 +76,8 @@ test_that("find_ri test", {
   result <- find_ri(gr)
 
   expect_s4_class(result, "GRanges")
-  expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event == "ri"))
+  expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event_type == "ri"))
 })
 
 # Test for find_a3ss
@@ -89,8 +89,8 @@ test_that("find_a3ss test", {
   result <- find_a3ss(gr)
 
   expect_s4_class(result, "GRanges")
-  expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event == "a3ss"))
+  expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event_type == "a3ss"))
 })
 
 
@@ -103,8 +103,8 @@ test_that("find_a5ss test", {
   result <- find_a5ss(gr)
 
   expect_s4_class(result, "GRanges")
-  expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event == "a5ss"))
+  expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event_type == "a5ss"))
 })
 
 # Test for find_se with new mock data
@@ -116,8 +116,8 @@ test_that("find_se test with generate_se", {
   result <- find_se(gr)
 
   expect_s4_class(result, "GRanges")
-  expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event == "se"))
+  expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
+  expect_true(any(result$event_type == "se"))
 })
 
 # Test for find_all_events
@@ -132,8 +132,8 @@ test_that("find_all_events returns combined GRanges with multiple event types", 
 
   expect_s4_class(result, "GRanges")
   expect_true(length(result) > 0L)
-  expect_true("event" %in% names(GenomicRanges::mcols(result)))
-  expect_true("se" %in% result$event)
+  expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
+  expect_true("se" %in% result$event_type)
 })
 
 test_that("find_all_events returns empty GRanges when no events exist", {

@@ -10,20 +10,31 @@
 #'
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
 #' and 'coef_col' metadata columns and preprocessed with preprocess().
+#'
+#' @return A GRanges object with the detected exon ranges and the following
+#' additional metadata columns:
+#' \describe{
+#'   \item{\code{event_type}}{The type of splicing event detected (e.g.
+#'     \code{"se"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"}, \code{"a3ss"}).}
+#'   \item{\code{event_tx_id}}{Transcript ID of the paired transcript
+#'     involved in the event.}
+#'   \item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
+#'   \item{\code{event_<col>}}{One column per name in
+#'     \code{metadata(gr)$additional_columns}, prefixed with \code{event_},
+#'     carrying the corresponding value from the paired transcript.}
+#' }
 
 NULL
 
 # for find_se
-utils::globalVariables(c("cand_idx", "l", "r", "event", "tx_event"))
+utils::globalVariables(c("cand_idx", "l", "r", "event_type", "event_tx_id"))
 
 #' @rdname find_events
 #' @param type The type of overlap to consider when
 #' identifying events.
 #' @param inverse If TRUE, identifies included exons
 #' instead of skipped exons.
-#' @return A GRanges object with an additional column `event` indicating:
-#' 
-#' `find_se()`: skipped exons
+#' @return `find_se()`: skipped exons
 #' @export
 #' @examples
 #'
@@ -83,7 +94,7 @@ find_se <- function(
 
   # build result tibble: one row per (candidate, tx_event) pair
   hits_tbl <- cand_tbl[pairs$cand_idx, ] |>
-    dplyr::mutate(event = event_name, tx_event = pairs$tx_id)
+    dplyr::mutate(event_type = event_name, event_tx_id = pairs$tx_id)
   # convert back to GRanges for return
   tbl_to_granges(hits_tbl, keep_cols, gr)
 }
@@ -97,7 +108,7 @@ find_ie <- function(gr, type = c("boundary", "over", "in")) {
 
 # for find_mxe
 utils::globalVariables(c(
-  "cand_idx", "l", "r", "pos_row", ".pair_order", "event", "tx_event"
+  "cand_idx", "l", "r", "pos_row", ".pair_order", "event_type", "event_tx_id"
 ))
 
 #' @rdname find_events
@@ -170,15 +181,15 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
   # build candidate hit rows
   cand_hits <- cand_tbl[pairs$cand_idx, ] |>
     dplyr::mutate(
-      event = "mxe", # mutually exclusive exon
-      tx_event = pairs$tx_id
+      event_type = "mxe", # mutually exclusive exon
+      event_tx_id = pairs$tx_id
     )
 
   # build middle pos exon hit rows
   pos_hits <- pos_tbl[pairs$pos_row, ] |>
     dplyr::mutate(
-      event = "mxe", # mutually exclusive exon
-      tx_event = cand_tbl$tx_id[pairs$cand_idx]
+      event_type = "mxe", # mutually exclusive exon
+      event_tx_id = cand_tbl$tx_id[pairs$cand_idx]
     )
   # interleave candidate and pos hits (cand1, pos1, cand2, pos2, ...)
   hits_tbl <- dplyr::bind_rows(cand_hits, pos_hits) |>
@@ -192,7 +203,7 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
 # for find_ri
 utils::globalVariables(c(
   "estimate", "intron_idx", "pos_idx", "gene_id_intron",
-  "gene_id_pos", "tx_id_intron", "event", "tx_event"
+  "gene_id_pos", "tx_id_intron", "event_type", "event_tx_id"
 ))
 
 #' @rdname find_events
@@ -254,8 +265,8 @@ find_ri <- function(gr) {
   # build result: one row per (pos exon, intron transcript) pair
   hits_tbl <- pos_tbl[match_tbl$pos_idx, ] |>
     dplyr::mutate(
-      event = "ri", # retained intron
-      tx_event = match_tbl$tx_id_intron
+      event_type = "ri", # retained intron
+      event_tx_id = match_tbl$tx_id_intron
     )
 
   # convert back to GRanges for return
@@ -266,7 +277,7 @@ find_ri <- function(gr) {
 # for find_alt_ss
 utils::globalVariables(c(
   "estimate", "cand_idx", "neg_idx", "gene_id_cand", "gene_id_neg",
-  "tx_id_neg", "n", "match_start", "match_end", "event", "tx_event"
+  "tx_id_neg", "n", "match_start", "match_end", "event_type", "event_tx_id"
 ))
 
 #' @rdname find_events
@@ -332,7 +343,7 @@ find_alt_ss <- function(gr, by_start = TRUE) {
     dplyr::filter(match_start != match_end) |>
     dplyr::filter(match_start == by_start) |>
     dplyr::mutate(
-      event = event_name
+      event_type = event_name
     )
 
   if (nrow(match_tbl) == 0L) {
@@ -341,7 +352,7 @@ find_alt_ss <- function(gr, by_start = TRUE) {
 
   # build result: one row per (candidate, neg exon match)
   hits_tbl <- cand_tbl[match_tbl$cand_idx, ] |>
-    dplyr::mutate(event = match_tbl$event, tx_event = match_tbl$tx_id_neg)
+    dplyr::mutate(event_type = match_tbl$event_type, event_tx_id = match_tbl$tx_id_neg)
   # convert back to GRanges for return
   tbl_to_granges(hits_tbl, keep_cols, gr)
 }

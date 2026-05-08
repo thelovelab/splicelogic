@@ -346,7 +346,7 @@ all_events
 ```{r events-barplot}
 #| fig.alt: 'Barplot of event types'
 barplot(
-  table(all_events$event), horiz=TRUE, las=1,
+  table(all_events$event_type), horiz=TRUE, las=1,
   xlab="exons participating in an event"
 )
 ```

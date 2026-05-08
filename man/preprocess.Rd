@@ -4,7 +4,7 @@
 \alias{preprocess}
 \title{Preprocess input GRanges object for splicing event calculation}
 \usage{
-preprocess(gr, coef_col, method_string = NULL)
+preprocess(gr, coef_col, method_string = NULL, additional_columns = NULL)
 }
 \arguments{
 \item{gr}{A GRanges object with metadata columns:
@@ -16,22 +16,25 @@ upregulated (+1) and downregulated (-1) exons.}
 \item{method_string}{The Differential Transcript Usage (DTU)
 method used to obtain the coef_col, for annotation purposes
 (optional).}
+
+\item{additional_columns}{A character vector of metadata column
+names to record for downstream use. Stored in
+\code{metadata(result)$additional_columns} (optional).}
 }
 \value{
 A GRanges object with added 'key', 'nexons',
-'internal', and 'event' columns.
+and 'internal' columns.
 }
 \description{
 This function checks that the input is a valid GRanges
 object with required metadata columns, then adds a unique
 key, the number of exons per transcript, and an 'internal'
-flag for each exon. It also initializes an 'event' column
-for downstream splicing event annotation.
+flag for each exon.
 }
 \examples{
 
 # create mock data and run preprocessing
 gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4) |>
- preprocess(coef_col = "estimate", method_string = "mock_method")
+  preprocess(coef_col = "estimate", method_string = "mock_method")
 
 }

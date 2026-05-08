@@ -42,8 +42,7 @@ utils::globalVariables(c("nexons"))
 #' This function checks that the input is a valid GRanges
 #' object with required metadata columns, then adds a unique
 #' key, the number of exons per transcript, and an 'internal'
-#' flag for each exon. It also initializes an 'event' column
-#' for downstream splicing event annotation.
+#' flag for each exon.
 #'
 #' @param gr A GRanges object with metadata columns:
 #' 'exon_rank', 'gene_id', 'tx_id', 'coef'.
@@ -52,17 +51,21 @@ utils::globalVariables(c("nexons"))
 #' @param method_string The Differential Transcript Usage (DTU)
 #' method used to obtain the coef_col, for annotation purposes
 #' (optional).
+#' @param additional_columns A character vector of metadata column
+#' names to record for downstream use. Stored in
+#' \code{metadata(result)$additional_columns} (optional).
 #'
 #' @return A GRanges object with added 'key', 'nexons',
-#' 'internal', and 'event' columns.
+#' and 'internal' columns.
 #' @export
 #' @examples
-#' 
+#'
 #' # create mock data and run preprocessing
 #' gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4) |>
-#'  preprocess(coef_col = "estimate", method_string = "mock_method")
-#' 
-preprocess <- function(gr, coef_col, method_string = NULL) {
+#'   preprocess(coef_col = "estimate", method_string = "mock_method")
+#'
+preprocess <- function(gr, coef_col, method_string = NULL,
+                       additional_columns = NULL) {
   check_input(gr, coef_col) # check metadata columns are present
 
   gr_seqinfo <- GenomicRanges::seqinfo(gr)
@@ -92,6 +95,21 @@ preprocess <- function(gr, coef_col, method_string = NULL) {
   S4Vectors::metadata(gr)$splicelogic_preprocessed <- TRUE
   if (!is.null(method_string)) {
     S4Vectors::metadata(gr)$method_string <- method_string
+  }
+  if (!is.null(additional_columns)) {
+    # check that additional_columns is a character vector
+    if (!is.character(additional_columns)) {
+      stop("'additional_columns' must be a character vector of column names.")
+    }
+    # check that additional_columns are present in the GRanges metadata
+    missing_cols <- setdiff(additional_columns, names(GenomicRanges::mcols(gr)))
+    if (length(missing_cols) > 0) {
+      stop(paste(
+        "The following additional columns are missing in GRanges metadata:",
+        paste(missing_cols, collapse = ", ")
+      ))
+    }
+    S4Vectors::metadata(gr)$additional_columns <- additional_columns
   }
   return(gr)
 }
