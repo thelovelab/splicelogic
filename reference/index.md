@@ -12,6 +12,8 @@
   : Preprocess input GRanges object for splicing event calculation
 - [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
   : Prepare exon ranges from a TxDb and DTU results table
+- [`prepare_exons_by_partition()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.md)
+  : Prepare exons from two transcript partitions
 
 ## Event detection
 
