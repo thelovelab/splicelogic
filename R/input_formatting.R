@@ -97,6 +97,96 @@ preprocess <- function(gr, coef_col, method_string = NULL) {
 }
 
 
+#' Prepare exons from two transcript partitions
+#'
+#' Combines two transcript partitions (up- and down-regulated) and assigns
+#' an \code{estimate} coefficient: \code{+1} to \code{up} and \code{-1} to
+#' \code{down}. Accepts either GRanges objects or character vectors of
+#' transcript IDs (in which case \code{txdb} is required to look up exon
+#' coordinates). The result is ready to pass to \code{\link{preprocess}}
+#' with \code{coef_col = "estimate"}.
+#'
+#' When \code{up} and \code{down} are GRanges, both must have
+#' \code{exon_rank}, \code{gene_id}, and \code{tx_id} metadata columns.
+#' Extra columns are kept; if one object lacks a column present in the
+#' other, those entries receive \code{NA}.
+#'
+#' @param up A GRanges object or character vector of transcript IDs for
+#'   the upregulated partition (assigned \code{estimate = +1}).
+#' @param down A GRanges object or character vector of transcript IDs for
+#'   the downregulated partition (assigned \code{estimate = -1}).
+#' @param txdb A \code{TxDb} object (from GenomicFeatures). Required when
+#'   \code{up} and \code{down} are character vectors of transcript IDs.
+#' @param verbose Whether to print progress messages. Default \code{TRUE}.
+#' @return A combined GRanges object with an \code{estimate} column
+#'   (\code{+1} for \code{up}, \code{-1} for \code{down}),
+#'   ready for \code{\link{preprocess}}.
+#' @export
+#' @examples
+#'
+#' # GRanges input
+#' gr <- create_mock_data(n_genes = 1, n_tx_per_gene = 4, n_exons_per_tx = 4)
+#' gr <- generate_se(gr, n_events = 1)
+#' gr_down <- gr[gr$estimate < 0]
+#' gr_up <- gr[gr$estimate > 0]
+#' prepare_exons_by_partition(gr_up, gr_down) |>
+#'   preprocess(coef_col = "estimate")
+#'
+prepare_exons_by_partition <- function(up, down, txdb = NULL, verbose = TRUE) {
+  both_gr   <- methods::is(up, "GRanges") && methods::is(down, "GRanges")
+  both_char <- is.character(up) && is.character(down)
+  if (!both_gr && !both_char) {
+    stop(
+      "'up' and 'down' must both be GRanges objects or ",
+      "both be character vectors of tx IDs."
+    )
+  }
+  # input are GRanges
+  if (methods::is(up, "GRanges")) {
+    # create estimate column with +1 for up and -1 for down
+    up$estimate <- 1L
+    check_input(up, "estimate")
+    down$estimate <- -1L
+    check_input(down, "estimate")
+    plyranges::bind_ranges(up, down)
+    } 
+    # input are character vectors of tx IDs
+    else if (is.character(up)) {
+      if (is.null(txdb)) {
+        stop("'txdb' is required when 'up' and 'down' are tx ID vectors.")
+      }
+      check_bioc_packages()
+      # extract gene IDs for the provided transcript IDs
+      tx_gene <- AnnotationDbi::select(
+        txdb,
+        keys    = c(up, down),
+        columns = "GENEID",
+        keytype = "TXNAME"
+      ) |> tibble::as_tibble()
+      # create a combined table of transcript IDs, gene IDs, and estimate values
+      # for up (+1) and down (-1) partitions, and join with tx_gene to get gene IDs
+      dtu_table <- tibble::tibble(
+        tx_id    = c(up, down),
+        estimate = c(rep(1L, length(up)), rep(-1L, length(down)))
+      ) |>
+        dplyr::left_join(
+          dplyr::rename(tx_gene, tx_id = TXNAME, gene_id = GENEID),
+          by = "tx_id"
+        )
+      # call prepare_exons to extract exon ranges given the txdb and dtu_table
+      prepare_exons(
+        txdb, dtu_table,
+        coef_col = "estimate", verbose = verbose
+      )
+    } else {
+      stop(
+        "'up' and 'down' must be GRanges objects or ",
+        "character vectors of tx IDs."
+      )
+      }
+}
+
+
 check_preprocessed <- function(gr) {
   if (!isTRUE(S4Vectors::metadata(gr)$splicelogic_preprocessed)) {
     stop(
