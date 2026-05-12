@@ -8,7 +8,7 @@ exons are annotated with a DTU effect estimate, allowing splicing events
 to be derived directly from transcript quantification with full isoform
 context. By comparing up- and down-regulated transcripts, *splicelogic*
 can detect skipped exons, included exons, mutually exclusive exons,
-retained introns, and alternative 5’ and 3’splice sites. Because it
+retained introns, and alternative 5’ and 3’ splice sites. Because it
 takes transcript-level effect estimates as input, it is compatible with
 any upstream DTU method (including DRIMSeq, DEXSeq, satuRn, and edgeR),
 supporting flexible experimental designs.

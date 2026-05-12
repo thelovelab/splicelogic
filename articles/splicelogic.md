@@ -796,7 +796,7 @@ sessionInfo()
     ##  [7] RCurl_1.98-1.18             GenomicAlignments_1.46.0   
     ##  [9] XML_3.99-0.23               digest_0.6.39              
     ## [11] lifecycle_1.0.5             KEGGREST_1.50.0            
-    ## [13] RSQLite_2.4.6               magrittr_2.0.5             
+    ## [13] RSQLite_3.52.0              magrittr_2.0.5             
     ## [15] compiler_4.5.2              rlang_1.2.0                
     ## [17] sass_0.4.10                 tools_4.5.2                
     ## [19] utf8_1.2.6                  yaml_2.3.12                
