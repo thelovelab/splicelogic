@@ -31,25 +31,36 @@ test_that("preprocess additional_columns -> event_<col> in output", {
   gr <- se_mock_data()
   # add a per-tx, transcript-level label column
   gr$tx_label <- paste0("tx_", gr$tx_id)
+  #add another one to test multiple additional columns
+  gr$tx_label2 <- paste0("label2_", gr$tx_id)
 
   gr_pp <- preprocess(
-    gr, coef_col = "estimate", additional_columns = "tx_label"
+    gr, coef_col = "estimate", additional_columns = c("tx_label", "tx_label2")
   )
 
   # stored under metadata for downstream consumption
   expect_equal(
-    S4Vectors::metadata(gr_pp)$additional_columns, "tx_label"
+    S4Vectors::metadata(gr_pp)$additional_columns, c("tx_label", "tx_label2")
   )
 
   result <- find_se(gr_pp)
   expect_gt(length(result), 0L)
   expect_true("event_tx_label" %in% names(GenomicRanges::mcols(result)))
+  expect_true("event_tx_label2" %in% names(GenomicRanges::mcols(result)))
 
   # event_tx_label must come from the partner transcript (event_tx_id),
   # not the reference one
   expect_equal(
     as.character(result$event_tx_label),
     paste0("tx_", as.character(result$event_tx_id))
+  )
+})
+
+test_that("preprocess missing additional_columns throws an error", {
+  gr <- create_mock_data(n_genes = 1, n_tx_per_gene = 2, n_exons_per_tx = 3)
+  expect_error(
+    preprocess(gr, coef_col = "estimate", additional_columns = "nonexistent_col"),
+    "columns are missing in GRanges metadata: nonexistent_col"
   )
 })
 
