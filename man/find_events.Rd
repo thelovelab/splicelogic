@@ -42,7 +42,8 @@ A GRanges object with the detected exon ranges and the following
 additional metadata columns:
 \describe{
 \item{\code{event_type}}{The type of splicing event detected (e.g.
-\code{"se"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"}, \code{"a3ss"}).}
+\code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"},
+\code{"a3ss"}).}
 \item{\code{event_tx_id}}{Transcript ID of the paired transcript
 involved in the event.}
 \item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
@@ -61,7 +62,7 @@ carrying the corresponding value from the paired transcript.}
 
 \code{find_a5ss()}: alternative 5' splice sites
 
-\code{find_a3ss()}: : alternative 3' splice sites
+\code{find_a3ss()}: alternative 3' splice sites
 
 \code{find_all_events()}: all detected events
 }

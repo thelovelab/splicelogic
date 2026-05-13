@@ -6,7 +6,7 @@
 \alias{splicelogic-package}
 \title{splicelogic: differential transcripts to splice events}
 \description{
-For more details on the features of plryanges, read the vignette:
+For more details on the features of splicelogic, read the vignette:
 \code{browseVignettes(package = "splicelogic")}
 }
 \seealso{
