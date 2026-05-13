@@ -49,8 +49,8 @@ additional metadata columns:
 
 - `event_type`:
 
-  The type of splicing event detected (e.g. `"se"`, `"mxe"`, `"ri"`,
-  `"a5ss"`, `"a3ss"`).
+  The type of splicing event detected (e.g. `"se"`, `"ie"`, `"mxe"`,
+  `"ri"`, `"a5ss"`, `"a3ss"`).
 
 - `event_tx_id`:
 
@@ -76,7 +76,7 @@ additional metadata columns:
 
 `find_a5ss()`: alternative 5' splice sites
 
-`find_a3ss()`: : alternative 3' splice sites
+`find_a3ss()`: alternative 3' splice sites
 
 `find_all_events()`: all detected events
 

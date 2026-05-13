@@ -132,6 +132,28 @@ up-regulated exons and negative values indicate down-regulated exons.
 All exons from the same transcript will share the same value for this
 column.
 
+## Output format
+
+All `find_*()` functions return a *GRanges* whose ranges are the exons
+detected to be involved in an event. Each row therefore carries the
+user’s original exon-level metadata — including `tx_id`, the transcript
+that the detected exon belongs to — together with the following
+event-specific columns added in
+[`mcols()`](https://rdrr.io/pkg/S4Vectors/man/Vector-class.html) that
+describe the *paired* transcript against which the event is defined:
+
+| Column | Description |
+|----|----|
+| `event_type` | Type of splicing event detected (`"se"`, `"ie"`, `"mxe"`, `"ri"`, `"a5ss"`, or `"a3ss"`). |
+| `event_tx_id` | Transcript ID of the *paired* transcript that, together with the detected exon’s transcript (`tx_id`), defines the event. |
+| `event_estimate` | DTU coefficient (`estimate`) of the paired transcript. |
+| `event_<col>` | One column per name in `metadata(gr)$additional_columns`, prefixed with `event_`, carrying the corresponding value from the paired transcript. |
+
+In short: the original metadata columns describe the transcript that
+*contains* the returned exon, while all columns with the prefix
+`event_*` describe the paired transcript against which the event is
+defined.
+
 ### Jones et al mouse long read dataset
 
 For demonstration, we will use a published mouse long read dataset and
@@ -259,7 +281,24 @@ signficant at FDR 10%.
 ``` r
 
 sig_exons <- exons |> filter(padj < .1)
+sig_exons |> head(2)
 ```
+
+    ## GRanges object with 2 ranges and 8 metadata columns:
+    ##       seqnames            ranges strand |   exon_id            exon_name
+    ##          <Rle>         <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr10 88036955-88037154      + |    304310 ENSMUSE00000574345.8
+    ##   [2]    chr10 88037674-88037772      + |    304316 ENSMUSE00000417972.4
+    ##       exon_rank                 tx_id               gene_id   gene_name
+    ##       <numeric>           <character>           <character> <character>
+    ##   [1]         1 ENSMUST00000020248.16 ENSMUSG00000020056.17      Washc3
+    ##   [2]         2 ENSMUST00000020248.16 ENSMUSG00000020056.17      Washc3
+    ##        estimate      padj
+    ##       <numeric> <numeric>
+    ##   [1] -0.264716 0.0449634
+    ##   [2] -0.264716 0.0449634
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
 ## Finding splicing events
 
@@ -275,7 +314,33 @@ input data, ensures that the necessary columns are present:
 library(splicelogic)
 sig_exons <- sig_exons |>
   preprocess(coef_col = "estimate")
+sig_exons |> head(2)
 ```
+
+    ## GRanges object with 2 ranges and 11 metadata columns:
+    ##       seqnames            ranges strand |   exon_id            exon_name
+    ##          <Rle>         <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr10 88036955-88037154      + |    304310 ENSMUSE00000574345.8
+    ##   [2]    chr10 88037674-88037772      + |    304316 ENSMUSE00000417972.4
+    ##       exon_rank                 tx_id               gene_id   gene_name
+    ##       <numeric>           <character>           <character> <character>
+    ##   [1]         1 ENSMUST00000020248.16 ENSMUSG00000020056.17      Washc3
+    ##   [2]         2 ENSMUST00000020248.16 ENSMUSG00000020056.17      Washc3
+    ##        estimate      padj                    key    nexons  internal
+    ##       <numeric> <numeric>            <character> <integer> <logical>
+    ##   [1] -0.264716 0.0449634 ENSMUST00000020248.1..         7     FALSE
+    ##   [2] -0.264716 0.0449634 ENSMUST00000020248.1..         7      TRUE
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
+
+[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
+also accepts an optional `additional_columns` argument. This lets us
+specify which metadata columns we want to bring over from the paired
+transcript (`event_tx_id`) into the event output. It takes a character
+vector of column names already present in `mcols(exons)`; each will then
+appear in the output as `event_<col>`. See
+[`?preprocess`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
+for details.
 
 ### Finding individual events
 
@@ -681,8 +746,8 @@ sim_dtu_table
     ## 10     10 ENST00000335137.4 ENSG00000186092.6 0.773       -0.576
     ## # ℹ 227,452 more rows
 
-Here we name this output `human_exons` to not collide with the example
-above for the mouse dataset.
+We now build the exons *GRanges* with
+[`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md):
 
 ``` r
 
@@ -708,11 +773,30 @@ human_exons <- human_exons |>
   preprocess(coef_col = "effect_est")
 ```
 
+### Using `prepare_exons_by_partition()`
+
+If one has two sets of transcripts to compare, for example, a set of
+transcripts of interest versus a reference set, one can use
+[`prepare_exons_by_partition()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.md)
+as an alternative entry point. It accepts either two *GRanges* objects
+(each carrying `exon_rank`, `gene_id`, and `tx_id`) or two character
+vectors of transcript IDs (in which case a *TxDb* must be supplied to
+look up exon coordinates). The two sets are passed as the `up` and
+`down` arguments; internally the function assigns `estimate = +1` to the
+`up` set and `estimate = -1` to the `down` set, and returns a combined
+*GRanges* ready to pass to
+[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
+with `coef_col = "estimate"`. This route is useful for comparing two
+transcript sets of interest directly, without needing per-transcript
+effect estimates from a DTU analysis. See
+[`?prepare_exons_by_partition`](https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.md)
+for details.
+
 ### Manual construction
 
 This section walks through the steps that
 [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)
-performs internally. This is useful if you need more control over the
+performs internally. This is useful if one needs more control over the
 process or want to understand how exon ranges are built from a *TxDb*.
 
 The following extracts the exons grouped by transcript from the *TxDb*:
@@ -729,8 +813,7 @@ exons_list <- GenomicFeatures::exonsBy(
 names(exons_list) <- sim_dtu_table$tx_id
 ```
 
-Next flattening the exons (here using a new name `flat_exons` to not
-collide with the `exons` mouse dataset above):
+Next, we flatten the exons:
 
 ``` r
 
@@ -740,7 +823,7 @@ flat_exons$tx_id <- names(flat_exons) # store transcript ids
 names(flat_exons) <- flat_exons$exon_name
 ```
 
-Adding DTU results and gene ID:
+Finally, we add the DTU results and gene ID:
 
 ``` r
 
