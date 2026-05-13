@@ -27,6 +27,32 @@ test_that("preprocess stores method_string in metadata", {
   expect_equal(S4Vectors::metadata(result)$method_string, "satuRn")
 })
 
+test_that("preprocess additional_columns -> event_<col> in output", {
+  gr <- se_mock_data()
+  # add a per-tx, transcript-level label column
+  gr$tx_label <- paste0("tx_", gr$tx_id)
+
+  gr_pp <- preprocess(
+    gr, coef_col = "estimate", additional_columns = "tx_label"
+  )
+
+  # stored under metadata for downstream consumption
+  expect_equal(
+    S4Vectors::metadata(gr_pp)$additional_columns, "tx_label"
+  )
+
+  result <- find_se(gr_pp)
+  expect_gt(length(result), 0L)
+  expect_true("event_tx_label" %in% names(GenomicRanges::mcols(result)))
+
+  # event_tx_label must come from the partner transcript (event_tx_id),
+  # not the reference one
+  expect_equal(
+    as.character(result$event_tx_label),
+    paste0("tx_", as.character(result$event_tx_id))
+  )
+})
+
 # ---------------------------------------------------------------
 # Tests for prepare_exons
 test_that("prepare_exons errors on missing dtu_table columns", {
