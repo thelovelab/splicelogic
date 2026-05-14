@@ -69,6 +69,7 @@ preprocess <- function(gr, coef_col, method_string = NULL,
   check_input(gr, coef_col) # check metadata columns are present
 
   gr_seqinfo <- GenomicRanges::seqinfo(gr)
+  gr_metadata <- S4Vectors::metadata(gr)
   # use tibble for faster group_by/mutate to add key, nexons, internal
   tbl <- gr |> tibble::as_tibble()  |>
     dplyr::group_by(tx_id) |>
@@ -91,6 +92,7 @@ preprocess <- function(gr, coef_col, method_string = NULL,
     tbl[, keep_cols]
   )
   GenomicRanges::seqinfo(gr) <- gr_seqinfo
+  S4Vectors::metadata(gr) <- gr_metadata
 
   S4Vectors::metadata(gr)$splicelogic_preprocessed <- TRUE
   if (!is.null(method_string)) {

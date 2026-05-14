@@ -8,6 +8,17 @@ test_that("preprocess adds key, nexons, internal columns", {
   ))
 })
 
+test_that("preprocess doesn't wipe out original metadata", {
+  gr <- se_mock_data()
+  S4Vectors::metadata(gr) <- list(test=123) # add some starter metadata
+  gr_pp <- preprocess(
+    gr, coef_col = "estimate"
+  )
+  expect_equal(
+    S4Vectors::metadata(gr_pp)$test, 123
+  )
+})
+
 test_that("preprocess sets splicelogic_preprocessed flag", {
   gr <- create_mock_data(n_genes = 1, n_tx_per_gene = 2, n_exons_per_tx = 3)
   result <- preprocess(gr, coef_col = "estimate")
@@ -29,9 +40,10 @@ test_that("preprocess stores method_string in metadata", {
 
 test_that("preprocess additional_columns -> event_<col> in output", {
   gr <- se_mock_data()
+
   # add a per-tx, transcript-level label column
   gr$tx_label <- paste0("tx_", gr$tx_id)
-  #add another one to test multiple additional columns
+  # add another one to test multiple additional columns
   gr$tx_label2 <- paste0("label2_", gr$tx_id)
 
   gr_pp <- preprocess(
