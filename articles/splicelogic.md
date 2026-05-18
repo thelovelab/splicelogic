@@ -100,14 +100,17 @@ skipped <- exons |> find_se()
 ## Input data
 
 *splicelogic* assumes the user has run a differential transcript usage
-(DTU) or differential splicing analysis providing an error bound
-(e.g. adjusted p-value / FDR) and an effect estimate with direction
-(e.g. GLM estimated coefficient or deltaPSI) (see [upstream
-methods](#upstream-methods)).
+(DTU) or differential splicing analysis providing 1) a statistic for
+defining a significant set of transcripts, e.g. adjusted p-value / FDR
+and 2) an effect estimate with direction. e.g. GLM estimated coefficient
+or deltaPSI (see [upstream methods](#upstream-methods)).
 
-It also assumes the user has obtained genomic ranges representing the
-exon structure of each transcript being analyzed (see [obtaining exon
-ranges](#obtaining-exon-ranges)).
+It also assumes the user has information about the genomic ranges for
+the exons of each transcript. *splicelogic* provides a set of helper
+functions for generating these exon ranges, see [obtaining exon
+ranges](#obtaining-exon-ranges)). One helper function can simply take a
+partition of the transcripts as input (if no DTU analysis was performed
+upstream).
 
 The `exons` should be provided in a flat *GRanges* object (one range per
 exon), containing exon-level metadata in `mcols(exons)` such as the gene
@@ -773,7 +776,7 @@ human_exons <- human_exons |>
   preprocess(coef_col = "effect_est")
 ```
 
-### Using `prepare_exons_by_partition()`
+### Comparing two sets
 
 If one has two sets of transcripts to compare, for example, a set of
 transcripts of interest versus a reference set, one can use
@@ -911,6 +914,6 @@ sessionInfo()
     ## [71] evaluate_1.0.5              lattice_0.22-9             
     ## [73] png_0.1-9                   Rsamtools_2.26.0           
     ## [75] cigarillo_1.0.0             memoise_2.0.1              
-    ## [77] bslib_0.10.0                SparseArray_1.10.10        
+    ## [77] bslib_0.11.0                SparseArray_1.10.10        
     ## [79] xfun_0.57                   fs_2.1.0                   
     ## [81] MatrixGenerics_1.22.0       pkgconfig_2.0.3
