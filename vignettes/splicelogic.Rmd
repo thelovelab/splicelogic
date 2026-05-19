@@ -116,16 +116,17 @@ skipped <- exons |> find_se()
 
 *splicelogic* assumes the user has run a differential transcript
 usage (DTU) or differential splicing analysis providing 1) 
-a statistic for defining a significant set of transcripts,
-e.g. adjusted p-value / FDR and 2) an effect estimate with
-direction. e.g. GLM estimated coefficient or deltaPSI
-(see [upstream methods](#upstream-methods)).
+a statistic for defining a set of significant transcripts,
+e.g. adjusted p-value and 2) an effect estimate with
+direction, e.g. GLM estimated coefficient or change in
+percent-spliced-in ($\Delta$PSI),
+see [upstream methods](#upstream-methods).
 
 It also assumes the user has information about the 
 genomic ranges for the exons of each transcript.
 _splicelogic_ provides a set
 of helper functions for generating these exon ranges, 
-see [obtaining exon ranges](#obtaining-exon-ranges)).
+see [obtaining exon ranges](#obtaining-exon-ranges).
 One helper function can simply take a partition 
 of the transcripts as input (if no DTU analysis was 
 performed upstream).
@@ -134,7 +135,9 @@ The `exons` should be provided in a flat *GRanges* object (one
 range per exon), containing exon-level metadata in `mcols(exons)`
 such as the gene ID, transcript ID, rank in the transcript, and
 the estimated change or at least direction of change from the
-differential analysis.
+differential analysis. Again, this object can be compiled by
+_splicelogic_ helper functions described
+[below](#obtaining-exon-ranges).
 
 Required columns for exons:
 
@@ -383,7 +386,7 @@ all_events
 ```{r events-barplot}
 #| fig.alt: 'Barplot of event types'
 barplot(
-  table(all_events$event_type), horiz=TRUE, las=1,
+  table(all_events$event), horiz=TRUE, las=1,
   xlab="exons participating in an event"
 )
 ```
@@ -452,8 +455,18 @@ functions (`find_se()`, `find_ie()`, etc.).
 `prepare_exons()` extracts exon ranges from a *TxDb* object and
 merges them with your DTU results table. It returns a flat
 *GRanges* ready for `preprocess()` and the `find_*` functions.
-We demonstrate using GENCODE v32 (human genes).
+Typical usage shown in the following code:
 
+```{r prepare-demo}
+#| eval: false
+exons <- prepare_exons(
+  txdb = <A TxDb OBJECT>,
+  dtu_table = <DTU_TABLE>,
+  coef_col = "estimate"
+)
+```
+
+We demonstrate using GENCODE v32 (human genes).
 The first step is to load a *TxDb* object. Typically, a user would
 supply their own GTF to `txdbmaker::makeTxDbFromGFF()` to generate
 this. For this demonstration we will load a pre-constructed *TxDb*
