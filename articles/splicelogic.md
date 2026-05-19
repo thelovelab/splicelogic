@@ -101,21 +101,24 @@ skipped <- exons |> find_se()
 
 *splicelogic* assumes the user has run a differential transcript usage
 (DTU) or differential splicing analysis providing 1) a statistic for
-defining a significant set of transcripts, e.g. adjusted p-value / FDR
-and 2) an effect estimate with direction. e.g. GLM estimated coefficient
-or deltaPSI (see [upstream methods](#upstream-methods)).
+defining a set of significant transcripts, e.g. adjusted p-value and 2)
+an effect estimate with direction, e.g. GLM estimated coefficient or
+change in percent-spliced-in ($`\Delta`$PSI), see [upstream
+methods](#upstream-methods).
 
 It also assumes the user has information about the genomic ranges for
 the exons of each transcript. *splicelogic* provides a set of helper
 functions for generating these exon ranges, see [obtaining exon
-ranges](#obtaining-exon-ranges)). One helper function can simply take a
+ranges](#obtaining-exon-ranges). One helper function can simply take a
 partition of the transcripts as input (if no DTU analysis was performed
 upstream).
 
 The `exons` should be provided in a flat *GRanges* object (one range per
 exon), containing exon-level metadata in `mcols(exons)` such as the gene
 ID, transcript ID, rank in the transcript, and the estimated change or
-at least direction of change from the differential analysis.
+at least direction of change from the differential analysis. Again, this
+object can be compiled by *splicelogic* helper functions described
+[below](#obtaining-exon-ranges).
 
 Required columns for exons:
 
@@ -666,13 +669,21 @@ etc.).
 extracts exon ranges from a *TxDb* object and merges them with your DTU
 results table. It returns a flat *GRanges* ready for
 [`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
-and the `find_*` functions. We demonstrate using GENCODE v32 (human
-genes).
+and the `find_*` functions. Typical usage shown in the following code:
 
-The first step is to load a *TxDb* object. Typically, a user would
-supply their own GTF to `txdbmaker::makeTxDbFromGFF()` to generate this.
-For this demonstration we will load a pre-constructed *TxDb* from
-Bioconductor’s *AnnotationHub*.
+``` r
+exons <- prepare_exons(
+  txdb = <A TxDb OBJECT>,
+  dtu_table = <DTU_TABLE>,
+  coef_col = "estimate"
+)
+```
+
+We demonstrate using GENCODE v32 (human genes). The first step is to
+load a *TxDb* object. Typically, a user would supply their own GTF to
+`txdbmaker::makeTxDbFromGFF()` to generate this. For this demonstration
+we will load a pre-constructed *TxDb* from Bioconductor’s
+*AnnotationHub*.
 
 ``` r
 
