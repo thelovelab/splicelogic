@@ -40,7 +40,9 @@
 #'   
 #'   skipped <- find_se(gr)
 #' 
-#'   library(magrittr)
+#'   suppressPackageStartupMessages(
+#'     library(magrittr)
+#'   )
 #'   # magrittr pipe needed for the `.` placeholder below
 #'   skipped %>% 
 #'     plyranges::flank_upstream(100) %>%
