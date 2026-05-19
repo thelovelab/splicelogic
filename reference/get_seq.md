@@ -63,10 +63,26 @@ range in `gr`, in the same order. Assign it onto `gr` (e.g.
   ) |>
     generate_se(n_events = 1) |>
     GenomicRanges::shift(50e6) # move mock data
-
+  
   skipped <- find_se(gr)
+
+  library(magrittr)
+#> 
+#> Attaching package: ‘magrittr’
+#> The following object is masked from ‘package:GenomicRanges’:
+#> 
+#>     subtract
+  # magrittr pipe needed for the `.` placeholder below
   skipped %>% 
     plyranges::flank_upstream(100) %>%
     dplyr::mutate(seq = get_seq(., "hg38"))
-#> Error in skipped %>% plyranges::flank_upstream(100) %>% dplyr::mutate(seq = get_seq(.,     "hg38")): could not find function "%>%"
+#> GRanges object with 1 range and 8 metadata columns:
+#>       seqnames            ranges strand |   gene_id     tx_id exon_rank
+#>          <Rle>         <IRanges>  <Rle> | <integer> <numeric> <integer>
+#>   [1]    chr15 50000011-50000110      + |         2         4         2
+#>        estimate  event_type event_tx_id event_estimate                     seq
+#>       <numeric> <character>   <numeric>      <numeric>          <DNAStringSet>
+#>   [1] -0.551199          se           5       0.334642 TGTTACATGT...TGAAGGATAT
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```
