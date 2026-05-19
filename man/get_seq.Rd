@@ -48,8 +48,11 @@ to genomes by name.
   ) |>
     generate_se(n_events = 1) |>
     GenomicRanges::shift(50e6) # move mock data
-
+  
   skipped <- find_se(gr)
+
+  library(magrittr)
+  # magrittr pipe needed for the `.` placeholder below
   skipped \%>\% 
     plyranges::flank_upstream(100) \%>\%
     dplyr::mutate(seq = get_seq(., "hg38"))
