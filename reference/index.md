@@ -26,6 +26,11 @@
   [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   : Find splice events from annotated exons
 
+## Sequence extraction
+
+- [`get_seq()`](https://thelovelab.github.io/splicelogic/reference/get_seq.md)
+  : Extract sequences for a GRanges
+
 ## Mock data generation
 
 - [`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md)
