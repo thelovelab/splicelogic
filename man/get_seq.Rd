@@ -28,13 +28,11 @@ Given a GRanges (e.g. the output of \code{\link{find_se}},
 of each range from a BSgenome reference.
 }
 \examples{
-if (requireNamespace("BSgenome.Hsapiens.UCSC.hg38", quietly = TRUE)) {
   gr <- GenomicRanges::GRanges(
     "chr1", IRanges::IRanges(start = c(1e6, 1.1e6), width = 50)
   )
   get_seq(gr, "BSgenome.Hsapiens.UCSC.hg38")
   get_seq(gr, "BSgenome.Hsapiens.UCSC.hg38", as_rna = TRUE)
-}
 
 # On splicelogic output: upstream-flank RNA of a skipped exon.
   gr <- create_mock_data(
