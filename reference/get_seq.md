@@ -66,12 +66,9 @@ range in `gr`, in the same order. Assign it onto `gr` (e.g.
   
   skipped <- find_se(gr)
 
-  library(magrittr)
-#> 
-#> Attaching package: ‘magrittr’
-#> The following object is masked from ‘package:GenomicRanges’:
-#> 
-#>     subtract
+  suppressPackageStartupMessages(
+    library(magrittr)
+  )
   # magrittr pipe needed for the `.` placeholder below
   skipped %>% 
     plyranges::flank_upstream(100) %>%
