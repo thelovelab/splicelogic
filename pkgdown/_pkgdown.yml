@@ -24,6 +24,9 @@ reference:
     contents:
       - starts_with("find_")
       - find_all_events
+  - title: "Sequence extraction"
+    contents:
+      - get_seq
   - title: "Mock data generation"
     contents:
       - create_mock_data
