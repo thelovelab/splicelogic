@@ -29,7 +29,7 @@
 ## Sequence extraction
 
 - [`get_seq()`](https://thelovelab.github.io/splicelogic/reference/get_seq.md)
-  : Extract sequences for a GRanges
+  : Extract sequences for GRanges
 
 ## Mock data generation
 

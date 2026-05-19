@@ -73,30 +73,30 @@ prepare_exons_by_partition(gr_up, gr_down) |>
 #> GRanges object with 15 ranges and 7 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <integer>
-#>    [1]    chr17       1-5      + |         1         2         1         1
-#>    [2]    chr17     21-25      + |         1         2         2         1
-#>    [3]    chr17     31-35      + |         1         2         3         1
-#>    [4]    chr17       1-5      + |         1         1         1        -1
-#>    [5]    chr17     11-15      + |         1         1         2        -1
+#>    [1]    chr11       1-5      + |         1         2         1         1
+#>    [2]    chr11     21-25      + |         1         2         2         1
+#>    [3]    chr11     31-35      + |         1         2         3         1
+#>    [4]    chr11       1-5      + |         1         4         1         1
+#>    [5]    chr11     11-15      + |         1         4         2         1
 #>    ...      ...       ...    ... .       ...       ...       ...       ...
-#>   [11]    chr17     31-35      + |         1         3         4        -1
-#>   [12]    chr17       1-5      + |         1         4         1        -1
-#>   [13]    chr17     11-15      + |         1         4         2        -1
-#>   [14]    chr17     21-25      + |         1         4         3        -1
-#>   [15]    chr17     31-35      + |         1         4         4        -1
+#>   [11]    chr11     31-35      + |         1         1         4        -1
+#>   [12]    chr11       1-5      + |         1         3         1        -1
+#>   [13]    chr11     11-15      + |         1         3         2        -1
+#>   [14]    chr11     21-25      + |         1         3         3        -1
+#>   [15]    chr11     31-35      + |         1         3         4        -1
 #>                key    nexons  internal
 #>        <character> <integer> <logical>
 #>    [1]         2-1         3     FALSE
 #>    [2]         2-2         3      TRUE
 #>    [3]         2-3         3     FALSE
-#>    [4]         1-1         4     FALSE
-#>    [5]         1-2         4      TRUE
+#>    [4]         4-1         4     FALSE
+#>    [5]         4-2         4      TRUE
 #>    ...         ...       ...       ...
-#>   [11]         3-4         4     FALSE
-#>   [12]         4-1         4     FALSE
-#>   [13]         4-2         4      TRUE
-#>   [14]         4-3         4      TRUE
-#>   [15]         4-4         4     FALSE
+#>   [11]         1-4         4     FALSE
+#>   [12]         3-1         4     FALSE
+#>   [13]         3-2         4      TRUE
+#>   [14]         3-3         4      TRUE
+#>   [15]         3-4         4     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```

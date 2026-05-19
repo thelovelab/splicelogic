@@ -55,31 +55,14 @@ the coefficient column, and any additional columns from `dtu_table`.
 ``` r
 
 library(AnnotationHub)
-#> Loading required package: BiocGenerics
-#> Loading required package: generics
-#> 
-#> Attaching package: ‘generics’
-#> The following objects are masked from ‘package:base’:
-#> 
-#>     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,
-#>     setequal, union
-#> 
-#> Attaching package: ‘BiocGenerics’
-#> The following objects are masked from ‘package:stats’:
-#> 
-#>     IQR, mad, sd, var, xtabs
-#> The following objects are masked from ‘package:base’:
-#> 
-#>     Filter, Find, Map, Position, Reduce, anyDuplicated, aperm, append,
-#>     as.data.frame, basename, cbind, colnames, dirname, do.call,
-#>     duplicated, eval, evalq, get, grep, grepl, is.unsorted, lapply,
-#>     mapply, match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
-#>     rank, rbind, rownames, sapply, saveRDS, table, tapply, unique,
-#>     unsplit, which.max, which.min
 #> Loading required package: BiocFileCache
 #> Loading required package: dbplyr
+#> 
+#> Attaching package: ‘AnnotationHub’
+#> The following object is masked from ‘package:rtracklayer’:
+#> 
+#>     hubUrl
 library(AnnotationDbi)
-#> Loading required package: stats4
 #> Loading required package: Biobase
 #> Welcome to Bioconductor
 #> 
@@ -91,19 +74,7 @@ library(AnnotationDbi)
 #> The following object is masked from ‘package:AnnotationHub’:
 #> 
 #>     cache
-#> Loading required package: IRanges
-#> Loading required package: S4Vectors
-#> 
-#> Attaching package: ‘S4Vectors’
-#> The following object is masked from ‘package:utils’:
-#> 
-#>     findMatches
-#> The following objects are masked from ‘package:base’:
-#> 
-#>     I, expand.grid, unname
 library(GenomicFeatures)
-#> Loading required package: Seqinfo
-#> Loading required package: GenomicRanges
 library(tibble)
 
 ah <- AnnotationHub()
