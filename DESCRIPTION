@@ -44,6 +44,8 @@ Suggests:
     AnnotationHub,
     ggplot2,
     AnnotationDbi,
-    Seqinfo
+    Seqinfo,
+    BSgenome,
+    Biostrings
 Config/testthat/edition: 3
 VignetteBuilder: knitr
