@@ -209,7 +209,29 @@ candidates_by_presence <- function(gr, neg_exons, pos_exons) {
     dplyr::group_by(gene_id) |>
     dplyr::mutate(n_txp_pos = dplyr::n_distinct(tx_id)) |>
     dplyr::ungroup()
-  count <- neg_exons |> plyranges::count_overlaps(pos_exons)
+
+  # rename seqnames to gene_id auxiliarily to make sure overlaps are
+  # counted within each gene: exons of different genes then sit on
+  # different "chromosomes" and can never be paired at all.
+  # counting genome-wide would let a neighbouring or antisense gene
+  # inflate overlap_count and silently drop a true candidate below.
+  gene_levels <- union(
+    as.character(neg_exons$gene_id),
+    as.character(pos_exons$gene_id)
+  )
+  neg_exons_aux <- GenomicRanges::GRanges(
+    factor(as.character(neg_exons$gene_id), gene_levels),
+    IRanges::ranges(neg_exons),
+    GenomicRanges::strand(neg_exons)
+  )
+  pos_exons_aux <- GenomicRanges::GRanges(
+    factor(as.character(pos_exons$gene_id), gene_levels),
+    IRanges::ranges(pos_exons),
+    GenomicRanges::strand(pos_exons)
+  )
+
+  count <- neg_exons_aux |>
+    plyranges::count_overlaps_directed(pos_exons_aux)
 
   candidates <- neg_exons |>
     dplyr::mutate(
