@@ -3,25 +3,43 @@
 \name{find_events}
 \alias{find_events}
 \alias{find_se}
+\alias{find_skipped_exons}
 \alias{find_ie}
+\alias{find_included_exons}
 \alias{find_mxe}
+\alias{find_mutually_exclusive_exons}
 \alias{find_ri}
+\alias{find_retained_introns}
 \alias{find_a5ss}
+\alias{find_alternative_5_prime_splice_sites}
 \alias{find_a3ss}
+\alias{find_alternative_3_prime_splice_sites}
 \alias{find_all_events}
 \title{Find splice events from annotated exons}
 \usage{
 find_se(gr, type = c("boundary", "over", "in"), inverse = FALSE)
 
+find_skipped_exons(gr, type = c("boundary", "over", "in"), inverse = FALSE)
+
 find_ie(gr, type = c("boundary", "over", "in"))
+
+find_included_exons(gr, type = c("boundary", "over", "in"))
 
 find_mxe(gr, type = c("boundary", "in", "over"))
 
+find_mutually_exclusive_exons(gr, type = c("boundary", "in", "over"))
+
 find_ri(gr)
+
+find_retained_introns(gr)
 
 find_a5ss(gr)
 
+find_alternative_5_prime_splice_sites(gr)
+
 find_a3ss(gr)
+
+find_alternative_3_prime_splice_sites(gr)
 
 find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 }

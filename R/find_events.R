@@ -101,11 +101,20 @@ find_se <- function(
 }
 
 #' @rdname find_events
+#' @export
+find_skipped_exons <- find_se
+
+#' @rdname find_events
 #' @return `find_ie()`: included exons
 #' @export
 find_ie <- function(gr, type = c("boundary", "over", "in")) {
   find_se(gr, type, inverse = TRUE)
 }
+
+
+#' @rdname find_events
+#' @export
+find_included_exons <- find_ie
 
 # for find_mxe
 utils::globalVariables(c(
@@ -201,6 +210,10 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
   tbl_to_granges(hits_tbl, keep_cols, gr)
 }
 
+#' @rdname find_events
+#' @export
+find_mutually_exclusive_exons <- find_mxe
+
 # for find_ri
 utils::globalVariables(c(
   "estimate", "intron_idx", "pos_idx", "gene_id_intron",
@@ -274,6 +287,9 @@ find_ri <- function(gr) {
   tbl_to_granges(hits_tbl, keep_cols, gr)
 }
 
+#' @rdname find_events
+#' @export
+find_retained_introns <- find_ri
 
 # for find_alt_ss
 utils::globalVariables(c(
@@ -378,6 +394,10 @@ find_a5ss <- function(gr) {
 }
 
 #' @rdname find_events
+#' @export
+find_alternative_5_prime_splice_sites <- find_a5ss
+
+#' @rdname find_events
 #' @return `find_a3ss()`: alternative 3' splice sites
 #' @examples
 #'
@@ -393,6 +413,10 @@ find_a5ss <- function(gr) {
 find_a3ss <- function(gr) {
   find_alt_ss(gr, by_start = FALSE)
 }
+
+#' @rdname find_events
+#' @export
+find_alternative_3_prime_splice_sites <- find_a3ss
 
 #' @rdname find_events
 #' @param verbose If TRUE, prints progress messages. Default TRUE.

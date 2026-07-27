@@ -23,7 +23,6 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Beatriz Campillo \email{beatrizcampillo29@gmail.com} (\href{https://orcid.org/0000-0001-7323-9125}{ORCID})
   \item Michael Love \email{michaelisaiahlove@gmail.com} (\href{https://orcid.org/0000-0001-8401-0545}{ORCID})
 }
 
