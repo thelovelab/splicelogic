@@ -222,7 +222,7 @@ create_mock_data <- function(
 NULL
 
 # for generate_se
-utils::globalVariables(c("estimate", "internal", "key"))
+utils::globalVariables(c("estimate", "internal", "key", "gene_id"))
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
@@ -237,12 +237,26 @@ utils::globalVariables(c("estimate", "internal", "key"))
 #' generate_se(gr, n_events = 1)
 #'
 generate_se <- function(gr, n_events = 1) {
-  # generate skipped exons by modifying random internal
-  # exons in transcripts with estimate > 0
-  se_exons_key <- gr |>
+  # one candidate key per gene (sampled from internal positive-estimate exons),
+  # then draw up to n_events genes from that pool
+  candidates <- gr |>
     as.data.frame() |>
     dplyr::filter(estimate > 0 & internal == TRUE) |>
-    dplyr::distinct(key) |>
+    dplyr::distinct(gene_id, key) |>
+    dplyr::group_by(gene_id) |>
+    dplyr::slice_sample(n = 1) |>
+    dplyr::ungroup()
+
+  n_available <- nrow(candidates)
+  if (n_events > n_available) {
+    warning(sprintf(
+      "n_events (%d) exceeds available genes with candidates (%d); capping at %d.",
+      n_events, n_available, n_available
+    ))
+    n_events <- n_available
+  }
+
+  se_exons_key <- candidates |>
     dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
 
