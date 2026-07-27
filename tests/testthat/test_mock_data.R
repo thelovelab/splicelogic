@@ -69,6 +69,14 @@ test_that("create_mock_data is preprocessed", {
   expect_true(all(preprocess_cols %in% names(GenomicRanges::mcols(gr))))
 })
 
+test_that("create_mock_data genes do not overlap when n_exons_per_tx is large", {
+  set.seed(42)
+  gr <- create_mock_data(n_genes = 5, n_tx_per_gene = 3, n_exons_per_tx = 20)
+  gr_se <- generate_se(gr, n_events = 1)
+  result <- find_se(gr_se)
+  expect_gt(length(result), 0L)
+})
+
 # Test for generate_se
 test_that("generate_se removes exons", {
   gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 3, n_exons_per_tx = 6)

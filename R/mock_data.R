@@ -150,13 +150,15 @@ create_mock_data <- function(
   data <- data |>
     dplyr::arrange(gene_id, tx_id, exon_rank)
 
+  # gene_offset scales with n_exons_per_tx to prevent cross-gene coordinate overlap
+  gene_offset <- n_exons_per_tx * 10 + 50
+
   # Calculate transcript IDs globally
   data <- data |>
     dplyr::mutate(
       tx_id = tx_id + (gene_id - 1) * n_tx_per_gene,
       seqnames = paste0("chr", sample(seq_len(22), 1)), # Random chromosome
-      # start positions shifted by gene_id so they dont overlap
-      start = (exon_rank - 1) * 10 + 1 + (gene_id - 1) * 100,
+      start = (exon_rank - 1) * 10 + 1 + (gene_id - 1) * gene_offset,
       width = 5, # Fixed width
       strand = "+" # Fixed strand for simplicity TO DO
     )
