@@ -182,12 +182,12 @@ prepare_exons_by_partition <- function(up, down, txdb = NULL,
       }
       check_bioc_packages()
       # extract gene IDs for the provided transcript IDs
-      tx_gene <- AnnotationDbi::select(
+      tx_gene <- suppressMessages(AnnotationDbi::select(
         txdb,
         keys    = c(up, down),
         columns = "GENEID",
         keytype = tx_id_col
-      ) |>
+      )) |>
         tibble::as_tibble() |>
         dplyr::select(tx_id = dplyr::all_of(tx_id_col), gene_id = "GENEID")
 
@@ -254,12 +254,12 @@ check_dtu_cols <- function(dtu_table, tx_id_col, gene_id_col, coef_col) {
 #' @noRd
 extract_named_ebt <- function(txdb) {
   ebt <- GenomicFeatures::exonsBy(txdb, by = "tx")
-  tx_map <- AnnotationDbi::select(
+  tx_map <- suppressMessages(AnnotationDbi::select(
     txdb,
     keys = AnnotationDbi::keys(txdb, "TXID"),
     columns = "TXNAME",
     keytype = "TXID"
-  ) |>
+  )) |>
     tibble::as_tibble()
   idx <- match(names(ebt), tx_map$TXID)
   names(ebt) <- tx_map$TXNAME[idx]

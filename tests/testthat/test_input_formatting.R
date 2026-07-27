@@ -94,15 +94,15 @@ test_that("prepare_exons returns GRanges with required columns", {
   skip_if_not_installed("AnnotationDbi")
   skip_if_offline()
 
-  ah <- AnnotationHub::AnnotationHub()
-  txdb <- ah[["AH84134"]]
+  ah <- suppressMessages(AnnotationHub::AnnotationHub())
+  txdb <- suppressMessages(ah[["AH84134"]])
 
-  txps <- AnnotationDbi::select(
+  txps <- suppressMessages(AnnotationDbi::select(
     txdb,
     keys    = AnnotationDbi::keys(txdb, "TXID"),
     columns = c("TXNAME", "GENEID"),
     keytype = "TXID"
-  ) |>
+  )) |>
     tibble::as_tibble() |>
     dplyr::select(tx_id = TXNAME, gene_id = GENEID) |>
     dplyr::filter(!is.na(gene_id)) |>
@@ -216,15 +216,15 @@ test_that("tx ID path returns preprocessed GRanges", {
   skip_if_not_installed("AnnotationDbi")
   skip_if_offline()
 
-  ah <- AnnotationHub::AnnotationHub()
-  txdb <- ah[["AH84134"]]
+  ah <- suppressMessages(AnnotationHub::AnnotationHub())
+  txdb <- suppressMessages(ah[["AH84134"]])
 
-  txps <- AnnotationDbi::select(
+  txps <- suppressMessages(AnnotationDbi::select(
     txdb,
     keys    = AnnotationDbi::keys(txdb, "TXID"),
     columns = c("TXNAME", "GENEID"),
     keytype = "TXID"
-  ) |>
+  )) |>
     tibble::as_tibble() |>
     dplyr::select(tx_id = TXNAME, gene_id = GENEID) |>
     dplyr::filter(!is.na(gene_id))
