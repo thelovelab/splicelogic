@@ -73,24 +73,24 @@ prepare_exons_by_partition(gr_up, gr_down) |>
 #> GRanges object with 15 ranges and 7 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <integer>
-#>    [1]    chr11       1-5      + |         1         2         1         1
-#>    [2]    chr11     21-25      + |         1         2         2         1
-#>    [3]    chr11     31-35      + |         1         2         3         1
-#>    [4]    chr11       1-5      + |         1         4         1         1
-#>    [5]    chr11     11-15      + |         1         4         2         1
+#>    [1]    chr21       1-5      + |         1         2         1         1
+#>    [2]    chr21     11-15      + |         1         2         2         1
+#>    [3]    chr21     21-25      + |         1         2         3         1
+#>    [4]    chr21     31-35      + |         1         2         4         1
+#>    [5]    chr21       1-5      + |         1         4         1         1
 #>    ...      ...       ...    ... .       ...       ...       ...       ...
-#>   [11]    chr11     31-35      + |         1         1         4        -1
-#>   [12]    chr11       1-5      + |         1         3         1        -1
-#>   [13]    chr11     11-15      + |         1         3         2        -1
-#>   [14]    chr11     21-25      + |         1         3         3        -1
-#>   [15]    chr11     31-35      + |         1         3         4        -1
+#>   [11]    chr21     31-35      + |         1         1         4        -1
+#>   [12]    chr21       1-5      + |         1         3         1        -1
+#>   [13]    chr21     11-15      + |         1         3         2        -1
+#>   [14]    chr21     21-25      + |         1         3         3        -1
+#>   [15]    chr21     31-35      + |         1         3         4        -1
 #>                key    nexons  internal
 #>        <character> <integer> <logical>
-#>    [1]         2-1         3     FALSE
-#>    [2]         2-2         3      TRUE
-#>    [3]         2-3         3     FALSE
-#>    [4]         4-1         4     FALSE
-#>    [5]         4-2         4      TRUE
+#>    [1]         2-1         4     FALSE
+#>    [2]         2-2         4      TRUE
+#>    [3]         2-3         4      TRUE
+#>    [4]         2-4         4     FALSE
+#>    [5]         4-1         3     FALSE
 #>    ...         ...       ...       ...
 #>   [11]         1-4         4     FALSE
 #>   [12]         3-1         4     FALSE

@@ -76,10 +76,10 @@ range in `gr`, in the same order. Assign it onto `gr` (e.g.
 #> GRanges object with 1 range and 8 metadata columns:
 #>       seqnames            ranges strand |   gene_id     tx_id exon_rank
 #>          <Rle>         <IRanges>  <Rle> | <integer> <numeric> <integer>
-#>   [1]    chr15 50000021-50000120      + |         2         4         2
+#>   [1]    chr15 49999911-50000010      + |         1         1         2
 #>        estimate  event_type event_tx_id event_estimate                     seq
 #>       <numeric> <character>   <numeric>      <numeric>          <DNAStringSet>
-#>   [1] -0.551199          se           5       0.334642 ATCAGTAGTT...TCAAGTTGTT
+#>   [1] -0.454079          se           2       0.900827 TTTTCAAAAG...TCATCCAGAG
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```

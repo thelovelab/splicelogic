@@ -54,24 +54,24 @@ generate_se(gr, n_events = 1)
 #> GRanges object with 31 ranges and 7 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>    [1]    chr10       1-5      + |         1         1         1 -0.103009
-#>    [2]    chr10     11-15      + |         1         1         2 -0.103009
-#>    [3]    chr10     21-25      + |         1         1         3 -0.103009
-#>    [4]    chr10     31-35      + |         1         1         4 -0.103009
-#>    [5]    chr10       1-5      + |         1         2         1  0.855840
+#>    [1]     chr4       1-5      + |         1         1         1 -0.620463
+#>    [2]     chr4     11-15      + |         1         1         2 -0.620463
+#>    [3]     chr4     21-25      + |         1         1         3 -0.620463
+#>    [4]     chr4     31-35      + |         1         1         4 -0.620463
+#>    [5]     chr4       1-5      + |         1         2         1  0.218208
 #>    ...      ...       ...    ... .       ...       ...       ...       ...
-#>   [27]    chr10   121-125      + |         2         7         4  0.656029
-#>   [28]    chr10     91-95      + |         2         8         1 -0.798687
-#>   [29]    chr10   101-105      + |         2         8         2 -0.798687
-#>   [30]    chr10   111-115      + |         2         8         3 -0.798687
-#>   [31]    chr10   121-125      + |         2         8         4 -0.798687
+#>   [27]     chr4   121-125      + |         2         7         4  0.812103
+#>   [28]     chr4     91-95      + |         2         8         1  0.545461
+#>   [29]     chr4   101-105      + |         2         8         2  0.545461
+#>   [30]     chr4   111-115      + |         2         8         3  0.545461
+#>   [31]     chr4   121-125      + |         2         8         4  0.545461
 #>                key    nexons  internal
 #>        <character> <integer> <logical>
 #>    [1]         1-1         4     FALSE
 #>    [2]         1-2         4      TRUE
 #>    [3]         1-3         4      TRUE
 #>    [4]         1-4         4     FALSE
-#>    [5]         2-1         3     FALSE
+#>    [5]         2-1         4     FALSE
 #>    ...         ...       ...       ...
 #>   [27]         7-4         4     FALSE
 #>   [28]         8-1         4     FALSE
@@ -87,19 +87,19 @@ gr <- create_mock_data(
 )
 generate_mxe(gr, n_events = 1)
 #> GRanges object with 30 ranges and 7 metadata columns:
-#>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
-#>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>    [1]     chr9       1-5      + |         1         1         1 -0.404016
-#>    [2]     chr9     11-15      + |         1         1         2 -0.404016
-#>    [3]     chr9     21-25      + |         1         1         3 -0.404016
-#>    [4]     chr9     31-35      + |         1         1         4 -0.404016
-#>    [5]     chr9       1-5      + |         1         2         1  0.395668
-#>    ...      ...       ...    ... .       ...       ...       ...       ...
-#>   [26]     chr9   101-105      + |         2         7         2 -0.838310
-#>   [27]     chr9   121-125      + |         2         7         3 -0.838310
-#>   [28]     chr9     91-95      + |         2         8         1  0.311965
-#>   [29]     chr9   111-115      + |         2         8         2  0.311965
-#>   [30]     chr9   121-125      + |         2         8         3  0.311965
+#>        seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate
+#>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer>  <numeric>
+#>    [1]    chr10       1-5      + |         1         1         1 -0.0303205
+#>    [2]    chr10     11-15      + |         1         1         2 -0.0303205
+#>    [3]    chr10     21-25      + |         1         1         3 -0.0303205
+#>    [4]    chr10     31-35      + |         1         1         4 -0.0303205
+#>    [5]    chr10       1-5      + |         1         2         1  0.6024902
+#>    ...      ...       ...    ... .       ...       ...       ...        ...
+#>   [26]    chr10   121-125      + |         2         7         4   0.313992
+#>   [27]    chr10     91-95      + |         2         8         1  -0.341366
+#>   [28]    chr10   101-105      + |         2         8         2  -0.341366
+#>   [29]    chr10   111-115      + |         2         8         3  -0.341366
+#>   [30]    chr10   121-125      + |         2         8         4  -0.341366
 #>                key    nexons  internal
 #>        <character> <integer> <logical>
 #>    [1]         1-1         4     FALSE
@@ -108,11 +108,11 @@ generate_mxe(gr, n_events = 1)
 #>    [4]         1-4         4     FALSE
 #>    [5]         2-1         4     FALSE
 #>    ...         ...       ...       ...
-#>   [26]         7-2         3      TRUE
-#>   [27]         7-3         3     FALSE
-#>   [28]         8-1         3     FALSE
-#>   [29]         8-2         3      TRUE
-#>   [30]         8-3         3     FALSE
+#>   [26]         7-4         4     FALSE
+#>   [27]         8-1         4     FALSE
+#>   [28]         8-2         4      TRUE
+#>   [29]         8-3         4      TRUE
+#>   [30]         8-4         4     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -124,17 +124,17 @@ generate_ri(gr, n_events = 1)
 #> GRanges object with 31 ranges and 7 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>    [1]     chr8       1-5      + |         1         1         1 -0.586908
-#>    [2]     chr8     11-15      + |         1         1         2 -0.586908
-#>    [3]     chr8     21-25      + |         1         1         3 -0.586908
-#>    [4]     chr8     31-35      + |         1         1         4 -0.586908
-#>    [5]     chr8       1-5      + |         1         2         1  0.134598
+#>    [1]    chr16       1-5      + |         1         1         1 -0.607554
+#>    [2]    chr16     11-15      + |         1         1         2 -0.607554
+#>    [3]    chr16     21-25      + |         1         1         3 -0.607554
+#>    [4]    chr16     31-35      + |         1         1         4 -0.607554
+#>    [5]    chr16       1-5      + |         1         2         1  0.760473
 #>    ...      ...       ...    ... .       ...       ...       ...       ...
-#>   [27]     chr8   111-115      + |         2         8         3 0.0177871
-#>   [28]     chr8   121-125      + |         2         8         4 0.0177871
-#>   [29]     chr8       1-5      + |         1         4         1 0.3303049
-#>   [30]     chr8     11-25      + |         1         4         2 0.3303049
-#>   [31]     chr8     31-35      + |         1         4         3 0.3303049
+#>   [27]    chr16   111-115      + |         2         8         3  0.275371
+#>   [28]    chr16   121-125      + |         2         8         4  0.275371
+#>   [29]    chr16     91-95      + |         2         6         1  0.394466
+#>   [30]    chr16   101-115      + |         2         6         2  0.394466
+#>   [31]    chr16   121-125      + |         2         6         3  0.394466
 #>                key    nexons  internal
 #>        <character> <integer> <logical>
 #>    [1]         1-1         4     FALSE
@@ -145,9 +145,9 @@ generate_ri(gr, n_events = 1)
 #>    ...         ...       ...       ...
 #>   [27]         8-3         4      TRUE
 #>   [28]         8-4         4     FALSE
-#>   [29]         4-1         3     FALSE
-#>   [30]         4-2         3      TRUE
-#>   [31]         4-3         3     FALSE
+#>   [29]         6-1         3     FALSE
+#>   [30]         6-2         3      TRUE
+#>   [31]         6-3         3     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -159,17 +159,17 @@ generate_a5ss(gr, n_events = 1)
 #> GRanges object with 32 ranges and 7 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>    [1]    chr20       1-5      + |         1         1         1 -0.478438
-#>    [2]    chr20     11-15      + |         1         1         2 -0.478438
-#>    [3]    chr20     21-25      + |         1         1         3 -0.478438
-#>    [4]    chr20     31-35      + |         1         1         4 -0.478438
-#>    [5]    chr20       1-5      + |         1         2         1  0.886854
+#>    [1]     chr1       1-5      + |         1         1         1 -0.568967
+#>    [2]     chr1     11-15      + |         1         1         2 -0.568967
+#>    [3]     chr1     21-25      + |         1         1         3 -0.568967
+#>    [4]     chr1     31-35      + |         1         1         4 -0.568967
+#>    [5]     chr1       1-5      + |         1         2         1  0.609315
 #>    ...      ...       ...    ... .       ...       ...       ...       ...
-#>   [28]    chr20   121-125      + |         2         7         4  0.629192
-#>   [29]    chr20     91-95      + |         2         8         1 -0.858070
-#>   [30]    chr20   101-105      + |         2         8         2 -0.858070
-#>   [31]    chr20   111-115      + |         2         8         3 -0.858070
-#>   [32]    chr20   121-125      + |         2         8         4 -0.858070
+#>   [28]     chr1   121-125      + |         2         7         4 0.0536606
+#>   [29]     chr1     91-95      + |         2         8         1 0.5269497
+#>   [30]     chr1   101-105      + |         2         8         2 0.5269497
+#>   [31]     chr1   111-115      + |         2         8         3 0.5269497
+#>   [32]     chr1   121-125      + |         2         8         4 0.5269497
 #>                key    nexons  internal
 #>        <character> <integer> <logical>
 #>    [1]         1-1         4     FALSE
@@ -192,19 +192,19 @@ gr <- create_mock_data(
 )
 generate_a3ss(gr, n_events = 1)
 #> GRanges object with 32 ranges and 7 metadata columns:
-#>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
-#>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>    [1]    chr14       1-5      + |         1         1         1 -0.741426
-#>    [2]    chr14     11-15      + |         1         1         2 -0.741426
-#>    [3]    chr14     21-25      + |         1         1         3 -0.741426
-#>    [4]    chr14     31-35      + |         1         1         4 -0.741426
-#>    [5]    chr14       1-5      + |         1         2         1  0.367170
-#>    ...      ...       ...    ... .       ...       ...       ...       ...
-#>   [28]    chr14   121-125      + |         2         7         4  0.655003
-#>   [29]    chr14     91-95      + |         2         8         1 -0.744885
-#>   [30]    chr14   101-105      + |         2         8         2 -0.744885
-#>   [31]    chr14   111-115      + |         2         8         3 -0.744885
-#>   [32]    chr14   121-125      + |         2         8         4 -0.744885
+#>        seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate
+#>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer>  <numeric>
+#>    [1]     chr5       1-5      + |         1         1         1 -0.1548135
+#>    [2]     chr5     11-15      + |         1         1         2 -0.1548135
+#>    [3]     chr5     21-25      + |         1         1         3 -0.1548135
+#>    [4]     chr5     31-35      + |         1         1         4 -0.1548135
+#>    [5]     chr5       1-5      + |         1         2         1  0.0406147
+#>    ...      ...       ...    ... .       ...       ...       ...        ...
+#>   [28]     chr5   121-125      + |         2         7         4  -0.423166
+#>   [29]     chr5     91-95      + |         2         8         1  -0.970462
+#>   [30]     chr5   101-105      + |         2         8         2  -0.970462
+#>   [31]     chr5   111-115      + |         2         8         3  -0.970462
+#>   [32]     chr5   121-125      + |         2         8         4  -0.970462
 #>                key    nexons  internal
 #>        <character> <integer> <logical>
 #>    [1]         1-1         4     FALSE

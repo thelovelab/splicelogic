@@ -91,24 +91,24 @@ events introduced</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 31 ranges and 7 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]    chr10       1-5      + |         1         1         1 -0.103009</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]    chr10     11-15      + |         1         1         2 -0.103009</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]    chr10     21-25      + |         1         1         3 -0.103009</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]    chr10     31-35      + |         1         1         4 -0.103009</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]    chr10       1-5      + |         1         2         1  0.855840</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]     chr4       1-5      + |         1         1         1 -0.620463</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]     chr4     11-15      + |         1         1         2 -0.620463</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]     chr4     21-25      + |         1         1         3 -0.620463</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]     chr4     31-35      + |         1         1         4 -0.620463</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]     chr4       1-5      + |         1         2         1  0.218208</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...       ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]    chr10   121-125      + |         2         7         4  0.656029</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]    chr10     91-95      + |         2         8         1 -0.798687</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]    chr10   101-105      + |         2         8         2 -0.798687</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr10   111-115      + |         2         8         3 -0.798687</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]    chr10   121-125      + |         2         8         4 -0.798687</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]     chr4   121-125      + |         2         7         4  0.812103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]     chr4     91-95      + |         2         8         1  0.545461</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]     chr4   101-105      + |         2         8         2  0.545461</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]     chr4   111-115      + |         2         8         3  0.545461</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]     chr4   121-125      + |         2         8         4  0.545461</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [2]         1-2         4      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [3]         1-3         4      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [4]         1-4         4     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]         2-1         3     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]         2-1         4     FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ...         ...       ...       ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [27]         7-4         4     FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [28]         8-1         4     FALSE</span>
@@ -124,19 +124,19 @@ events introduced</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">generate_mxe</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 30 ranges and 7 metadata columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]     chr9       1-5      + |         1         1         1 -0.404016</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]     chr9     11-15      + |         1         1         2 -0.404016</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]     chr9     21-25      + |         1         1         3 -0.404016</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]     chr9     31-35      + |         1         1         4 -0.404016</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]     chr9       1-5      + |         1         2         1  0.395668</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...       ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [26]     chr9   101-105      + |         2         7         2 -0.838310</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]     chr9   121-125      + |         2         7         3 -0.838310</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]     chr9     91-95      + |         2         8         1  0.311965</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]     chr9   111-115      + |         2         8         2  0.311965</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]     chr9   121-125      + |         2         8         3  0.311965</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt;  &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]    chr10       1-5      + |         1         1         1 -0.0303205</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]    chr10     11-15      + |         1         1         2 -0.0303205</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]    chr10     21-25      + |         1         1         3 -0.0303205</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]    chr10     31-35      + |         1         1         4 -0.0303205</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]    chr10       1-5      + |         1         2         1  0.6024902</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...        ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [26]    chr10   121-125      + |         2         7         4   0.313992</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]    chr10     91-95      + |         2         8         1  -0.341366</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]    chr10   101-105      + |         2         8         2  -0.341366</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]    chr10   111-115      + |         2         8         3  -0.341366</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr10   121-125      + |         2         8         4  -0.341366</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE</span>
@@ -145,11 +145,11 @@ events introduced</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [4]         1-4         4     FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [5]         2-1         4     FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ...         ...       ...       ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [26]         7-2         3      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]         7-3         3     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]         8-1         3     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]         8-2         3      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]         8-3         3     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [26]         7-4         4     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]         8-1         4     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]         8-2         4      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]         8-3         4      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]         8-4         4     FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
@@ -161,17 +161,17 @@ events introduced</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 31 ranges and 7 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]     chr8       1-5      + |         1         1         1 -0.586908</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]     chr8     11-15      + |         1         1         2 -0.586908</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]     chr8     21-25      + |         1         1         3 -0.586908</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]     chr8     31-35      + |         1         1         4 -0.586908</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]     chr8       1-5      + |         1         2         1  0.134598</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]    chr16       1-5      + |         1         1         1 -0.607554</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]    chr16     11-15      + |         1         1         2 -0.607554</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]    chr16     21-25      + |         1         1         3 -0.607554</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]    chr16     31-35      + |         1         1         4 -0.607554</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]    chr16       1-5      + |         1         2         1  0.760473</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...       ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]     chr8   111-115      + |         2         8         3 0.0177871</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]     chr8   121-125      + |         2         8         4 0.0177871</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]     chr8       1-5      + |         1         4         1 0.3303049</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]     chr8     11-25      + |         1         4         2 0.3303049</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]     chr8     31-35      + |         1         4         3 0.3303049</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]    chr16   111-115      + |         2         8         3  0.275371</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]    chr16   121-125      + |         2         8         4  0.275371</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]    chr16     91-95      + |         2         6         1  0.394466</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr16   101-115      + |         2         6         2  0.394466</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]    chr16   121-125      + |         2         6         3  0.394466</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE</span>
@@ -182,9 +182,9 @@ events introduced</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ...         ...       ...       ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [27]         8-3         4      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [28]         8-4         4     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]         4-1         3     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]         4-2         3      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]         4-3         3     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]         6-1         3     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]         6-2         3      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]         6-3         3     FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
@@ -196,17 +196,17 @@ events introduced</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 32 ranges and 7 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]    chr20       1-5      + |         1         1         1 -0.478438</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]    chr20     11-15      + |         1         1         2 -0.478438</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]    chr20     21-25      + |         1         1         3 -0.478438</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]    chr20     31-35      + |         1         1         4 -0.478438</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]    chr20       1-5      + |         1         2         1  0.886854</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]     chr1       1-5      + |         1         1         1 -0.568967</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]     chr1     11-15      + |         1         1         2 -0.568967</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]     chr1     21-25      + |         1         1         3 -0.568967</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]     chr1     31-35      + |         1         1         4 -0.568967</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]     chr1       1-5      + |         1         2         1  0.609315</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...       ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]    chr20   121-125      + |         2         7         4  0.629192</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]    chr20     91-95      + |         2         8         1 -0.858070</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr20   101-105      + |         2         8         2 -0.858070</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]    chr20   111-115      + |         2         8         3 -0.858070</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [32]    chr20   121-125      + |         2         8         4 -0.858070</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]     chr1   121-125      + |         2         7         4 0.0536606</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]     chr1     91-95      + |         2         8         1 0.5269497</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]     chr1   101-105      + |         2         8         2 0.5269497</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]     chr1   111-115      + |         2         8         3 0.5269497</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [32]     chr1   121-125      + |         2         8         4 0.5269497</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE</span>
@@ -229,19 +229,19 @@ events introduced</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">generate_a3ss</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 32 ranges and 7 metadata columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]    chr14       1-5      + |         1         1         1 -0.741426</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]    chr14     11-15      + |         1         1         2 -0.741426</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]    chr14     21-25      + |         1         1         3 -0.741426</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]    chr14     31-35      + |         1         1         4 -0.741426</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]    chr14       1-5      + |         1         2         1  0.367170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...       ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]    chr14   121-125      + |         2         7         4  0.655003</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]    chr14     91-95      + |         2         8         1 -0.744885</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr14   101-105      + |         2         8         2 -0.744885</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]    chr14   111-115      + |         2         8         3 -0.744885</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [32]    chr14   121-125      + |         2         8         4 -0.744885</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt;  &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]     chr5       1-5      + |         1         1         1 -0.1548135</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]     chr5     11-15      + |         1         1         2 -0.1548135</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]     chr5     21-25      + |         1         1         3 -0.1548135</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]     chr5     31-35      + |         1         1         4 -0.1548135</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]     chr5       1-5      + |         1         2         1  0.0406147</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...        ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]     chr5   121-125      + |         2         7         4  -0.423166</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]     chr5     91-95      + |         2         8         1  -0.970462</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]     chr5   101-105      + |         2         8         2  -0.970462</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]     chr5   111-115      + |         2         8         3  -0.970462</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [32]     chr5   121-125      + |         2         8         4  -0.970462</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE</span>
