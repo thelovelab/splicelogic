@@ -89,11 +89,17 @@ as part of the EOSS program.
 ## Event detection
 
 - [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_included_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_mutually_exclusive_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   : Find splice events from annotated exons
 

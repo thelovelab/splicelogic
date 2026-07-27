@@ -51,15 +51,27 @@ and alternative 5' and 3' splice sites (a5ss / a3ss).</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">find_se</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">find_skipped_exons</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">find_ie</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">find_included_exons</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">find_mxe</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"in"</span>, <span class="st">"over"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">find_mutually_exclusive_exons</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"in"</span>, <span class="st">"over"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">find_ri</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">find_retained_introns</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">find_a5ss</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">find_alternative_5_prime_splice_sites</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">find_a3ss</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">find_alternative_3_prime_splice_sites</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">find_all_events</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -177,8 +189,8 @@ carrying the corresponding value from the paired transcript.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 7 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr10   111-125      + |         2         7         2  0.840011</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr10   111-125      + |         2         7         2  0.840011</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr10   101-115      + |         2         7         2  0.840011</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr10   101-115      + |         2         7         2  0.840011</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        event_type event_tx_id event_estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [1]          ri           5      -0.852455</span>
@@ -198,7 +210,7 @@ carrying the corresponding value from the paired transcript.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 1 range and 7 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr22   121-123      + |         2         6         3  0.128291</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr22   111-113      + |         2         6         3  0.128291</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        event_type event_tx_id event_estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [1]        a5ss           5      -0.372363</span>
@@ -255,7 +267,7 @@ carrying the corresponding value from the paired transcript.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
