@@ -73,13 +73,16 @@ range in `gr`, in the same order. Assign it onto `gr` (e.g.
   skipped %>% 
     plyranges::flank_upstream(100) %>%
     dplyr::mutate(seq = get_seq(., "hg38"))
-#> GRanges object with 1 range and 8 metadata columns:
+#> GRanges object with 1 range and 9 metadata columns:
 #>       seqnames            ranges strand |   gene_id     tx_id exon_rank
 #>          <Rle>         <IRanges>  <Rle> | <integer> <numeric> <integer>
 #>   [1]    chr15 49999911-50000010      + |         1         1         2
-#>        estimate  event_type event_tx_id event_estimate                     seq
-#>       <numeric> <character>   <numeric>      <numeric>          <DNAStringSet>
-#>   [1] -0.454079          se           2       0.900827 TTTTCAAAAG...TCATCCAGAG
+#>        estimate sim_event  event_type event_tx_id event_estimate
+#>       <numeric> <logical> <character>   <numeric>      <numeric>
+#>   [1] -0.454079      TRUE          se           2       0.900827
+#>                           seq
+#>                <DNAStringSet>
+#>   [1] TTTTCAAAAG...TCATCCAGAG
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```

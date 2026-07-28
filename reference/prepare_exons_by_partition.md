@@ -70,7 +70,7 @@ gr_down <- gr[gr$estimate < 0]
 gr_up <- gr[gr$estimate > 0]
 prepare_exons_by_partition(gr_up, gr_down) |>
   preprocess(coef_col = "estimate")
-#> GRanges object with 15 ranges and 7 metadata columns:
+#> GRanges object with 15 ranges and 8 metadata columns:
 #>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>           <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <integer>
 #>    [1]    chr21       1-5      + |         1         2         1         1
@@ -84,19 +84,19 @@ prepare_exons_by_partition(gr_up, gr_down) |>
 #>   [13]    chr21     11-15      + |         1         3         2        -1
 #>   [14]    chr21     21-25      + |         1         3         3        -1
 #>   [15]    chr21     31-35      + |         1         3         4        -1
-#>                key    nexons  internal
-#>        <character> <integer> <logical>
-#>    [1]         2-1         4     FALSE
-#>    [2]         2-2         4      TRUE
-#>    [3]         2-3         4      TRUE
-#>    [4]         2-4         4     FALSE
-#>    [5]         4-1         3     FALSE
-#>    ...         ...       ...       ...
-#>   [11]         1-4         4     FALSE
-#>   [12]         3-1         4     FALSE
-#>   [13]         3-2         4      TRUE
-#>   [14]         3-3         4      TRUE
-#>   [15]         3-4         4     FALSE
+#>                key    nexons  internal sim_event
+#>        <character> <integer> <logical> <logical>
+#>    [1]         2-1         4     FALSE     FALSE
+#>    [2]         2-2         4      TRUE     FALSE
+#>    [3]         2-3         4      TRUE     FALSE
+#>    [4]         2-4         4     FALSE     FALSE
+#>    [5]         4-1         3     FALSE     FALSE
+#>    ...         ...       ...       ...       ...
+#>   [11]         1-4         4     FALSE     FALSE
+#>   [12]         3-1         4     FALSE     FALSE
+#>   [13]         3-2         4      TRUE      TRUE
+#>   [14]         3-3         4      TRUE     FALSE
+#>   [15]         3-4         4     FALSE     FALSE
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```
