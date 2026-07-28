@@ -281,7 +281,7 @@ create_mock_data <- function(
 NULL
 
 # for generate_se
-utils::globalVariables(c("estimate", "internal", "key", "gene_id"))
+utils::globalVariables(c("estimate", "internal", "key", "gene_id", "sim_event"))
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
@@ -319,9 +319,20 @@ generate_se <- function(gr, n_events = 1) {
     dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
 
+  event_coords <- gr |>
+    as.data.frame() |>
+    dplyr::filter(key %in% se_exons_key) |>
+    dplyr::mutate(coord_sig = paste(start, end, gene_id)) |>
+    dplyr::pull(coord_sig)
+
   gr <- gr |>
     dplyr::filter(!key %in% se_exons_key)
   gr <- rerank_exons(gr)
+
+  gr <- gr |>
+    dplyr::mutate(
+      sim_event = estimate < 0 & paste(start, end, gene_id) %in% event_coords
+    )
   return(gr)
 }
 
@@ -378,9 +389,27 @@ generate_mxe <- function(gr, n_events = 1) {
   pos_remove <- paste0(mx_pairs$pos_tx_id, "-", mx_pairs$exon_rank)
   neg_remove <- paste0(mx_pairs$neg_tx_id, "-", mx_pairs$exon_rank + 1L)
 
+  # pos-removed exon coords survive in neg; neg-removed exon coords survive in pos
+  pos_removed_coords <- gr |>
+    as.data.frame() |>
+    dplyr::filter(key %in% pos_remove) |>
+    dplyr::mutate(coord_sig = paste(start, end, gene_id)) |>
+    dplyr::pull(coord_sig)
+  neg_removed_coords <- gr |>
+    as.data.frame() |>
+    dplyr::filter(key %in% neg_remove) |>
+    dplyr::mutate(coord_sig = paste(start, end, gene_id)) |>
+    dplyr::pull(coord_sig)
+
   gr <- gr |>
     dplyr::filter(!key %in% c(pos_remove, neg_remove))
   gr <- rerank_exons(gr)
+
+  gr <- gr |>
+    dplyr::mutate(
+      sim_event = (estimate < 0 & paste(start, end, gene_id) %in% pos_removed_coords) |
+                  (estimate > 0 & paste(start, end, gene_id) %in% neg_removed_coords)
+    )
   return(gr)
 }
 
@@ -427,11 +456,21 @@ generate_ri <- function(gr, n_events = 1) {
     dplyr::ungroup() |>
     plyranges::as_granges()
 
-  #remove old transcripts with retained introns and add the new ones
+  ri_event_coords <- new_txps_with_ri |>
+    as.data.frame() |>
+    dplyr::filter(exon_rank == exon_idx) |>
+    dplyr::mutate(coord_sig = paste(start, end, gene_id)) |>
+    dplyr::pull(coord_sig)
+
   gr <- gr |>
     dplyr::filter(!tx_id %in% ri_tx_ids) |>
     plyranges::bind_ranges(new_txps_with_ri)
   gr <- rerank_exons(gr)
+
+  gr <- gr |>
+    dplyr::mutate(
+      sim_event = estimate > 0 & paste(start, end, gene_id) %in% ri_event_coords
+    )
   return(gr)
 }
 
@@ -504,6 +543,8 @@ generate_a5ss <- function(gr, n_events = 1) {
       ) # TO DO : include - strand case (start instead of end)
     )
   gr_with_a5ss <- preprocess(gr_with_a5ss, coef_col = "estimate")
+  gr_with_a5ss <- gr_with_a5ss |>
+    dplyr::mutate(sim_event = key %in% a5ss_exon_key)
   return(gr_with_a5ss)
 }
 # for generate_a3ss
@@ -550,5 +591,7 @@ generate_a3ss <- function(gr, n_events = 1) {
       )
     ) # TO DO : include - strand case (end instead of start)
   gr_with_a3ss <- preprocess(gr_with_a3ss, coef_col = "estimate")
+  gr_with_a3ss <- gr_with_a3ss |>
+    dplyr::mutate(sim_event = key %in% a3ss_exon_key)
   return(gr_with_a3ss)
 }
