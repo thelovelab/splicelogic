@@ -145,3 +145,19 @@ test_that("find_all_events returns empty GRanges when no events exist", {
   expect_s4_class(result, "GRanges")
   expect_equal(length(result), 0L)
 })
+
+test_that("find_se counts isoforms, not exons, when picking candidates", {
+  gr <- preprocess(intron_split_mock_data(), coef_col = "estimate")
+
+  result <- find_se(gr, type = "boundary")
+
+  expect_s4_class(result, "GRanges")
+  # exactly one event: the 100-300 exon of neg1, skipped by posC
+  expect_equal(length(result), 1L)
+  expect_equal(GenomicRanges::start(result), 100L)
+  expect_equal(GenomicRanges::end(result), 300L)
+  expect_equal(as.character(result$tx_id), "neg1")
+  expect_equal(as.character(result$event_type), "se")
+  # posA and posB keep the region (split in two), only posC skips it
+  expect_equal(as.character(result$event_tx_id), "posC")
+})

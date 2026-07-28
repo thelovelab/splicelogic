@@ -115,6 +115,65 @@ no_event_mock_data <- function() {
   return(gr)
 }
 
+#' Create a sample GRanges with one negative coef transcript and three
+#' positive coef transcripts, two of which splice an intron inside the
+#' candidate exon
+#'
+#' ```
+#' neg1  [1-50] [====100-300====] [400-450]
+#' posA  [1-50] [100-150] [200-300] [400-450]
+#' posB  [1-50] [100-150] [200-300] [400-450]
+#' posC  [1-50]                     [400-450]
+#' ```
+#'
+#' posC splices `1-50` straight to `400-450`, so 100-300 is a genuine
+#' skipped exon relative to posC. posA and posB each contribute TWO
+#' exons overlapping the candidate, so counting exons rather than
+#' isoforms gives 4 against 3 positive transcripts and discards the
+#' candidate before it reaches the flanking-exon stage.
+#' @return A GRanges object with four transcripts in one gene
+#' @noRd
+intron_split_mock_data <- function() {
+  df1 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 100, 400),
+    end = c(50, 300, 450),
+    strand = "+",
+    exon_rank = seq_len(3),
+    gene_id = "g1",
+    estimate = -1
+  )
+  df2 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 100, 200, 400),
+    end = c(50, 150, 300, 450),
+    strand = "+",
+    exon_rank = seq_len(4),
+    gene_id = "g1",
+    estimate = 1
+  )
+  df3 <- df2
+  df4 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 400),
+    end = c(50, 450),
+    strand = "+",
+    exon_rank = seq_len(2),
+    gene_id = "g1",
+    estimate = 1
+  )
+  gr1 <- plyranges::as_granges(df1)
+  gr2 <- plyranges::as_granges(df2)
+  gr3 <- plyranges::as_granges(df3)
+  gr4 <- plyranges::as_granges(df4)
+  gr <- plyranges::bind_ranges(gr1, gr2, gr3, gr4) |>
+    dplyr::mutate(
+      tx_id = rep(c("neg1", "posA", "posB", "posC"), times = c(3, 4, 4, 2))
+    )
+
+  return(gr)
+}
+
 # for create_mock_data
 utils::globalVariables(c("gene_id", "strand", "tx_order", "estimate"))
 

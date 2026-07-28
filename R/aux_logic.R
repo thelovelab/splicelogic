@@ -230,8 +230,19 @@ candidates_by_presence <- function(gr, neg_exons, pos_exons) {
     GenomicRanges::strand(pos_exons)
   )
 
+  # split into one item per positive transcript so that the count is of
+  # transcripts containing the exon, not of overlapping exons. a transcript
+  # that splices an intron inside the candidate contributes two exons and
+  # would otherwise push overlap_count / n_txp_pos to 1 or above, silently
+  # dropping a true candidate. with this, count < n_txp_pos reads exactly
+  # as "at least one positive isoform does not contain this exon".
+  pos_by_tx_aux <- S4Vectors::split(
+    pos_exons_aux, #GRanges object
+    factor(pos_exons$tx_id, levels = unique(pos_exons$tx_id))
+  ) # output is GRangesList of lenght = n of pos transcripts
+
   count <- neg_exons_aux |>
-    plyranges::count_overlaps_directed(pos_exons_aux)
+    plyranges::count_overlaps_directed(pos_by_tx_aux)
 
   candidates <- neg_exons |>
     dplyr::mutate(
@@ -239,7 +250,7 @@ candidates_by_presence <- function(gr, neg_exons, pos_exons) {
       n_txp_pos = pos_exons$n_txp_pos[match(gene_id, pos_exons$gene_id)]
     ) |>
     dplyr::filter(internal & (overlap_count / n_txp_pos) < 1)
-
+    
   # early return: no candidates -> empty list with GRanges objects
   if (length(candidates) == 0L) {
     return(list(
