@@ -76,7 +76,10 @@ preprocess <- function(gr, coef_col, method_string = NULL,
     dplyr::mutate(
       key = paste0(tx_id, "-", exon_rank),
       nexons = length(exon_rank),
-      internal = exon_rank > 1 & exon_rank < nexons,
+      # rank-relative so that transcripts whose exon_rank does not
+      # start at 1 (e.g. a subset of a larger annotation) still get
+      # their first/last exon flagged correctly
+      internal = exon_rank > min(exon_rank) & exon_rank < max(exon_rank),
       # always use "estimate" as the column name
       # for coef values in downstream functions
       estimate = !!rlang::sym(coef_col)
