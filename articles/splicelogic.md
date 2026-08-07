@@ -887,7 +887,7 @@ sessionInfo()
     ## loaded via a namespace (and not attached):
     ##  [1] tidyselect_1.2.1            blob_1.3.0                 
     ##  [3] filelock_1.0.3              Biostrings_2.78.0          
-    ##  [5] bitops_1.0-9                fastmap_1.2.0              
+    ##  [5] bitops_1.1-0                fastmap_1.2.0              
     ##  [7] RCurl_1.98-1.19             GenomicAlignments_1.46.0   
     ##  [9] XML_3.99-0.23               digest_0.6.39              
     ## [11] lifecycle_1.0.5             KEGGREST_1.50.0            
@@ -923,6 +923,6 @@ sessionInfo()
     ## [71] evaluate_1.0.5              lattice_0.22-9             
     ## [73] png_0.1-9                   Rsamtools_2.26.0           
     ## [75] cigarillo_1.0.0             memoise_2.0.1              
-    ## [77] bslib_0.11.0                SparseArray_1.10.10        
+    ## [77] bslib_0.12.0                SparseArray_1.10.10        
     ## [79] xfun_0.60                   fs_2.1.0                   
     ## [81] MatrixGenerics_1.22.0       pkgconfig_2.0.3
