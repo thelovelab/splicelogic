@@ -1,3 +1,64 @@
+# for check_exon_rank
+utils::globalVariables(c("tx_id", "exon_rank"))
+
+#' Check that exon_rank runs consecutively within each transcript
+#'
+#' Ranks do not have to start at 1 -- a GRanges taken as a subset of a
+#' larger annotation may be ranked from any offset -- but within a
+#' transcript they must form a run of consecutive integers, with no
+#' gaps and no duplicates. Downstream helpers look up flanking exons by
+#' building keys from \code{exon_rank - 1} / \code{exon_rank + 1}, so a
+#' missing rank silently resolves to no match.
+#'
+#' @param gr A GRanges object with 'exon_rank' and 'tx_id' mcols
+#' @return TRUE if valid, otherwise throws an error
+#' @noRd
+check_exon_rank <- function(gr) {
+  ranks <- GenomicRanges::mcols(gr)$exon_rank
+  txs <- GenomicRanges::mcols(gr)$tx_id
+  if (!is.numeric(ranks)) {
+    stop("The 'exon_rank' metadata column must contain numeric values.")
+  }
+  if (anyNA(ranks) || anyNA(txs)) {
+    stop("'exon_rank' and 'tx_id' must not contain NA values.")
+  }
+  if (length(gr) < 2L) {
+    return(TRUE)
+  }
+  # a GRanges has no sortedness invariant -- row order is whatever the
+  # caller built. unlist(exonsBy(txdb, by = "tx")) happens to arrive
+  # grouped and in rank order, but one sort(gr) both interleaves the
+  # transcripts and leaves minus-strand ranks descending. Sorting here
+  # restores grouping and rank order so the check below tests the set
+  # of ranks rather than the order the rows are stored in.
+  tbl <- gr |>
+    dplyr::select(tx_id, exon_rank, .drop_ranges = TRUE) |>
+    tibble::as_tibble() |>
+    dplyr::arrange(tx_id, exon_rank)
+  # within a transcript every step must be exactly 1: a gap gives > 1,
+  # a duplicate gives 0
+  n <- nrow(tbl)
+  same_tx <- tbl$tx_id[-1] == tbl$tx_id[-n]
+  bad <- same_tx & (diff(tbl$exon_rank) != 1L)
+  if (any(bad)) {         
+    affected <- unique(tbl$tx_id[-1][bad])
+    shown <- affected[seq_len(min(5L, length(affected)))]
+    stop(
+      "'exon_rank' must be consecutive within each transcript ",
+      "(gaps or duplicates found).\n",
+      "  Ranks do not need to start at 1, but they must be ",
+      "consecutive.\n",
+      "  Affected tx_id: ", paste(shown, collapse = ", "),
+      if (length(affected) > 5L) {
+        paste0(", ... and ", length(affected) - 5L, " more")
+      } else {
+        ""
+      }
+    )
+  }
+  TRUE
+}
+
 #' Check that input is a valid GRanges object with required
 #' metadata columns provided by the user
 #' exon_rank", "gene_id", "tx_id", coef_col
@@ -29,6 +90,8 @@ check_input <- function(gr, coef_col) {
       ))
     }
   }
+  # exon_rank must run consecutively within each transcript
+  check_exon_rank(gr)
 
   TRUE
 }
