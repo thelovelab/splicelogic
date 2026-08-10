@@ -8,6 +8,27 @@ test_that("find_se works with se_mock_data and preprocess", {
   expect_true(any(result$event_type == "se"))
 })
 
+# Test for find_se when exon_rank is offset (CDS-style ranges)
+test_that("find_se detects a skipped exon when exon_rank starts at 2", {
+  gr <- cds_mock_data()
+  gr <- preprocess(gr, coef_col = "estimate")
+  result <- find_se(gr)
+
+  expect_s4_class(result, "GRanges")
+
+  # tx 2 skips 31-35, which is exon_rank 5 of tx 1. This is only found
+  # if 'internal' is computed relative to each transcript's own rank
+  # range: the candidate is the second-to-last exon, which the old
+  # 'exon_rank < nexons' form marked terminal and discarded.
+  expect_equal(length(result), 1L)
+  expect_equal(as.integer(GenomicRanges::start(result)), 31L)
+  expect_equal(as.integer(GenomicRanges::end(result)), 35L)
+  expect_equal(as.integer(GenomicRanges::mcols(result)$tx_id), 1L)
+  expect_equal(as.integer(GenomicRanges::mcols(result)$exon_rank), 5L)
+  expect_equal(as.integer(GenomicRanges::mcols(result)$event_tx_id), 2L)
+  expect_equal(as.character(GenomicRanges::mcols(result)$event_type), "se")
+})
+
 # Test for no event detected in skipped exon
 test_that("find_se returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events

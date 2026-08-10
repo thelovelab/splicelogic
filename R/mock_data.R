@@ -115,6 +115,55 @@ no_event_mock_data <- function() {
   return(gr)
 }
 
+#' Create a sample GRanges whose exon_rank does not start at 1
+#'
+#' Mimics coding-sequence (CDS) ranges rather than whole exons: a 5'
+#' UTR-only exon is not part of the CDS, so the first coding range of
+#' each transcript carries exon_rank 2 instead of 1. Ranks are still
+#' consecutive within a transcript, they just start at an offset.
+#'
+#' ```
+#' rank     2        3        4        5        6
+#' neg1  [1-5]  [11-15]  [21-25]  [31-35]  [41-45]
+#' pos2  [1-5]  [11-15]  [21-25]           [41-45]
+#' rank     2        3        4                 5
+#' ```
+#'
+#' tx 2 skips 31-35, so there is one skipped exon event at exon_rank 5
+#' of tx 1. Because the ranks are offset, this fixture also covers the
+#' 'internal' flag being computed relative to each transcript's own
+#' rank range rather than assuming ranks run 1..nexons.
+#' @return A GRanges object with two transcripts in one gene
+#' @noRd
+cds_mock_data <- function() {
+  df1 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11, 21, 31, 41),
+    width = 5,
+    strand = "+",
+    exon_rank = 2:6,
+    gene_id = rep(1, 5),
+    estimate = rep(runif(1, min = -1, max = 0), 5)
+  )
+  df2 <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11, 21, 41),
+    width = 5,
+    strand = "+",
+    exon_rank = 2:5,
+    gene_id = rep(1, 4),
+    estimate = rep(runif(1, min = 0, max = 1), 4)
+  )
+  gr1 <- plyranges::as_granges(df1)
+  gr2 <- plyranges::as_granges(df2)
+  gr <- plyranges::bind_ranges(gr1, gr2) |>
+    dplyr::mutate(
+      tx_id = c(rep(1, 5), rep(2, 4))
+    )
+
+  return(gr)
+}
+
 #' Create a sample GRanges with one negative coef transcript and three
 #' positive coef transcripts, two of which splice an intron inside the
 #' candidate exon
