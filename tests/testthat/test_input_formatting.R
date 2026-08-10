@@ -77,6 +77,92 @@ test_that("preprocess missing additional_columns throws an error", {
 })
 
 # ---------------------------------------------------------------
+# Tests for exon_rank validation and the rank-relative 'internal' flag
+
+test_that("preprocess accepts exon_rank that does not start at 1", {
+  gr <- cds_mock_data()
+  expect_no_error(preprocess(gr, coef_col = "estimate"))
+})
+
+test_that("internal is relative to each transcript's own rank range", {
+  gr <- preprocess(cds_mock_data(), coef_col = "estimate")
+
+  # tx 1 is ranked 2..6, so only ranks 3, 4, 5 are internal;
+  # tx 2 is ranked 2..5, so only ranks 3, 4 are internal.
+  # The old 'exon_rank < nexons' form flagged these off by one.
+  expect_equal(
+    gr$internal[gr$tx_id == 1],
+    c(FALSE, TRUE, TRUE, TRUE, FALSE)
+  )
+  expect_equal(
+    gr$internal[gr$tx_id == 2],
+    c(FALSE, TRUE, TRUE, FALSE)
+  )
+})
+
+test_that("preprocess accepts transcripts with different rank offsets", {
+  gr <- cds_mock_data()
+  # tx 1 stays at 2..6, tx 2 moves to 10..13: each transcript is
+  # judged against its own range, so both runs are valid
+  gr$exon_rank[gr$tx_id == 2] <- gr$exon_rank[gr$tx_id == 2] + 8L
+  expect_no_error(preprocess(gr, coef_col = "estimate"))
+})
+
+test_that("preprocess rejects a gap in exon_rank", {
+  gr <- cds_mock_data()
+  gr$exon_rank[4] <- 8L # tx 1 becomes 2, 3, 4, 8, 6
+  expect_error(
+    preprocess(gr, coef_col = "estimate"),
+    "must be consecutive within each transcript"
+  )
+})
+
+test_that("preprocess rejects duplicated exon_rank", {
+  gr <- cds_mock_data()
+  # tx 1 becomes 2, 3, 4, 4, 6 -- min 2, max 6, 5 exons, so the range
+  # still matches the count and only a duplicate check catches it
+  gr$exon_rank[4] <- 4L
+  expect_error(
+    preprocess(gr, coef_col = "estimate"),
+    "must be consecutive within each transcript"
+  )
+})
+
+test_that("exon_rank is checked per transcript, not across all rows", {
+  gr <- cds_mock_data()
+  # pooled, these ranks read 2..10 with no holes, but each transcript
+  # on its own is gapped -- only grouping by tx_id catches it
+  gr$exon_rank[gr$tx_id == 1] <- c(2, 4, 6, 8, 10)
+  gr$exon_rank[gr$tx_id == 2] <- c(3, 5, 7, 9)
+  expect_error(
+    preprocess(gr, coef_col = "estimate"),
+    "Affected tx_id: 1, 2"
+  )
+})
+
+test_that("exon_rank check names only the affected transcript", {
+  gr <- cds_mock_data()
+  gr$exon_rank[gr$tx_id == 2] <- c(2, 3, 4, 6) # tx 1 left valid
+  expect_error(
+    preprocess(gr, coef_col = "estimate"),
+    "Affected tx_id: 2"
+  )
+})
+
+test_that("preprocess rejects NA in exon_rank", {
+  gr <- cds_mock_data()
+  gr$exon_rank[4] <- NA
+  expect_error(
+    preprocess(gr, coef_col = "estimate"),
+    "must not contain NA"
+  )
+})
+
+test_that("exon_rank check handles a single-exon transcript", {
+  expect_no_error(preprocess(cds_mock_data()[1], coef_col = "estimate"))
+})
+
+# ---------------------------------------------------------------
 # Tests for prepare_exons
 test_that("prepare_exons errors on missing dtu_table columns", {
   skip_if_not_installed("GenomicFeatures")
