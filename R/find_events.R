@@ -174,14 +174,20 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
       pos_lookup,
       by = c("tx_id", "middle_rank" = "exon_rank")
     ) |>
-    # exclude pairs where the middle pos exon has the same coordinates
-    # as the candidate neg exon (not a true MX — just an overlap/SE)
-    # FP scenario: candidate neg exon (e.g. 21-25) is absent from some pos
-    # txps but present in another (tx3). tx3 has flanking matches with gap=2,
-    # and the middle pos exon IS the candidate itself — not a true MX pair.
+    # exclude pairs where the middle pos exon overlaps the candidate neg
+    # exon at all — mutually exclusive exons are disjoint by definition, so
+    # the middle exon must lie entirely before or after the candidate.
+    # false positive 1: candidate neg exon (e.g. 21-25) is absent from some
+    # pos txps but present in another (tx3). tx3 has flanking matches with
+    # gap=2, and the middle pos exon IS the candidate — not a true MX pair.
+    # false positive 2: the middle pos exon is the candidate with one boundary
+    # shifted (e.g. 21-25 vs 23-25). Truncating an exon does not change how
+    # many exons sit between the flanks, so the gap stays 2 and an
+    # alternative 5'/3' splice site would otherwise be reported as MX too.
+    # similar to filter by non overlapping middle pos exon
     dplyr::filter(
-      pos_tbl$start[pos_row] != cand_tbl$start[cand_idx] |
-        pos_tbl$end[pos_row] != cand_tbl$end[cand_idx]
+      pos_tbl$end[pos_row] < cand_tbl$start[cand_idx] |
+        pos_tbl$start[pos_row] > cand_tbl$end[cand_idx]
     )
 
   if (nrow(pairs) == 0L) {
