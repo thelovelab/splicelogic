@@ -78,6 +78,74 @@ test_that("find_mxe detects mutually exclusive exons in mx_mock_data", {
   )
 })
 
+# Test that an alternative splice site is not also reported as MX
+test_that("find_mxe ignores a middle exon overlapping the candidate", {
+  # tx 1 is the anchor. tx 2 drops exon 3 entirely, which is what makes
+  # 21-25 a candidate at all. tx 3 keeps exon 3 but shifts its start
+  # (21-25 -> 23-25): truncating an exon does not change how many exons sit
+  # between the flanks, so the gap stays 2 and, without the disjointness
+  # check, tx 3 is reported as an MX partner as well as an a3ss.
+  base <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11, 21, 31, 41),
+    end = c(5, 15, 25, 35, 45),
+    strand = "+",
+    gene_id = 1
+  )
+  gr <- dplyr::bind_rows(
+    base |> dplyr::mutate(tx_id = 1, estimate = -1, exon_rank = seq_len(5)),
+    base[-3, ] |>
+      dplyr::mutate(tx_id = 2, estimate = 1, exon_rank = seq_len(4)),
+    base |>
+      dplyr::mutate(
+        tx_id = 3,
+        estimate = 1,
+        exon_rank = seq_len(5),
+        start = replace(start, 3, 23)
+      )
+  ) |>
+    plyranges::as_granges() |>
+    preprocess(coef_col = "estimate")
+
+  # tx 3's shifted exon is an alternative 3' splice site, not an MX pair
+  expect_equal(length(find_mxe(gr)), 0L)
+
+  a3ss <- find_a3ss(gr)
+  expect_equal(length(a3ss), 1L)
+  expect_equal(as.integer(GenomicRanges::start(a3ss)), 23L)
+  expect_equal(as.integer(GenomicRanges::mcols(a3ss)$tx_id), 3L)
+
+  # the genuine skipped exon in tx 2 is still detected
+  se <- find_se(gr)
+  expect_equal(length(se), 1L)
+  expect_equal(as.integer(GenomicRanges::mcols(se)$event_tx_id), 2L)
+
+  # the same holds when the donor moves instead of the acceptor
+  # (21-25 -> 21-23): the check is on overlap, not on which boundary
+  # shifted, so an a5ss is not reported as MX either
+  gr_a5 <- dplyr::bind_rows(
+    base |> dplyr::mutate(tx_id = 1, estimate = -1, exon_rank = seq_len(5)),
+    base[-3, ] |>
+      dplyr::mutate(tx_id = 2, estimate = 1, exon_rank = seq_len(4)),
+    base |>
+      dplyr::mutate(
+        tx_id = 3,
+        estimate = 1,
+        exon_rank = seq_len(5),
+        end = replace(end, 3, 23)
+      )
+  ) |>
+    plyranges::as_granges() |>
+    preprocess(coef_col = "estimate")
+
+  expect_equal(length(find_mxe(gr_a5)), 0L)
+
+  a5ss <- find_a5ss(gr_a5)
+  expect_equal(length(a5ss), 1L)
+  expect_equal(as.integer(GenomicRanges::end(a5ss)), 23L)
+  expect_equal(as.integer(GenomicRanges::mcols(a5ss)$tx_id), 3L)
+})
+
 # Test for no event detected in mx
 test_that("find_mxe returns empty GRanges if no events", {
   gr <- no_event_mock_data() # no_event_mock_data has no mx events
