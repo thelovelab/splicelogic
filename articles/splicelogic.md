@@ -920,7 +920,7 @@ sessionInfo()
     ## [65] rappdirs_0.3.4              htmltools_0.5.9            
     ## [67] R6_2.6.1                    httr2_1.3.0                
     ## [69] textshaping_1.0.5           vroom_1.7.1                
-    ## [71] evaluate_1.0.5              lattice_0.22-9             
+    ## [71] evaluate_1.0.5              lattice_0.23-1             
     ## [73] png_0.1-9                   Rsamtools_2.26.0           
     ## [75] cigarillo_1.0.0             memoise_2.0.1              
     ## [77] bslib_0.12.0                SparseArray_1.10.10        
