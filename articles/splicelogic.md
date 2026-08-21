@@ -911,7 +911,7 @@ sessionInfo()
     ## [47] XVector_0.50.0              restfulr_0.0.17            
     ## [49] matrixStats_1.5.0           vctrs_0.7.3                
     ## [51] Matrix_1.7-6                jsonlite_2.0.0             
-    ## [53] hms_1.1.4                   bit64_4.8.2                
+    ## [53] hms_1.1.4                   bit64_4.8.4                
     ## [55] systemfonts_1.3.2           jquerylib_0.1.4            
     ## [57] glue_1.8.1                  pkgdown_2.2.1              
     ## [59] codetools_0.2-20            BiocVersion_3.22.0         
