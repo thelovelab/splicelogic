@@ -278,6 +278,7 @@ below.
 
 ```{r mock-load}
 #| message: false
+library(splicelogic)
 library(plyranges)
 dir <- system.file("extdata", package = "splicelogic")
 mock_exons <- plyranges::read_bed(file.path(dir, "mock_exons.bed.gz"))
@@ -534,7 +535,6 @@ that the necessary columns are present:
 
 ```{r preprocess}
 #| message: false
-library(splicelogic)
 sig_exons <- sig_exons |>
   preprocess(coef_col = "estimate")
 sig_exons |> head(2)
