@@ -1,4 +1,4 @@
-# splicelogic: obtaining splicing events from transcript sets
+# splicelogic: splicing events from transcript sets
 
 _splicelogic_ turns sets of transcripts into discrete splicing events.
 Unlike event-based tools that work at the junction level, _splicelogic_ operates on whole transcript structures: within each gene it compares two groups of transcripts and all of their exons, so events are derived with full isoform context. It detects skipped exons, included exons, mutually exclusive exons, retained introns, and alternative 5' and 3' splice sites.
