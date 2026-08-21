@@ -4,8 +4,6 @@
 # exons from BED and running the splicelogic pipeline, without needing a
 # TxDb or a real DTU results table.
 
-# BED can only carry chrom/start/end/name/score/strand, so the ranges and
-
 # All transcripts belong to one gene, gene_1, and every one of them is
 # derived from the same 5-exon baseline, tx_0. tx_0 is the anchor, the
 # transcript to pass as `down`: the event finders look for neg exons that
