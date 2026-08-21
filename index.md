@@ -1,4 +1,4 @@
-# splicelogic: obtaining splicing events from transcript sets
+# splicelogic: splicing events from transcript sets
 
 *splicelogic* turns sets of transcripts into discrete splicing events.
 Unlike event-based tools that work at the junction level, *splicelogic*
