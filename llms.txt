@@ -28,8 +28,16 @@ for more details.
 
 # How to install
 
-`splicelogic` will be submitted to Bioconductor. For now you can test it
-by installing from GitHub:
+`splicelogic` is [available from Bioconductor Release
+(3.23)](https://bioconductor.org/packages/splicelogic):
+
+    if (!require("BiocManager", quietly = TRUE))
+        install.packages("BiocManager")
+
+    BiocManager::install("splicelogic")
+
+The most recent development version can be installed from the `devel`
+branch on GitHub:
 
     devtools::install_github("thelovelab/splicelogic")
 
