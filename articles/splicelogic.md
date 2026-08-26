@@ -432,21 +432,24 @@ transcripts; in both cases the partner transcript is in `event_tx_id`.
 
 Because an exon can participate in an event against more than one
 partner transcript, the same range can appear on several rows. To get
-one call per exon and event type, with the partners concatenated, we
-group can group by exon_id (build if needed) and event_type, then use
-`plyranges` to collapse the ranges and concatenate the partner
-transcript IDs.
+one call per exon and event type, with the partners concatenated, we can
+group by `exon_id` and `event_type`, then use *plyranges* to collapse
+the ranges and concatenate the partner transcript IDs. The new columns
+after grouping tell us the number of pairs (`n`) and collapse other
+informative variables.
 
 ``` r
 
+# define a helper function
+my_paste <- \(x) paste(unique(x), collapse = ",")
 mock_events |>
   dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end)) |>
   dplyr::group_by(exon_id, event_type) |>
   plyranges::reduce_ranges_directed(
     n = plyranges::n(),
-    tx_id = paste(unique(tx_id), collapse = ","),
-    exon_rank = paste(unique(exon_rank), collapse = ","),
-    event_tx_id = paste(unique(event_tx_id), collapse = ",")
+    tx_id = my_paste(tx_id),
+    exon_rank = my_paste(exon_rank),
+    event_tx_id = my_paste(event_tx_id),
   )
 ```
 
