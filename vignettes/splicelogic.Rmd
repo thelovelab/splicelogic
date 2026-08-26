@@ -15,23 +15,29 @@ vignette: |
 
 # Introduction
 
-*splicelogic* allows users to find alternative splicing events after 
-performing differential transcript usage (DTU) analysis.
-Unlike event-based tools that work at the junction level, 
-*splicelogic* operates on whole transcript structures: each transcript 
-and all its exons are annotated with a DTU effect estimate, allowing 
-splicing events to be derived directly from transcript quantification 
-with full isoform context. By comparing up- and down-regulated 
-transcripts, *splicelogic* can detect skipped exons, included exons,
+*splicelogic* turns sets of transcripts into discrete splicing events.
+Unlike event-based tools that work at the junction level, *splicelogic*
+operates on whole transcript structures: within each gene it compares
+two groups of transcripts and all of their exons, so events are derived
+with full isoform context. It detects skipped exons, included exons,
 mutually exclusive exons, retained introns, and alternative 5' and 3'
-splice sites. Because it takes transcript-level effect estimates as input, 
-it is compatible with any upstream DTU method (including *DRIMSeq*, *DEXSeq*, 
-*satuRn*, and *edgeR*), supporting flexible experimental designs.
+splice sites.
+
+*splicelogic* allows the two groups of transcripts to be compared to be
+defined upstream in one of two ways. They can come from an explicit
+partition of the transcripts into two sets, e.g. a set of novel transcripts
+against a set of annotated reference transcripts, or transcripts found in
+disease samples relative to those found in control samples. Or they can come
+from a differential transcript usage (DTU) analysis, which gives each
+transcript an effect estimate whose sign defines the comparison. Because it
+takes transcript-level results tables as input, *splicelogic* is compatible
+with any upstream DTU method (including *DRIMSeq*, *DEXSeq*, *satuRn*, and
+*edgeR*), supporting flexible experimental designs.
 
 *splicelogic* operates on exon-level data stored as *GRanges* objects.
-Given a set of exons annotated with a coefficient column indicating
-differential transcript usage (DTU), *splicelogic* identifies the
-following types of splicing events:
+Given a set of exons carrying the gene ID, transcript ID, exon rank,
+and a value indicating the direction of change, *splicelogic* identifies
+the following types of splicing events:
 
 -   **Skipped exons (SE)** -- exons skipped in up-regulated transcripts
 -   **Included exons (IE)** -- exons included in up-regulated transcripts
@@ -49,10 +55,8 @@ following types of splicing events:
 These are detected using a series of functions, e.g. `find_se()`,
 `find_ie()`, etc. described below.
 
-## Related methods
-
-Several tools exist for detecting alternative splicing from
-RNA-seq data and analyzing its consequences.
+Several alternative tools exist for detecting splicing events from
+RNA-seq data and analyzing their consequences:
 
 -   [IsoformSwitchAnalyzeR](https://www.bioconductor.org/packages/IsoformSwitchAnalyzeR)
     — a comprehensive workflow that performs DTU testing, annotates
@@ -73,12 +77,12 @@ RNA-seq data and analyzing its consequences.
     etc.) and provides expression profile plots and functional
     enrichment analysis.
 
-*splicelogic* differs in its main input and focus: it does not perform 
+*splicelogic* differs from these in its main input and focus: it does not perform
 DTU testing, and also does not take pre-computed splicing events as input.
-Instead, it takes transcript-level DTU results (effect estimates
-and adjusted p-values from any upstream method) already mapped
-onto exon structures, and directly classifies the type of splicing
-event from the comparison of up- and down-regulated isoforms.
+Instead, it works from two groups of transcripts (either an explicit partition
+or transcript-level DTU results already mapped onto exon structures) and
+directly classifies the type of splicing event from the comparison of the two
+groups.
 
 By operating on exon-level *GRanges* with attached DTU statistics, 
 *splicelogic* provides a flexible framework for users to identify 
@@ -106,19 +110,19 @@ To find splicing events from two sets of transcripts we use
 `prepare_exons_by_partition()`. `down` is the anchor, or reference
 group, and `up` holds the alternative transcripts that are read
 against it: the function assigns `estimate = -1` to `down` and
-`estimate = +1` to `up`. Each setis given either as a *GRanges* of 
+`estimate = +1` to `up`. Each set is given either as a *GRanges* of 
 exons or as a character vector of transcript IDs (the latter needs a
 *TxDb* to look up the exon coordinates):
 
 ```{r quick-start-sets}
 #| eval: false
 exons <- prepare_exons_by_partition(
-  up = <GRanges OF EXONS, OR tx IDs>,
-  down = <GRanges OF EXONS, OR tx IDs>
+  up = <GRanges OF EXONS, OR TX IDs>,
+  down = <GRanges OF EXONS, OR TX IDs>
 ) |>
   preprocess(coef_col = "estimate")
 
-# find skipped exons:
+# find e.g. skipped exons:
 skipped <- exons |> find_se()
 ```
 
@@ -141,12 +145,12 @@ exons <- prepare_exons(
 
 exons <- preprocess(exons, coef_col = "estimate")
 
-# find skipped exons:
+# find e.g. skipped exons:
 skipped <- exons |> find_se()
 ```
 
 This route is worked through in full with a published dataset in
-[Jones et al mouse long read dataset](#jones).
+[Finding events after DTU analysis](#dtu-analysis).
 
 
 # Input data
@@ -222,21 +226,17 @@ that *contains* the returned exon, while all columns with the prefix
 
 The rest of the vignette works through two examples that reach the
 same `find_*()` functions by different routes. The first starts from
-two sets of transcripts with no DTU analysis behind them, partitioned
-into `up` and `down` by the user. The second starts from a published
-DTU analysis, where every transcript carries a numeric effect
-estimate. Both produce the same kind of exon-level *GRanges*, and from
+two sets of transcripts, partitioned into `up` and `down` by the user. 
+The second starts from a DTU analysis, where every transcript carries a numeric
+effect estimate. Both produce the same kind of exon-level *GRanges*, and from
 `preprocess()` onwards the workflow is identical.
 
 ## Finding events from transcript sets {#transcript-sets}
  
-Often what we have is two sets of transcripts we want to compare, one acting
-as the anchor that the other is read against — a reference annotation
-against novel transcripts assembled from long reads, say, or the
-canonical isoform of each gene against its other annotated isoforms,
-or the transcripts recovered in a control sample against those
-recovered in a disease sample. We can use `prepare_exons_by_partition()` to 
-build the input for *splicelogic*.
+Often what we have is two sets of transcripts we want to compare, e.g. a set
+of novel transcripts against a set of annotated reference transcripts, or
+transcripts found in disease samples relative to those found in control samples.
+We can use `prepare_exons_by_partition()` to build the input for *splicelogic*.
 
 ### Input format
 
@@ -252,15 +252,27 @@ finders take the exons of the `down` transcripts and ask which of them
 are missing from, or truncated in, the `up` transcripts of the same
 gene.
 
-The two sets may be given either as *GRanges* of exons or as character
-vectors of transcript IDs, in which case a *TxDb* is required to look
-up the exon coordinates. See
-[comparing two sets](#comparing-two-sets) below.
+The simplest way to use `prepare_exons_by_partition()` is to pass the two sets
+as character vectors of transcript IDs, along with a *TxDb* object that
+*splicelogic* uses to look up the exon coordinates. A *TxDb* can be built from
+a GTF file (e.g. from Ensembl or GENCODE) using:
+
+```{r make-txdb}
+#| eval: false
+txdb <- txdbmaker::makeTxDbFromGFF("path/to/annotation.gtf")
+```
+
+Alternatively, if exon coordinates are already available as a *GRanges*, those
+can be passed directly. 
+
+For more details on preparing exons as input see the vignette section 
+[comparing two_sets](#comparing-two-sets).
 
 ### A synthetic exon set
 
-To demonstrate this route we use a small synthetic exon set saved in
-`extdata`. It contains a single gene, `gene_1`, on the `+` strand,
+To demonstrate this route we use a small synthetic exon set saved 
+as a small BED file within the package, `mock_exons.bed`.
+It contains a single gene, `gene_1`, on the `+` strand,
 with five transcripts all derived from the same five-exon baseline
 (exons of 100 bp separated by introns of 100 bp):
 
@@ -308,9 +320,10 @@ all of the remaining transcripts in `up`, so that each variant is read
 against the baseline.
 
 ```{r mock-partition}
-down <- mock_exons |> dplyr::filter(tx_id == "tx_0")
-up <- mock_exons |> dplyr::filter(tx_id != "tx_0")
-mock <- prepare_exons_by_partition(up = up, down = down) |>
+mock <- prepare_exons_by_partition(
+  up = mock_exons |> dplyr::filter(tx_id != "tx_0"),
+  down = mock_exons |> dplyr::filter(tx_id == "tx_0")
+) |>
   preprocess(coef_col = "estimate")
 mock |> head(2)
 ```
@@ -391,7 +404,7 @@ wiggleplotr::plotTranscripts(
 )
 ```
 
-## Finding events after DTU analysis
+## Finding events after DTU analysis {#dtu-analysis}
 
 ### Jones et al mouse long read dataset {#jones}
 
