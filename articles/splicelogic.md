@@ -1270,8 +1270,8 @@ sessionInfo()
     ##  [3] farver_2.1.2                filelock_1.0.3             
     ##  [5] Biostrings_2.78.0           S7_0.2.2                   
     ##  [7] bitops_1.1-0                fastmap_1.2.0              
-    ##  [9] RCurl_1.98-1.19             GenomicAlignments_1.46.0   
-    ## [11] XML_3.99-0.23               digest_0.6.39              
+    ##  [9] RCurl_1.98-1.20             GenomicAlignments_1.46.0   
+    ## [11] XML_3.99-0.24               digest_0.6.39              
     ## [13] lifecycle_1.0.5             KEGGREST_1.50.0            
     ## [15] RSQLite_3.53.3              magrittr_2.0.5             
     ## [17] compiler_4.5.2              rlang_1.3.0                
@@ -1280,7 +1280,7 @@ sessionInfo()
     ## [23] rtracklayer_1.70.1          knitr_1.51                 
     ## [25] S4Arrays_1.10.1             labeling_0.4.3             
     ## [27] htmlwidgets_1.6.4           bit_4.6.0                  
-    ## [29] curl_7.1.0                  DelayedArray_0.36.1        
+    ## [29] curl_8.0.0                  DelayedArray_0.36.1        
     ## [31] RColorBrewer_1.1-3          abind_1.4-8                
     ## [33] BiocParallel_1.44.0         wiggleplotr_1.34.1         
     ## [35] withr_3.0.3                 purrr_1.2.2                
