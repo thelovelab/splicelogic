@@ -1,21 +1,41 @@
 # splicelogic: splicing events from transcript sets
 
 _splicelogic_ turns sets of transcripts into discrete splicing events.
-Unlike event-based tools that work at the junction level, _splicelogic_ operates on whole transcript structures: within each gene it compares two groups of transcripts and all of their exons, so events are derived with full isoform context. It detects skipped exons, included exons, mutually exclusive exons, retained introns, and alternative 5' and 3' splice sites.
+Unlike event-based tools that work at the junction level, _splicelogic_ operates
+on whole transcript structures: within each gene it compares two groups of
+transcripts and all of their exons, so events are derived with full isoform
+context. It detects skipped exons, included exons, mutually exclusive exons,
+retained introns, and alternative 5' and 3' splice sites.
 
-_splicelogic_ does not decide what the two groups are; that is settled upstream, in one of two ways. They can come from an explicit partition of the transcripts into two sets, with no differential analysis behind it — a reference annotation against a set of novel transcripts, say, or a control sample against a disease sample. Or they can come from a differential transcript usage (DTU) analysis, which gives each transcript an effect estimate whose sign defines the comparison; because it takes transcript-level effect estimates as input, _splicelogic_ is compatible with any upstream DTU method (including DRIMSeq, DEXSeq, satuRn, and edgeR), supporting flexible experimental designs.
+_splicelogic_ allows the two groups of transcripts to be compared to be defined
+upstream in one of two ways. They can come from an explicit partition of the
+transcripts into two sets, e.g. a set of novel transcripts against a set of
+annotated reference transcripts, or transcripts found in disease samples
+relative to those found in control samples. 
+Or they can come from a differential transcript usage (DTU) analysis, which
+gives each transcript an effect estimate whose sign defines the comparison.
+Because it takes transcript-level results tables as input, _splicelogic_ is
+compatible with any upstream DTU method (including DRIMSeq, DEXSeq, satuRn, and
+edgeR), supporting flexible experimental designs.
 
-*splicelogic* operates on exon-level data stored as *GRanges* objects within R/Bioconductor.
-Given a set of exons carrying the gene ID, transcript ID and exon rank, _splicelogic_ can be used to identify a variety of splicing events. See the [vignette](https://thelovelab.github.io/splicelogic/articles/splicelogic.html) for more details.
+*splicelogic* operates on exon-level data stored as *GRanges* objects within
+R/Bioconductor.
+Given a set of exons carrying the gene ID, transcript ID and exon rank,
+_splicelogic_ can be used to identify a variety of splicing events. See the
+[vignette](https://thelovelab.github.io/splicelogic/articles/splicelogic.html)
+for more details.
+_splicelogic_ works well within the [tidyomics](https://github.com/tidyomics/)
+framework. Event results including the exons and introns underlying
+each event can be further manipulated downstream using
+[plyranges](https://tidyomics.github.io/plyranges).
 
 # How to install
 
-`splicelogic` is [available from Bioconductor Release (3.23)](https://bioconductor.org/packages/splicelogic):
+`splicelogic` is [available from Bioconductor](https://bioconductor.org/packages/splicelogic):
 
 ```
 if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
+  install.packages("BiocManager")
 BiocManager::install("splicelogic")
 ```
 
