@@ -361,7 +361,7 @@ and collapse other informative variables.
 
 ```{r mock-collapse}
 # define a helper function
-my_paste <- \(x) paste(unique(x), collapse = ","),
+my_paste <- \(x) paste(unique(x), collapse = ",")
 mock_events |>
   dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end)) |>
   dplyr::group_by(exon_id, event_type) |>
