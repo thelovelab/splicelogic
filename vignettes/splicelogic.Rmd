@@ -53,7 +53,8 @@ the following types of splicing events:
     splice site
 
 These are detected using a series of functions, e.g. `find_se()`,
-`find_ie()`, etc. described below.
+`find_ie()`, etc., summarized in
+[the `find_*()` functions](#find-functions).
 
 Several alternative tools exist for detecting splicing events from
 RNA-seq data and analyzing their consequences:
@@ -202,7 +203,47 @@ the reference, whose exons are tested against those of the positive
 group. All exons from the same transcript will share the same value
 for this column.
 
-# Output format
+# The `find_*()` functions {#find-functions}
+
+One function detects each event type. All of them take as their
+first argument an exon *GRanges* that has been through
+`preprocess()`, and return event *GRanges* in the same shape (see
+[output format](#output-format)), so they can be called in any order
+or all at once with `find_all_events()`.
+
+Throughout, *up* and *down* refer to the sign of the effect
+estimate: down transcripts are the reference group, and the events
+are what the up transcripts do relative to them.
+
+| Function | `event_type` | Detects | Exons returned |
+|-----------|-----------|-----------------------|-----------------------|
+| `find_se()` | `"se"` | An exon of a down transcript that is absent from an up transcript of the same gene, whose two flanking exons are adjacent in that up transcript | The skipped exon, from the down transcript |
+| `find_ie()` | `"ie"` | The mirror image of SE: an exon of an up transcript absent from a down transcript of the same gene | The included exon, from the up transcript |
+| `find_mxe()` | `"mxe"` | Two non-overlapping exons, one in each transcript, sitting between the same pair of flanking exons | Both exons of the pair, one row each, interleaved |
+| `find_ri()` | `"ri"` | An intron of a down transcript that falls entirely within a single exon of an up transcript of the same gene | The exon retaining the intron, from the up transcript |
+| `find_a5ss()` | `"a5ss"` | An up exon sharing the 3' splice site (acceptor) of a down exon but differing at the 5' splice site (donor) | The exon with the alternative donor, from the up transcript |
+| `find_a3ss()` | `"a3ss"` | The reverse: shared donor, differing acceptor | The exon with the alternative acceptor, from the up transcript |
+| `find_all_events()` | all of the above | Runs the six finders in turn and binds the results | All exons returned by the individual finders |
+
+`find_se()`, `find_ie()`, `find_mxe()` and `find_all_events()` also
+take a `type` argument, controlling how an exon flanking a candidate
+is matched to an exon of the partner transcript: `"boundary"` (the
+default) requires only the shared splice site to coincide, `"over"`
+accepts any overlap, and `"in"` requires the two exons to be
+identical.
+
+Every finder has a long-form alias that spells the event type out —
+`find_skipped_exons()`, `find_included_exons()`,
+`find_mutually_exclusive_exons()`, `find_retained_introns()`,
+`find_alternative_5_prime_splice_sites()` and
+`find_alternative_3_prime_splice_sites()` — for use where a script
+reads better with the full name. They are the same functions, so
+`find_se()` and `find_skipped_exons()` are interchangeable.
+
+Worked examples of all of these are in
+[finding individual events](#individual-events).
+
+# Output format {#output-format}
 
 All `find_*()` functions return a *GRanges* whose ranges are the
 exons detected to be involved in an event. Each row therefore carries the user's
@@ -330,7 +371,8 @@ mock |> head(2)
 
 ### Finding events
 
-`find_all_events()` wraps the six event finders, which can also be
+`find_all_events()` wraps the six event finders
+([the `find_*()` functions](#find-functions)), which can also be
 called one at a time — see
 [finding individual events](#individual-events) below:
 
@@ -571,7 +613,8 @@ output as `event_<col>`. See `?preprocess` for details.
 ### Finding individual events {#individual-events}
 
 Next we can run the various functions for calculating different
-types of splicing events.
+types of splicing events, listed in
+[the `find_*()` functions](#find-functions).
 
 **Skipped exons (SE)**
 
@@ -691,7 +734,8 @@ exon-level *GRanges*
 (see [Obtaining exon ranges](#obtaining-exon-ranges)). This
 annotated *GRanges* is the starting point for *splicelogic*,
 beginning with `preprocess()` and then followed by event-specific
-functions (`find_se()`, `find_ie()`, etc.).
+functions (`find_se()`, `find_ie()`, etc., see
+[the `find_*()` functions](#find-functions)).
 
 # Obtaining exon ranges {#obtaining-exon-ranges}
 
