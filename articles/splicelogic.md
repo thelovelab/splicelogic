@@ -348,36 +348,24 @@ GenomicRanges::mcols(mock_exons) <- S4Vectors::DataFrame(
     show_col_types = FALSE
   )
 )
-mock_exons
+mock_exons |>
+  dplyr::select(-gene_id)
 ```
 
-    ## GRanges object with 23 ranges and 4 metadata columns:
-    ##        seqnames    ranges strand |     gene_id       tx_id          exon_id
-    ##           <Rle> <IRanges>  <Rle> | <character> <character>      <character>
-    ##    [1]     chr1 1001-1100      + |      gene_1        tx_0 gene_1:1001-1100
-    ##    [2]     chr1 1201-1300      + |      gene_1        tx_0 gene_1:1201-1300
-    ##    [3]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
-    ##    [4]     chr1 1601-1700      + |      gene_1        tx_0 gene_1:1601-1700
-    ##    [5]     chr1 1801-1900      + |      gene_1        tx_0 gene_1:1801-1900
-    ##    ...      ...       ...    ... .         ...         ...              ...
-    ##   [19]     chr1 1801-1900      + |      gene_1        tx_2 gene_1:1801-1900
-    ##   [20]     chr1 1001-1100      + |      gene_1        tx_5 gene_1:1001-1100
-    ##   [21]     chr1 1201-1300      + |      gene_1        tx_5 gene_1:1201-1300
-    ##   [22]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700
-    ##   [23]     chr1 1801-1900      + |      gene_1        tx_5 gene_1:1801-1900
-    ##        exon_rank
-    ##        <numeric>
-    ##    [1]         1
-    ##    [2]         2
-    ##    [3]         3
-    ##    [4]         4
-    ##    [5]         5
-    ##    ...       ...
-    ##   [19]         5
-    ##   [20]         1
-    ##   [21]         2
-    ##   [22]         3
-    ##   [23]         4
+    ## GRanges object with 23 ranges and 3 metadata columns:
+    ##        seqnames    ranges strand |       tx_id          exon_id exon_rank
+    ##           <Rle> <IRanges>  <Rle> | <character>      <character> <numeric>
+    ##    [1]     chr1 1001-1100      + |        tx_0 gene_1:1001-1100         1
+    ##    [2]     chr1 1201-1300      + |        tx_0 gene_1:1201-1300         2
+    ##    [3]     chr1 1401-1500      + |        tx_0 gene_1:1401-1500         3
+    ##    [4]     chr1 1601-1700      + |        tx_0 gene_1:1601-1700         4
+    ##    [5]     chr1 1801-1900      + |        tx_0 gene_1:1801-1900         5
+    ##    ...      ...       ...    ... .         ...              ...       ...
+    ##   [19]     chr1 1801-1900      + |        tx_2 gene_1:1801-1900         5
+    ##   [20]     chr1 1001-1100      + |        tx_5 gene_1:1001-1100         1
+    ##   [21]     chr1 1201-1300      + |        tx_5 gene_1:1201-1300         2
+    ##   [22]     chr1 1651-1700      + |        tx_5 gene_1:1651-1700         3
+    ##   [23]     chr1 1801-1900      + |        tx_5 gene_1:1801-1900         4
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 

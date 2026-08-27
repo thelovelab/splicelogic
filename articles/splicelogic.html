@@ -500,34 +500,22 @@ the same pairing used for the Jones exons below.</p>
 <span>    show_col_types <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">mock_exons</span></span></code></pre></div>
-<pre><code><span><span class="co">## GRanges object with 23 ranges and 4 metadata columns:</span></span>
-<span><span class="co">##        seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
-<span><span class="co">##           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
-<span><span class="co">##    [1]     chr1 1001-1100      + |      gene_1        tx_0 gene_1:1001-1100</span></span>
-<span><span class="co">##    [2]     chr1 1201-1300      + |      gene_1        tx_0 gene_1:1201-1300</span></span>
-<span><span class="co">##    [3]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
-<span><span class="co">##    [4]     chr1 1601-1700      + |      gene_1        tx_0 gene_1:1601-1700</span></span>
-<span><span class="co">##    [5]     chr1 1801-1900      + |      gene_1        tx_0 gene_1:1801-1900</span></span>
-<span><span class="co">##    ...      ...       ...    ... .         ...         ...              ...</span></span>
-<span><span class="co">##   [19]     chr1 1801-1900      + |      gene_1        tx_2 gene_1:1801-1900</span></span>
-<span><span class="co">##   [20]     chr1 1001-1100      + |      gene_1        tx_5 gene_1:1001-1100</span></span>
-<span><span class="co">##   [21]     chr1 1201-1300      + |      gene_1        tx_5 gene_1:1201-1300</span></span>
-<span><span class="co">##   [22]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700</span></span>
-<span><span class="co">##   [23]     chr1 1801-1900      + |      gene_1        tx_5 gene_1:1801-1900</span></span>
-<span><span class="co">##        exon_rank</span></span>
-<span><span class="co">##        &lt;numeric&gt;</span></span>
-<span><span class="co">##    [1]         1</span></span>
-<span><span class="co">##    [2]         2</span></span>
-<span><span class="co">##    [3]         3</span></span>
-<span><span class="co">##    [4]         4</span></span>
-<span><span class="co">##    [5]         5</span></span>
-<span><span class="co">##    ...       ...</span></span>
-<span><span class="co">##   [19]         5</span></span>
-<span><span class="co">##   [20]         1</span></span>
-<span><span class="co">##   [21]         2</span></span>
-<span><span class="co">##   [22]         3</span></span>
-<span><span class="co">##   [23]         4</span></span>
+<span><span class="va">mock_exons</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">gene_id</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GRanges object with 23 ranges and 3 metadata columns:</span></span>
+<span><span class="co">##        seqnames    ranges strand |       tx_id          exon_id exon_rank</span></span>
+<span><span class="co">##           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;      &lt;character&gt; &lt;numeric&gt;</span></span>
+<span><span class="co">##    [1]     chr1 1001-1100      + |        tx_0 gene_1:1001-1100         1</span></span>
+<span><span class="co">##    [2]     chr1 1201-1300      + |        tx_0 gene_1:1201-1300         2</span></span>
+<span><span class="co">##    [3]     chr1 1401-1500      + |        tx_0 gene_1:1401-1500         3</span></span>
+<span><span class="co">##    [4]     chr1 1601-1700      + |        tx_0 gene_1:1601-1700         4</span></span>
+<span><span class="co">##    [5]     chr1 1801-1900      + |        tx_0 gene_1:1801-1900         5</span></span>
+<span><span class="co">##    ...      ...       ...    ... .         ...              ...       ...</span></span>
+<span><span class="co">##   [19]     chr1 1801-1900      + |        tx_2 gene_1:1801-1900         5</span></span>
+<span><span class="co">##   [20]     chr1 1001-1100      + |        tx_5 gene_1:1001-1100         1</span></span>
+<span><span class="co">##   [21]     chr1 1201-1300      + |        tx_5 gene_1:1201-1300         2</span></span>
+<span><span class="co">##   [22]     chr1 1651-1700      + |        tx_5 gene_1:1651-1700         3</span></span>
+<span><span class="co">##   [23]     chr1 1801-1900      + |        tx_5 gene_1:1801-1900         4</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
 <p>We can visualize the five transcripts with
