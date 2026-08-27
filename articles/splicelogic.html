@@ -57,7 +57,7 @@ Campillo</h4>
                                     <h4 data-toc-skip class="author">Michael
 I. Love</h4>
                         
-            <h4 data-toc-skip class="date">08/26/2026</h4>
+            <h4 data-toc-skip class="date">08/27/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/thelovelab/splicelogic/blob/devel/vignettes/splicelogic.Rmd" class="external-link"><code>vignettes/splicelogic.Rmd</code></a></small>
       <div class="d-none name"><code>splicelogic.Rmd</code></div>
@@ -407,33 +407,33 @@ the same pairing used for the Jones exons below.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">mock_exons</span></span></code></pre></div>
-<pre><code><span><span class="co">## GRanges object with 23 ranges and 5 metadata columns:</span></span>
-<span><span class="co">##        seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc</span></span>
-<span><span class="co">##           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">##    [1]     chr1 1001-1100      + |      gene_1        tx_0         1        -2</span></span>
-<span><span class="co">##    [2]     chr1 1201-1300      + |      gene_1        tx_0         2        -2</span></span>
-<span><span class="co">##    [3]     chr1 1401-1500      + |      gene_1        tx_0         3        -2</span></span>
-<span><span class="co">##    [4]     chr1 1601-1700      + |      gene_1        tx_0         4        -2</span></span>
-<span><span class="co">##    [5]     chr1 1801-1900      + |      gene_1        tx_0         5        -2</span></span>
-<span><span class="co">##    ...      ...       ...    ... .         ...         ...       ...       ...</span></span>
-<span><span class="co">##   [19]     chr1 1801-1900      + |      gene_1        tx_2         5       0.9</span></span>
-<span><span class="co">##   [20]     chr1 1001-1100      + |      gene_1        tx_5         1       2.6</span></span>
-<span><span class="co">##   [21]     chr1 1201-1300      + |      gene_1        tx_5         2       2.6</span></span>
-<span><span class="co">##   [22]     chr1 1651-1700      + |      gene_1        tx_5         3       2.6</span></span>
-<span><span class="co">##   [23]     chr1 1801-1900      + |      gene_1        tx_5         4       2.6</span></span>
-<span><span class="co">##               name</span></span>
-<span><span class="co">##        &lt;character&gt;</span></span>
-<span><span class="co">##    [1]      tx_0-1</span></span>
-<span><span class="co">##    [2]      tx_0-2</span></span>
-<span><span class="co">##    [3]      tx_0-3</span></span>
-<span><span class="co">##    [4]      tx_0-4</span></span>
-<span><span class="co">##    [5]      tx_0-5</span></span>
-<span><span class="co">##    ...         ...</span></span>
-<span><span class="co">##   [19]      tx_2-5</span></span>
-<span><span class="co">##   [20]      tx_5-1</span></span>
-<span><span class="co">##   [21]      tx_5-2</span></span>
-<span><span class="co">##   [22]      tx_5-3</span></span>
-<span><span class="co">##   [23]      tx_5-4</span></span>
+<pre><code><span><span class="co">## GRanges object with 23 ranges and 4 metadata columns:</span></span>
+<span><span class="co">##        seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##    [1]     chr1 1001-1100      + |      gene_1        tx_0 gene_1:1001-1100</span></span>
+<span><span class="co">##    [2]     chr1 1201-1300      + |      gene_1        tx_0 gene_1:1201-1300</span></span>
+<span><span class="co">##    [3]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
+<span><span class="co">##    [4]     chr1 1601-1700      + |      gene_1        tx_0 gene_1:1601-1700</span></span>
+<span><span class="co">##    [5]     chr1 1801-1900      + |      gene_1        tx_0 gene_1:1801-1900</span></span>
+<span><span class="co">##    ...      ...       ...    ... .         ...         ...              ...</span></span>
+<span><span class="co">##   [19]     chr1 1801-1900      + |      gene_1        tx_2 gene_1:1801-1900</span></span>
+<span><span class="co">##   [20]     chr1 1001-1100      + |      gene_1        tx_5 gene_1:1001-1100</span></span>
+<span><span class="co">##   [21]     chr1 1201-1300      + |      gene_1        tx_5 gene_1:1201-1300</span></span>
+<span><span class="co">##   [22]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700</span></span>
+<span><span class="co">##   [23]     chr1 1801-1900      + |      gene_1        tx_5 gene_1:1801-1900</span></span>
+<span><span class="co">##        exon_rank</span></span>
+<span><span class="co">##        &lt;numeric&gt;</span></span>
+<span><span class="co">##    [1]         1</span></span>
+<span><span class="co">##    [2]         2</span></span>
+<span><span class="co">##    [3]         3</span></span>
+<span><span class="co">##    [4]         4</span></span>
+<span><span class="co">##    [5]         5</span></span>
+<span><span class="co">##    ...       ...</span></span>
+<span><span class="co">##   [19]         5</span></span>
+<span><span class="co">##   [20]         1</span></span>
+<span><span class="co">##   [21]         2</span></span>
+<span><span class="co">##   [22]         3</span></span>
+<span><span class="co">##   [23]         4</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
 <p>We can visualize the five transcripts with
@@ -457,15 +457,15 @@ derived from, which makes it the anchor: we put it on its own in
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span></span>
 <span><span class="va">mock</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## GRanges object with 2 ranges and 9 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1001-1100      + |      gene_1        tx_1         1       1.5</span></span>
-<span><span class="co">##   [2]     chr1 1201-1300      + |      gene_1        tx_1         2       1.5</span></span>
-<span><span class="co">##              name  estimate         key    nexons  internal</span></span>
-<span><span class="co">##       &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;integer&gt; &lt;logical&gt;</span></span>
-<span><span class="co">##   [1]      tx_1-1         1      tx_1-1         4     FALSE</span></span>
-<span><span class="co">##   [2]      tx_1-2         1      tx_1-2         4      TRUE</span></span>
+<pre><code><span><span class="co">## GRanges object with 2 ranges and 8 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1001-1100      + |      gene_1        tx_1 gene_1:1001-1100</span></span>
+<span><span class="co">##   [2]     chr1 1201-1300      + |      gene_1        tx_1 gene_1:1201-1300</span></span>
+<span><span class="co">##       exon_rank  estimate         key    nexons  internal</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;integer&gt; &lt;logical&gt;</span></span>
+<span><span class="co">##   [1]         1         1      tx_1-1         4     FALSE</span></span>
+<span><span class="co">##   [2]         2         1      tx_1-2         4      TRUE</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
 </div>
@@ -486,21 +486,21 @@ individual events</a> below:</p>
 <pre><code><span><span class="co">## Done! 5 events detected.</span></span></code></pre>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mock_events</span></span></code></pre></div>
-<pre><code><span><span class="co">## GRanges object with 5 ranges and 9 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0         3      -2.0</span></span>
-<span><span class="co">##   [2]     chr1 1401-1500      + |      gene_1        tx_0         3      -2.0</span></span>
-<span><span class="co">##   [3]     chr1 1401-1450      + |      gene_1        tx_2         3       0.9</span></span>
-<span><span class="co">##   [4]     chr1 1651-1700      + |      gene_1        tx_4         4       1.2</span></span>
-<span><span class="co">##   [5]     chr1 1651-1700      + |      gene_1        tx_5         3       2.6</span></span>
-<span><span class="co">##              name  estimate  event_type event_tx_id event_estimate</span></span>
-<span><span class="co">##       &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt;</span></span>
-<span><span class="co">##   [1]      tx_0-3        -1          se        tx_1              1</span></span>
-<span><span class="co">##   [2]      tx_0-3        -1          se        tx_5              1</span></span>
-<span><span class="co">##   [3]      tx_2-3         1        a5ss        tx_0             -1</span></span>
-<span><span class="co">##   [4]      tx_4-4         1        a3ss        tx_0             -1</span></span>
-<span><span class="co">##   [5]      tx_5-3         1        a3ss        tx_0             -1</span></span>
+<pre><code><span><span class="co">## GRanges object with 5 ranges and 8 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
+<span><span class="co">##   [2]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
+<span><span class="co">##   [3]     chr1 1401-1450      + |      gene_1        tx_2 gene_1:1401-1450</span></span>
+<span><span class="co">##   [4]     chr1 1651-1700      + |      gene_1        tx_4 gene_1:1651-1700</span></span>
+<span><span class="co">##   [5]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt;</span></span>
+<span><span class="co">##   [1]         3        -1          se        tx_1              1</span></span>
+<span><span class="co">##   [2]         3        -1          se        tx_5              1</span></span>
+<span><span class="co">##   [3]         3         1        a5ss        tx_0             -1</span></span>
+<span><span class="co">##   [4]         4         1        a3ss        tx_0             -1</span></span>
+<span><span class="co">##   [5]         3         1        a3ss        tx_0             -1</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
 <p>Every event built into the set is recovered. Exon 3 of
@@ -528,8 +528,12 @@ pairs (<code>n</code>) and collapse other informative variables.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># define a helper function</span></span>
 <span><span class="va">my_paste</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">","</span><span class="op">)</span></span>
+<span><span class="co"># `exon_id` is usually found in the metadata columns in the input exons. </span></span>
+<span><span class="co"># If not available, we can build it from the gene and the exon coordinates — the same </span></span>
+<span><span class="co"># exon then gets the same id in every transcript that contains it:</span></span>
+<span><span class="co">#   mock_events &lt;- mock_events |&gt;</span></span>
+<span><span class="co">#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))</span></span>
 <span><span class="va">mock_events</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>exon_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gene_id</span>, <span class="st">":"</span>, <span class="va">start</span>, <span class="st">"-"</span>, <span class="va">end</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">exon_id</span>, <span class="va">event_type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/ranges-reduce.html" class="external-link">reduce_ranges_directed</a></span><span class="op">(</span></span>
 <span>    n <span class="op">=</span> <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/n.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -568,48 +572,48 @@ transcripts.</p>
 <span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="va">events_by_pair</span>, <span class="va">events_by_pair</span><span class="op">$</span><span class="va">tx_pair</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRangesList object of length 4:</span></span>
 <span><span class="co">## $`tx_0-tx_1`</span></span>
-<span><span class="co">## GRanges object with 1 range and 10 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0         3        -2</span></span>
-<span><span class="co">##              name  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
-<span><span class="co">##       &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]      tx_0-3        -1          se        tx_1              1   tx_0-tx_1</span></span>
+<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         3        -1          se        tx_1              1   tx_0-tx_1</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`tx_0-tx_2`</span></span>
-<span><span class="co">## GRanges object with 1 range and 10 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1401-1450      + |      gene_1        tx_2         3       0.9</span></span>
-<span><span class="co">##              name  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
-<span><span class="co">##       &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]      tx_2-3         1        a5ss        tx_0             -1   tx_0-tx_2</span></span>
+<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1401-1450      + |      gene_1        tx_2 gene_1:1401-1450</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         3         1        a5ss        tx_0             -1   tx_0-tx_2</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`tx_0-tx_4`</span></span>
-<span><span class="co">## GRanges object with 1 range and 10 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1651-1700      + |      gene_1        tx_4         4       1.2</span></span>
-<span><span class="co">##              name  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
-<span><span class="co">##       &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]      tx_4-4         1        a3ss        tx_0             -1   tx_0-tx_4</span></span>
+<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1651-1700      + |      gene_1        tx_4 gene_1:1651-1700</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         4         1        a3ss        tx_0             -1   tx_0-tx_4</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`tx_0-tx_5`</span></span>
-<span><span class="co">## GRanges object with 2 ranges and 10 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0         3      -2.0</span></span>
-<span><span class="co">##   [2]     chr1 1651-1700      + |      gene_1        tx_5         3       2.6</span></span>
-<span><span class="co">##              name  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
-<span><span class="co">##       &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]      tx_0-3        -1          se        tx_5              1   tx_0-tx_5</span></span>
-<span><span class="co">##   [2]      tx_5-3         1        a3ss        tx_0             -1   tx_0-tx_5</span></span>
+<span><span class="co">## GRanges object with 2 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
+<span><span class="co">##   [2]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         3        -1          se        tx_5              1   tx_0-tx_5</span></span>
+<span><span class="co">##   [2]         3         1        a3ss        tx_0             -1   tx_0-tx_5</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
 <p><code>tx_0-tx_5</code> carries two events, the skipped exon and the

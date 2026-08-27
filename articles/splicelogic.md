@@ -299,33 +299,33 @@ GenomicRanges::mcols(mock_exons) <- S4Vectors::DataFrame(
 mock_exons
 ```
 
-    ## GRanges object with 23 ranges and 5 metadata columns:
-    ##        seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc
-    ##           <Rle> <IRanges>  <Rle> | <character> <character> <numeric> <numeric>
-    ##    [1]     chr1 1001-1100      + |      gene_1        tx_0         1        -2
-    ##    [2]     chr1 1201-1300      + |      gene_1        tx_0         2        -2
-    ##    [3]     chr1 1401-1500      + |      gene_1        tx_0         3        -2
-    ##    [4]     chr1 1601-1700      + |      gene_1        tx_0         4        -2
-    ##    [5]     chr1 1801-1900      + |      gene_1        tx_0         5        -2
-    ##    ...      ...       ...    ... .         ...         ...       ...       ...
-    ##   [19]     chr1 1801-1900      + |      gene_1        tx_2         5       0.9
-    ##   [20]     chr1 1001-1100      + |      gene_1        tx_5         1       2.6
-    ##   [21]     chr1 1201-1300      + |      gene_1        tx_5         2       2.6
-    ##   [22]     chr1 1651-1700      + |      gene_1        tx_5         3       2.6
-    ##   [23]     chr1 1801-1900      + |      gene_1        tx_5         4       2.6
-    ##               name
-    ##        <character>
-    ##    [1]      tx_0-1
-    ##    [2]      tx_0-2
-    ##    [3]      tx_0-3
-    ##    [4]      tx_0-4
-    ##    [5]      tx_0-5
-    ##    ...         ...
-    ##   [19]      tx_2-5
-    ##   [20]      tx_5-1
-    ##   [21]      tx_5-2
-    ##   [22]      tx_5-3
-    ##   [23]      tx_5-4
+    ## GRanges object with 23 ranges and 4 metadata columns:
+    ##        seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##           <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##    [1]     chr1 1001-1100      + |      gene_1        tx_0 gene_1:1001-1100
+    ##    [2]     chr1 1201-1300      + |      gene_1        tx_0 gene_1:1201-1300
+    ##    [3]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
+    ##    [4]     chr1 1601-1700      + |      gene_1        tx_0 gene_1:1601-1700
+    ##    [5]     chr1 1801-1900      + |      gene_1        tx_0 gene_1:1801-1900
+    ##    ...      ...       ...    ... .         ...         ...              ...
+    ##   [19]     chr1 1801-1900      + |      gene_1        tx_2 gene_1:1801-1900
+    ##   [20]     chr1 1001-1100      + |      gene_1        tx_5 gene_1:1001-1100
+    ##   [21]     chr1 1201-1300      + |      gene_1        tx_5 gene_1:1201-1300
+    ##   [22]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700
+    ##   [23]     chr1 1801-1900      + |      gene_1        tx_5 gene_1:1801-1900
+    ##        exon_rank
+    ##        <numeric>
+    ##    [1]         1
+    ##    [2]         2
+    ##    [3]         3
+    ##    [4]         4
+    ##    [5]         5
+    ##    ...       ...
+    ##   [19]         5
+    ##   [20]         1
+    ##   [21]         2
+    ##   [22]         3
+    ##   [23]         4
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -358,15 +358,15 @@ mock <- prepare_exons_by_partition(
 mock |> head(2)
 ```
 
-    ## GRanges object with 2 ranges and 9 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc
-    ##          <Rle> <IRanges>  <Rle> | <character> <character> <numeric> <numeric>
-    ##   [1]     chr1 1001-1100      + |      gene_1        tx_1         1       1.5
-    ##   [2]     chr1 1201-1300      + |      gene_1        tx_1         2       1.5
-    ##              name  estimate         key    nexons  internal
-    ##       <character> <integer> <character> <integer> <logical>
-    ##   [1]      tx_1-1         1      tx_1-1         4     FALSE
-    ##   [2]      tx_1-2         1      tx_1-2         4      TRUE
+    ## GRanges object with 2 ranges and 8 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1001-1100      + |      gene_1        tx_1 gene_1:1001-1100
+    ##   [2]     chr1 1201-1300      + |      gene_1        tx_1 gene_1:1201-1300
+    ##       exon_rank  estimate         key    nexons  internal
+    ##       <numeric> <integer> <character> <integer> <logical>
+    ##   [1]         1         1      tx_1-1         4     FALSE
+    ##   [2]         2         1      tx_1-2         4      TRUE
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -400,21 +400,21 @@ mock_events <- mock |> find_all_events()
 mock_events
 ```
 
-    ## GRanges object with 5 ranges and 9 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc
-    ##          <Rle> <IRanges>  <Rle> | <character> <character> <numeric> <numeric>
-    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0         3      -2.0
-    ##   [2]     chr1 1401-1500      + |      gene_1        tx_0         3      -2.0
-    ##   [3]     chr1 1401-1450      + |      gene_1        tx_2         3       0.9
-    ##   [4]     chr1 1651-1700      + |      gene_1        tx_4         4       1.2
-    ##   [5]     chr1 1651-1700      + |      gene_1        tx_5         3       2.6
-    ##              name  estimate  event_type event_tx_id event_estimate
-    ##       <character> <integer> <character> <character>      <integer>
-    ##   [1]      tx_0-3        -1          se        tx_1              1
-    ##   [2]      tx_0-3        -1          se        tx_5              1
-    ##   [3]      tx_2-3         1        a5ss        tx_0             -1
-    ##   [4]      tx_4-4         1        a3ss        tx_0             -1
-    ##   [5]      tx_5-3         1        a3ss        tx_0             -1
+    ## GRanges object with 5 ranges and 8 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
+    ##   [2]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
+    ##   [3]     chr1 1401-1450      + |      gene_1        tx_2 gene_1:1401-1450
+    ##   [4]     chr1 1651-1700      + |      gene_1        tx_4 gene_1:1651-1700
+    ##   [5]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate
+    ##       <numeric> <integer> <character> <character>      <integer>
+    ##   [1]         3        -1          se        tx_1              1
+    ##   [2]         3        -1          se        tx_5              1
+    ##   [3]         3         1        a5ss        tx_0             -1
+    ##   [4]         4         1        a3ss        tx_0             -1
+    ##   [5]         3         1        a3ss        tx_0             -1
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -442,8 +442,12 @@ informative variables.
 
 # define a helper function
 my_paste <- \(x) paste(unique(x), collapse = ",")
+# `exon_id` is usually found in the metadata columns in the input exons. 
+# If not available, we can build it from the gene and the exon coordinates — the same 
+# exon then gets the same id in every transcript that contains it:
+#   mock_events <- mock_events |>
+#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
 mock_events |>
-  dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end)) |>
   dplyr::group_by(exon_id, event_type) |>
   plyranges::reduce_ranges_directed(
     n = plyranges::n(),
@@ -487,48 +491,48 @@ S4Vectors::split(events_by_pair, events_by_pair$tx_pair)
 
     ## GRangesList object of length 4:
     ## $`tx_0-tx_1`
-    ## GRanges object with 1 range and 10 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc
-    ##          <Rle> <IRanges>  <Rle> | <character> <character> <numeric> <numeric>
-    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0         3        -2
-    ##              name  estimate  event_type event_tx_id event_estimate     tx_pair
-    ##       <character> <integer> <character> <character>      <integer> <character>
-    ##   [1]      tx_0-3        -1          se        tx_1              1   tx_0-tx_1
+    ## GRanges object with 1 range and 9 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
+    ##       <numeric> <integer> <character> <character>      <integer> <character>
+    ##   [1]         3        -1          se        tx_1              1   tx_0-tx_1
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
     ## 
     ## $`tx_0-tx_2`
-    ## GRanges object with 1 range and 10 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc
-    ##          <Rle> <IRanges>  <Rle> | <character> <character> <numeric> <numeric>
-    ##   [1]     chr1 1401-1450      + |      gene_1        tx_2         3       0.9
-    ##              name  estimate  event_type event_tx_id event_estimate     tx_pair
-    ##       <character> <integer> <character> <character>      <integer> <character>
-    ##   [1]      tx_2-3         1        a5ss        tx_0             -1   tx_0-tx_2
+    ## GRanges object with 1 range and 9 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1401-1450      + |      gene_1        tx_2 gene_1:1401-1450
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
+    ##       <numeric> <integer> <character> <character>      <integer> <character>
+    ##   [1]         3         1        a5ss        tx_0             -1   tx_0-tx_2
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
     ## 
     ## $`tx_0-tx_4`
-    ## GRanges object with 1 range and 10 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc
-    ##          <Rle> <IRanges>  <Rle> | <character> <character> <numeric> <numeric>
-    ##   [1]     chr1 1651-1700      + |      gene_1        tx_4         4       1.2
-    ##              name  estimate  event_type event_tx_id event_estimate     tx_pair
-    ##       <character> <integer> <character> <character>      <integer> <character>
-    ##   [1]      tx_4-4         1        a3ss        tx_0             -1   tx_0-tx_4
+    ## GRanges object with 1 range and 9 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1651-1700      + |      gene_1        tx_4 gene_1:1651-1700
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
+    ##       <numeric> <integer> <character> <character>      <integer> <character>
+    ##   [1]         4         1        a3ss        tx_0             -1   tx_0-tx_4
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
     ## 
     ## $`tx_0-tx_5`
-    ## GRanges object with 2 ranges and 10 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id exon_rank    log2fc
-    ##          <Rle> <IRanges>  <Rle> | <character> <character> <numeric> <numeric>
-    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0         3      -2.0
-    ##   [2]     chr1 1651-1700      + |      gene_1        tx_5         3       2.6
-    ##              name  estimate  event_type event_tx_id event_estimate     tx_pair
-    ##       <character> <integer> <character> <character>      <integer> <character>
-    ##   [1]      tx_0-3        -1          se        tx_5              1   tx_0-tx_5
-    ##   [2]      tx_5-3         1        a3ss        tx_0             -1   tx_0-tx_5
+    ## GRanges object with 2 ranges and 9 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
+    ##   [2]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
+    ##       <numeric> <integer> <character> <character>      <integer> <character>
+    ##   [1]         3        -1          se        tx_5              1   tx_0-tx_5
+    ##   [2]         3         1        a3ss        tx_0             -1   tx_0-tx_5
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
