@@ -43,7 +43,7 @@ following types of splicing events:
 These are detected using a series of functions,
 e.g. [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-etc. described below.
+etc., summarized in [the `find_*()` functions](#find-functions).
 
 Several alternative tools exist for detecting splicing events from
 RNA-seq data and analyzing their consequences:
@@ -188,6 +188,58 @@ values indicate up-regulated exons and negative values indicate
 down-regulated exons; the negative group is the reference, whose exons
 are tested against those of the positive group. All exons from the same
 transcript will share the same value for this column.
+
+## The `find_*()` functions
+
+One function detects each event type. All of them take as their first
+argument an exon *GRanges* that has been through
+[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md),
+and return event *GRanges* in the same shape (see [output
+format](#output-format)), so they can be called in any order or all at
+once with
+[`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
+
+Throughout, *up* and *down* refer to the sign of the effect estimate:
+down transcripts are the reference group, and the events are what the up
+transcripts do relative to them.
+
+| Function | `event_type` | Detects | Exons returned |
+|----|----|----|----|
+| [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"se"` | An exon of a down transcript that is absent from an up transcript of the same gene, whose two flanking exons are adjacent in that up transcript | The skipped exon, from the down transcript |
+| [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ie"` | The mirror image of SE: an exon of an up transcript absent from a down transcript of the same gene | The included exon, from the up transcript |
+| [`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"mxe"` | Two non-overlapping exons, one in each transcript, sitting between the same pair of flanking exons | Both exons of the pair, one row each, interleaved |
+| [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ri"` | An intron of a down transcript that falls entirely within a single exon of an up transcript of the same gene | The exon retaining the intron, from the up transcript |
+| [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a5ss"` | An up exon sharing the 3’ splice site (acceptor) of a down exon but differing at the 5’ splice site (donor) | The exon with the alternative donor, from the up transcript |
+| [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a3ss"` | The reverse: shared donor, differing acceptor | The exon with the alternative acceptor, from the up transcript |
+| [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | all of the above | Runs the six finders in turn and binds the results | All exons returned by the individual finders |
+
+[`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+and
+[`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+also take a `type` argument, controlling how an exon flanking a
+candidate is matched to an exon of the partner transcript: `"boundary"`
+(the default) requires only the shared splice site to coincide, `"over"`
+accepts any overlap, and `"in"` requires the two exons to be identical.
+
+Every finder has a long-form alias that spells the event type out —
+[`find_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_included_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_mutually_exclusive_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+and
+[`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+— for use where a script reads better with the full name. They are the
+same functions, so
+[`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+and
+[`find_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+are interchangeable.
+
+Worked examples of all of these are in [finding individual
+events](#individual-events).
 
 ## Output format
 
@@ -373,7 +425,8 @@ mock |> head(2)
 #### Finding events
 
 [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
-wraps the six event finders, which can also be called one at a time —
+wraps the six event finders ([the `find_*()`
+functions](#find-functions)), which can also be called one at a time —
 see [finding individual events](#individual-events) below:
 
 ``` r
@@ -756,7 +809,7 @@ for details.
 #### Finding individual events
 
 Next we can run the various functions for calculating different types of
-splicing events.
+splicing events, listed in [the `find_*()` functions](#find-functions).
 
 **Skipped exons (SE)**
 
@@ -1064,7 +1117,7 @@ individual exons of each transcript to produce an exon-level *GRanges*
 and then followed by event-specific functions
 ([`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-etc.).
+etc., see [the `find_*()` functions](#find-functions)).
 
 ## Obtaining exon ranges
 

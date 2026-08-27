@@ -114,8 +114,8 @@ splice site from exons in down-regulated transcripts</li>
 the 3’ splice site</li>
 </ul>
 <p>These are detected using a series of functions,
-e.g. <code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>, etc. described
-below.</p>
+e.g. <code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>, etc., summarized in
+<a href="#find-functions">the <code>find_*()</code> functions</a>.</p>
 <p>Several alternative tools exist for detecting splicing events from
 RNA-seq data and analyzing their consequences:</p>
 <ul>
@@ -271,6 +271,100 @@ exons and negative values indicate down-regulated exons; the negative
 group is the reference, whose exons are tested against those of the
 positive group. All exons from the same transcript will share the same
 value for this column.</p>
+</div>
+<div class="section level2">
+<h2 id="find-functions">The <code>find_*()</code> functions<a class="anchor" aria-label="anchor" href="#find-functions"></a>
+</h2>
+<p>One function detects each event type. All of them take as their first
+argument an exon <em>GRanges</em> that has been through
+<code><a href="../reference/preprocess.html">preprocess()</a></code>, and return event <em>GRanges</em> in the same
+shape (see <a href="#output-format">output format</a>), so they can be
+called in any order or all at once with
+<code><a href="../reference/find_events.html">find_all_events()</a></code>.</p>
+<p>Throughout, <em>up</em> and <em>down</em> refer to the sign of the
+effect estimate: down transcripts are the reference group, and the
+events are what the up transcripts do relative to them.</p>
+<table class="table">
+<colgroup>
+<col width="16%">
+<col width="16%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th><code>event_type</code></th>
+<th>Detects</th>
+<th>Exons returned</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/find_events.html">find_se()</a></code></td>
+<td><code>"se"</code></td>
+<td>An exon of a down transcript that is absent from an up transcript of
+the same gene, whose two flanking exons are adjacent in that up
+transcript</td>
+<td>The skipped exon, from the down transcript</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/find_events.html">find_ie()</a></code></td>
+<td><code>"ie"</code></td>
+<td>The mirror image of SE: an exon of an up transcript absent from a
+down transcript of the same gene</td>
+<td>The included exon, from the up transcript</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/find_events.html">find_mxe()</a></code></td>
+<td><code>"mxe"</code></td>
+<td>Two non-overlapping exons, one in each transcript, sitting between
+the same pair of flanking exons</td>
+<td>Both exons of the pair, one row each, interleaved</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/find_events.html">find_ri()</a></code></td>
+<td><code>"ri"</code></td>
+<td>An intron of a down transcript that falls entirely within a single
+exon of an up transcript of the same gene</td>
+<td>The exon retaining the intron, from the up transcript</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/find_events.html">find_a5ss()</a></code></td>
+<td><code>"a5ss"</code></td>
+<td>An up exon sharing the 3’ splice site (acceptor) of a down exon but
+differing at the 5’ splice site (donor)</td>
+<td>The exon with the alternative donor, from the up transcript</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/find_events.html">find_a3ss()</a></code></td>
+<td><code>"a3ss"</code></td>
+<td>The reverse: shared donor, differing acceptor</td>
+<td>The exon with the alternative acceptor, from the up transcript</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/find_events.html">find_all_events()</a></code></td>
+<td>all of the above</td>
+<td>Runs the six finders in turn and binds the results</td>
+<td>All exons returned by the individual finders</td>
+</tr>
+</tbody>
+</table>
+<p><code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>,
+<code><a href="../reference/find_events.html">find_mxe()</a></code> and <code><a href="../reference/find_events.html">find_all_events()</a></code> also take a
+<code>type</code> argument, controlling how an exon flanking a candidate
+is matched to an exon of the partner transcript: <code>"boundary"</code>
+(the default) requires only the shared splice site to coincide,
+<code>"over"</code> accepts any overlap, and <code>"in"</code> requires
+the two exons to be identical.</p>
+<p>Every finder has a long-form alias that spells the event type out —
+<code><a href="../reference/find_events.html">find_skipped_exons()</a></code>, <code><a href="../reference/find_events.html">find_included_exons()</a></code>,
+<code><a href="../reference/find_events.html">find_mutually_exclusive_exons()</a></code>,
+<code><a href="../reference/find_events.html">find_retained_introns()</a></code>,
+<code><a href="../reference/find_events.html">find_alternative_5_prime_splice_sites()</a></code> and
+<code><a href="../reference/find_events.html">find_alternative_3_prime_splice_sites()</a></code> — for use where a
+script reads better with the full name. They are the same functions, so
+<code><a href="../reference/find_events.html">find_se()</a></code> and <code><a href="../reference/find_events.html">find_skipped_exons()</a></code> are
+interchangeable.</p>
+<p>Worked examples of all of these are in <a href="#individual-events">finding individual events</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="output-format">Output format<a class="anchor" aria-label="anchor" href="#output-format"></a>
@@ -472,9 +566,8 @@ derived from, which makes it the anchor: we put it on its own in
 <div class="section level4">
 <h4 id="finding-events">Finding events<a class="anchor" aria-label="anchor" href="#finding-events"></a>
 </h4>
-<p><code><a href="../reference/find_events.html">find_all_events()</a></code> wraps the six event finders, which can
-also be called one at a time — see <a href="#individual-events">finding
-individual events</a> below:</p>
+<p><code><a href="../reference/find_events.html">find_all_events()</a></code> wraps the six event finders (<a href="#find-functions">the <code>find_*()</code> functions</a>), which
+can also be called one at a time — see <a href="#individual-events">finding individual events</a> below:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mock_events</span> <span class="op">&lt;-</span> <span class="va">mock</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_all_events</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Calculating skipped exon events...</span></span></code></pre>
@@ -804,7 +897,8 @@ See <code><a href="../reference/preprocess.html">?preprocess</a></code> for deta
 <h4 id="individual-events">Finding individual events<a class="anchor" aria-label="anchor" href="#individual-events"></a>
 </h4>
 <p>Next we can run the various functions for calculating different types
-of splicing events.</p>
+of splicing events, listed in <a href="#find-functions">the
+<code>find_*()</code> functions</a>.</p>
 <p><strong>Skipped exons (SE)</strong></p>
 <p>For example, we can calculate exons that are skipped in up-regulated
 transcripts relative to down-regulated transcripts, across all genes. As
@@ -1062,7 +1156,8 @@ individual exons of each transcript to produce an exon-level
 ranges</a>). This annotated <em>GRanges</em> is the starting point for
 <em>splicelogic</em>, beginning with <code><a href="../reference/preprocess.html">preprocess()</a></code> and then
 followed by event-specific functions (<code><a href="../reference/find_events.html">find_se()</a></code>,
-<code><a href="../reference/find_events.html">find_ie()</a></code>, etc.).</p>
+<code><a href="../reference/find_events.html">find_ie()</a></code>, etc., see <a href="#find-functions">the
+<code>find_*()</code> functions</a>).</p>
 </div>
 <div class="section level2">
 <h2 id="obtaining-exon-ranges">Obtaining exon ranges<a class="anchor" aria-label="anchor" href="#obtaining-exon-ranges"></a>
