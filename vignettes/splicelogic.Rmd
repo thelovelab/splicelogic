@@ -362,8 +362,12 @@ and collapse other informative variables.
 ```{r mock-collapse}
 # define a helper function
 my_paste <- \(x) paste(unique(x), collapse = ",")
+# `exon_id` is usually found in the metadata columns in the input exons. 
+# If not available, we can build it from the gene and the exon coordinates — the same 
+# exon then gets the same id in every transcript that contains it:
+#   mock_events <- mock_events |>
+#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
 mock_events |>
-  dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end)) |>
   dplyr::group_by(exon_id, event_type) |>
   plyranges::reduce_ranges_directed(
     n = plyranges::n(),
