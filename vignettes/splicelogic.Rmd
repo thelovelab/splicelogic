@@ -341,7 +341,8 @@ GenomicRanges::mcols(mock_exons) <- S4Vectors::DataFrame(
     show_col_types = FALSE
   )
 )
-mock_exons
+mock_exons |>
+  dplyr::select(-gene_id)
 ```
 We can visualize the five transcripts with `wiggleplotr::plotTranscripts()`.
 
