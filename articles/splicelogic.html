@@ -221,7 +221,7 @@ estimate with a direction — a GLM coefficient, a change in
 percent-spliced-in
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math>PSI),
 and so on — usually alongside a statistic such as an adjusted p-value
-for restricting to a significant set. See <a href="#upstream-methods">upstream methods</a>.</p></li>
+for restricting to a significant set. See <a href="#upstream-methods">upstream DTU methods</a>.</p></li>
 </ol>
 <p><em>splicelogic</em> also assumes the user has information about the
 genomic ranges for the exons of each transcript. <em>splicelogic</em>
@@ -1106,13 +1106,14 @@ empty vector.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="upstream-methods">Upstream methods<a class="anchor" aria-label="anchor" href="#upstream-methods"></a>
+<h2 id="upstream-methods">Upstream DTU methods<a class="anchor" aria-label="anchor" href="#upstream-methods"></a>
 </h2>
-<p><em>splicelogic</em> is designed to operate downstream of
-differential transcript usage (DTU). DTU methods test whether the
-relative proportions of transcripts within a gene differ between
-experimental conditions.</p>
-<p>In general, any upstream method that produces transcript-resolved
+<p>In this section we talk about one of the two routes into
+<em>splicelogic</em>: the one where the two groups of transcripts come
+out of a differential transcript usage (DTU) analysis. DTU methods test
+whether the relative proportions of transcripts within a gene differ
+between experimental conditions.</p>
+<p>Any upstream DTU method that produces transcript-resolved
 differential usage statistics can be used with <em>splicelogic</em>,
 provided that results include:</p>
 <ol style="list-style-type: decimal">
@@ -1122,7 +1123,7 @@ coefficient, change in isoform fraction, deltaPSI, etc.), and<br>
 <li>an adjusted p-value (or equivalent significance metric by
 thresholding).</li>
 </ol>
-<p>Common upstream methods include:</p>
+<p>Common upstream DTU methods include:</p>
 <ul>
 <li><p><a href="https://bioconductor.org/packages/satuRn" class="external-link">satuRn</a> —
 fits quasi-binomial generalized linear models to transcript usage
@@ -1253,26 +1254,6 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <code class="sourceCode R"><span><span class="va">human_exons</span> <span class="op">&lt;-</span> <span class="va">human_exons</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">padj</span> <span class="op">&lt;</span> <span class="fl">.01</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"effect_est"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="comparing-two-sets">Comparing two sets<a class="anchor" aria-label="anchor" href="#comparing-two-sets"></a>
-</h3>
-<p>If one has two sets of transcripts to compare, for example, a set of
-transcripts of interest versus a reference set, one can use
-<code><a href="../reference/prepare_exons_by_partition.html">prepare_exons_by_partition()</a></code> as an alternative entry point.
-It accepts either two <em>GRanges</em> objects (each carrying
-<code>exon_rank</code>, <code>gene_id</code>, and <code>tx_id</code>) or
-two character vectors of transcript IDs (in which case a <em>TxDb</em>
-must be supplied to look up exon coordinates). The two sets are passed
-as the <code>up</code> and <code>down</code> arguments; internally the
-function assigns <code>estimate = +1</code> to the <code>up</code> set
-and <code>estimate = -1</code> to the <code>down</code> set, and returns
-a combined <em>GRanges</em> ready to pass to <code><a href="../reference/preprocess.html">preprocess()</a></code>
-with <code>coef_col = "estimate"</code>. This route is useful for
-comparing two transcript sets of interest directly, without needing
-per-transcript effect estimates from a DTU analysis. See
-<code><a href="../reference/prepare_exons_by_partition.html">?prepare_exons_by_partition</a></code> for details, and <a href="#transcript-sets">finding events from transcript sets</a> above
-for a worked example.</p>
 </div>
 <div class="section level3">
 <h3 id="manual-construction">Manual construction<a class="anchor" aria-label="anchor" href="#manual-construction"></a>

@@ -156,7 +156,7 @@ what those two groups are; that is settled upstream, in one of two ways:
     with a direction — a GLM coefficient, a change in percent-spliced-in
     ($`\Delta`$PSI), and so on — usually alongside a statistic such as
     an adjusted p-value for restricting to a significant set. See
-    [upstream methods](#upstream-methods).
+    [upstream DTU methods](#upstream-methods).
 
 *splicelogic* also assumes the user has information about the genomic
 ranges for the exons of each transcript. *splicelogic* provides a set of
@@ -1063,23 +1063,24 @@ barplot(
 ![Barplot of event
 types](splicelogic_files/figure-html/events-barplot-1.png)
 
-## Upstream methods
+## Upstream DTU methods
 
-*splicelogic* is designed to operate downstream of differential
-transcript usage (DTU). DTU methods test whether the relative
+In this section we talk about one of the two routes into *splicelogic*:
+the one where the two groups of transcripts come out of a differential
+transcript usage (DTU) analysis. DTU methods test whether the relative
 proportions of transcripts within a gene differ between experimental
 conditions.
 
-In general, any upstream method that produces transcript-resolved
-differential usage statistics can be used with *splicelogic*, provided
-that results include:
+Any upstream DTU method that produces transcript-resolved differential
+usage statistics can be used with *splicelogic*, provided that results
+include:
 
 1.  a per-transcript directional effect estimate (e.g. a model
     coefficient, change in isoform fraction, deltaPSI, etc.), and  
 2.  an adjusted p-value (or equivalent significance metric by
     thresholding).
 
-Common upstream methods include:
+Common upstream DTU methods include:
 
 - [satuRn](https://bioconductor.org/packages/satuRn) — fits
   quasi-binomial generalized linear models to transcript usage
@@ -1242,26 +1243,6 @@ human_exons <- human_exons |>
   filter(padj < .01) |>
   preprocess(coef_col = "effect_est")
 ```
-
-### Comparing two sets
-
-If one has two sets of transcripts to compare, for example, a set of
-transcripts of interest versus a reference set, one can use
-[`prepare_exons_by_partition()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.md)
-as an alternative entry point. It accepts either two *GRanges* objects
-(each carrying `exon_rank`, `gene_id`, and `tx_id`) or two character
-vectors of transcript IDs (in which case a *TxDb* must be supplied to
-look up exon coordinates). The two sets are passed as the `up` and
-`down` arguments; internally the function assigns `estimate = +1` to the
-`up` set and `estimate = -1` to the `down` set, and returns a combined
-*GRanges* ready to pass to
-[`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
-with `coef_col = "estimate"`. This route is useful for comparing two
-transcript sets of interest directly, without needing per-transcript
-effect estimates from a DTU analysis. See
-[`?prepare_exons_by_partition`](https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.md)
-for details, and [finding events from transcript sets](#transcript-sets)
-above for a worked example.
 
 ### Manual construction
 
