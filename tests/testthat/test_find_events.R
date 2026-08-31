@@ -196,6 +196,46 @@ test_that("find_a5ss test", {
   expect_true(any(result$event_type == "a5ss"))
 })
 
+# Test that the a5ss/a3ss labels follow the strand
+test_that("find_a5ss and find_a3ss respect the minus strand", {
+  # the same five exons, but read right to left: exon_rank 1 is the 41-45
+  # exon, so the exon end is the acceptor and the exon start is the donor,
+  # the opposite of the "+" strand case above. a shifted boundary that
+  # would be an a3ss on "+" is therefore an a5ss here.
+  base <- data.frame(
+    seqnames = "chr1",
+    start = c(1, 11, 21, 31, 41),
+    end = c(5, 15, 25, 35, 45),
+    strand = "-",
+    gene_id = 1
+  )
+  # tx 1 is the anchor, tx 2 carries the shifted exon
+  make_gr <- function(alt) {
+    dplyr::bind_rows(
+      base |> dplyr::mutate(tx_id = 1, estimate = -1, exon_rank = 5:1),
+      alt |> dplyr::mutate(tx_id = 2, estimate = 1, exon_rank = 5:1)
+    ) |>
+      plyranges::as_granges() |>
+      preprocess(coef_col = "estimate")
+  }
+
+  # the donor moves (21-25 -> 23-25): on "-" that is the exon start
+  gr_a5 <- make_gr(base |> dplyr::mutate(start = replace(start, 3, 23)))
+  a5ss <- find_a5ss(gr_a5)
+  expect_equal(length(a5ss), 1L)
+  expect_equal(as.integer(GenomicRanges::start(a5ss)), 23L)
+  expect_equal(GenomicRanges::mcols(a5ss)$event_type, "a5ss")
+  expect_equal(length(find_a3ss(gr_a5)), 0L)
+
+  # the acceptor moves (21-25 -> 21-23): on "-" that is the exon end
+  gr_a3 <- make_gr(base |> dplyr::mutate(end = replace(end, 3, 23)))
+  a3ss <- find_a3ss(gr_a3)
+  expect_equal(length(a3ss), 1L)
+  expect_equal(as.integer(GenomicRanges::end(a3ss)), 23L)
+  expect_equal(GenomicRanges::mcols(a3ss)$event_type, "a3ss")
+  expect_equal(length(find_a5ss(gr_a3)), 0L)
+})
+
 # Test for find_se with new mock data
 test_that("find_se test with generate_se", {
   gr <- create_mock_data(3, 3, 6)

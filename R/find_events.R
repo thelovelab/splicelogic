@@ -300,7 +300,8 @@ find_retained_introns <- find_ri
 # for find_alt_ss
 utils::globalVariables(c(
   "estimate", "cand_idx", "neg_idx", "gene_id_cand", "gene_id_neg",
-  "tx_id_neg", "n", "match_start", "match_end", "event_type", "event_tx_id"
+  "tx_id_neg", "n", "match_start", "match_end", "event_type", "event_tx_id",
+  "on_minus"
 ))
 
 #' @rdname find_events
@@ -349,6 +350,12 @@ find_alt_ss <- function(gr, by_start = TRUE) {
       gene_id_neg = neg_tbl$gene_id[neg_idx],
       match_start = cand_tbl$start[cand_idx] == neg_tbl$start[neg_idx],
       match_end = cand_tbl$end[cand_idx] == neg_tbl$end[neg_idx],
+      # which boundary carries the donor depends on the strand: on "+" the
+      # exon end is the donor (5' splice site) and the start the acceptor,
+      # on "-" transcription runs the other way and the two swap. candidates
+      # are found with directed overlaps, so the candidate's strand is also
+      # the partner's. "*" falls through as "+".
+      on_minus = as.character(cand_tbl$strand[cand_idx]) == "-",
       tx_id_neg = neg_tbl$tx_id[neg_idx]
     ) |>
     # restrict to same gene
@@ -364,7 +371,10 @@ find_alt_ss <- function(gr, by_start = TRUE) {
     dplyr::anti_join(multi_overlap, by = c("cand_idx", "tx_id_neg")) |>
     # one boundary matches but not the other (XOR)
     dplyr::filter(match_start != match_end) |>
-    dplyr::filter(match_start == by_start) |>
+    # an a5ss shares the acceptor and moves the donor, an a3ss the reverse.
+    # on "+" the acceptor is the start, so a5ss wants match_start; on "-"
+    # it is the end, so the requirement flips.
+    dplyr::filter(match_start == xor(by_start, on_minus)) |>
     dplyr::mutate(
       event_type = event_name
     )
