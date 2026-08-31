@@ -275,6 +275,112 @@ test_that("find_all_events returns empty GRanges when no events exist", {
   expect_equal(length(result), 0L)
 })
 
+# Test every finder against a minus-strand fixture
+test_that("all find_* functions work on minus-strand data", {
+  # six "-" strand genes, one engineered event each. exon_rank runs right
+  # to left, so this checks that the finders key off exon_rank and strand
+  # rather than off genomic order.
+  gr <- preprocess(minus_strand_mock_data(), coef_col = "estimate")
+
+  # g1: pos1 splices out 21-25, which is exon_rank 3 of neg1
+  se <- find_se(gr)
+  expect_s4_class(se, "GRanges")
+  expect_equal(length(se), 1L)
+  expect_equal(GenomicRanges::start(se), 21L)
+  expect_equal(GenomicRanges::end(se), 25L)
+  expect_equal(as.character(GenomicRanges::strand(se)), "-")
+  expect_equal(se$tx_id, "neg1")
+  expect_equal(se$exon_rank, 3L)
+  expect_equal(se$event_tx_id, "pos1")
+  expect_equal(se$event_type, "se")
+
+  # g6: the roles are reversed, so 521-525 is present only in pos6
+  ie <- find_ie(gr)
+  expect_s4_class(ie, "GRanges")
+  expect_equal(length(ie), 1L)
+  expect_equal(GenomicRanges::start(ie), 521L)
+  expect_equal(GenomicRanges::end(ie), 525L)
+  expect_equal(ie$tx_id, "pos6")
+  expect_equal(ie$event_tx_id, "neg6")
+  expect_equal(ie$event_type, "ie")
+
+  # g2: 121-125 (neg2) and 131-135 (pos2) sit between the same flanks and
+  # are disjoint. results are interleaved candidate-then-partner.
+  mxe <- find_mxe(gr)
+  expect_s4_class(mxe, "GRanges")
+  expect_equal(length(mxe), 2L)
+  expect_equal(GenomicRanges::start(mxe), c(121L, 131L))
+  expect_equal(GenomicRanges::end(mxe), c(125L, 135L))
+  expect_equal(mxe$tx_id, c("neg2", "pos2"))
+  expect_equal(mxe$event_tx_id, c("pos2", "neg2"))
+  expect_equal(mxe$event_type, rep("mxe", 2L))
+
+  # g3: pos3 retains the 216-220 intron of neg3
+  ri <- find_ri(gr)
+  expect_s4_class(ri, "GRanges")
+  expect_equal(length(ri), 1L)
+  expect_equal(GenomicRanges::start(ri), 211L)
+  expect_equal(GenomicRanges::end(ri), 225L)
+  expect_equal(ri$tx_id, "pos3")
+  expect_equal(ri$event_tx_id, "neg3")
+  expect_equal(ri$event_type, "ri")
+
+  # g4: the exon start moves (311-315 -> 313-315). on "-" the start is the
+  # donor, so this is an a5ss and must not be reported as an a3ss.
+  a5ss <- find_a5ss(gr)
+  expect_s4_class(a5ss, "GRanges")
+  expect_equal(length(a5ss), 1L)
+  expect_equal(GenomicRanges::start(a5ss), 313L)
+  expect_equal(GenomicRanges::end(a5ss), 315L)
+  expect_equal(a5ss$tx_id, "pos4")
+  expect_equal(a5ss$event_tx_id, "neg4")
+  expect_equal(a5ss$event_type, "a5ss")
+
+  # g5: the exon end moves (411-415 -> 411-413), the acceptor on "-"
+  a3ss <- find_a3ss(gr)
+  expect_s4_class(a3ss, "GRanges")
+  expect_equal(length(a3ss), 1L)
+  expect_equal(GenomicRanges::start(a3ss), 411L)
+  expect_equal(GenomicRanges::end(a3ss), 413L)
+  expect_equal(a3ss$tx_id, "pos5")
+  expect_equal(a3ss$event_tx_id, "neg5")
+  expect_equal(a3ss$event_type, "a3ss")
+
+  # the flank lookup labels the rank k - 1 exon "left", which on "-" is
+  # genomically the right-hand one. nothing downstream depends on the
+  # label -- every match type is symmetric and the filters are on
+  # abs(l - r) -- so all three types must agree.
+  counts <- vapply(
+    c("boundary", "over", "in"),
+    function(ty) {
+      c(
+        se = length(find_se(gr, type = ty)),
+        ie = length(find_ie(gr, type = ty)),
+        mxe = length(find_mxe(gr, type = ty))
+      )
+    },
+    integer(3L)
+  )
+  expect_equal(
+    counts,
+    cbind(
+      boundary = c(se = 1L, ie = 1L, mxe = 2L),
+      over = c(se = 1L, ie = 1L, mxe = 2L),
+      "in" = c(se = 1L, ie = 1L, mxe = 2L)
+    )
+  )
+
+  # and the wrapper picks up all six types, with nothing extra
+  all_events <- find_all_events(gr, verbose = FALSE)
+  expect_s4_class(all_events, "GRanges")
+  expect_equal(length(all_events), 7L)
+  expect_equal(
+    sort(unique(all_events$event_type)),
+    c("a3ss", "a5ss", "ie", "mxe", "ri", "se")
+  )
+  expect_true(all(as.character(GenomicRanges::strand(all_events)) == "-"))
+})
+
 test_that("find_se counts isoforms, not exons, when picking candidates", {
   gr <- preprocess(intron_split_mock_data(), coef_col = "estimate")
 

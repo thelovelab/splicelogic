@@ -259,9 +259,13 @@ candidates_by_presence <- function(gr, neg_exons, pos_exons) {
       right_exons = GenomicRanges::GRanges()
     ))
   }
-  # keys of exons to the left and right of candidates
-  # TO DO: check if this works for - strand.
-  # ie would the left exon be exon_rank +1?
+  # keys of the two rank-adjacent flanks of each candidate. "left" and
+  # "right" follow exon_rank, not the genome: on "-" the rank k - 1 exon
+  # sits to the genomic right, so the two are swapped there. that is safe
+  # because nothing downstream depends on which side is which --
+  # find_matches_batch matches on overlap / equality / shared boundary,
+  # all symmetric, and find_se / find_mxe filter on abs(l - r). the
+  # minus-strand test in test_find_events.R covers all three match types.
   left_keys <- paste0(candidates$tx_id, "-", candidates$exon_rank - 1L)
   right_keys <- paste0(candidates$tx_id, "-", candidates$exon_rank + 1L)
 

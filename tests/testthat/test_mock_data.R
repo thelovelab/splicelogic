@@ -121,3 +121,87 @@ test_that("generate_a3ss modifies exon starts", {
   expect_equal(length(gr_a3), length(gr))
   expect_false(all(GenomicRanges::start(gr_a3) == GenomicRanges::start(gr)))
 })
+
+# Test the neg/pos pairing guarantee and its one boundary case
+test_that("a single transcript per gene warns and is all-negative", {
+  # the neg/pos pairing keys off tx_order 1 and 2, so one transcript per
+  # gene leaves everything negative and nothing for a generator to edit
+  expect_warning(gr <- create_mock_data(2, 1, 5), "n_tx_per_gene < 2")
+  expect_true(all(GenomicRanges::mcols(gr)$estimate < 0))
+
+  # two transcripts per gene is fine and does not warn
+  expect_silent(gr2 <- create_mock_data(2, 2, 5))
+  expect_true(any(GenomicRanges::mcols(gr2)$estimate > 0))
+  expect_s4_class(generate_ri(gr2, 1), "GRanges")
+})
+
+# Test that create_mock_data honours the strand argument
+test_that("create_mock_data places transcripts on the requested strand", {
+  gr_plus <- create_mock_data(2, 3, 4, strand = "+")
+  gr_minus <- create_mock_data(2, 3, 4, strand = "-")
+
+  expect_true(all(as.character(GenomicRanges::strand(gr_plus)) == "+"))
+  expect_true(all(as.character(GenomicRanges::strand(gr_minus)) == "-"))
+  expect_equal(length(gr_minus), length(gr_plus))
+
+  # on "-" exon_rank runs the other way: rank 1 is the rightmost exon,
+  # so rank and genomic start are anti-correlated within a transcript
+  rank_vs_start <- function(gr) {
+    tibble::as_tibble(gr) |>
+      dplyr::group_by(tx_id) |>
+      dplyr::summarise(rho = stats::cor(exon_rank, start), .groups = "drop") |>
+      dplyr::pull(rho)
+  }
+  expect_true(all(rank_vs_start(gr_plus) == 1))
+  expect_true(all(rank_vs_start(gr_minus) == -1))
+
+  expect_error(create_mock_data(strand = "?"))
+})
+
+# Test that the generators put the event on the strand-correct boundary
+test_that("generate_a5ss and generate_a3ss follow the strand", {
+  # on "+" the donor is the exon end and the acceptor the exon start;
+  # on "-" the two swap. shifting the wrong boundary silently turns an
+  # a5ss into an a3ss and vice versa, which is what this guards.
+  for (st in c("+", "-")) {
+    set.seed(7)
+    gr <- create_mock_data(3, 3, 6, strand = st)
+
+    a5 <- generate_a5ss(gr, n_events = 2)
+    expect_gt(length(find_a5ss(a5)), 0L)
+    expect_equal(length(find_a3ss(a5)), 0L)
+
+    a3 <- generate_a3ss(gr, n_events = 2)
+    expect_gt(length(find_a3ss(a3)), 0L)
+    expect_equal(length(find_a5ss(a3)), 0L)
+
+    # the moved boundary is the one the strand marks as the splice site
+    moved_end <- GenomicRanges::end(a5) != GenomicRanges::end(gr)
+    moved_start <- GenomicRanges::start(a5) != GenomicRanges::start(gr)
+    if (st == "+") {
+      expect_true(any(moved_end) && !any(moved_start))
+    } else {
+      expect_true(any(moved_start) && !any(moved_end))
+    }
+  }
+})
+
+test_that("generate_se, mxe and ri work on the minus strand", {
+  # these three are rank-based rather than coordinate-based, but
+  # generate_ri merges an exon with its rank neighbour, which lies to the
+  # genomic left on "-" -- extending the end there would invert the range
+  for (st in c("+", "-")) {
+    set.seed(3)
+    gr <- create_mock_data(3, 3, 6, strand = st)
+
+    se <- generate_se(gr, n_events = 2)
+    expect_gt(length(find_se(se)), 0L)
+
+    mxe <- generate_mxe(gr, n_events = 2)
+    expect_gt(length(find_mxe(mxe)), 0L)
+
+    ri <- generate_ri(gr, n_events = 2)
+    expect_true(all(GenomicRanges::width(ri) > 0))
+    expect_gt(length(find_ri(ri)), 0L)
+  }
+})

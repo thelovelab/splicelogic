@@ -223,31 +223,127 @@ intron_split_mock_data <- function() {
   return(gr)
 }
 
+#' Create a sample GRanges on the minus strand covering every event type
+#'
+#' Six one-gene loci, all on `-`, each engineered for a single event. What
+#' distinguishes this fixture from the `+` strand ones is that exon_rank
+#' runs right to left in genomic coordinates (rank 1 is the rightmost
+#' exon), so the exon of rank k - 1 sits to the genomic *right* of rank k,
+#' and an exon's donor / acceptor are its genomic start / end rather than
+#' the other way round.
+#'
+#' ```
+#' g1 se   neg1 [1-5]     [11-15]   [21-25]             [31-35]   [41-45]
+#'         pos1 [1-5]     [11-15]                       [31-35]   [41-45]
+#' g2 mxe  neg2 [100-105] [111-115] [121-125]           [141-145] [151-155]
+#'         pos2 [100-105] [111-115]           [131-135] [141-145] [151-155]
+#' g3 ri   neg3 [200-205] [211-215] [221-225]
+#'         pos3 [200-205] [===211-225===]
+#' g4 a5ss neg4 [300-305] [311-315] [321-325]
+#'         pos4 [300-305]   [313-315] [321-325]
+#' g5 a3ss neg5 [400-405] [411-415] [421-425]
+#'         pos5 [400-405] [411-413] [421-425]
+#' g6 ie   neg6 [500-505] [511-515]           [531-535] [541-545]
+#'         pos6 [500-505] [511-515] [521-525] [531-535] [541-545]
+#' ```
+#'
+#' In g4 the moved boundary is the exon start, which on `-` is the donor,
+#' so it is an a5ss; in g5 it is the exon end, the acceptor, so it is an
+#' a3ss. Both are the mirror image of the `+` strand case.
+#' @return A GRanges object with twelve transcripts in six genes
+#' @noRd
+minus_strand_mock_data <- function() {
+  tx <- function(gene_id, tx_id, start, end, estimate) {
+    data.frame(
+      seqnames = "chr1",
+      start = start,
+      end = end,
+      strand = "-",
+      # rank 1 is the 5'-most exon, which on "-" is the rightmost one
+      exon_rank = rev(seq_along(start)),
+      gene_id = gene_id,
+      tx_id = tx_id,
+      estimate = estimate
+    )
+  }
+
+  dplyr::bind_rows(
+    tx("g1", "neg1", c(1, 11, 21, 31, 41), c(5, 15, 25, 35, 45), -1),
+    tx("g1", "pos1", c(1, 11, 31, 41), c(5, 15, 35, 45), 1),
+    tx(
+      "g2", "neg2",
+      c(100, 111, 121, 141, 151), c(105, 115, 125, 145, 155), -1
+    ),
+    tx(
+      "g2", "pos2",
+      c(100, 111, 131, 141, 151), c(105, 115, 135, 145, 155), 1
+    ),
+    tx("g3", "neg3", c(200, 211, 221), c(205, 215, 225), -1),
+    tx("g3", "pos3", c(200, 211), c(205, 225), 1),
+    tx("g4", "neg4", c(300, 311, 321), c(305, 315, 325), -1),
+    tx("g4", "pos4", c(300, 313, 321), c(305, 315, 325), 1),
+    tx("g5", "neg5", c(400, 411, 421), c(405, 415, 425), -1),
+    tx("g5", "pos5", c(400, 411, 421), c(405, 413, 425), 1),
+    tx("g6", "neg6", c(500, 511, 531, 541), c(505, 515, 535, 545), -1),
+    tx(
+      "g6", "pos6",
+      c(500, 511, 521, 531, 541), c(505, 515, 525, 535, 545), 1
+    )
+  ) |>
+    plyranges::as_granges()
+}
+
 # for create_mock_data
 utils::globalVariables(c("gene_id", "strand", "tx_order", "estimate"))
 
 #' Create mock GRanges data for splicing event testing
 #' 
 #' @param n_genes Number of genes to simulate
-#' @param n_tx_per_gene Number of transcripts per gene
+#' @param n_tx_per_gene Number of transcripts per gene. Use 2 or more:
+#'   the first transcript of each gene is given a negative estimate and
+#'   the second a positive one, so a single transcript per gene leaves
+#'   the set all-negative and the `generate_*()` helpers with nothing to
+#'   modify.
 #' @param n_exons_per_tx Number of exons per transcript
 #' @param coef_range Range of coefficient values to sample from
-#' 
+#' @param strand Strand to place every transcript on: `"+"` (default),
+#'   `"-"`, or `"*"`. On `"-"` the exon ranks are reversed, so exon_rank 1
+#'   is the rightmost exon in genomic coordinates.
+#'
 #' @return A GRanges object with simulated transcripts and exons
-#' 
+#'
 #' @examples
-#' 
+#'
 #' # create mock data with 2 genes, 4 transcripts
 #' # per gene, and 4 exons per transcript
 #' gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4)
-#' 
+#'
+#' # the same, on the minus strand
+#' gr_minus <- create_mock_data(n_genes = 2, n_exons_per_tx = 4, strand = "-")
+#'
 #' @export
 create_mock_data <- function(
   n_genes = 1,
   n_tx_per_gene = 2,
   n_exons_per_tx = 5,
-  coef_range = c(-1, 1)
+  coef_range = c(-1, 1),
+  strand = c("+", "-", "*")
 ) {
+  # bound to a distinct name so the mutate() below reads the argument
+  # rather than the column it is creating
+  tx_strand <- match.arg(strand)
+
+  # the neg/pos pairing below is per gene and keys off tx_order 1 and 2,
+  # so it cannot be honoured with a single transcript per gene
+  if (n_tx_per_gene < 2) {
+    warning(
+      "n_tx_per_gene < 2: every transcript is assigned a negative ",
+      "estimate, so there is no\n  positive isoform to compare against ",
+      "and the generate_*() helpers have nothing to modify.",
+      call. = FALSE
+    )
+  }
+
   # Generate all combinations of genes, transcripts, and exons
   data <- expand.grid(
     gene_id = seq_len(n_genes),
@@ -268,7 +364,7 @@ create_mock_data <- function(
       seqnames = paste0("chr", sample(seq_len(22), 1)), # Random chromosome
       start = (exon_rank - 1) * 10 + 1 + (gene_id - 1) * gene_offset,
       width = 5, # Fixed width
-      strand = "+" # Fixed strand for simplicity TO DO
+      strand = tx_strand # one strand for the whole simulated set
     )
 
   # Reverse exon_rank for transcripts with strand == "-"
@@ -279,7 +375,8 @@ create_mock_data <- function(
     ) |>
     dplyr::ungroup()
 
-  # Assign estimate per tx_id ensuring at least 1 neg and 1 pos per gene
+  # Assign estimate per tx_id: 1 neg and 1 pos per gene when
+  # n_tx_per_gene >= 2 (warned about above when it is not)
   # Create a lookup table for tx estimate:
   # first tx gets negative, second gets positive, rest random
   tx_estimate <- data |>
@@ -463,7 +560,7 @@ generate_mxe <- function(gr, n_events = 1) {
 }
 
 # for generate_ri
-utils::globalVariables(c("estimate"))
+utils::globalVariables(c("estimate", "strand"))
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
@@ -499,7 +596,20 @@ generate_ri <- function(gr, n_events = 1) {
     # then remove exon 2 and 3 and re rank the exons accordingly
     dplyr::group_by(tx_id) |>
     dplyr::mutate(
-      end = ifelse(exon_rank == exon_idx, end[exon_rank == exon_idx + 1], end)
+      # the next exon by rank sits to the genomic right on "+" but to the
+      # genomic left on "-", so the intron is swallowed by pushing out the
+      # end or the start accordingly. extending the end on "-" would run
+      # the range backwards and error out.
+      end = ifelse(
+        exon_rank == exon_idx & strand != "-",
+        end[exon_rank == exon_idx + 1],
+        end
+      ),
+      start = ifelse(
+        exon_rank == exon_idx & strand == "-",
+        start[exon_rank == exon_idx + 1],
+        start
+      )
     ) |>
     dplyr::filter(!(exon_rank %in% c(exon_idx + 1))) |>
     dplyr::ungroup() |>
@@ -583,13 +693,26 @@ generate_a5ss <- function(gr, n_events = 1) {
     dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
 
+  # the donor (5' splice site) is the exon end on "+" but the exon start
+  # on "-", so move whichever boundary the strand puts downstream.
+  # as.character() because an ungrouped mutate() hands back strand as an
+  # Rle, which if_else() rejects as a condition. the offset is named
+  # bp_shift, not shift: plyranges' data mask resolves a bare `shift` to
+  # IRanges::shift(), so `end + shift` adds a function and errors.
+  bp_shift <- sample(c(-2L, 2L), 1)
+  on_minus <- as.character(GenomicRanges::strand(gr)) == "-"
   gr_with_a5ss <- gr |>
     dplyr::mutate(
       end = dplyr::if_else(
-        key %in% a5ss_exon_key,
-        end + sample(c(-2, 2), 1),
+        key %in% a5ss_exon_key & !on_minus,
+        end + bp_shift,
         end
-      ) # TO DO : include - strand case (start instead of end)
+      ),
+      start = dplyr::if_else(
+        key %in% a5ss_exon_key & on_minus,
+        start + bp_shift,
+        start
+      )
     )
   gr_with_a5ss <- preprocess(gr_with_a5ss, coef_col = "estimate")
   gr_with_a5ss <- gr_with_a5ss |>
@@ -631,14 +754,27 @@ generate_a3ss <- function(gr, n_events = 1) {
     dplyr::slice_sample(n = n_events) |>
     dplyr::pull(key)
 
+  # the acceptor (3' splice site) is the exon start on "+" but the exon
+  # end on "-", so move whichever boundary the strand puts upstream.
+  # as.character() because an ungrouped mutate() hands back strand as an
+  # Rle, which if_else() rejects as a condition. the offset is named
+  # bp_shift, not shift: plyranges' data mask resolves a bare `shift` to
+  # IRanges::shift(), so `end + shift` adds a function and errors.
+  bp_shift <- sample(c(-2L, 2L), 1)
+  on_minus <- as.character(GenomicRanges::strand(gr)) == "-"
   gr_with_a3ss <- gr |>
     dplyr::mutate(
       start = dplyr::if_else(
-        key %in% a3ss_exon_key,
-        start + sample(c(-2, 2), 1),
+        key %in% a3ss_exon_key & !on_minus,
+        start + bp_shift,
         start
+      ),
+      end = dplyr::if_else(
+        key %in% a3ss_exon_key & on_minus,
+        end + bp_shift,
+        end
       )
-    ) # TO DO : include - strand case (end instead of start)
+    )
   gr_with_a3ss <- preprocess(gr_with_a3ss, coef_col = "estimate")
   gr_with_a3ss <- gr_with_a3ss |>
     dplyr::mutate(sim_event = key %in% a3ss_exon_key)
