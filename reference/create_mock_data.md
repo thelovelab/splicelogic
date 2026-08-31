@@ -9,7 +9,8 @@ create_mock_data(
   n_genes = 1,
   n_tx_per_gene = 2,
   n_exons_per_tx = 5,
-  coef_range = c(-1, 1)
+  coef_range = c(-1, 1),
+  strand = c("+", "-", "*")
 )
 ```
 
@@ -21,7 +22,10 @@ create_mock_data(
 
 - n_tx_per_gene:
 
-  Number of transcripts per gene
+  Number of transcripts per gene. Use 2 or more: the first transcript of
+  each gene is given a negative estimate and the second a positive one,
+  so a single transcript per gene leaves the set all-negative and the
+  `generate_*()` helpers with nothing to modify.
 
 - n_exons_per_tx:
 
@@ -30,6 +34,12 @@ create_mock_data(
 - coef_range:
 
   Range of coefficient values to sample from
+
+- strand:
+
+  Strand to place every transcript on: `"+"` (default), `"-"`, or `"*"`.
+  On `"-"` the exon ranks are reversed, so exon_rank 1 is the rightmost
+  exon in genomic coordinates.
 
 ## Value
 
@@ -42,4 +52,7 @@ A GRanges object with simulated transcripts and exons
 # create mock data with 2 genes, 4 transcripts
 # per gene, and 4 exons per transcript
 gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4)
+
+# the same, on the minus strand
+gr_minus <- create_mock_data(n_genes = 2, n_exons_per_tx = 4, strand = "-")
 ```

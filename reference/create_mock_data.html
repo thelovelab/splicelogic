@@ -44,7 +44,8 @@
 <span>  n_genes <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  n_tx_per_gene <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  n_exons_per_tx <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  coef_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  coef_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  strand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"+"</span>, <span class="st">"-"</span>, <span class="st">"*"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -57,7 +58,11 @@
 
 
 <dt id="arg-n-tx-per-gene">n_tx_per_gene<a class="anchor" aria-label="anchor" href="#arg-n-tx-per-gene"></a></dt>
-<dd><p>Number of transcripts per gene</p></dd>
+<dd><p>Number of transcripts per gene. Use 2 or more:
+the first transcript of each gene is given a negative estimate and
+the second a positive one, so a single transcript per gene leaves
+the set all-negative and the <code>generate_*()</code> helpers with nothing to
+modify.</p></dd>
 
 
 <dt id="arg-n-exons-per-tx">n_exons_per_tx<a class="anchor" aria-label="anchor" href="#arg-n-exons-per-tx"></a></dt>
@@ -66,6 +71,12 @@
 
 <dt id="arg-coef-range">coef_range<a class="anchor" aria-label="anchor" href="#arg-coef-range"></a></dt>
 <dd><p>Range of coefficient values to sample from</p></dd>
+
+
+<dt id="arg-strand">strand<a class="anchor" aria-label="anchor" href="#arg-strand"></a></dt>
+<dd><p>Strand to place every transcript on: <code>"+"</code> (default),
+<code>"-"</code>, or <code>"*"</code>. On <code>"-"</code> the exon ranks are reversed, so exon_rank 1
+is the rightmost exon in genomic coordinates.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -79,6 +90,9 @@
 <span class="r-in"><span><span class="co"># create mock data with 2 genes, 4 transcripts</span></span></span>
 <span class="r-in"><span><span class="co"># per gene, and 4 exons per transcript</span></span></span>
 <span class="r-in"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu">create_mock_data</span><span class="op">(</span>n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the same, on the minus strand</span></span></span>
+<span class="r-in"><span><span class="va">gr_minus</span> <span class="op">&lt;-</span> <span class="fu">create_mock_data</span><span class="op">(</span>n_genes <span class="op">=</span> <span class="fl">2</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">4</span>, strand <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
