@@ -301,7 +301,7 @@ find_retained_introns <- find_ri
 utils::globalVariables(c(
   "estimate", "cand_idx", "neg_idx", "gene_id_cand", "gene_id_neg",
   "tx_id_neg", "n", "match_start", "match_end", "event_type", "event_tx_id",
-  "on_minus"
+  "on_minus", "is_first", "is_last", "site_is_start", "site_matches"
 ))
 
 #' @rdname find_events
@@ -316,9 +316,24 @@ find_alt_ss <- function(gr, by_start = TRUE) {
 
   event_name <- if (by_start) "a5ss" else "a3ss"
 
+  # flag each transcript's first and last exon. a first exon has no
+  # acceptor and a last exon has no donor, so a boundary moving there is
+  # a transcription start / end change, not a splice site change --
+  # find_aTSS() / find_aTES() report those instead. exon_rank follows
+  # transcription, so rank 1 is the first exon on either strand and this
+  # rule needs no strand handling of its own. min/max rather than
+  # 1/nexons so that CDS-style offset ranks still work.
+  gr_flagged <- gr |>
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(
+      is_first = exon_rank == min(exon_rank),
+      is_last = exon_rank == max(exon_rank)
+    ) |>
+    dplyr::ungroup()
+
   # separate positive and negative exons
-  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1)
-  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1)
+  pos_exons <- gr_flagged |> dplyr::filter(sign(estimate) == 1)
+  neg_exons <- gr_flagged |> dplyr::filter(sign(estimate) == -1)
 
   # candidates: pos exons not exactly identical to any neg exon,
   # but overlapping at least one neg exon (directed)
@@ -356,6 +371,8 @@ find_alt_ss <- function(gr, by_start = TRUE) {
       # are found with directed overlaps, so the candidate's strand is also
       # the partner's. "*" falls through as "+".
       on_minus = as.character(cand_tbl$strand[cand_idx]) == "-",
+      is_first = cand_tbl$is_first[cand_idx],
+      is_last = cand_tbl$is_last[cand_idx],
       tx_id_neg = neg_tbl$tx_id[neg_idx]
     ) |>
     # restrict to same gene
@@ -369,23 +386,29 @@ find_alt_ss <- function(gr, by_start = TRUE) {
 
   match_tbl <- match_tbl |>
     dplyr::anti_join(multi_overlap, by = c("cand_idx", "tx_id_neg")) |>
-    # one boundary matches but not the other (XOR)
-    dplyr::filter(match_start != match_end) |>
-    # an a5ss shares the acceptor and moves the donor, an a3ss the reverse.
-    # on "+" the acceptor is the start, so a5ss wants match_start; on "-"
-    # it is the end, so the requirement flips.
-    dplyr::filter(match_start == xor(by_start, on_minus)) |>
     dplyr::mutate(
-      event_type = event_name
+      # this call only cares about one boundary: the donor for a5ss, the
+      # acceptor for a3ss. the donor is the exon end on "+" and the exon
+      # start on "-"; the acceptor is the other way round. nothing here
+      # looks at the *other* boundary, so an exon that moved both is
+      # reported by find_a5ss() and find_a3ss() alike.
+      site_is_start = xor(!by_start, on_minus),
+      site_matches = dplyr::if_else(site_is_start, match_start, match_end)
+    ) |>
+    dplyr::filter(
+      # the site moved
+      !site_matches,
+      # and it exists: the last exon has no donor, the first no acceptor
+      if (by_start) !is_last else !is_first
     )
 
   if (nrow(match_tbl) == 0L) {
     return(GenomicRanges::GRanges())
   }
 
-  # build result: one row per (candidate, neg exon match)
+  # build result: one row per (candidate, moved boundary)
   hits_tbl <- cand_tbl[match_tbl$cand_idx, ] |>
-    dplyr::mutate(event_type = match_tbl$event_type, event_tx_id = match_tbl$tx_id_neg)
+    dplyr::mutate(event_type = event_name, event_tx_id = match_tbl$tx_id_neg)
   # convert back to GRanges for return
   tbl_to_granges(hits_tbl, keep_cols, gr)
 }
