@@ -59,8 +59,17 @@ find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 \item{gr}{A GRanges object with exon annotations, including 'tx_id', 'exon',
 and 'coef_col' metadata columns and preprocessed with preprocess().}
 
-\item{type}{The type of overlap to consider when
-identifying events.}
+\item{type}{How an exon flanking a candidate is matched to an exon of
+the partner transcript. One of:
+\describe{
+\item{\code{"boundary"}}{(default) the two exons overlap \emph{and} share
+a start or an end coordinate, so they may still differ in length at
+the other end.}
+\item{\code{"over"}}{any overlap, with no coordinate in common
+required. The most permissive setting.}
+\item{\code{"in"}}{the two exons are identical (same start and same
+end). The strictest setting.}
+}}
 
 \item{inverse}{If TRUE, identifies included exons
 instead of skipped exons.}
