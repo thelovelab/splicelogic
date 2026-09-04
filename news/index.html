@@ -34,14 +34,14 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.1.3" id="splicelogic-113">splicelogic 1.1.3<a class="anchor" aria-label="anchor" href="#splicelogic-113"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.1.4" id="splicelogic-114">splicelogic 1.1.4<a class="anchor" aria-label="anchor" href="#splicelogic-114"></a></h2>
 <ul><li>Added <code><a href="../reference/prepare_exons_by_partition.html">prepare_exons_by_partition()</a></code> for building input from two sets of transcripts, without needing a estimate column from a DTU analysis.</li>
 <li>Added <code><a href="../reference/find_events.html">find_atss()</a></code> and <code><a href="../reference/find_events.html">find_ates()</a></code> for detecting alternative transcription start and end sites. Both are included in <code><a href="../reference/find_events.html">find_all_events()</a></code>.</li>
 <li>
 <code><a href="../reference/find_events.html">find_a5ss()</a></code> and <code><a href="../reference/find_events.html">find_a3ss()</a></code> now label events per moved boundary, so an exon that moves both of its boundaries is reported as both an a5ss and an a3ss.</li>
 <li>Added <code><a href="../reference/get_seq.html">get_seq()</a></code> to extract exon sequences from a <code>GRanges</code> against a genome.</li>
 <li>Results now carry <code>event_type</code>, <code>event_tx_id</code> and <code>event_estimate</code>, and any columns registered via <code>additional_columns</code> are propagated to the partner transcript with an <code>event_</code> prefix.
-<ul><li>Added long-form aliases for every finder (<code><a href="../reference/find_events.html">find_skipped_exons()</a></code>, <code><a href="../reference/find_events.html">find_included_exons()</a></code>, <code><a href="../reference/find_events.html">find_mutually_exclusive_exons()</a></code>, <code><a href="../reference/find_events.html">find_retained_introns()</a></code>, <code><a href="../reference/find_events.html">find_alternative_5_prime_splice_sites()</a></code>, <code><a href="../reference/find_events.html">find_alternative_3_prime_splice_sites()</a></code>, <code>find_alternative_start_sites()</code>, <code>find_alternative_end_sites()</code>).</li>
+<ul><li>Added long-form aliases for every finder (<code><a href="../reference/find_events.html">find_skipped_exons()</a></code>, <code><a href="../reference/find_events.html">find_included_exons()</a></code>, <code><a href="../reference/find_events.html">find_mutually_exclusive_exons()</a></code>, <code><a href="../reference/find_events.html">find_retained_introns()</a></code>, <code><a href="../reference/find_events.html">find_alternative_5_prime_splice_sites()</a></code>, <code><a href="../reference/find_events.html">find_alternative_3_prime_splice_sites()</a></code>, <code><a href="../reference/find_events.html">find_alternative_transcription_start_sites()</a></code>, <code><a href="../reference/find_events.html">find_alternative_transcription_end_sites()</a></code>).</li>
 </ul></li>
 </ul></div>
     <div class="section level2">

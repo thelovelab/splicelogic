@@ -1,6 +1,6 @@
 # Changelog
 
-## splicelogic 1.1.3
+## splicelogic 1.1.4
 
 - Added
   [`prepare_exons_by_partition()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.md)
@@ -31,7 +31,8 @@
     [`find_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
     [`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
     [`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-    `find_alternative_start_sites()`, `find_alternative_end_sites()`).
+    [`find_alternative_transcription_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+    [`find_alternative_transcription_end_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)).
 
 ## splicelogic 0.99.0
 
