@@ -1431,7 +1431,7 @@ sessionInfo()
     ##  [7] dbplyr_2.6.0           readr_2.2.0            plyranges_1.30.1      
     ## [10] dplyr_1.2.1            GenomicRanges_1.62.1   Seqinfo_1.0.0         
     ## [13] IRanges_2.44.0         S4Vectors_0.48.1       BiocGenerics_0.56.0   
-    ## [16] generics_0.1.4         splicelogic_1.1.2     
+    ## [16] generics_0.1.4         splicelogic_1.1.3     
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] tidyselect_1.2.1            blob_1.3.0                 
