@@ -6,7 +6,16 @@
 #' @description Functions to find different types of alternative splicing
 #' events from preprocessed GRanges exon data. Events include skipped exon (se),
 #' included exon (ie), mutatualy exclusive exons (mxe), retained intron (ri),
-#' and alternative 5' and 3' splice sites (a5ss / a3ss).
+#' alternative 5' and 3' splice sites (a5ss / a3ss), and alternative
+#' transcription start and end sites (aTSS / aTES).
+#'
+#' `find_a5ss()` / `find_a3ss()` do not require either boundary of an exon
+#' to be shared with its partner, so an exon that moved both boundaries is
+#' reported as an a5ss *and* an a3ss. A first exon has no acceptor and a
+#' last exon has no donor, so those boundaries never produce an a3ss /
+#' a5ss; `find_aTSS()` / `find_aTES()` report them instead by comparing
+#' where each transcript begins and ends. `exon_rank` runs in
+#' transcription order, so this holds on both strands.
 #'
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
 #' and 'coef_col' metadata columns and preprocessed with preprocess().
@@ -16,7 +25,7 @@
 #' \describe{
 #'   \item{\code{event_type}}{The type of splicing event detected (e.g.
 #'     \code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"},
-#'     \code{"a3ss"}).}
+#'     \code{"a3ss"}, \code{"aTSS"}, \code{"aTES"}).}
 #'   \item{\code{event_tx_id}}{Transcript ID of the paired transcript
 #'     involved in the event.}
 #'   \item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
@@ -457,6 +466,153 @@ find_a3ss <- function(gr) {
 #' @export
 find_alternative_3_prime_splice_sites <- find_a3ss
 
+#' Find alternative transcription start / end sites
+#'
+#' Unlike the splice-site finders this does not go through overlaps at
+#' all: it takes the first (or last) exon of every transcript and simply
+#' compares where transcription begins (or ends).
+#'
+#' @param gr A preprocessed GRanges object
+#' @param at_start If TRUE, compares the first exon of each transcript
+#'   (aTSS); if FALSE, the last exon (aTES).
+#' @return A GRanges of detected events
+#' @noRd
+find_alt_ts <- function(gr, at_start = TRUE) {
+  # if preprocessing didn't happen
+  check_preprocessed(gr)
+  keep_cols <- keep_cols(gr)
+
+  event_name <- if (at_start) "aTSS" else "aTES"
+
+  # flag each transcript's first and last exon, exactly as find_alt_ss()
+  # does -- but there the flags only *veto* a label, while here they
+  # select which exons are considered at all. min/max rather than
+  # 1/nexons so that CDS-style offset ranks still work.
+  gr_flagged <- gr |>
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(
+      is_first = exon_rank == min(exon_rank),
+      is_last = exon_rank == max(exon_rank)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::filter(if (at_start) is_first else is_last)
+
+  # separate positive and negative exons
+  pos_exons <- gr_flagged |> dplyr::filter(sign(estimate) == 1)
+  neg_exons <- gr_flagged |> dplyr::filter(sign(estimate) == -1)
+
+  # candidates: every terminal pos exon. unlike find_alt_ss() there is no
+  # overlap requirement and no identity test -- an alternative start / end site
+  # can sit anywhere in the gene, so a first exon that does not touch its
+  # partner at all still counts.
+  if (length(pos_exons) == 0L || length(neg_exons) == 0L) {
+    return(GenomicRanges::GRanges())
+  }
+
+  cand_tbl <- tibble::as_tibble(pos_exons)
+  neg_tbl <- tibble::as_tibble(neg_exons)
+
+  # index pairs: every candidate against every negative terminal exon of
+  # the same gene. this is what findOverlaps() supplies in find_alt_ss();
+  # with no overlap requirement the pairing is a join on gene_id, which
+  # also applies the same-gene restriction that find_alt_ss() has to
+  # filter for afterwards.
+  hits <- dplyr::inner_join(
+    cand_tbl |>
+      dplyr::mutate(cand_idx = dplyr::row_number()) |>
+      dplyr::select(cand_idx, gene_id),
+    neg_tbl |>
+      dplyr::mutate(neg_idx = dplyr::row_number()) |>
+      dplyr::select(neg_idx, gene_id),
+    by = "gene_id",
+    relationship = "many-to-many"
+  )
+
+  if (nrow(hits) == 0L) {
+    return(GenomicRanges::GRanges())
+  }
+
+  # build match tibble with boundary checks
+  match_tbl <- tibble::tibble(
+    cand_idx = hits$cand_idx,
+    neg_idx = hits$neg_idx
+  ) |>
+    dplyr::mutate(
+      match_start = cand_tbl$start[cand_idx] == neg_tbl$start[neg_idx],
+      match_end = cand_tbl$end[cand_idx] == neg_tbl$end[neg_idx],
+      # which boundary carries the transcription start depends on the
+      # strand: on "+" transcription begins at the exon start and ends at
+      # the exon end, on "-" the two swap. "*" falls through as "+".
+      on_minus = as.character(cand_tbl$strand[cand_idx]) == "-",
+      tx_id_neg = neg_tbl$tx_id[neg_idx]
+    )
+
+  match_tbl <- match_tbl |>
+    dplyr::mutate(
+      # this call only cares about one boundary: the  start
+      # for aTSS, the end for aTES. the same line in
+      # find_alt_ss() reads xor(!by_start, on_minus), because there the
+      # a5ss donor is the exon *end* on "+" rather than the start.
+      site_is_start = xor(at_start, on_minus),
+      site_matches = dplyr::if_else(site_is_start, match_start, match_end)
+    ) |>
+    dplyr::filter(
+      # the site moved
+      !site_matches
+    )
+
+  if (nrow(match_tbl) == 0L) {
+    return(GenomicRanges::GRanges())
+  }
+
+  # build result: one row per (candidate, negative terminal exon)
+  hits_tbl <- cand_tbl[match_tbl$cand_idx, ] |>
+    dplyr::mutate(event_type = event_name, event_tx_id = match_tbl$tx_id_neg)
+  # convert back to GRanges for return
+  tbl_to_granges(hits_tbl, keep_cols, gr)
+}
+
+#' @rdname find_events
+#' @return `find_aTSS()`: alternative transcription start sites — first
+#'   exons that begin transcription at a different coordinate
+#' @examples
+#'
+#' gr_tss <- data.frame(
+#'   seqnames = "chr1",
+#'   start = c(1, 21, 41, 5, 21, 41),
+#'   end = c(10, 30, 50, 10, 30, 50),
+#'   strand = "+",
+#'   gene_id = "g1",
+#'   tx_id = rep(c("down", "up"), each = 3),
+#'   exon_rank = rep(seq_len(3), 2),
+#'   estimate = rep(c(-1, 1), each = 3)
+#' ) |>
+#'   plyranges::as_granges() |>
+#'   preprocess(coef_col = "estimate")
+#'
+#' find_aTSS(gr_tss)
+#'
+#' @export
+find_aTSS <- function(gr) {
+  find_alt_ts(gr, at_start = TRUE)
+}
+
+#' @rdname find_events
+#' @export
+find_alternative_start_sites <- find_aTSS
+
+#' @rdname find_events
+#' @return `find_aTES()`: alternative transcription end sites — last
+#'   exons that end transcription at a different coordinate
+#' @export
+find_aTES <- function(gr) {
+  find_alt_ts(gr, at_start = FALSE)
+}
+
+#' @rdname find_events
+#' @export
+find_alternative_end_sites <- find_aTES
+
 #' @rdname find_events
 #' @param verbose If TRUE, prints progress messages. Default TRUE.
 #' @return `find_all_events()`: all detected events
@@ -501,6 +657,12 @@ find_all_events <- function(
 
   msg("Calculating alternative 3' splice site events...")
   results$a3ss <- find_a3ss(gr)
+
+  msg("Calculating alternative transcription start site events...")
+  results$aTSS <- find_aTSS(gr)
+
+  msg("Calculating alternative transcription end site events...")
+  results$aTES <- find_aTES(gr)
 
   # keep only non-empty results
   results <- Filter(function(x) length(x) > 0L, results)
