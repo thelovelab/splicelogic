@@ -57,7 +57,7 @@ Campillo</h4>
                                     <h4 data-toc-skip class="author">Michael
 I. Love</h4>
                         
-            <h4 data-toc-skip class="date">09/03/2026</h4>
+            <h4 data-toc-skip class="date">09/04/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/thelovelab/splicelogic/blob/devel/vignettes/splicelogic.Rmd" class="external-link"><code>vignettes/splicelogic.Rmd</code></a></small>
       <div class="d-none name"><code>splicelogic.Rmd</code></div>
@@ -73,8 +73,9 @@ events. Unlike event-based tools that work at the junction level,
 <em>splicelogic</em> operates on whole transcript structures: within
 each gene it compares two groups of transcripts and all of their exons,
 so events are derived with full isoform context. It detects skipped
-exons, included exons, mutually exclusive exons, retained introns, and
-alternative 5’ and 3’ splice sites.</p>
+exons, included exons, mutually exclusive exons, retained introns,
+alternative 5’ and 3’ splice sites, and alternative transcription start
+and end sites.</p>
 <p><em>splicelogic</em> allows the two groups of transcripts to be
 compared to be defined upstream in one of two ways. They can come from
 an explicit partition of the transcripts into two sets, e.g. a set of
@@ -330,24 +331,49 @@ exon of an up transcript of the same gene</td>
 <tr class="odd">
 <td><code><a href="../reference/find_events.html">find_a5ss()</a></code></td>
 <td><code>"a5ss"</code></td>
-<td>An up exon sharing the 3’ splice site (acceptor) of a down exon but
-differing at the 5’ splice site (donor)</td>
+<td>An up exon whose 5’ splice site (donor) differs from that of an
+overlapping down exon of the same gene. A last exon has no donor, so it
+is never reported here</td>
 <td>The exon with the alternative donor, from the up transcript</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/find_events.html">find_a3ss()</a></code></td>
 <td><code>"a3ss"</code></td>
-<td>The reverse: shared donor, differing acceptor</td>
+<td>The reverse: a differing 3’ splice site (acceptor). A first exon has
+no acceptor, so it is never reported here</td>
 <td>The exon with the alternative acceptor, from the up transcript</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/find_events.html">find_atss()</a></code></td>
+<td><code>"atss"</code></td>
+<td>The first exon of an up transcript beginning transcription at a
+different coordinate from the first exon of a down transcript of the
+same gene. No overlap is required, so an alternative promoter elsewhere
+in the gene is still found</td>
+<td>The first exon, from the up transcript</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/find_events.html">find_ates()</a></code></td>
+<td><code>"ates"</code></td>
+<td>The mirror image: a last exon ending transcription at a different
+coordinate</td>
+<td>The last exon, from the up transcript</td>
 </tr>
 <tr class="odd">
 <td><code><a href="../reference/find_events.html">find_all_events()</a></code></td>
 <td>all of the above</td>
-<td>Runs the six finders in turn and binds the results</td>
+<td>Runs the eight finders in turn and binds the results</td>
 <td>All exons returned by the individual finders</td>
 </tr>
 </tbody>
 </table>
+<p>Neither boundary of an exon has to match its partner, so an exon that
+has moved both its acceptor and its donor is reported by
+<code><a href="../reference/find_events.html">find_a5ss()</a></code> <em>and</em> by <code><a href="../reference/find_events.html">find_a3ss()</a></code>.
+Because <code>exon_rank</code> runs in transcription order, the
+first/last restrictions above hold on either strand: on the minus strand
+the first exon is the rightmost one, and its transcription start is its
+genomic end.</p>
 <p><code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>,
 <code><a href="../reference/find_events.html">find_mxe()</a></code> and <code><a href="../reference/find_events.html">find_all_events()</a></code> also take a
 <code>type</code> argument, controlling how an exon flanking a candidate
@@ -359,9 +385,11 @@ the two exons to be identical.</p>
 <code><a href="../reference/find_events.html">find_skipped_exons()</a></code>, <code><a href="../reference/find_events.html">find_included_exons()</a></code>,
 <code><a href="../reference/find_events.html">find_mutually_exclusive_exons()</a></code>,
 <code><a href="../reference/find_events.html">find_retained_introns()</a></code>,
-<code><a href="../reference/find_events.html">find_alternative_5_prime_splice_sites()</a></code> and
-<code><a href="../reference/find_events.html">find_alternative_3_prime_splice_sites()</a></code> — for use where a
-script reads better with the full name. They are the same functions, so
+<code><a href="../reference/find_events.html">find_alternative_5_prime_splice_sites()</a></code>,
+<code><a href="../reference/find_events.html">find_alternative_3_prime_splice_sites()</a></code>,
+<code><a href="../reference/find_events.html">find_alternative_start_sites()</a></code> and
+<code><a href="../reference/find_events.html">find_alternative_end_sites()</a></code> — for use where a script reads
+better with the full name. They are the same functions, so
 <code><a href="../reference/find_events.html">find_se()</a></code> and <code><a href="../reference/find_events.html">find_skipped_exons()</a></code> are
 interchangeable.</p>
 <p>Worked examples of all of these are in <a href="#individual-events">finding individual events</a>.</p>
@@ -554,7 +582,7 @@ derived from, which makes it the anchor: we put it on its own in
 <div class="section level4">
 <h4 id="finding-events">Finding events<a class="anchor" aria-label="anchor" href="#finding-events"></a>
 </h4>
-<p><code><a href="../reference/find_events.html">find_all_events()</a></code> wraps the six event finders (<a href="#find-functions">the <code>find_*()</code> functions</a>), which
+<p><code><a href="../reference/find_events.html">find_all_events()</a></code> wraps the eight event finders (<a href="#find-functions">the <code>find_*()</code> functions</a>), which
 can also be called one at a time — see <a href="#individual-events">finding individual events</a> below:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mock_events</span> <span class="op">&lt;-</span> <span class="va">mock</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_all_events</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -564,8 +592,10 @@ can also be called one at a time — see <a href="#individual-events">finding in
 <pre><code><span><span class="co">## Calculating retained intron events...</span></span></code></pre>
 <pre><code><span><span class="co">## Calculating alternative 5' splice site events...</span></span></code></pre>
 <pre><code><span><span class="co">## Calculating alternative 3' splice site events...</span></span></code></pre>
+<pre><code><span><span class="co">## Calculating alternative transcription start site events...</span></span></code></pre>
+<pre><code><span><span class="co">## Calculating alternative transcription end site events...</span></span></code></pre>
 <pre><code><span><span class="co">## Done! 5 events detected.</span></span></code></pre>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mock_events</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 5 ranges and 8 metadata columns:</span></span>
 <span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
@@ -595,122 +625,10 @@ format</a>, the skipped exon rows belong to <code>tx_0</code>, the down
 transcript that actually contains the exon, while the alternative splice
 site rows belong to the up transcripts; in both cases the partner
 transcript is in <code>event_tx_id</code>.</p>
-</div>
-<div class="section level4">
-<h4 id="collapsing-redundant-events">Collapsing redundant events<a class="anchor" aria-label="anchor" href="#collapsing-redundant-events"></a>
-</h4>
-<p>Because an exon can participate in an event against more than one
-partner transcript, the same range can appear on several rows. To get
-one call per exon and event type, with the partners concatenated, we can
-group by <code>exon_id</code> and <code>event_type</code>, then use
-<em>plyranges</em> to collapse the ranges and concatenate the partner
-transcript IDs. The new columns after grouping tell us the number of
-pairs (<code>n</code>) and collapse other informative variables.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># define a helper function</span></span>
-<span><span class="va">my_paste</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">","</span><span class="op">)</span></span>
-<span><span class="co"># `exon_id` is usually found in the metadata columns in the input exons. </span></span>
-<span><span class="co"># If not available, we can build it from the gene and the exon coordinates — the same </span></span>
-<span><span class="co"># exon then gets the same id in every transcript that contains it:</span></span>
-<span><span class="co">#   mock_events &lt;- mock_events |&gt;</span></span>
-<span><span class="co">#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))</span></span>
-<span><span class="va">mock_events</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">exon_id</span>, <span class="va">event_type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/ranges-reduce.html" class="external-link">reduce_ranges_directed</a></span><span class="op">(</span></span>
-<span>    n <span class="op">=</span> <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/n.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>    tx_id <span class="op">=</span> <span class="fu">my_paste</span><span class="op">(</span><span class="va">tx_id</span><span class="op">)</span>,</span>
-<span>    exon_rank <span class="op">=</span> <span class="fu">my_paste</span><span class="op">(</span><span class="va">exon_rank</span><span class="op">)</span>,</span>
-<span>    event_tx_id <span class="op">=</span> <span class="fu">my_paste</span><span class="op">(</span><span class="va">event_tx_id</span><span class="op">)</span>,</span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## GRanges object with 3 ranges and 6 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |          exon_id  event_type         n</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |      &lt;character&gt; &lt;character&gt; &lt;integer&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1401-1500      + | gene_1:1401-1500          se         2</span></span>
-<span><span class="co">##   [2]     chr1 1401-1450      + | gene_1:1401-1450        a5ss         1</span></span>
-<span><span class="co">##   [3]     chr1 1651-1700      + | gene_1:1651-1700        a3ss         2</span></span>
-<span><span class="co">##             tx_id   exon_rank event_tx_id</span></span>
-<span><span class="co">##       &lt;character&gt; &lt;character&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]        tx_0           3   tx_1,tx_5</span></span>
-<span><span class="co">##   [2]        tx_2           3        tx_0</span></span>
-<span><span class="co">##   [3]   tx_4,tx_5         4,3        tx_0</span></span>
-<span><span class="co">##   -------</span></span>
-<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
-</div>
-<div class="section level4">
-<h4 id="identifying-complex-events">Identifying complex events<a class="anchor" aria-label="anchor" href="#identifying-complex-events"></a>
-</h4>
-<p>We want to identify events that happen in the same transcript pair
-that lead into complex splicicing events. To do this, we can group the
-events by transcript pairs, since each event is defined by a pair of
-transcripts.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">events_by_pair</span> <span class="op">&lt;-</span> <span class="va">mock_events</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    tx_pair <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">event_tx_id</span><span class="op">)</span>, <span class="st">"-"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">event_tx_id</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="va">events_by_pair</span>, <span class="va">events_by_pair</span><span class="op">$</span><span class="va">tx_pair</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## GRangesList object of length 4:</span></span>
-<span><span class="co">## $`tx_0-tx_1`</span></span>
-<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
-<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
-<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]         3        -1          se        tx_1              1   tx_0-tx_1</span></span>
-<span><span class="co">##   -------</span></span>
-<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $`tx_0-tx_2`</span></span>
-<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1401-1450      + |      gene_1        tx_2 gene_1:1401-1450</span></span>
-<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
-<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]         3         1        a5ss        tx_0             -1   tx_0-tx_2</span></span>
-<span><span class="co">##   -------</span></span>
-<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $`tx_0-tx_4`</span></span>
-<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1651-1700      + |      gene_1        tx_4 gene_1:1651-1700</span></span>
-<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
-<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]         4         1        a3ss        tx_0             -1   tx_0-tx_4</span></span>
-<span><span class="co">##   -------</span></span>
-<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $`tx_0-tx_5`</span></span>
-<span><span class="co">## GRanges object with 2 ranges and 9 metadata columns:</span></span>
-<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
-<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
-<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
-<span><span class="co">##   [2]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700</span></span>
-<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
-<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
-<span><span class="co">##   [1]         3        -1          se        tx_5              1   tx_0-tx_5</span></span>
-<span><span class="co">##   [2]         3         1        a3ss        tx_0             -1   tx_0-tx_5</span></span>
-<span><span class="co">##   -------</span></span>
-<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
-<p><code>tx_0-tx_5</code> carries two events, the skipped exon and the
-alternative 3’ splice site. Pulling the two transcripts of a pair back
-out of the preprocessed exons lets us look at the event in context:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ev</span> <span class="op">&lt;-</span> <span class="va">events_by_pair</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tx_pair</span> <span class="op">==</span> <span class="st">"tx_0-tx_5"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">pair</span> <span class="op">&lt;-</span> <span class="va">mock</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tx_id</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">ev</span><span class="op">$</span><span class="va">tx_id</span>, <span class="va">ev</span><span class="op">$</span><span class="va">event_tx_id</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">wiggleplotr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/wiggleplotr/man/plotTranscripts.html" class="external-link">plotTranscripts</a></span><span class="op">(</span></span>
-<span>  <span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="va">pair</span>, <span class="va">pair</span><span class="op">$</span><span class="va">tx_id</span><span class="op">)</span>,</span>
-<span>  rescale_introns <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="splicelogic_files/figure-html/mock-pair-plot-1.png" class="r-plt" alt="Exon structures of the transcript pair tx_0 and tx_5" width="700"></p>
+<p>Notice that the same exon appears on more than one row, once per
+partner transcript, and that a single transcript pair can carry more
+than one event. Both are expected, and <a href="#collapsing-events">collapsing redundant events</a> and <a href="#complex-events">identifying complex events</a> below show how to
+summarise each.</p>
 </div>
 </div>
 <div class="section level3">
@@ -787,14 +705,14 @@ statistical method was used to test DTU, that we have adjusted p-values
 allowing us to subset to an FDR bounded set, and that we have a numeric
 value indicating the direction of change associated with each
 transcript.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org" class="external-link">readr</a></span><span class="op">)</span></span>
 <span><span class="co"># load DTU results</span></span>
 <span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package<span class="op">=</span><span class="st">"splicelogic"</span><span class="op">)</span></span>
 <span><span class="va">dtu_table</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_delim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"dtu_table.tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We load from BED file the 601 exons from GENCODE M31 annotation for
 the 49 differential transcripts, and attach the metadata columns.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">plyranges</span><span class="op">)</span></span>
 <span><span class="va">exons_file</span> <span class="op">&lt;-</span> <span class="st">"exons_M31.bed.gz"</span></span>
 <span><span class="va">exons_mcols_file</span> <span class="op">&lt;-</span> <span class="st">"exons_mcols.tsv.gz"</span></span>
@@ -804,7 +722,7 @@ the 49 differential transcripts, and attach the metadata columns.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we add <code>Seqinfo</code> for mm49, the reference mouse
 genome for GENCODE M31.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">si</span> <span class="op">&lt;-</span> <span class="fu">Seqinfo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/Seqinfo-class.html" class="external-link">Seqinfo</a></span><span class="op">(</span>genome<span class="op">=</span><span class="st">"mm39"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html" class="external-link">seqlevels</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html" class="external-link">seqlevels</a></span><span class="op">(</span><span class="va">si</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html" class="external-link">seqinfo</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">si</span></span></code></pre></div>
@@ -815,7 +733,7 @@ transcripts belong.</p>
 <p>The code below matches the transcript IDs in the <code>exons</code>
 metadata with the DTU results table, and then binds the two tables
 before assigning back to <code>exons</code>.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">txp_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">exons</span><span class="op">$</span><span class="va">tx_id</span>, <span class="va">dtu_table</span><span class="op">$</span><span class="va">tx_id</span><span class="op">)</span></span>
 <span><span class="va">cols_to_add</span> <span class="op">&lt;-</span> <span class="va">dtu_table</span><span class="op">[</span><span class="va">txp_idx</span>, <span class="op">]</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">tx_id</span><span class="op">)</span></span>
 <span><span class="va">merged_DF</span> <span class="op">&lt;-</span> <span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu">cbind</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">exons</span><span class="op">)</span>, <span class="va">cols_to_add</span><span class="op">)</span></span>
@@ -823,13 +741,13 @@ before assigning back to <code>exons</code>.</p>
 <p>As of Bioc 3.23 and <em>plyranges</em> version 1.32, the above code
 to add metadata columns from an additional table can be replaced with
 the following:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exons</span> <span class="op">&lt;-</span> <span class="va">exons</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">plyranges</span><span class="fu">::</span><span class="fu">join_mcols_left</span><span class="op">(</span><span class="va">dtu_table</span>, by <span class="op">=</span> <span class="st">"tx_id"</span><span class="op">)</span></span></code></pre></div>
 <p><em>splicelogic</em> is designed to take as input the exons from
 significantly changed transcripts, so we first filter out transcripts
 that were not signficant at FDR 10%.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sig_exons</span> <span class="op">&lt;-</span> <span class="va">exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">padj</span> <span class="op">&lt;</span> <span class="fl">.1</span><span class="op">)</span></span>
 <span><span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 2 ranges and 8 metadata columns:</span></span>
@@ -854,7 +772,7 @@ that were not signficant at FDR 10%.</p>
 <p>The first step is to run <code><a href="../reference/preprocess.html">preprocess()</a></code>, which prepares
 the <code>exons</code> for event detection. This function checks the
 input data, ensures that the necessary columns are present:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sig_exons</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span></span>
 <span><span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
@@ -892,7 +810,7 @@ of splicing events, listed in <a href="#find-functions">the
 transcripts relative to down-regulated transcripts, across all genes. As
 these are skipped in the up-regulated transcripts, it is expected that
 the exons returned belong to down-regulated transcripts:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">skipped</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_se</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">skipped</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 1 range and 11 metadata columns:</span></span>
@@ -908,7 +826,7 @@ the exons returned belong to down-regulated transcripts:</p>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 <p><strong>Included exons (IE)</strong></p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">included</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_ie</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">included</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 3 ranges and 11 metadata columns:</span></span>
@@ -930,7 +848,7 @@ the exons returned belong to down-regulated transcripts:</p>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 <p><strong>Mutually exclusive exons (MXE)</strong></p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mx</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_mxe</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mx</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 2 ranges and 11 metadata columns:</span></span>
@@ -951,7 +869,7 @@ the exons returned belong to down-regulated transcripts:</p>
 <p><strong>Retained introns (RI)</strong></p>
 <p>Here we do not find retained introns, and the function returns an
 empty vector.</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ri</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_ri</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">ri</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 0 ranges and 0 metadata columns:</span></span>
@@ -960,7 +878,7 @@ empty vector.</p>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: no sequences</span></span></code></pre>
 <p><strong>Alternative 5’ and 3’ splice sites (A5/3SS)</strong></p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a5ss</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_a5ss</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">a5ss</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 1 range and 11 metadata columns:</span></span>
@@ -975,7 +893,7 @@ empty vector.</p>
 <span><span class="co">##   [1]   6.33671 0.00607823        a5ss ENSMUST00000046371.13       -0.69401</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a3ss</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_a3ss</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">a3ss</span></span></code></pre></div>
 <pre><code><span><span class="co">## GRanges object with 2 ranges and 11 metadata columns:</span></span>
@@ -993,12 +911,82 @@ empty vector.</p>
 <span><span class="co">##   [2]   9.13055 0.0184726        a3ss ENSMUST00000030254.15      -2.405394</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
+<p><strong>Alternative transcription start and end sites
+(ATSS/ATES)</strong></p>
+<p>These two compare only the first exon, or only the last exon, of each
+transcript, and ask whether transcription begins or ends at a different
+coordinate. Unlike the splice-site finders they do not require the two
+exons to overlap, so an alternative promoter somewhere else in the gene
+is still reported:</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">atss</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_atss</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">atss</span></span></code></pre></div>
+<pre><code><span><span class="co">## GRanges object with 7 ranges and 11 metadata columns:</span></span>
+<span><span class="co">##       seqnames              ranges strand |   exon_id            exon_name</span></span>
+<span><span class="co">##          &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;          &lt;character&gt;</span></span>
+<span><span class="co">##   [1]    chr10   88037014-88037154      + |    304312 ENSMUSE00001309977.2</span></span>
+<span><span class="co">##   [2]    chr14   20529963-20530189      - |    408097 ENSMUSE00000901772.3</span></span>
+<span><span class="co">##   [3]     chr8 120840891-120841056      + |    250964 ENSMUSE00000678589.2</span></span>
+<span><span class="co">##   [4]     chr8 112458671-112458768      - |    262498 ENSMUSE00001389859.2</span></span>
+<span><span class="co">##   [5]     chr4 101504990-101505022      + |    107521 ENSMUSE00000631777.3</span></span>
+<span><span class="co">##   [6]     chr9   21849570-21849860      + |    266124 ENSMUSE00001334761.2</span></span>
+<span><span class="co">##   [7]    chr11     6339074-6339140      + |    321824 ENSMUSE00000681601.2</span></span>
+<span><span class="co">##       exon_rank                 tx_id               gene_id     gene_name</span></span>
+<span><span class="co">##       &lt;numeric&gt;           &lt;character&gt;           &lt;character&gt;   &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         1  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3</span></span>
+<span><span class="co">##   [2]         1  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7</span></span>
+<span><span class="co">##   [3]         1 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik</span></span>
+<span><span class="co">##   [4]         1  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1</span></span>
+<span><span class="co">##   [5]         1  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot</span></span>
+<span><span class="co">##   [6]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2</span></span>
+<span><span class="co">##   [7]         1  ENSMUST00000109787.8 ENSMUSG00000041164.16         Zmiz2</span></span>
+<span><span class="co">##        estimate        padj  event_type           event_tx_id event_estimate</span></span>
+<span><span class="co">##       &lt;numeric&gt;   &lt;numeric&gt; &lt;character&gt;           &lt;character&gt;      &lt;numeric&gt;</span></span>
+<span><span class="co">##   [1]   9.19059 0.086737576        atss ENSMUST00000020248.16      -0.264716</span></span>
+<span><span class="co">##   [2]   3.02406 0.018472554        atss ENSMUST00000065504.17      -3.348940</span></span>
+<span><span class="co">##   [3]   4.14230 0.000995041        atss  ENSMUST00000108951.8      -3.427593</span></span>
+<span><span class="co">##   [4]   3.85659 0.027009405        atss  ENSMUST00000166232.4      -3.477749</span></span>
+<span><span class="co">##   [5]   9.13055 0.018472554        atss ENSMUST00000030254.15      -2.405394</span></span>
+<span><span class="co">##   [6]   6.33671 0.006078234        atss ENSMUST00000046371.13      -0.694010</span></span>
+<span><span class="co">##   [7]   4.66083 0.042846324        atss ENSMUST00000012612.11      -3.209764</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ates</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_ates</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">ates</span></span></code></pre></div>
+<pre><code><span><span class="co">## GRanges object with 6 ranges and 11 metadata columns:</span></span>
+<span><span class="co">##       seqnames              ranges strand |   exon_id            exon_name</span></span>
+<span><span class="co">##          &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;          &lt;character&gt;</span></span>
+<span><span class="co">##   [1]    chr10   88081618-88081868      + |    304334 ENSMUSE00001310024.2</span></span>
+<span><span class="co">##   [2]    chr14   20505329-20506669      - |    408059 ENSMUSE00000564348.6</span></span>
+<span><span class="co">##   [3]     chr8 120887954-120892045      + |    250998 ENSMUSE00000446870.6</span></span>
+<span><span class="co">##   [4]     chr8 112437109-112438026      - |    262490 ENSMUSE00001391518.2</span></span>
+<span><span class="co">##   [5]     chr9   21858900-21860203      + |    266139 ENSMUSE00001327764.2</span></span>
+<span><span class="co">##   [6]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2</span></span>
+<span><span class="co">##       exon_rank                 tx_id               gene_id     gene_name</span></span>
+<span><span class="co">##       &lt;numeric&gt;           &lt;character&gt;           &lt;character&gt;   &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         7  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3</span></span>
+<span><span class="co">##   [2]        14  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7</span></span>
+<span><span class="co">##   [3]        13 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik</span></span>
+<span><span class="co">##   [4]         7  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1</span></span>
+<span><span class="co">##   [5]         9  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2</span></span>
+<span><span class="co">##   [6]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1</span></span>
+<span><span class="co">##        estimate        padj  event_type           event_tx_id event_estimate</span></span>
+<span><span class="co">##       &lt;numeric&gt;   &lt;numeric&gt; &lt;character&gt;           &lt;character&gt;      &lt;numeric&gt;</span></span>
+<span><span class="co">##   [1]   9.19059 0.086737576        ates ENSMUST00000020248.16      -0.264716</span></span>
+<span><span class="co">##   [2]   3.02406 0.018472554        ates ENSMUST00000065504.17      -3.348940</span></span>
+<span><span class="co">##   [3]   4.14230 0.000995041        ates  ENSMUST00000108951.8      -3.427593</span></span>
+<span><span class="co">##   [4]   3.85659 0.027009405        ates  ENSMUST00000166232.4      -3.477749</span></span>
+<span><span class="co">##   [5]   6.33671 0.006078234        ates ENSMUST00000046371.13      -0.694010</span></span>
+<span><span class="co">##   [6]   2.88524 0.013967132        ates ENSMUST00000097291.10      -2.973204</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="finding-all-events">Finding all events<a class="anchor" aria-label="anchor" href="#finding-all-events"></a>
 </h4>
 <p>The following function wraps the above ones to find all events.</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">all_events</span> <span class="op">&lt;-</span> <span class="va">sig_exons</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_all_events</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Calculating skipped exon events...</span></span></code></pre>
 <pre><code><span><span class="co">## Calculating included exon events...</span></span></code></pre>
@@ -1006,57 +994,60 @@ empty vector.</p>
 <pre><code><span><span class="co">## Calculating retained intron events...</span></span></code></pre>
 <pre><code><span><span class="co">## Calculating alternative 5' splice site events...</span></span></code></pre>
 <pre><code><span><span class="co">## Calculating alternative 3' splice site events...</span></span></code></pre>
-<pre><code><span><span class="co">## Done! 9 events detected.</span></span></code></pre>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## Calculating alternative transcription start site events...</span></span></code></pre>
+<pre><code><span><span class="co">## Calculating alternative transcription end site events...</span></span></code></pre>
+<pre><code><span><span class="co">## Done! 22 events detected.</span></span></code></pre>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">all_events</span></span></code></pre></div>
-<pre><code><span><span class="co">## GRanges object with 9 ranges and 11 metadata columns:</span></span>
-<span><span class="co">##       seqnames              ranges strand |   exon_id            exon_name</span></span>
-<span><span class="co">##          &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;          &lt;character&gt;</span></span>
-<span><span class="co">##   [1]    chr17   66647479-66647535      - |    480827 ENSMUSE00000443570.7</span></span>
-<span><span class="co">##   [2]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2</span></span>
-<span><span class="co">##   [3]     chr1 163739641-163739706      + |     12966 ENSMUSE00000368805.4</span></span>
-<span><span class="co">##   [4]     chr8 120884207-120884236      + |    250989 ENSMUSE00001243257.2</span></span>
-<span><span class="co">##   [5]    chr12   91799829-91799996      - |    374021 ENSMUSE00001304078.2</span></span>
-<span><span class="co">##   [6]    chr12   91798541-91798558      - |    374018 ENSMUSE00001473756.2</span></span>
-<span><span class="co">##   [7]     chr9   21858242-21858348      + |    266133 ENSMUSE00001322549.2</span></span>
-<span><span class="co">##   [8]    chr10   88055115-88055222      + |    304327 ENSMUSE00001223513.2</span></span>
-<span><span class="co">##   [9]     chr4 101513375-101513492      + |    107524 ENSMUSE00000671573.2</span></span>
-<span><span class="co">##       exon_rank                 tx_id               gene_id     gene_name</span></span>
-<span><span class="co">##       &lt;numeric&gt;           &lt;character&gt;           &lt;character&gt;   &lt;character&gt;</span></span>
-<span><span class="co">##   [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18         Mtcl1</span></span>
-<span><span class="co">##   [2]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7</span></span>
-<span><span class="co">##   [3]        20 ENSMUST00000077642.12 ENSMUSG00000026585.14        Kifap3</span></span>
-<span><span class="co">##   [4]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik</span></span>
-<span><span class="co">##   [5]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15         Sel1l</span></span>
-<span><span class="co">##   [6]         4  ENSMUST00000178462.8 ENSMUSG00000020964.15         Sel1l</span></span>
-<span><span class="co">##   [7]         7  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2</span></span>
-<span><span class="co">##   [8]         5  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3</span></span>
-<span><span class="co">##   [9]         3  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot</span></span>
-<span><span class="co">##        estimate        padj  event_type           event_tx_id event_estimate</span></span>
-<span><span class="co">##       &lt;numeric&gt;   &lt;numeric&gt; &lt;character&gt;           &lt;character&gt;      &lt;numeric&gt;</span></span>
-<span><span class="co">##   [1]  -2.97320 0.009701213          se ENSMUST00000086693.12       2.885236</span></span>
-<span><span class="co">##   [2]   3.02406 0.018472554          ie ENSMUST00000065504.17      -3.348940</span></span>
-<span><span class="co">##   [3]   1.04389 0.010395185          ie  ENSMUST00000027877.7      -1.707077</span></span>
-<span><span class="co">##   [4]   4.14230 0.000995041          ie  ENSMUST00000108951.8      -3.427593</span></span>
-<span><span class="co">##   [5]  -3.28535 0.001719345         mxe  ENSMUST00000178462.8       2.993838</span></span>
-<span><span class="co">##   [6]   2.99384 0.001719345         mxe ENSMUST00000021347.12      -3.285352</span></span>
-<span><span class="co">##   [7]   6.33671 0.006078234        a5ss ENSMUST00000046371.13      -0.694010</span></span>
-<span><span class="co">##   [8]   9.19059 0.086737576        a3ss ENSMUST00000020248.16      -0.264716</span></span>
-<span><span class="co">##   [9]   9.13055 0.018472554        a3ss ENSMUST00000030254.15      -2.405394</span></span>
+<pre><code><span><span class="co">## GRanges object with 22 ranges and 11 metadata columns:</span></span>
+<span><span class="co">##        seqnames              ranges strand |   exon_id            exon_name</span></span>
+<span><span class="co">##           &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;          &lt;character&gt;</span></span>
+<span><span class="co">##    [1]    chr17   66647479-66647535      - |    480827 ENSMUSE00000443570.7</span></span>
+<span><span class="co">##    [2]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2</span></span>
+<span><span class="co">##    [3]     chr1 163739641-163739706      + |     12966 ENSMUSE00000368805.4</span></span>
+<span><span class="co">##    [4]     chr8 120884207-120884236      + |    250989 ENSMUSE00001243257.2</span></span>
+<span><span class="co">##    [5]    chr12   91799829-91799996      - |    374021 ENSMUSE00001304078.2</span></span>
+<span><span class="co">##    ...      ...                 ...    ... .       ...                  ...</span></span>
+<span><span class="co">##   [18]    chr14   20505329-20506669      - |    408059 ENSMUSE00000564348.6</span></span>
+<span><span class="co">##   [19]     chr8 120887954-120892045      + |    250998 ENSMUSE00000446870.6</span></span>
+<span><span class="co">##   [20]     chr8 112437109-112438026      - |    262490 ENSMUSE00001391518.2</span></span>
+<span><span class="co">##   [21]     chr9   21858900-21860203      + |    266139 ENSMUSE00001327764.2</span></span>
+<span><span class="co">##   [22]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2</span></span>
+<span><span class="co">##        exon_rank                 tx_id               gene_id     gene_name</span></span>
+<span><span class="co">##        &lt;numeric&gt;           &lt;character&gt;           &lt;character&gt;   &lt;character&gt;</span></span>
+<span><span class="co">##    [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18         Mtcl1</span></span>
+<span><span class="co">##    [2]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7</span></span>
+<span><span class="co">##    [3]        20 ENSMUST00000077642.12 ENSMUSG00000026585.14        Kifap3</span></span>
+<span><span class="co">##    [4]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik</span></span>
+<span><span class="co">##    [5]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15         Sel1l</span></span>
+<span><span class="co">##    ...       ...                   ...                   ...           ...</span></span>
+<span><span class="co">##   [18]        14  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7</span></span>
+<span><span class="co">##   [19]        13 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik</span></span>
+<span><span class="co">##   [20]         7  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1</span></span>
+<span><span class="co">##   [21]         9  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2</span></span>
+<span><span class="co">##   [22]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1</span></span>
+<span><span class="co">##         estimate        padj  event_type           event_tx_id event_estimate</span></span>
+<span><span class="co">##        &lt;numeric&gt;   &lt;numeric&gt; &lt;character&gt;           &lt;character&gt;      &lt;numeric&gt;</span></span>
+<span><span class="co">##    [1]  -2.97320 0.009701213          se ENSMUST00000086693.12        2.88524</span></span>
+<span><span class="co">##    [2]   3.02406 0.018472554          ie ENSMUST00000065504.17       -3.34894</span></span>
+<span><span class="co">##    [3]   1.04389 0.010395185          ie  ENSMUST00000027877.7       -1.70708</span></span>
+<span><span class="co">##    [4]   4.14230 0.000995041          ie  ENSMUST00000108951.8       -3.42759</span></span>
+<span><span class="co">##    [5]  -3.28535 0.001719345         mxe  ENSMUST00000178462.8        2.99384</span></span>
+<span><span class="co">##    ...       ...         ...         ...                   ...            ...</span></span>
+<span><span class="co">##   [18]   3.02406 0.018472554        ates ENSMUST00000065504.17       -3.34894</span></span>
+<span><span class="co">##   [19]   4.14230 0.000995041        ates  ENSMUST00000108951.8       -3.42759</span></span>
+<span><span class="co">##   [20]   3.85659 0.027009405        ates  ENSMUST00000166232.4       -3.47775</span></span>
+<span><span class="co">##   [21]   6.33671 0.006078234        ates ENSMUST00000046371.13       -0.69401</span></span>
+<span><span class="co">##   [22]   2.88524 0.013967132        ates ENSMUST00000097291.10       -2.97320</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 61 sequences (1 circular) from mm39 genome</span></span></code></pre>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">all_events</span><span class="op">$</span><span class="va">event_type</span><span class="op">)</span>, horiz<span class="op">=</span><span class="cn">TRUE</span>, las<span class="op">=</span><span class="fl">1</span>,</span>
 <span>  xlab<span class="op">=</span><span class="st">"exons participating in an event"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="splicelogic_files/figure-html/events-barplot-1.png" class="r-plt" alt="Barplot of event types" width="700"></p>
-</div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="upstream-methods">Upstream DTU methods<a class="anchor" aria-label="anchor" href="#upstream-methods"></a>
-</h2>
+<p><img src="splicelogic_files/figure-html/events-barplot-1.png" class="r-plt" alt="Barplot of event types" width="700">
+## Upstream DTU methods {#upstream-methods}</p>
 <p>In this section we talk about one of the two routes into
 <em>splicelogic</em>: the one where the two groups of transcripts come
 out of a differential transcript usage (DTU) analysis. DTU methods test
@@ -1109,6 +1100,139 @@ followed by event-specific functions (<code><a href="../reference/find_events.ht
 <code><a href="../reference/find_events.html">find_ie()</a></code>, etc., see <a href="#find-functions">the
 <code>find_*()</code> functions</a>).</p>
 </div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="collapsing-events">Collapsing redundant events<a class="anchor" aria-label="anchor" href="#collapsing-events"></a>
+</h2>
+<p>This section is a post-processing recipe rather than a detection
+step. It applies to the output of any <code>find_*()</code> call,
+whether the input came from transcript sets or from a DTU table, so it
+is kept separate from the walkthroughs above. The examples reuse
+<code>mock_events</code> from <a href="#transcript-sets">the synthetic
+set</a>, whose structure is small enough to read at a glance.</p>
+<p>Because an exon can participate in an event against more than one
+partner transcript, the same range can appear on several rows. To get
+one call per exon and event type, with the partners concatenated, we can
+group by <code>exon_id</code> and <code>event_type</code>, then use
+<em>plyranges</em> to collapse the ranges and concatenate the partner
+transcript IDs. The new columns after grouping tell us the number of
+pairs (<code>n</code>) and collapse other informative variables.</p>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># define a helper function</span></span>
+<span><span class="va">my_paste</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">","</span><span class="op">)</span></span>
+<span><span class="co"># `exon_id` is usually found in the metadata columns in the input exons. </span></span>
+<span><span class="co"># If not available, we can build it from the gene and the exon coordinates — the same </span></span>
+<span><span class="co"># exon then gets the same id in every transcript that contains it:</span></span>
+<span><span class="co">#   mock_events &lt;- mock_events |&gt;</span></span>
+<span><span class="co">#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))</span></span>
+<span><span class="va">mock_events</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">exon_id</span>, <span class="va">event_type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/ranges-reduce.html" class="external-link">reduce_ranges_directed</a></span><span class="op">(</span></span>
+<span>    n <span class="op">=</span> <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/n.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    tx_id <span class="op">=</span> <span class="fu">my_paste</span><span class="op">(</span><span class="va">tx_id</span><span class="op">)</span>,</span>
+<span>    exon_rank <span class="op">=</span> <span class="fu">my_paste</span><span class="op">(</span><span class="va">exon_rank</span><span class="op">)</span>,</span>
+<span>    event_tx_id <span class="op">=</span> <span class="fu">my_paste</span><span class="op">(</span><span class="va">event_tx_id</span><span class="op">)</span>,</span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GRanges object with 3 ranges and 6 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |          exon_id  event_type         n</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |      &lt;character&gt; &lt;character&gt; &lt;integer&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1401-1500      + | gene_1:1401-1500          se         2</span></span>
+<span><span class="co">##   [2]     chr1 1401-1450      + | gene_1:1401-1450        a5ss         1</span></span>
+<span><span class="co">##   [3]     chr1 1651-1700      + | gene_1:1651-1700        a3ss         2</span></span>
+<span><span class="co">##             tx_id   exon_rank event_tx_id</span></span>
+<span><span class="co">##       &lt;character&gt; &lt;character&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]        tx_0           3   tx_1,tx_5</span></span>
+<span><span class="co">##   [2]        tx_2           3        tx_0</span></span>
+<span><span class="co">##   [3]   tx_4,tx_5         4,3        tx_0</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="complex-events">Identifying complex events<a class="anchor" aria-label="anchor" href="#complex-events"></a>
+</h2>
+<p>This section is also a post-processing recipe rather than a detection
+step, and likewise applies to the output of any <code>find_*()</code>
+call, whatever the input was. Where the previous section grouped by exon
+to answer “how many distinct events are there?”, grouping by transcript
+pair answers a different question: which differences co-occur in a
+single isoform switch. A pair often differs in more than one way at once
+— an exon skipped <em>and</em> a splice site shifted — and every event
+row names both transcripts involved, so the pair is enough to recover
+them. The examples again reuse <code>mock_events</code> from <a href="#transcript-sets">the synthetic set</a>.</p>
+<p>We want to identify events that happen in the same transcript pair
+that lead into complex splicicing events. To do this, we can group the
+events by transcript pairs, since each event is defined by a pair of
+transcripts.</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">events_by_pair</span> <span class="op">&lt;-</span> <span class="va">mock_events</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    tx_pair <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">event_tx_id</span><span class="op">)</span>, <span class="st">"-"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">event_tx_id</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="va">events_by_pair</span>, <span class="va">events_by_pair</span><span class="op">$</span><span class="va">tx_pair</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GRangesList object of length 4:</span></span>
+<span><span class="co">## $`tx_0-tx_1`</span></span>
+<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         3        -1          se        tx_1              1   tx_0-tx_1</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $`tx_0-tx_2`</span></span>
+<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1401-1450      + |      gene_1        tx_2 gene_1:1401-1450</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         3         1        a5ss        tx_0             -1   tx_0-tx_2</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $`tx_0-tx_4`</span></span>
+<span><span class="co">## GRanges object with 1 range and 9 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1651-1700      + |      gene_1        tx_4 gene_1:1651-1700</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         4         1        a3ss        tx_0             -1   tx_0-tx_4</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $`tx_0-tx_5`</span></span>
+<span><span class="co">## GRanges object with 2 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##       seqnames    ranges strand |     gene_id       tx_id          exon_id</span></span>
+<span><span class="co">##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt;      &lt;character&gt;</span></span>
+<span><span class="co">##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500</span></span>
+<span><span class="co">##   [2]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700</span></span>
+<span><span class="co">##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair</span></span>
+<span><span class="co">##       &lt;numeric&gt; &lt;integer&gt; &lt;character&gt; &lt;character&gt;      &lt;integer&gt; &lt;character&gt;</span></span>
+<span><span class="co">##   [1]         3        -1          se        tx_5              1   tx_0-tx_5</span></span>
+<span><span class="co">##   [2]         3         1        a3ss        tx_0             -1   tx_0-tx_5</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
+<p><code>tx_0-tx_5</code> carries two events, the skipped exon and the
+alternative 3’ splice site. Pulling the two transcripts of a pair back
+out of the preprocessed exons lets us look at the event in context:</p>
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ev</span> <span class="op">&lt;-</span> <span class="va">events_by_pair</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tx_pair</span> <span class="op">==</span> <span class="st">"tx_0-tx_5"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">pair</span> <span class="op">&lt;-</span> <span class="va">mock</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tx_id</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">ev</span><span class="op">$</span><span class="va">tx_id</span>, <span class="va">ev</span><span class="op">$</span><span class="va">event_tx_id</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">wiggleplotr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/wiggleplotr/man/plotTranscripts.html" class="external-link">plotTranscripts</a></span><span class="op">(</span></span>
+<span>  <span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="va">pair</span>, <span class="va">pair</span><span class="op">$</span><span class="va">tx_id</span><span class="op">)</span>,</span>
+<span>  rescale_introns <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="splicelogic_files/figure-html/mock-pair-plot-1.png" class="r-plt" alt="Exon structures of the transcript pair tx_0 and tx_5" width="700"></p>
+</div>
 <div class="section level2">
 <h2 id="obtaining-exon-ranges">Obtaining exon ranges<a class="anchor" aria-label="anchor" href="#obtaining-exon-ranges"></a>
 </h2>
@@ -1120,17 +1244,17 @@ followed by event-specific functions (<code><a href="../reference/find_events.ht
 returns a flat <em>GRanges</em> ready for <code><a href="../reference/preprocess.html">preprocess()</a></code> and
 the <code>find_*</code> functions. Typical usage shown in the following
 code:</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a>exons <span class="ot">&lt;-</span> <span class="fu">prepare_exons</span>(</span>
-<span id="cb56-2"><a href="#cb56-2" tabindex="-1"></a>  <span class="at">txdb =</span> <span class="sc">&lt;</span>A TxDb OBJECT<span class="sc">&gt;</span>,</span>
-<span id="cb56-3"><a href="#cb56-3" tabindex="-1"></a>  <span class="at">dtu_table =</span> <span class="sc">&lt;</span>DTU_TABLE<span class="sc">&gt;</span>,</span>
-<span id="cb56-4"><a href="#cb56-4" tabindex="-1"></a>  <span class="at">coef_col =</span> <span class="st">"estimate"</span></span>
-<span id="cb56-5"><a href="#cb56-5" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a>exons <span class="ot">&lt;-</span> <span class="fu">prepare_exons</span>(</span>
+<span id="cb64-2"><a href="#cb64-2" tabindex="-1"></a>  <span class="at">txdb =</span> <span class="sc">&lt;</span>A TxDb OBJECT<span class="sc">&gt;</span>,</span>
+<span id="cb64-3"><a href="#cb64-3" tabindex="-1"></a>  <span class="at">dtu_table =</span> <span class="sc">&lt;</span>DTU_TABLE<span class="sc">&gt;</span>,</span>
+<span id="cb64-4"><a href="#cb64-4" tabindex="-1"></a>  <span class="at">coef_col =</span> <span class="st">"estimate"</span></span>
+<span id="cb64-5"><a href="#cb64-5" tabindex="-1"></a>)</span></code></pre></div>
 <p>We demonstrate using GENCODE v32 (human genes). The first step is to
 load a <em>TxDb</em> object. Typically, a user would supply their own
 GTF to <code>txdbmaker::makeTxDbFromGFF()</code> to generate this. For
 this demonstration we will load a pre-constructed <em>TxDb</em> from
 Bioconductor’s <em>AnnotationHub</em>.</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">AnnotationHub</span><span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/AnnotationDbi" class="external-link">AnnotationDbi</a></span><span class="op">)</span></span>
@@ -1138,8 +1262,10 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="va">ah</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html" class="external-link">AnnotationHub</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH75191"</span><span class="op">]</span><span class="op">]</span> <span class="co"># GENCODE v32 (human)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Error while performing HEAD request.</span></span>
+<span><span class="co">##    Proceeding without cache information.</span></span></code></pre>
 <pre><code><span><span class="co">## loading from cache</span></span></code></pre>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
@@ -1151,7 +1277,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>tx_num <span class="op">=</span> <span class="va">TXID</span>, tx_id <span class="op">=</span> <span class="va">TXNAME</span>, gene_id <span class="op">=</span> <span class="va">GENEID</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">gene_id</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 'select()' returned 1:1 mapping between keys and columns</span></span></code></pre>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">txps</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 227,462 × 3</span></span></span>
 <span><span class="co">##    tx_num tx_id             gene_id          </span></span>
@@ -1167,7 +1293,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <span><span class="co">## <span style="color: #BCBCBC;"> 9</span>      9 ENST00000641515.2 ENSG00000186092.6</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">10</span>     10 ENST00000335137.4 ENSG00000186092.6</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 227,452 more rows</span></span></span></code></pre>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># simulate DTU results</span></span>
 <span><span class="va">sim_dtu_table</span> <span class="op">&lt;-</span> <span class="va">txps</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -1191,7 +1317,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <span><span class="co">## <span style="color: #949494;"># ℹ 227,452 more rows</span></span></span></code></pre>
 <p>We now build the exons <em>GRanges</em> with
 <code><a href="../reference/prepare_exons.html">prepare_exons()</a></code>:</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_exons.html">prepare_exons</a></span><span class="op">(</span></span>
 <span>  <span class="va">txdb</span>, <span class="va">sim_dtu_table</span>, coef_col <span class="op">=</span> <span class="st">"effect_est"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -1199,7 +1325,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <pre><code><span><span class="co">## Mapping transcript IDs...</span></span></code></pre>
 <pre><code><span><span class="co">## Merging DTU results onto exons...</span></span></code></pre>
 <pre><code><span><span class="co">## Done. Returned 1372308 exon ranges from 227462 unique transcripts.</span></span></code></pre>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_exons</span> <span class="op">&lt;-</span> <span class="va">human_exons</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">padj</span> <span class="op">&lt;</span> <span class="fl">.01</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"effect_est"</span><span class="op">)</span></span></code></pre></div>
@@ -1213,7 +1339,7 @@ needs more control over the process or want to understand how exon
 ranges are built from a <em>TxDb</em>.</p>
 <p>The following extracts the exons grouped by transcript from the
 <em>TxDb</em>:</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract exons as a GRangesList</span></span>
 <span><span class="va">exons_list</span> <span class="op">&lt;-</span> <span class="fu">GenomicFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcriptsBy.html" class="external-link">exonsBy</a></span><span class="op">(</span></span>
 <span>  <span class="va">txdb</span>,</span>
@@ -1223,13 +1349,13 @@ ranges are built from a <em>TxDb</em>.</p>
 <span><span class="co"># of the GRangesList. prepare_exons() handles alignment checks.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">exons_list</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">sim_dtu_table</span><span class="op">$</span><span class="va">tx_id</span></span></code></pre></div>
 <p>Next, we flatten the exons:</p>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">flat_exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">exons_list</span><span class="op">)</span></span>
 <span><span class="co"># swap tx_id with exon_name as the names of the GRanges</span></span>
 <span><span class="va">flat_exons</span><span class="op">$</span><span class="va">tx_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">)</span> <span class="co"># store transcript ids</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">flat_exons</span><span class="op">$</span><span class="va">exon_name</span></span></code></pre></div>
 <p>Finally, we add the DTU results and gene ID:</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">txp_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">$</span><span class="va">tx_id</span>, <span class="va">sim_dtu_table</span><span class="op">$</span><span class="va">tx_id</span><span class="op">)</span></span>
 <span><span class="va">cols_to_add</span> <span class="op">&lt;-</span> <span class="va">sim_dtu_table</span><span class="op">[</span><span class="va">txp_idx</span>,<span class="op">]</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">tx_num</span><span class="op">)</span><span class="op">)</span></span>
@@ -1240,7 +1366,7 @@ ranges are built from a <em>TxDb</em>.</p>
 <div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.5.2 (2025-10-31)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>

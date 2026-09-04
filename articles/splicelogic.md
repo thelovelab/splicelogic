@@ -7,8 +7,8 @@ Unlike event-based tools that work at the junction level, *splicelogic*
 operates on whole transcript structures: within each gene it compares
 two groups of transcripts and all of their exons, so events are derived
 with full isoform context. It detects skipped exons, included exons,
-mutually exclusive exons, retained introns, and alternative 5’ and 3’
-splice sites.
+mutually exclusive exons, retained introns, alternative 5’ and 3’ splice
+sites, and alternative transcription start and end sites.
 
 *splicelogic* allows the two groups of transcripts to be compared to be
 defined upstream in one of two ways. They can come from an explicit
@@ -209,9 +209,21 @@ transcripts do relative to them.
 | [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ie"` | The mirror image of SE: an exon of an up transcript absent from a down transcript of the same gene | The included exon, from the up transcript |
 | [`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"mxe"` | Two non-overlapping exons, one in each transcript, sitting between the same pair of flanking exons | Both exons of the pair, one row each, interleaved |
 | [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ri"` | An intron of a down transcript that falls entirely within a single exon of an up transcript of the same gene | The exon retaining the intron, from the up transcript |
-| [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a5ss"` | An up exon sharing the 3’ splice site (acceptor) of a down exon but differing at the 5’ splice site (donor) | The exon with the alternative donor, from the up transcript |
-| [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a3ss"` | The reverse: shared donor, differing acceptor | The exon with the alternative acceptor, from the up transcript |
-| [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | all of the above | Runs the six finders in turn and binds the results | All exons returned by the individual finders |
+| [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a5ss"` | An up exon whose 5’ splice site (donor) differs from that of an overlapping down exon of the same gene. A last exon has no donor, so it is never reported here | The exon with the alternative donor, from the up transcript |
+| [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a3ss"` | The reverse: a differing 3’ splice site (acceptor). A first exon has no acceptor, so it is never reported here | The exon with the alternative acceptor, from the up transcript |
+| [`find_atss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"atss"` | The first exon of an up transcript beginning transcription at a different coordinate from the first exon of a down transcript of the same gene. No overlap is required, so an alternative promoter elsewhere in the gene is still found | The first exon, from the up transcript |
+| [`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ates"` | The mirror image: a last exon ending transcription at a different coordinate | The last exon, from the up transcript |
+| [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | all of the above | Runs the eight finders in turn and binds the results | All exons returned by the individual finders |
+
+Neither boundary of an exon has to match its partner, so an exon that
+has moved both its acceptor and its donor is reported by
+[`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+*and* by
+[`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
+Because `exon_rank` runs in transcription order, the first/last
+restrictions above hold on either strand: on the minus strand the first
+exon is the rightmost one, and its transcription start is its genomic
+end.
 
 [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
@@ -228,9 +240,11 @@ Every finder has a long-form alias that spells the event type out —
 [`find_included_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_mutually_exclusive_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-[`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+[`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_alternative_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
 and
-[`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+[`find_alternative_end_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
 — for use where a script reads better with the full name. They are the
 same functions, so
 [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
@@ -413,7 +427,7 @@ mock |> head(2)
 #### Finding events
 
 [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
-wraps the six event finders ([the `find_*()`
+wraps the eight event finders ([the `find_*()`
 functions](#find-functions)), which can also be called one at a time —
 see [finding individual events](#individual-events) below:
 
@@ -433,6 +447,10 @@ mock_events <- mock |> find_all_events()
     ## Calculating alternative 5' splice site events...
 
     ## Calculating alternative 3' splice site events...
+
+    ## Calculating alternative transcription start site events...
+
+    ## Calculating alternative transcription end site events...
 
     ## Done! 5 events detected.
 
@@ -469,133 +487,11 @@ exon rows belong to `tx_0`, the down transcript that actually contains
 the exon, while the alternative splice site rows belong to the up
 transcripts; in both cases the partner transcript is in `event_tx_id`.
 
-#### Collapsing redundant events
-
-Because an exon can participate in an event against more than one
-partner transcript, the same range can appear on several rows. To get
-one call per exon and event type, with the partners concatenated, we can
-group by `exon_id` and `event_type`, then use *plyranges* to collapse
-the ranges and concatenate the partner transcript IDs. The new columns
-after grouping tell us the number of pairs (`n`) and collapse other
-informative variables.
-
-``` r
-
-# define a helper function
-my_paste <- \(x) paste(unique(x), collapse = ",")
-# `exon_id` is usually found in the metadata columns in the input exons. 
-# If not available, we can build it from the gene and the exon coordinates — the same 
-# exon then gets the same id in every transcript that contains it:
-#   mock_events <- mock_events |>
-#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
-mock_events |>
-  dplyr::group_by(exon_id, event_type) |>
-  plyranges::reduce_ranges_directed(
-    n = plyranges::n(),
-    tx_id = my_paste(tx_id),
-    exon_rank = my_paste(exon_rank),
-    event_tx_id = my_paste(event_tx_id),
-  )
-```
-
-    ## GRanges object with 3 ranges and 6 metadata columns:
-    ##       seqnames    ranges strand |          exon_id  event_type         n
-    ##          <Rle> <IRanges>  <Rle> |      <character> <character> <integer>
-    ##   [1]     chr1 1401-1500      + | gene_1:1401-1500          se         2
-    ##   [2]     chr1 1401-1450      + | gene_1:1401-1450        a5ss         1
-    ##   [3]     chr1 1651-1700      + | gene_1:1651-1700        a3ss         2
-    ##             tx_id   exon_rank event_tx_id
-    ##       <character> <character> <character>
-    ##   [1]        tx_0           3   tx_1,tx_5
-    ##   [2]        tx_2           3        tx_0
-    ##   [3]   tx_4,tx_5         4,3        tx_0
-    ##   -------
-    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
-
-#### Identifying complex events
-
-We want to identify events that happen in the same transcript pair that
-lead into complex splicicing events. To do this, we can group the events
-by transcript pairs, since each event is defined by a pair of
-transcripts.
-
-``` r
-
-events_by_pair <- mock_events |>
-  dplyr::mutate(
-    tx_pair = paste0(
-      pmin(tx_id, event_tx_id), "-", pmax(tx_id, event_tx_id)
-    )
-  )
-S4Vectors::split(events_by_pair, events_by_pair$tx_pair)
-```
-
-    ## GRangesList object of length 4:
-    ## $`tx_0-tx_1`
-    ## GRanges object with 1 range and 9 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
-    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
-    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
-    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
-    ##       <numeric> <integer> <character> <character>      <integer> <character>
-    ##   [1]         3        -1          se        tx_1              1   tx_0-tx_1
-    ##   -------
-    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
-    ## 
-    ## $`tx_0-tx_2`
-    ## GRanges object with 1 range and 9 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
-    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
-    ##   [1]     chr1 1401-1450      + |      gene_1        tx_2 gene_1:1401-1450
-    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
-    ##       <numeric> <integer> <character> <character>      <integer> <character>
-    ##   [1]         3         1        a5ss        tx_0             -1   tx_0-tx_2
-    ##   -------
-    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
-    ## 
-    ## $`tx_0-tx_4`
-    ## GRanges object with 1 range and 9 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
-    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
-    ##   [1]     chr1 1651-1700      + |      gene_1        tx_4 gene_1:1651-1700
-    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
-    ##       <numeric> <integer> <character> <character>      <integer> <character>
-    ##   [1]         4         1        a3ss        tx_0             -1   tx_0-tx_4
-    ##   -------
-    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
-    ## 
-    ## $`tx_0-tx_5`
-    ## GRanges object with 2 ranges and 9 metadata columns:
-    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
-    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
-    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
-    ##   [2]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700
-    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
-    ##       <numeric> <integer> <character> <character>      <integer> <character>
-    ##   [1]         3        -1          se        tx_5              1   tx_0-tx_5
-    ##   [2]         3         1        a3ss        tx_0             -1   tx_0-tx_5
-    ##   -------
-    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
-
-`tx_0-tx_5` carries two events, the skipped exon and the alternative 3’
-splice site. Pulling the two transcripts of a pair back out of the
-preprocessed exons lets us look at the event in context:
-
-``` r
-
-ev <- events_by_pair |>
-  dplyr::filter(tx_pair == "tx_0-tx_5") |>
-  head(1)
-pair <- mock |>
-  dplyr::filter(tx_id %in% c(ev$tx_id, ev$event_tx_id))
-wiggleplotr::plotTranscripts(
-  S4Vectors::split(pair, pair$tx_id),
-  rescale_introns = FALSE
-)
-```
-
-![Exon structures of the transcript pair tx_0 and
-tx_5](splicelogic_files/figure-html/mock-pair-plot-1.png)
+Notice that the same exon appears on more than one row, once per partner
+transcript, and that a single transcript pair can carry more than one
+event. Both are expected, and [collapsing redundant
+events](#collapsing-events) and [identifying complex
+events](#complex-events) below show how to summarise each.
 
 ### Finding events after DTU analysis
 
@@ -936,6 +832,85 @@ a3ss
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
+**Alternative transcription start and end sites (ATSS/ATES)**
+
+These two compare only the first exon, or only the last exon, of each
+transcript, and ask whether transcription begins or ends at a different
+coordinate. Unlike the splice-site finders they do not require the two
+exons to overlap, so an alternative promoter somewhere else in the gene
+is still reported:
+
+``` r
+
+atss <- sig_exons |> find_atss()
+atss
+```
+
+    ## GRanges object with 7 ranges and 11 metadata columns:
+    ##       seqnames              ranges strand |   exon_id            exon_name
+    ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr10   88037014-88037154      + |    304312 ENSMUSE00001309977.2
+    ##   [2]    chr14   20529963-20530189      - |    408097 ENSMUSE00000901772.3
+    ##   [3]     chr8 120840891-120841056      + |    250964 ENSMUSE00000678589.2
+    ##   [4]     chr8 112458671-112458768      - |    262498 ENSMUSE00001389859.2
+    ##   [5]     chr4 101504990-101505022      + |    107521 ENSMUSE00000631777.3
+    ##   [6]     chr9   21849570-21849860      + |    266124 ENSMUSE00001334761.2
+    ##   [7]    chr11     6339074-6339140      + |    321824 ENSMUSE00000681601.2
+    ##       exon_rank                 tx_id               gene_id     gene_name
+    ##       <numeric>           <character>           <character>   <character>
+    ##   [1]         1  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3
+    ##   [2]         1  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##   [3]         1 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##   [4]         1  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1
+    ##   [5]         1  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
+    ##   [6]         1  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [7]         1  ENSMUST00000109787.8 ENSMUSG00000041164.16         Zmiz2
+    ##        estimate        padj  event_type           event_tx_id event_estimate
+    ##       <numeric>   <numeric> <character>           <character>      <numeric>
+    ##   [1]   9.19059 0.086737576        atss ENSMUST00000020248.16      -0.264716
+    ##   [2]   3.02406 0.018472554        atss ENSMUST00000065504.17      -3.348940
+    ##   [3]   4.14230 0.000995041        atss  ENSMUST00000108951.8      -3.427593
+    ##   [4]   3.85659 0.027009405        atss  ENSMUST00000166232.4      -3.477749
+    ##   [5]   9.13055 0.018472554        atss ENSMUST00000030254.15      -2.405394
+    ##   [6]   6.33671 0.006078234        atss ENSMUST00000046371.13      -0.694010
+    ##   [7]   4.66083 0.042846324        atss ENSMUST00000012612.11      -3.209764
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
+
+``` r
+
+ates <- sig_exons |> find_ates()
+ates
+```
+
+    ## GRanges object with 6 ranges and 11 metadata columns:
+    ##       seqnames              ranges strand |   exon_id            exon_name
+    ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
+    ##   [1]    chr10   88081618-88081868      + |    304334 ENSMUSE00001310024.2
+    ##   [2]    chr14   20505329-20506669      - |    408059 ENSMUSE00000564348.6
+    ##   [3]     chr8 120887954-120892045      + |    250998 ENSMUSE00000446870.6
+    ##   [4]     chr8 112437109-112438026      - |    262490 ENSMUSE00001391518.2
+    ##   [5]     chr9   21858900-21860203      + |    266139 ENSMUSE00001327764.2
+    ##   [6]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2
+    ##       exon_rank                 tx_id               gene_id     gene_name
+    ##       <numeric>           <character>           <character>   <character>
+    ##   [1]         7  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3
+    ##   [2]        14  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##   [3]        13 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##   [4]         7  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1
+    ##   [5]         9  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [6]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
+    ##        estimate        padj  event_type           event_tx_id event_estimate
+    ##       <numeric>   <numeric> <character>           <character>      <numeric>
+    ##   [1]   9.19059 0.086737576        ates ENSMUST00000020248.16      -0.264716
+    ##   [2]   3.02406 0.018472554        ates ENSMUST00000065504.17      -3.348940
+    ##   [3]   4.14230 0.000995041        ates  ENSMUST00000108951.8      -3.427593
+    ##   [4]   3.85659 0.027009405        ates  ENSMUST00000166232.4      -3.477749
+    ##   [5]   6.33671 0.006078234        ates ENSMUST00000046371.13      -0.694010
+    ##   [6]   2.88524 0.013967132        ates ENSMUST00000097291.10      -2.973204
+    ##   -------
+    ##   seqinfo: 61 sequences (1 circular) from mm39 genome
+
 #### Finding all events
 
 The following function wraps the above ones to find all events.
@@ -957,47 +932,57 @@ all_events <- sig_exons |> find_all_events()
 
     ## Calculating alternative 3' splice site events...
 
-    ## Done! 9 events detected.
+    ## Calculating alternative transcription start site events...
+
+    ## Calculating alternative transcription end site events...
+
+    ## Done! 22 events detected.
 
 ``` r
 
 all_events
 ```
 
-    ## GRanges object with 9 ranges and 11 metadata columns:
-    ##       seqnames              ranges strand |   exon_id            exon_name
-    ##          <Rle>           <IRanges>  <Rle> | <numeric>          <character>
-    ##   [1]    chr17   66647479-66647535      - |    480827 ENSMUSE00000443570.7
-    ##   [2]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2
-    ##   [3]     chr1 163739641-163739706      + |     12966 ENSMUSE00000368805.4
-    ##   [4]     chr8 120884207-120884236      + |    250989 ENSMUSE00001243257.2
-    ##   [5]    chr12   91799829-91799996      - |    374021 ENSMUSE00001304078.2
-    ##   [6]    chr12   91798541-91798558      - |    374018 ENSMUSE00001473756.2
-    ##   [7]     chr9   21858242-21858348      + |    266133 ENSMUSE00001322549.2
-    ##   [8]    chr10   88055115-88055222      + |    304327 ENSMUSE00001223513.2
-    ##   [9]     chr4 101513375-101513492      + |    107524 ENSMUSE00000671573.2
-    ##       exon_rank                 tx_id               gene_id     gene_name
-    ##       <numeric>           <character>           <character>   <character>
-    ##   [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18         Mtcl1
-    ##   [2]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
-    ##   [3]        20 ENSMUST00000077642.12 ENSMUSG00000026585.14        Kifap3
-    ##   [4]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
-    ##   [5]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15         Sel1l
-    ##   [6]         4  ENSMUST00000178462.8 ENSMUSG00000020964.15         Sel1l
-    ##   [7]         7  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
-    ##   [8]         5  ENSMUST00000182183.8 ENSMUSG00000020056.17        Washc3
-    ##   [9]         3  ENSMUST00000106927.2 ENSMUSG00000035212.15        Leprot
-    ##        estimate        padj  event_type           event_tx_id event_estimate
-    ##       <numeric>   <numeric> <character>           <character>      <numeric>
-    ##   [1]  -2.97320 0.009701213          se ENSMUST00000086693.12       2.885236
-    ##   [2]   3.02406 0.018472554          ie ENSMUST00000065504.17      -3.348940
-    ##   [3]   1.04389 0.010395185          ie  ENSMUST00000027877.7      -1.707077
-    ##   [4]   4.14230 0.000995041          ie  ENSMUST00000108951.8      -3.427593
-    ##   [5]  -3.28535 0.001719345         mxe  ENSMUST00000178462.8       2.993838
-    ##   [6]   2.99384 0.001719345         mxe ENSMUST00000021347.12      -3.285352
-    ##   [7]   6.33671 0.006078234        a5ss ENSMUST00000046371.13      -0.694010
-    ##   [8]   9.19059 0.086737576        a3ss ENSMUST00000020248.16      -0.264716
-    ##   [9]   9.13055 0.018472554        a3ss ENSMUST00000030254.15      -2.405394
+    ## GRanges object with 22 ranges and 11 metadata columns:
+    ##        seqnames              ranges strand |   exon_id            exon_name
+    ##           <Rle>           <IRanges>  <Rle> | <numeric>          <character>
+    ##    [1]    chr17   66647479-66647535      - |    480827 ENSMUSE00000443570.7
+    ##    [2]    chr14   20517526-20517591      - |    408079 ENSMUSE00001423050.2
+    ##    [3]     chr1 163739641-163739706      + |     12966 ENSMUSE00000368805.4
+    ##    [4]     chr8 120884207-120884236      + |    250989 ENSMUSE00001243257.2
+    ##    [5]    chr12   91799829-91799996      - |    374021 ENSMUSE00001304078.2
+    ##    ...      ...                 ...    ... .       ...                  ...
+    ##   [18]    chr14   20505329-20506669      - |    408059 ENSMUSE00000564348.6
+    ##   [19]     chr8 120887954-120892045      + |    250998 ENSMUSE00000446870.6
+    ##   [20]     chr8 112437109-112438026      - |    262490 ENSMUSE00001391518.2
+    ##   [21]     chr9   21858900-21860203      + |    266139 ENSMUSE00001327764.2
+    ##   [22]    chr17   66643977-66645149      - |    480823 ENSMUSE00000791759.2
+    ##        exon_rank                 tx_id               gene_id     gene_name
+    ##        <numeric>           <character>           <character>   <character>
+    ##    [1]        14 ENSMUST00000097291.10 ENSMUSG00000052105.18         Mtcl1
+    ##    [2]         6  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##    [3]        20 ENSMUST00000077642.12 ENSMUSG00000026585.14        Kifap3
+    ##    [4]        10 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##    [5]         4 ENSMUST00000021347.12 ENSMUSG00000020964.15         Sel1l
+    ##    ...       ...                   ...                   ...           ...
+    ##   [18]        14  ENSMUST00000100844.6 ENSMUSG00000021814.18         Anxa7
+    ##   [19]        13 ENSMUST00000034281.13 ENSMUSG00000031824.16 6430548M08Rik
+    ##   [20]         7  ENSMUST00000212349.2 ENSMUSG00000031955.11         Bcar1
+    ##   [21]         9  ENSMUST00000190387.7 ENSMUSG00000040563.14        Plppr2
+    ##   [22]        14 ENSMUST00000086693.12 ENSMUSG00000052105.18         Mtcl1
+    ##         estimate        padj  event_type           event_tx_id event_estimate
+    ##        <numeric>   <numeric> <character>           <character>      <numeric>
+    ##    [1]  -2.97320 0.009701213          se ENSMUST00000086693.12        2.88524
+    ##    [2]   3.02406 0.018472554          ie ENSMUST00000065504.17       -3.34894
+    ##    [3]   1.04389 0.010395185          ie  ENSMUST00000027877.7       -1.70708
+    ##    [4]   4.14230 0.000995041          ie  ENSMUST00000108951.8       -3.42759
+    ##    [5]  -3.28535 0.001719345         mxe  ENSMUST00000178462.8        2.99384
+    ##    ...       ...         ...         ...                   ...            ...
+    ##   [18]   3.02406 0.018472554        ates ENSMUST00000065504.17       -3.34894
+    ##   [19]   4.14230 0.000995041        ates  ENSMUST00000108951.8       -3.42759
+    ##   [20]   3.85659 0.027009405        ates  ENSMUST00000166232.4       -3.47775
+    ##   [21]   6.33671 0.006078234        ates ENSMUST00000046371.13       -0.69401
+    ##   [22]   2.88524 0.013967132        ates ENSMUST00000097291.10       -2.97320
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
@@ -1010,9 +995,8 @@ barplot(
 ```
 
 ![Barplot of event
-types](splicelogic_files/figure-html/events-barplot-1.png)
-
-## Upstream DTU methods
+types](splicelogic_files/figure-html/events-barplot-1.png) \## Upstream
+DTU methods {#upstream-methods}
 
 In this section we talk about one of the two routes into *splicelogic*:
 the one where the two groups of transcripts come out of a differential
@@ -1069,6 +1053,152 @@ and then followed by event-specific functions
 [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 etc., see [the `find_*()` functions](#find-functions)).
 
+## Collapsing redundant events
+
+This section is a post-processing recipe rather than a detection step.
+It applies to the output of any `find_*()` call, whether the input came
+from transcript sets or from a DTU table, so it is kept separate from
+the walkthroughs above. The examples reuse `mock_events` from [the
+synthetic set](#transcript-sets), whose structure is small enough to
+read at a glance.
+
+Because an exon can participate in an event against more than one
+partner transcript, the same range can appear on several rows. To get
+one call per exon and event type, with the partners concatenated, we can
+group by `exon_id` and `event_type`, then use *plyranges* to collapse
+the ranges and concatenate the partner transcript IDs. The new columns
+after grouping tell us the number of pairs (`n`) and collapse other
+informative variables.
+
+``` r
+
+# define a helper function
+my_paste <- \(x) paste(unique(x), collapse = ",")
+# `exon_id` is usually found in the metadata columns in the input exons. 
+# If not available, we can build it from the gene and the exon coordinates — the same 
+# exon then gets the same id in every transcript that contains it:
+#   mock_events <- mock_events |>
+#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
+mock_events |>
+  dplyr::group_by(exon_id, event_type) |>
+  plyranges::reduce_ranges_directed(
+    n = plyranges::n(),
+    tx_id = my_paste(tx_id),
+    exon_rank = my_paste(exon_rank),
+    event_tx_id = my_paste(event_tx_id),
+  )
+```
+
+    ## GRanges object with 3 ranges and 6 metadata columns:
+    ##       seqnames    ranges strand |          exon_id  event_type         n
+    ##          <Rle> <IRanges>  <Rle> |      <character> <character> <integer>
+    ##   [1]     chr1 1401-1500      + | gene_1:1401-1500          se         2
+    ##   [2]     chr1 1401-1450      + | gene_1:1401-1450        a5ss         1
+    ##   [3]     chr1 1651-1700      + | gene_1:1651-1700        a3ss         2
+    ##             tx_id   exon_rank event_tx_id
+    ##       <character> <character> <character>
+    ##   [1]        tx_0           3   tx_1,tx_5
+    ##   [2]        tx_2           3        tx_0
+    ##   [3]   tx_4,tx_5         4,3        tx_0
+    ##   -------
+    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+## Identifying complex events
+
+This section is also a post-processing recipe rather than a detection
+step, and likewise applies to the output of any `find_*()` call,
+whatever the input was. Where the previous section grouped by exon to
+answer “how many distinct events are there?”, grouping by transcript
+pair answers a different question: which differences co-occur in a
+single isoform switch. A pair often differs in more than one way at once
+— an exon skipped *and* a splice site shifted — and every event row
+names both transcripts involved, so the pair is enough to recover them.
+The examples again reuse `mock_events` from [the synthetic
+set](#transcript-sets).
+
+We want to identify events that happen in the same transcript pair that
+lead into complex splicicing events. To do this, we can group the events
+by transcript pairs, since each event is defined by a pair of
+transcripts.
+
+``` r
+
+events_by_pair <- mock_events |>
+  dplyr::mutate(
+    tx_pair = paste0(
+      pmin(tx_id, event_tx_id), "-", pmax(tx_id, event_tx_id)
+    )
+  )
+S4Vectors::split(events_by_pair, events_by_pair$tx_pair)
+```
+
+    ## GRangesList object of length 4:
+    ## $`tx_0-tx_1`
+    ## GRanges object with 1 range and 9 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
+    ##       <numeric> <integer> <character> <character>      <integer> <character>
+    ##   [1]         3        -1          se        tx_1              1   tx_0-tx_1
+    ##   -------
+    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+    ## 
+    ## $`tx_0-tx_2`
+    ## GRanges object with 1 range and 9 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1401-1450      + |      gene_1        tx_2 gene_1:1401-1450
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
+    ##       <numeric> <integer> <character> <character>      <integer> <character>
+    ##   [1]         3         1        a5ss        tx_0             -1   tx_0-tx_2
+    ##   -------
+    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+    ## 
+    ## $`tx_0-tx_4`
+    ## GRanges object with 1 range and 9 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1651-1700      + |      gene_1        tx_4 gene_1:1651-1700
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
+    ##       <numeric> <integer> <character> <character>      <integer> <character>
+    ##   [1]         4         1        a3ss        tx_0             -1   tx_0-tx_4
+    ##   -------
+    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+    ## 
+    ## $`tx_0-tx_5`
+    ## GRanges object with 2 ranges and 9 metadata columns:
+    ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
+    ##          <Rle> <IRanges>  <Rle> | <character> <character>      <character>
+    ##   [1]     chr1 1401-1500      + |      gene_1        tx_0 gene_1:1401-1500
+    ##   [2]     chr1 1651-1700      + |      gene_1        tx_5 gene_1:1651-1700
+    ##       exon_rank  estimate  event_type event_tx_id event_estimate     tx_pair
+    ##       <numeric> <integer> <character> <character>      <integer> <character>
+    ##   [1]         3        -1          se        tx_5              1   tx_0-tx_5
+    ##   [2]         3         1        a3ss        tx_0             -1   tx_0-tx_5
+    ##   -------
+    ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+`tx_0-tx_5` carries two events, the skipped exon and the alternative 3’
+splice site. Pulling the two transcripts of a pair back out of the
+preprocessed exons lets us look at the event in context:
+
+``` r
+
+ev <- events_by_pair |>
+  dplyr::filter(tx_pair == "tx_0-tx_5") |>
+  head(1)
+pair <- mock |>
+  dplyr::filter(tx_id %in% c(ev$tx_id, ev$event_tx_id))
+wiggleplotr::plotTranscripts(
+  S4Vectors::split(pair, pair$tx_id),
+  rescale_introns = FALSE
+)
+```
+
+![Exon structures of the transcript pair tx_0 and
+tx_5](splicelogic_files/figure-html/mock-pair-plot-1.png)
+
 ## Obtaining exon ranges
 
 ### Using `prepare_exons()`
@@ -1103,6 +1233,9 @@ suppressPackageStartupMessages({
 ah <- AnnotationHub()
 txdb <- ah[["AH75191"]] # GENCODE v32 (human)
 ```
+
+    ## Error while performing HEAD request.
+    ##    Proceeding without cache information.
 
     ## loading from cache
 

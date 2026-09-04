@@ -51,7 +51,11 @@ events into mock GRanges data for testing purposes.</p>
 <span></span>
 <span><span class="fu">generate_a5ss</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">generate_a3ss</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">generate_a3ss</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">generate_atss</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span>, mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shift"</span>, <span class="st">"drop"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">generate_ates</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span>, mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shift"</span>, <span class="st">"drop"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,6 +70,13 @@ events into mock GRanges data for testing purposes.</p>
 <dt id="arg-n-events">n_events<a class="anchor" aria-label="anchor" href="#arg-n-events"></a></dt>
 <dd><p>Number of events to generate</p></dd>
 
+
+<dt id="arg-mode">mode<a class="anchor" aria-label="anchor" href="#arg-mode"></a></dt>
+<dd><p>How to move the site: <code>"shift"</code> moves the terminal exon's
+outer boundary (so it still overlaps its partner), <code>"drop"</code> removes
+the terminal exon and re-ranks (so the new terminal exon does not
+overlap its partner at all).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -79,6 +90,10 @@ events introduced</p>
 events introduced</p>
 <p><code>generate_a3ss()</code>: A GRanges object with alternative 3' splice site
 events introduced</p>
+<p><code>generate_atss()</code>: A GRanges object with alternative
+transcription start site events introduced</p>
+<p><code>generate_ates()</code>: A GRanges object with alternative
+transcription end site events introduced</p>
     </div>
 
     <div class="section level2">
@@ -242,6 +257,108 @@ events introduced</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr11   101-105      + |         2         8         2 -0.651227</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [31]    chr11   111-115      + |         2         8         3 -0.651227</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [32]    chr11   121-125      + |         2         8         4 -0.651227</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal sim_event</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt; &lt;logical&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]         1-2         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]         1-3         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]         1-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]         2-1         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ...         ...       ...       ...       ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]         7-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]         8-1         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]         8-2         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]         8-3         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [32]         8-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">4</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">generate_atss</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 32 ranges and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]    chr16       1-5      + |         1         1         1 -0.899916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]    chr16     11-15      + |         1         1         2 -0.899916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]    chr16     21-25      + |         1         1         3 -0.899916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]    chr16     31-35      + |         1         1         4 -0.899916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]    chr16       3-5      + |         1         2         1  0.963550</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...       ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]    chr16   121-125      + |         2         7         4  -0.36442</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]    chr16     91-95      + |         2         8         1  -0.77664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr16   101-105      + |         2         8         2  -0.77664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]    chr16   111-115      + |         2         8         3  -0.77664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [32]    chr16   121-125      + |         2         8         4  -0.77664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal sim_event</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt; &lt;logical&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]         1-2         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]         1-3         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]         1-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]         2-1         4     FALSE      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ...         ...       ...       ...       ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]         7-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]         8-1         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]         8-2         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]         8-3         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [32]         8-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the non-overlapping variant: drop the first exon altogether</span></span></span>
+<span class="r-in"><span><span class="fu">generate_atss</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span>, mode <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 31 ranges and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]    chr16       1-5      + |         1         1         1 -0.899916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]    chr16     11-15      + |         1         1         2 -0.899916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]    chr16     21-25      + |         1         1         3 -0.899916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]    chr16     31-35      + |         1         1         4 -0.899916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]    chr16       1-5      + |         1         2         1  0.963550</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...       ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]    chr16   121-125      + |         2         7         4  -0.36442</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]    chr16     91-95      + |         2         8         1  -0.77664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]    chr16   101-105      + |         2         8         2  -0.77664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr16   111-115      + |         2         8         3  -0.77664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]    chr16   121-125      + |         2         8         4  -0.77664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal sim_event</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt; &lt;logical&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]         1-2         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]         1-3         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]         1-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]         2-1         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ...         ...       ...       ...       ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [27]         7-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]         8-1         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]         8-2         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]         8-3         4      TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]         8-4         4     FALSE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">4</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">generate_ates</span><span class="op">(</span><span class="va">gr</span>, n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 32 ranges and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]    chr14       1-5      + |         1         1         1 -0.999897</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]    chr14     11-15      + |         1         1         2 -0.999897</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]    chr14     21-25      + |         1         1         3 -0.999897</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]    chr14     31-35      + |         1         1         4 -0.999897</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]    chr14       1-5      + |         1         2         1  0.650260</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ...      ...       ...    ... .       ...       ...       ...       ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [28]    chr14   121-125      + |         2         7         4  0.713045</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [29]    chr14     91-95      + |         2         8         1 -0.308634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [30]    chr14   101-105      + |         2         8         2 -0.308634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [31]    chr14   111-115      + |         2         8         3 -0.308634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [32]    chr14   121-125      + |         2         8         4 -0.308634</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                key    nexons  internal sim_event</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;character&gt; &lt;integer&gt; &lt;logical&gt; &lt;logical&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    [1]         1-1         4     FALSE     FALSE</span>

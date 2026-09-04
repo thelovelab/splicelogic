@@ -3,7 +3,16 @@
 Functions to find different types of alternative splicing events from
 preprocessed GRanges exon data. Events include skipped exon (se),
 included exon (ie), mutatualy exclusive exons (mxe), retained intron
-(ri), and alternative 5' and 3' splice sites (a5ss / a3ss).
+(ri), alternative 5' and 3' splice sites (a5ss / a3ss), and alternative
+transcription start and end sites (atss / ates).
+
+`find_a5ss()` / `find_a3ss()` do not require either boundary of an exon
+to be shared with its partner, so an exon that moved both boundaries is
+reported as an a5ss *and* an a3ss. A first exon has no acceptor and a
+last exon has no donor, so those boundaries never produce an a3ss /
+a5ss; `find_atss()` / `find_ates()` report them instead by comparing
+where each transcript begins and ends. `exon_rank` runs in transcription
+order, so this holds on both strands.
 
 ## Usage
 
@@ -31,6 +40,14 @@ find_alternative_5_prime_splice_sites(gr)
 find_a3ss(gr)
 
 find_alternative_3_prime_splice_sites(gr)
+
+find_atss(gr)
+
+find_alternative_start_sites(gr)
+
+find_ates(gr)
+
+find_alternative_end_sites(gr)
 
 find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 ```
@@ -62,7 +79,7 @@ additional metadata columns:
 - `event_type`:
 
   The type of splicing event detected (e.g. `"se"`, `"ie"`, `"mxe"`,
-  `"ri"`, `"a5ss"`, `"a3ss"`).
+  `"ri"`, `"a5ss"`, `"a3ss"`, `"atss"`, `"ates"`).
 
 - `event_tx_id`:
 
@@ -89,6 +106,12 @@ additional metadata columns:
 `find_a5ss()`: alternative 5' splice sites
 
 `find_a3ss()`: alternative 3' splice sites
+
+`find_atss()`: alternative transcription start sites — first exons that
+begin transcription at a different coordinate
+
+`find_ates()`: alternative transcription end sites — last exons that end
+transcription at a different coordinate
 
 `find_all_events()`: all detected events
 
@@ -200,6 +223,31 @@ find_a3ss(gr_a3)
 #>       <logical> <character>   <numeric>      <numeric>
 #>   [1]      TRUE        a3ss           1      -0.437331
 #>   [2]      TRUE        a3ss           4      -0.559999
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+
+gr_tss <- data.frame(
+  seqnames = "chr1",
+  start = c(1, 21, 41, 5, 21, 41),
+  end = c(10, 30, 50, 10, 30, 50),
+  strand = "+",
+  gene_id = "g1",
+  tx_id = rep(c("down", "up"), each = 3),
+  exon_rank = rep(seq_len(3), 2),
+  estimate = rep(c(-1, 1), each = 3)
+) |>
+  plyranges::as_granges() |>
+  preprocess(coef_col = "estimate")
+
+find_atss(gr_tss)
+#> GRanges object with 1 range and 7 metadata columns:
+#>       seqnames    ranges strand |     gene_id       tx_id exon_rank  estimate
+#>          <Rle> <IRanges>  <Rle> | <character> <character> <integer> <numeric>
+#>   [1]     chr1      5-10      + |          g1          up         1         1
+#>        event_type event_tx_id event_estimate
+#>       <character> <character>      <numeric>
+#>   [1]        atss        down             -1
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
