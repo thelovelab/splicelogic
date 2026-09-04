@@ -382,10 +382,10 @@ does not single out the splice site facing the candidate.</p>
 <code><a href="../reference/find_events.html">find_retained_introns()</a></code>,
 <code><a href="../reference/find_events.html">find_alternative_5_prime_splice_sites()</a></code>,
 <code><a href="../reference/find_events.html">find_alternative_3_prime_splice_sites()</a></code>,
-<code><a href="../reference/find_events.html">find_alternative_start_sites()</a></code> and
-<code><a href="../reference/find_events.html">find_alternative_end_sites()</a></code> — for use where a script reads
-better with the full name. They are the same functions, so
-<code><a href="../reference/find_events.html">find_se()</a></code> and <code><a href="../reference/find_events.html">find_skipped_exons()</a></code> are
+<code><a href="../reference/find_events.html">find_alternative_transcription_start_sites()</a></code> and
+<code><a href="../reference/find_events.html">find_alternative_transcription_end_sites()</a></code> — for use where
+a script reads better with the full name. They are the same functions,
+so <code><a href="../reference/find_events.html">find_se()</a></code> and <code><a href="../reference/find_events.html">find_skipped_exons()</a></code> are
 interchangeable.</p>
 <p>Worked examples of all of these are in <a href="#individual-events">finding individual events</a>.</p>
 </div>
@@ -1044,10 +1044,9 @@ is still reported:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="splicelogic_files/figure-html/events-barplot-1.png" class="r-plt" alt="Barplot of event types" width="700"></p>
 </div>
-</div>
-<div class="section level3">
-<h3 id="upstream-methods">Upstream DTU methods<a class="anchor" aria-label="anchor" href="#upstream-methods"></a>
-</h3>
+<div class="section level4">
+<h4 id="upstream-methods">Upstream DTU methods<a class="anchor" aria-label="anchor" href="#upstream-methods"></a>
+</h4>
 <p>In this section we talk about one of the two routes into
 <em>splicelogic</em>: the one where the two groups of transcripts come
 out of a differential transcript usage (DTU) analysis. DTU methods test
@@ -1099,6 +1098,7 @@ for <em>splicelogic</em>, beginning with <code><a href="../reference/preprocess.
 then followed by event-specific functions (<code><a href="../reference/find_events.html">find_se()</a></code>,
 <code><a href="../reference/find_events.html">find_ie()</a></code>, etc., see <a href="#find-functions">the
 <code>find_*()</code> functions</a>).</p>
+</div>
 </div>
 </div>
 <div class="section level2">

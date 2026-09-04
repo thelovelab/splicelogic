@@ -143,9 +143,9 @@ as part of the EOSS program.
   [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_atss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
-  [`find_alternative_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_alternative_transcription_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
-  [`find_alternative_end_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_alternative_transcription_end_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   : Find splice events from annotated exons
 

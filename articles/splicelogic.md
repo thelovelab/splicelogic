@@ -233,9 +233,9 @@ Every finder has a long-form alias that spells the event type out —
 [`find_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-[`find_alternative_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+[`find_alternative_transcription_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
 and
-[`find_alternative_end_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+[`find_alternative_transcription_end_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
 — for use where a script reads better with the full name. They are the
 same functions, so
 [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
@@ -989,7 +989,7 @@ barplot(
 ![Barplot of event
 types](splicelogic_files/figure-html/events-barplot-1.png)
 
-### Upstream DTU methods
+#### Upstream DTU methods
 
 In this section we talk about one of the two routes into *splicelogic*:
 the one where the two groups of transcripts come out of a differential

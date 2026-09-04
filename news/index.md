@@ -31,8 +31,7 @@
     [`find_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
     [`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
     [`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-    [`find_alternative_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-    [`find_alternative_end_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)).
+    `find_alternative_start_sites()`, `find_alternative_end_sites()`).
 
 ## splicelogic 0.99.0
 

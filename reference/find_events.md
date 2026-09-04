@@ -43,11 +43,11 @@ find_alternative_3_prime_splice_sites(gr)
 
 find_atss(gr)
 
-find_alternative_start_sites(gr)
+find_alternative_transcription_start_sites(gr)
 
 find_ates(gr)
 
-find_alternative_end_sites(gr)
+find_alternative_transcription_end_sites(gr)
 
 find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 ```
