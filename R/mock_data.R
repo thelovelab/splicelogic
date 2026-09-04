@@ -427,7 +427,9 @@ create_mock_data <- function(
 NULL
 
 # for generate_se
-utils::globalVariables(c("estimate", "internal", "key", "gene_id", "sim_event"))
+utils::globalVariables(c(
+  "estimate", "internal", "key", "gene_id", "sim_event", "coord_sig"
+))
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
@@ -484,7 +486,8 @@ generate_se <- function(gr, n_events = 1) {
 
 # for generate_mxe
 utils::globalVariables(c(
-  "estimate", "internal", "next_key", "gene_id", "neg_tx_id", "key"
+  "estimate", "internal", "next_key", "gene_id", "neg_tx_id", "key",
+  "coord_sig"
 ))
 
 #' @rdname generate_events
@@ -560,7 +563,7 @@ generate_mxe <- function(gr, n_events = 1) {
 }
 
 # for generate_ri
-utils::globalVariables(c("estimate", "strand"))
+utils::globalVariables(c("estimate", "strand", "coord_sig"))
 
 #' @rdname generate_events
 #' @param n_events Number of events to generate
