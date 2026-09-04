@@ -780,3 +780,150 @@ generate_a3ss <- function(gr, n_events = 1) {
     dplyr::mutate(sim_event = key %in% a3ss_exon_key)
   return(gr_with_a3ss)
 }
+
+# for generate_alt_ts
+utils::globalVariables(c(
+  "estimate", "key", "terminal", "exon_rank", "tx_id", "sim_event"
+))
+
+#' Introduce an alternative transcription start or end site
+#'
+#' Shared implementation for generate_aTSS() / generate_aTES(). Two ways
+#' of moving where a transcript begins or ends:
+#'
+#' - `"shift"` moves the *outer* boundary of the terminal exon (the one
+#'   facing away from the rest of the transcript), leaving the inner
+#'   splice site untouched. The altered exon still overlaps its partner.
+#' - `"drop"` removes the terminal exon outright and re-ranks, so the
+#'   transcript now begins (or ends) at what was the next exon along.
+#'   That exon does not overlap the partner's terminal exon at all, which
+#'   is the case an overlap-based finder could never reach.
+#'
+#' @param gr A GRanges object with an 'estimate' column
+#' @param n_events Number of events to generate
+#' @param at_start If TRUE, alters the first exon; if FALSE, the last
+#' @param mode Either `"shift"` or `"drop"`, as above
+#' @return A GRanges object with the events introduced
+#' @noRd
+generate_alt_ts <- function(gr, n_events = 1, at_start = TRUE,
+                            mode = c("shift", "drop")) {
+  mode <- match.arg(mode)
+  # if preprocessing didn't happen
+  if (
+    !all(
+      c("key", "nexons", "internal") %in%
+        names(GenomicRanges::mcols(gr))
+    )
+  ) {
+    gr <- preprocess(gr, coef_col = "estimate")
+  }
+
+  # the first / last exon of each positive-coefficient transcript. the
+  # 'internal' mcol is no help: it marks both terminal exons at once.
+  # min/max rather than 1/nexons so CDS-style offset ranks still work.
+  alt_exon_key <- tibble::as_tibble(gr) |>
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(
+      terminal = if (at_start) {
+        exon_rank == min(exon_rank)
+      } else {
+        exon_rank == max(exon_rank)
+      }
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::filter(estimate > 0 & terminal) |>
+    dplyr::distinct(key) |>
+    dplyr::slice_sample(n = n_events) |>
+    dplyr::pull(key)
+
+  if (mode == "drop") {
+    # keys are rebuilt by the re-rank below, so remember the transcripts
+    # rather than the keys
+    alt_tx <- tibble::as_tibble(gr) |>
+      dplyr::filter(key %in% alt_exon_key) |>
+      dplyr::pull(tx_id)
+
+    gr_with_alt <- gr |>
+      dplyr::filter(!key %in% alt_exon_key)
+    gr_with_alt <- rerank_exons(gr_with_alt)
+
+    # the event is on whichever exon became terminal
+    gr_with_alt <- gr_with_alt |>
+      dplyr::group_by(tx_id) |>
+      dplyr::mutate(
+        sim_event = tx_id %in% alt_tx &
+          if (at_start) {
+            exon_rank == min(exon_rank)
+          } else {
+            exon_rank == max(exon_rank)
+          }
+      ) |>
+      dplyr::ungroup()
+    return(gr_with_alt)
+  }
+
+  # mode == "shift": which boundary is the outer one depends on both the
+  # strand and which end of the transcript this is. a first exon begins
+  # the transcript at its genomic start on "+" but at its genomic end on
+  # "-", and a last exon is the reverse.
+  on_minus <- as.character(GenomicRanges::strand(gr)) == "-"
+  outer_is_start <- xor(at_start, on_minus)
+
+  # always moved *inward*, shrinking the exon: outward could push the
+  # first exon of the first gene below coordinate 1, and inward can never
+  # collide with the neighbouring exon.
+  gr_with_alt <- gr |>
+    dplyr::mutate(
+      start = dplyr::if_else(
+        key %in% alt_exon_key & outer_is_start,
+        start + 2L,
+        start
+      ),
+      end = dplyr::if_else(
+        key %in% alt_exon_key & !outer_is_start,
+        end - 2L,
+        end
+      )
+    )
+  gr_with_alt <- preprocess(gr_with_alt, coef_col = "estimate")
+  gr_with_alt |>
+    dplyr::mutate(sim_event = key %in% alt_exon_key)
+}
+
+#' @rdname generate_events
+#' @param n_events Number of events to generate
+#' @param mode How to move the site: `"shift"` moves the terminal exon's
+#'   outer boundary (so it still overlaps its partner), `"drop"` removes
+#'   the terminal exon and re-ranks (so the new terminal exon does not
+#'   overlap its partner at all).
+#' @return `generate_aTSS()`: A GRanges object with alternative
+#' transcription start site events introduced
+#' @export
+#' @examples
+#'
+#' gr <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+#' )
+#' generate_aTSS(gr, n_events = 1)
+#'
+#' # the non-overlapping variant: drop the first exon altogether
+#' generate_aTSS(gr, n_events = 1, mode = "drop")
+#'
+generate_aTSS <- function(gr, n_events = 1, mode = c("shift", "drop")) {
+  generate_alt_ts(gr, n_events, at_start = TRUE, mode = mode)
+}
+
+#' @rdname generate_events
+#' @return `generate_aTES()`: A GRanges object with alternative
+#' transcription end site events introduced
+#' @export
+#' @examples
+#'
+#' gr <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+#' )
+#' generate_aTES(gr, n_events = 1)
+#'
+generate_aTES <- function(gr, n_events = 1, mode = c("shift", "drop")) {
+  generate_alt_ts(gr, n_events, at_start = FALSE, mode = mode)
+}
