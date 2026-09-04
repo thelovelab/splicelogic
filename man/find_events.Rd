@@ -14,6 +14,10 @@
 \alias{find_alternative_5_prime_splice_sites}
 \alias{find_a3ss}
 \alias{find_alternative_3_prime_splice_sites}
+\alias{find_aTSS}
+\alias{find_alternative_start_sites}
+\alias{find_aTES}
+\alias{find_alternative_end_sites}
 \alias{find_all_events}
 \title{Find splice events from annotated exons}
 \usage{
@@ -41,6 +45,14 @@ find_a3ss(gr)
 
 find_alternative_3_prime_splice_sites(gr)
 
+find_aTSS(gr)
+
+find_alternative_start_sites(gr)
+
+find_aTES(gr)
+
+find_alternative_end_sites(gr)
+
 find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 }
 \arguments{
@@ -61,7 +73,7 @@ additional metadata columns:
 \describe{
 \item{\code{event_type}}{The type of splicing event detected (e.g.
 \code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"},
-\code{"a3ss"}).}
+\code{"a3ss"}, \code{"aTSS"}, \code{"aTES"}).}
 \item{\code{event_tx_id}}{Transcript ID of the paired transcript
 involved in the event.}
 \item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
@@ -82,13 +94,28 @@ carrying the corresponding value from the paired transcript.}
 
 \code{find_a3ss()}: alternative 3' splice sites
 
+\code{find_aTSS()}: alternative transcription start sites — first
+exons that begin transcription at a different coordinate
+
+\code{find_aTES()}: alternative transcription end sites — last
+exons that end transcription at a different coordinate
+
 \code{find_all_events()}: all detected events
 }
 \description{
 Functions to find different types of alternative splicing
 events from preprocessed GRanges exon data. Events include skipped exon (se),
 included exon (ie), mutatualy exclusive exons (mxe), retained intron (ri),
-and alternative 5' and 3' splice sites (a5ss / a3ss).
+alternative 5' and 3' splice sites (a5ss / a3ss), and alternative
+transcription start and end sites (aTSS / aTES).
+
+\code{find_a5ss()} / \code{find_a3ss()} do not require either boundary of an exon
+to be shared with its partner, so an exon that moved both boundaries is
+reported as an a5ss \emph{and} an a3ss. A first exon has no acceptor and a
+last exon has no donor, so those boundaries never produce an a3ss /
+a5ss; \code{find_aTSS()} / \code{find_aTES()} report them instead by comparing
+where each transcript begins and ends. \code{exon_rank} runs in
+transcription order, so this holds on both strands.
 }
 \examples{
 
@@ -140,6 +167,22 @@ gr_a3 <- create_mock_data(
   preprocess(coef_col = "estimate") |>
   generate_a3ss(n_events = 1)
 find_a3ss(gr_a3)
+
+
+gr_tss <- data.frame(
+  seqnames = "chr1",
+  start = c(1, 21, 41, 5, 21, 41),
+  end = c(10, 30, 50, 10, 30, 50),
+  strand = "+",
+  gene_id = "g1",
+  tx_id = rep(c("down", "up"), each = 3),
+  exon_rank = rep(seq_len(3), 2),
+  estimate = rep(c(-1, 1), each = 3)
+) |>
+  plyranges::as_granges() |>
+  preprocess(coef_col = "estimate")
+
+find_aTSS(gr_tss)
 
 
 # detect all event types at once

@@ -7,6 +7,8 @@
 \alias{generate_ri}
 \alias{generate_a5ss}
 \alias{generate_a3ss}
+\alias{generate_aTSS}
+\alias{generate_aTES}
 \title{Generate mock splice events in a GRanges object}
 \usage{
 generate_se(gr, n_events = 1)
@@ -18,12 +20,21 @@ generate_ri(gr, n_events = 1)
 generate_a5ss(gr, n_events = 1)
 
 generate_a3ss(gr, n_events = 1)
+
+generate_aTSS(gr, n_events = 1, mode = c("shift", "drop"))
+
+generate_aTES(gr, n_events = 1, mode = c("shift", "drop"))
 }
 \arguments{
 \item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id',
 'tx_id', and 'estimate'.}
 
 \item{n_events}{Number of events to generate}
+
+\item{mode}{How to move the site: \code{"shift"} moves the terminal exon's
+outer boundary (so it still overlaps its partner), \code{"drop"} removes
+the terminal exon and re-ranks (so the new terminal exon does not
+overlap its partner at all).}
 }
 \value{
 \code{generate_se()}: A GRanges object with skipped exon
@@ -40,6 +51,12 @@ events introduced
 
 \code{generate_a3ss()}: A GRanges object with alternative 3' splice site
 events introduced
+
+\code{generate_aTSS()}: A GRanges object with alternative
+transcription start site events introduced
+
+\code{generate_aTES()}: A GRanges object with alternative
+transcription end site events introduced
 }
 \description{
 Functions to introduce specific types of alternative splicing
@@ -75,5 +92,20 @@ gr <- create_mock_data(
   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 )
 generate_a3ss(gr, n_events = 1)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+)
+generate_aTSS(gr, n_events = 1)
+
+# the non-overlapping variant: drop the first exon altogether
+generate_aTSS(gr, n_events = 1, mode = "drop")
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+)
+generate_aTES(gr, n_events = 1)
 
 }
