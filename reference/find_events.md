@@ -61,7 +61,23 @@ find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 
 - type:
 
-  The type of overlap to consider when identifying events.
+  How an exon flanking a candidate is matched to an exon of the partner
+  transcript. One of:
+
+  `"boundary"`
+
+  :   (default) the two exons overlap *and* share a start or an end
+      coordinate, so they may still differ in length at the other end.
+
+  `"over"`
+
+  :   any overlap, with no coordinate in common required. The most
+      permissive setting.
+
+  `"in"`
+
+  :   the two exons are identical (same start and same end). The
+      strictest setting.
 
 - inverse:
 

@@ -118,8 +118,22 @@ and 'coef_col' metadata columns and preprocessed with preprocess().</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>The type of overlap to consider when
-identifying events.</p></dd>
+<dd><p>How an exon flanking a candidate is matched to an exon of
+the partner transcript. One of:</p><dl><dt><code>"boundary"</code></dt>
+<dd><p>(default) the two exons overlap <em>and</em> share
+a start or an end coordinate, so they may still differ in length at
+the other end.</p></dd>
+
+<dt><code>"over"</code></dt>
+<dd><p>any overlap, with no coordinate in common
+required. The most permissive setting.</p></dd>
+
+<dt><code>"in"</code></dt>
+<dd><p>the two exons are identical (same start and same
+end). The strictest setting.</p></dd>
+
+
+</dl></dd>
 
 
 <dt id="arg-inverse">inverse<a class="anchor" aria-label="anchor" href="#arg-inverse"></a></dt>

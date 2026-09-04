@@ -1234,9 +1234,6 @@ ah <- AnnotationHub()
 txdb <- ah[["AH75191"]] # GENCODE v32 (human)
 ```
 
-    ## Error while performing HEAD request.
-    ##    Proceeding without cache information.
-
     ## loading from cache
 
 ``` r
