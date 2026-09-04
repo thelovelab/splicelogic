@@ -233,7 +233,8 @@ Every finder has a long-form alias that spells the event type out —
 `find_mutually_exclusive_exons()`, `find_retained_introns()`,
 `find_alternative_5_prime_splice_sites()`,
 `find_alternative_3_prime_splice_sites()`,
-`find_alternative_start_sites()` and `find_alternative_end_sites()` —
+`find_alternative_transcription_start_sites()` and
+`find_alternative_transcription_end_sites()` —
 for use where a script
 reads better with the full name. They are the same functions, so
 `find_se()` and `find_skipped_exons()` are interchangeable.
@@ -637,7 +638,7 @@ barplot(
 )
 ```
 
-## Upstream DTU methods {#upstream-methods}
+### Upstream DTU methods {#upstream-methods}
 
 In this section we talk about one of the two routes into
 *splicelogic*: the one where the two groups of transcripts come out

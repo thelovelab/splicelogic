@@ -608,7 +608,7 @@ find_atss <- function(gr) {
 
 #' @rdname find_events
 #' @export
-find_alternative_start_sites <- find_atss
+find_alternative_transcription_start_sites <- find_atss
 
 #' @rdname find_events
 #' @return `find_ates()`: alternative transcription end sites — last
@@ -620,7 +620,7 @@ find_ates <- function(gr) {
 
 #' @rdname find_events
 #' @export
-find_alternative_end_sites <- find_ates
+find_alternative_transcription_end_sites <- find_ates
 
 #' @rdname find_events
 #' @param verbose If TRUE, prints progress messages. Default TRUE.
