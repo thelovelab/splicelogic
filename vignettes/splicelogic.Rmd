@@ -20,8 +20,8 @@ Unlike event-based tools that work at the junction level, *splicelogic*
 operates on whole transcript structures: within each gene it compares
 two groups of transcripts and all of their exons, so events are derived
 with full isoform context. It detects skipped exons, included exons,
-mutually exclusive exons, retained introns, and alternative 5' and 3'
-splice sites.
+mutually exclusive exons, retained introns, alternative 5' and 3'
+splice sites, and alternative transcription start and end sites.
 
 *splicelogic* allows the two groups of transcripts to be compared to be
 defined upstream in one of two ways. They can come from an explicit
@@ -221,9 +221,18 @@ are what the up transcripts do relative to them.
 | `find_ie()` | `"ie"` | The mirror image of SE: an exon of an up transcript absent from a down transcript of the same gene | The included exon, from the up transcript |
 | `find_mxe()` | `"mxe"` | Two non-overlapping exons, one in each transcript, sitting between the same pair of flanking exons | Both exons of the pair, one row each, interleaved |
 | `find_ri()` | `"ri"` | An intron of a down transcript that falls entirely within a single exon of an up transcript of the same gene | The exon retaining the intron, from the up transcript |
-| `find_a5ss()` | `"a5ss"` | An up exon sharing the 3' splice site (acceptor) of a down exon but differing at the 5' splice site (donor) | The exon with the alternative donor, from the up transcript |
-| `find_a3ss()` | `"a3ss"` | The reverse: shared donor, differing acceptor | The exon with the alternative acceptor, from the up transcript |
-| `find_all_events()` | all of the above | Runs the six finders in turn and binds the results | All exons returned by the individual finders |
+| `find_a5ss()` | `"a5ss"` | An up exon whose 5' splice site (donor) differs from that of an overlapping down exon of the same gene. A last exon has no donor, so it is never reported here | The exon with the alternative donor, from the up transcript |
+| `find_a3ss()` | `"a3ss"` | The reverse: a differing 3' splice site (acceptor). A first exon has no acceptor, so it is never reported here | The exon with the alternative acceptor, from the up transcript |
+| `find_atss()` | `"atss"` | The first exon of an up transcript beginning transcription at a different coordinate from the first exon of a down transcript of the same gene. No overlap is required, so an alternative promoter elsewhere in the gene is still found | The first exon, from the up transcript |
+| `find_ates()` | `"ates"` | The mirror image: a last exon ending transcription at a different coordinate | The last exon, from the up transcript |
+| `find_all_events()` | all of the above | Runs the eight finders in turn and binds the results | All exons returned by the individual finders |
+
+Neither boundary of an exon has to match its partner, so an exon that
+has moved both its acceptor and its donor is reported by `find_a5ss()`
+*and* by `find_a3ss()`. Because `exon_rank` runs in transcription
+order, the first/last restrictions above hold on either strand: on the
+minus strand the first exon is the rightmost one, and its transcription
+start is its genomic end.
 
 `find_se()`, `find_ie()`, `find_mxe()` and `find_all_events()` also
 take a `type` argument, controlling how an exon flanking a candidate
@@ -235,8 +244,10 @@ identical.
 Every finder has a long-form alias that spells the event type out —
 `find_skipped_exons()`, `find_included_exons()`,
 `find_mutually_exclusive_exons()`, `find_retained_introns()`,
-`find_alternative_5_prime_splice_sites()` and
-`find_alternative_3_prime_splice_sites()` — for use where a script
+`find_alternative_5_prime_splice_sites()`,
+`find_alternative_3_prime_splice_sites()`,
+`find_alternative_start_sites()` and `find_alternative_end_sites()` —
+for use where a script
 reads better with the full name. They are the same functions, so
 `find_se()` and `find_skipped_exons()` are interchangeable.
 
@@ -372,7 +383,7 @@ mock |> head(2)
 
 ### Finding events
 
-`find_all_events()` wraps the six event finders
+`find_all_events()` wraps the eight event finders
 ([the `find_*()` functions](#find-functions)), which can also be
 called one at a time — see
 [finding individual events](#individual-events) below:
@@ -392,68 +403,12 @@ exon rows belong to `tx_0`, the down transcript that actually contains
 the exon, while the alternative splice site rows belong to the up
 transcripts; in both cases the partner transcript is in `event_tx_id`.
 
-### Collapsing redundant events
-
-Because an exon can participate in an event against more than one
-partner transcript, the same range can appear on several rows. To get one 
-call per exon and event type, with the partners concatenated, we can
-group by `exon_id` and `event_type`, then use  *plyranges*
-to collapse the ranges and concatenate the partner transcript IDs.
-The new columns after grouping tell us the number of pairs (`n`) 
-and collapse other informative variables.
-
-```{r mock-collapse}
-# define a helper function
-my_paste <- \(x) paste(unique(x), collapse = ",")
-# `exon_id` is usually found in the metadata columns in the input exons. 
-# If not available, we can build it from the gene and the exon coordinates — the same 
-# exon then gets the same id in every transcript that contains it:
-#   mock_events <- mock_events |>
-#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
-mock_events |>
-  dplyr::group_by(exon_id, event_type) |>
-  plyranges::reduce_ranges_directed(
-    n = plyranges::n(),
-    tx_id = my_paste(tx_id),
-    exon_rank = my_paste(exon_rank),
-    event_tx_id = my_paste(event_tx_id),
-  )
-```
-
-### Identifying complex events
-
-We want to identify events that happen in the same transcript pair that 
-lead into complex splicicing events. To do this, we can group the events
-by transcript pairs, since each event is defined by a pair of transcripts.
-
-```{r mock-pairs}
-events_by_pair <- mock_events |>
-  dplyr::mutate(
-    tx_pair = paste0(
-      pmin(tx_id, event_tx_id), "-", pmax(tx_id, event_tx_id)
-    )
-  )
-S4Vectors::split(events_by_pair, events_by_pair$tx_pair)
-```
-
-`tx_0-tx_5` carries two events, the skipped exon and the alternative
-3' splice site. Pulling the two transcripts of a pair back out of the
-preprocessed exons lets us look at the event in context:
-
-```{r mock-pair-plot}
-#| warning: false
-#| fig.height: 2
-#| fig.alt: 'Exon structures of the transcript pair tx_0 and tx_5'
-ev <- events_by_pair |>
-  dplyr::filter(tx_pair == "tx_0-tx_5") |>
-  head(1)
-pair <- mock |>
-  dplyr::filter(tx_id %in% c(ev$tx_id, ev$event_tx_id))
-wiggleplotr::plotTranscripts(
-  S4Vectors::split(pair, pair$tx_id),
-  rescale_introns = FALSE
-)
-```
+Notice that the same exon appears on more than one row, once per partner
+transcript, and that a single transcript pair can carry more than one
+event. Both are expected, and
+[collapsing redundant events](#collapsing-events) and
+[identifying complex events](#complex-events) below show how to
+summarise each.
 
 ## Finding events after DTU analysis {#dtu-analysis}
 
@@ -663,6 +618,21 @@ a3ss <- sig_exons |> find_a3ss()
 a3ss
 ```
 
+**Alternative transcription start and end sites (ATSS/ATES)**
+
+These two compare only the first exon, or only the last exon, of each
+transcript, and ask whether transcription begins or ends at a different
+coordinate. Unlike the splice-site finders they do not require the two
+exons to overlap, so an alternative promoter somewhere else in the gene
+is still reported:
+
+```{r calc-atss-ates}
+atss <- sig_exons |> find_atss()
+atss
+ates <- sig_exons |> find_ates()
+ates
+```
+
 ### Finding all events
 
 The following function wraps the above ones to find all events.
@@ -679,8 +649,7 @@ barplot(
   xlab="exons participating in an event"
 )
 ```
-
-# Upstream DTU methods {#upstream-methods}
+## Upstream DTU methods {#upstream-methods}
 
 In this section we talk about one of the two routes into
 *splicelogic*: the one where the two groups of transcripts come out
@@ -738,6 +707,89 @@ annotated *GRanges* is the starting point for *splicelogic*,
 beginning with `preprocess()` and then followed by event-specific
 functions (`find_se()`, `find_ie()`, etc., see
 [the `find_*()` functions](#find-functions)).
+
+# Collapsing redundant events {#collapsing-events}
+
+This section is a post-processing recipe rather than a detection step.
+It applies to the output of any `find_*()` call, whether the input came
+from transcript sets or from a DTU table, so it is kept separate from
+the walkthroughs above. The examples reuse `mock_events` from
+[the synthetic set](#transcript-sets), whose structure is small enough
+to read at a glance.
+
+Because an exon can participate in an event against more than one
+partner transcript, the same range can appear on several rows. To get one 
+call per exon and event type, with the partners concatenated, we can
+group by `exon_id` and `event_type`, then use  *plyranges*
+to collapse the ranges and concatenate the partner transcript IDs.
+The new columns after grouping tell us the number of pairs (`n`) 
+and collapse other informative variables.
+
+```{r mock-collapse}
+# define a helper function
+my_paste <- \(x) paste(unique(x), collapse = ",")
+# `exon_id` is usually found in the metadata columns in the input exons. 
+# If not available, we can build it from the gene and the exon coordinates — the same 
+# exon then gets the same id in every transcript that contains it:
+#   mock_events <- mock_events |>
+#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
+mock_events |>
+  dplyr::group_by(exon_id, event_type) |>
+  plyranges::reduce_ranges_directed(
+    n = plyranges::n(),
+    tx_id = my_paste(tx_id),
+    exon_rank = my_paste(exon_rank),
+    event_tx_id = my_paste(event_tx_id),
+  )
+```
+
+# Identifying complex events {#complex-events}
+
+This section is also a post-processing recipe rather than a detection
+step, and likewise applies to the output of any `find_*()` call,
+whatever the input was. Where the previous section grouped by exon to
+answer "how many distinct events are there?", grouping by transcript
+pair answers a different question: which differences co-occur in a
+single isoform switch. A pair often differs in more than one way at
+once — an exon skipped *and* a splice site shifted — and every event row
+names both transcripts involved, so the pair is enough to recover them.
+The examples again reuse `mock_events` from
+[the synthetic set](#transcript-sets).
+
+We want to identify events that happen in the same transcript pair that 
+lead into complex splicicing events. To do this, we can group the events
+by transcript pairs, since each event is defined by a pair of transcripts.
+
+```{r mock-pairs}
+events_by_pair <- mock_events |>
+  dplyr::mutate(
+    tx_pair = paste0(
+      pmin(tx_id, event_tx_id), "-", pmax(tx_id, event_tx_id)
+    )
+  )
+S4Vectors::split(events_by_pair, events_by_pair$tx_pair)
+```
+
+`tx_0-tx_5` carries two events, the skipped exon and the alternative
+3' splice site. Pulling the two transcripts of a pair back out of the
+preprocessed exons lets us look at the event in context:
+
+```{r mock-pair-plot}
+#| warning: false
+#| fig.height: 2
+#| fig.alt: 'Exon structures of the transcript pair tx_0 and tx_5'
+ev <- events_by_pair |>
+  dplyr::filter(tx_pair == "tx_0-tx_5") |>
+  head(1)
+pair <- mock |>
+  dplyr::filter(tx_id %in% c(ev$tx_id, ev$event_tx_id))
+wiggleplotr::plotTranscripts(
+  S4Vectors::split(pair, pair$tx_id),
+  rescale_introns = FALSE
+)
+```
+
+
 
 # Obtaining exon ranges {#obtaining-exon-ranges}
 
