@@ -111,37 +111,26 @@ retained as part of an exon in up-regulated transcripts</li>
 transcripts that share the same 3’ splice site but differ at the 5’
 splice site from exons in down-regulated transcripts</li>
 <li>
-<strong>Alternative 3’ (A3SS)</strong> – as above, but differing in
-the 3’ splice site</li>
+<strong>Alternative 3’ (A3SS)</strong> – exons in up-regulated
+transcripts that share the same 5’ splice site but differ at the 3’
+splice site from exons in down-regulated transcripts</li>
+<li>
+<strong>Alternative transcription start sites (ATSS)</strong> –
+first exons in up-regulated transcripts that begin transcription at a
+different coordinate from the first exons of down-regulated
+transcripts</li>
+<li>
+<strong>Alternative transcription end sites (ATES)</strong> – last
+exons in up-regulated transcripts that end transcription at a different
+coordinate from the last exons of down-regulated transcripts</li>
 </ul>
 <p>These are detected using a series of functions,
 e.g. <code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>, etc., summarized in
 <a href="#find-functions">the <code>find_*()</code> functions</a>.</p>
 <p>Several alternative tools exist for detecting splicing events from
-RNA-seq data and analyzing their consequences:</p>
-<ul>
-<li><p><a href="https://www.bioconductor.org/packages/IsoformSwitchAnalyzeR" class="external-link">IsoformSwitchAnalyzeR</a>
-— a comprehensive workflow that performs DTU testing, annotates the
-resulting isoform switches with splicing event types, and predicts
-functional consequences such as domain loss and NMD.</p></li>
-<li><p><a href="https://www.bioconductor.org/packages/GeneStructureTools" class="external-link">GeneStructureTools</a>
-— takes differential splicing results from read-based tools such as
-Whippet or leafcutter (which detect splicing events from junction
-counts), classifies the event types, and assesses their structural and
-functional consequences such as ORF changes, NMD potential, and UTR
-structure.</p></li>
-<li><p><a href="https://github.com/luciorq/isoformic" class="external-link">isoformic</a> — a
-visualization and functional interpretation pipeline for pre-computed
-differential transcript expression results. It organizes transcripts by
-biotype (protein-coding, lncRNA, NMD, etc.) and provides expression
-profile plots and functional enrichment analysis.</p></li>
-</ul>
-<p><em>splicelogic</em> differs from these in its main input and focus:
-it does not perform DTU testing, and also does not take pre-computed
-splicing events as input. Instead, it works from two groups of
-transcripts (either an explicit partition or transcript-level DTU
-results already mapped onto exon structures) and directly classifies the
-type of splicing event from the comparison of the two groups.</p>
+RNA-seq data and analyzing their consequences; <em>splicelogic</em> is
+compared with them in <a href="#related-tools">related tools</a> at the
+end of this vignette.</p>
 <p>By operating on exon-level <em>GRanges</em> with attached DTU
 statistics, <em>splicelogic</em> provides a flexible framework for users
 to identify and interpret splicing events in the context of their
@@ -227,7 +216,7 @@ for restricting to a significant set. See <a href="#upstream-methods">upstream D
 <p><em>splicelogic</em> also assumes the user has information about the
 genomic ranges for the exons of each transcript. <em>splicelogic</em>
 provides a set of helper functions for generating these exon ranges, see
-<a href="#obtaining-exon-ranges">obtaining exon ranges</a>.</p>
+<a href="#exon-ranges-input">exon ranges input for splicelogic</a>.</p>
 <p>Either way, the <code>exons</code> are provided in a flat
 <em>GRanges</em> object (one range per exon), containing exon-level
 metadata in <code>mcols(exons)</code>: the gene ID, transcript ID, rank
@@ -310,8 +299,9 @@ transcript</td>
 <tr class="even">
 <td><code><a href="../reference/find_events.html">find_ie()</a></code></td>
 <td><code>"ie"</code></td>
-<td>The mirror image of SE: an exon of an up transcript absent from a
-down transcript of the same gene</td>
+<td>An exon of an up transcript that is absent from a down transcript of
+the same gene, whose two flanking exons are adjacent in that down
+transcript</td>
 <td>The included exon, from the up transcript</td>
 </tr>
 <tr class="odd">
@@ -332,15 +322,14 @@ exon of an up transcript of the same gene</td>
 <td><code><a href="../reference/find_events.html">find_a5ss()</a></code></td>
 <td><code>"a5ss"</code></td>
 <td>An up exon whose 5’ splice site (donor) differs from that of an
-overlapping down exon of the same gene. A last exon has no donor, so it
-is never reported here</td>
+overlapping down exon of the same gene</td>
 <td>The exon with the alternative donor, from the up transcript</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/find_events.html">find_a3ss()</a></code></td>
 <td><code>"a3ss"</code></td>
-<td>The reverse: a differing 3’ splice site (acceptor). A first exon has
-no acceptor, so it is never reported here</td>
+<td>An up exon whose 3’ splice site (acceptor) differs from that of an
+overlapping down exon of the same gene</td>
 <td>The exon with the alternative acceptor, from the up transcript</td>
 </tr>
 <tr class="odd">
@@ -355,8 +344,10 @@ in the gene is still found</td>
 <tr class="even">
 <td><code><a href="../reference/find_events.html">find_ates()</a></code></td>
 <td><code>"ates"</code></td>
-<td>The mirror image: a last exon ending transcription at a different
-coordinate</td>
+<td>The last exon of an up transcript ending transcription at a
+different coordinate from the last exon of a down transcript of the same
+gene. No overlap is required, so an alternative terminal exon elsewhere
+in the gene is still found</td>
 <td>The last exon, from the up transcript</td>
 </tr>
 <tr class="odd">
@@ -370,17 +361,21 @@ coordinate</td>
 <p>Neither boundary of an exon has to match its partner, so an exon that
 has moved both its acceptor and its donor is reported by
 <code><a href="../reference/find_events.html">find_a5ss()</a></code> <em>and</em> by <code><a href="../reference/find_events.html">find_a3ss()</a></code>.
-Because <code>exon_rank</code> runs in transcription order, the
-first/last restrictions above hold on either strand: on the minus strand
-the first exon is the rightmost one, and its transcription start is its
-genomic end.</p>
+Because <code>exon_rank</code> runs in transcription order, the first
+and last exons used by <code><a href="../reference/find_events.html">find_atss()</a></code> and
+<code><a href="../reference/find_events.html">find_ates()</a></code> are the same on either strand: on the minus
+strand the first exon is the rightmost one, and its transcription start
+is its genomic end.</p>
 <p><code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>,
 <code><a href="../reference/find_events.html">find_mxe()</a></code> and <code><a href="../reference/find_events.html">find_all_events()</a></code> also take a
 <code>type</code> argument, controlling how an exon flanking a candidate
-is matched to an exon of the partner transcript: <code>"boundary"</code>
-(the default) requires only the shared splice site to coincide,
-<code>"over"</code> accepts any overlap, and <code>"in"</code> requires
-the two exons to be identical.</p>
+is matched to an exon of the partner transcript. <code>"boundary"</code>
+(the default) requires the two exons to overlap <em>and</em> to share a
+start or an end coordinate, so they may still differ in length at the
+other end; <code>"over"</code> accepts any overlap, with no coordinate
+in common; and <code>"in"</code> requires the two exons to be identical.
+Note that <code>"boundary"</code> accepts a match at either end — it
+does not single out the splice site facing the candidate.</p>
 <p>Every finder has a long-form alias that spells the event type out —
 <code><a href="../reference/find_events.html">find_skipped_exons()</a></code>, <code><a href="../reference/find_events.html">find_included_exons()</a></code>,
 <code><a href="../reference/find_events.html">find_mutually_exclusive_exons()</a></code>,
@@ -418,7 +413,8 @@ against which the event is defined:</p>
 <td><code>event_type</code></td>
 <td>Type of splicing event detected (<code>"se"</code>,
 <code>"ie"</code>, <code>"mxe"</code>, <code>"ri"</code>,
-<code>"a5ss"</code>, or <code>"a3ss"</code>).</td>
+<code>"a5ss"</code>, <code>"a3ss"</code>, <code>"atss"</code>, or
+<code>"ates"</code>).</td>
 </tr>
 <tr class="even">
 <td><code>event_tx_id</code></td>
@@ -488,7 +484,7 @@ exon coordinates. A <em>TxDb</em> can be built from a GTF file
 <p>Alternatively, if exon coordinates are already available as a
 <em>GRanges</em>, those can be passed directly.</p>
 <p>For more details on preparing exons as input see the vignette section
-<a href="#comparing-two-sets">comparing two_sets</a>.</p>
+<a href="#exon-ranges-input">exon ranges input for splicelogic</a>.</p>
 </div>
 <div class="section level4">
 <h4 id="a-synthetic-exon-set">A synthetic exon set<a class="anchor" aria-label="anchor" href="#a-synthetic-exon-set"></a>
@@ -688,8 +684,8 @@ nothing has to be partitioned by hand.</p>
 <p>In this section we load the small example dataset that has been
 prepared for this vignette. Note that in a typical <em>splicelogic</em>
 workflow, the exons <em>GRanges</em> would be loaded from a
-<em>TxDb</em>. See the <a href="#obtaining-exon-ranges">obtaining exon
-ranges</a> section below for further details.</p>
+<em>TxDb</em>. See the <a href="#exon-ranges-input">exon ranges input
+for splicelogic</a> section below for further details.</p>
 <p>We load the differential transcript usage analysis from the Jones
 <em>et al.</em> paper. Specifically, we load the transcripts found to
 exhibit DTU in the <a href="https://github.com/lasseignelab/230227_EJ_MouseBrainIsoDiv/blob/main/results/dtu_transcripts/cortex_sex_sig_features.csv" class="external-link">F
@@ -1046,8 +1042,12 @@ is still reported:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">all_events</span><span class="op">$</span><span class="va">event_type</span><span class="op">)</span>, horiz<span class="op">=</span><span class="cn">TRUE</span>, las<span class="op">=</span><span class="fl">1</span>,</span>
 <span>  xlab<span class="op">=</span><span class="st">"exons participating in an event"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="splicelogic_files/figure-html/events-barplot-1.png" class="r-plt" alt="Barplot of event types" width="700">
-## Upstream DTU methods {#upstream-methods}</p>
+<p><img src="splicelogic_files/figure-html/events-barplot-1.png" class="r-plt" alt="Barplot of event types" width="700"></p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="upstream-methods">Upstream DTU methods<a class="anchor" aria-label="anchor" href="#upstream-methods"></a>
+</h3>
 <p>In this section we talk about one of the two routes into
 <em>splicelogic</em>: the one where the two groups of transcripts come
 out of a differential transcript usage (DTU) analysis. DTU methods test
@@ -1093,13 +1093,12 @@ transcript-level testing.</p></li>
 <p>Regardless of which method is used, the per-transcript DTU statistics
 (effect estimates and adjusted p-values) have to be mapped onto the
 individual exons of each transcript to produce an exon-level
-<em>GRanges</em> (see <a href="#obtaining-exon-ranges">Obtaining exon
-ranges</a>). This annotated <em>GRanges</em> is the starting point for
-<em>splicelogic</em>, beginning with <code><a href="../reference/preprocess.html">preprocess()</a></code> and then
-followed by event-specific functions (<code><a href="../reference/find_events.html">find_se()</a></code>,
+<em>GRanges</em> (see <a href="#exon-ranges-input">Exon ranges input for
+splicelogic</a>). This annotated <em>GRanges</em> is the starting point
+for <em>splicelogic</em>, beginning with <code><a href="../reference/preprocess.html">preprocess()</a></code> and
+then followed by event-specific functions (<code><a href="../reference/find_events.html">find_se()</a></code>,
 <code><a href="../reference/find_events.html">find_ie()</a></code>, etc., see <a href="#find-functions">the
 <code>find_*()</code> functions</a>).</p>
-</div>
 </div>
 </div>
 <div class="section level2">
@@ -1121,11 +1120,6 @@ pairs (<code>n</code>) and collapse other informative variables.</p>
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># define a helper function</span></span>
 <span><span class="va">my_paste</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">","</span><span class="op">)</span></span>
-<span><span class="co"># `exon_id` is usually found in the metadata columns in the input exons. </span></span>
-<span><span class="co"># If not available, we can build it from the gene and the exon coordinates — the same </span></span>
-<span><span class="co"># exon then gets the same id in every transcript that contains it:</span></span>
-<span><span class="co">#   mock_events &lt;- mock_events |&gt;</span></span>
-<span><span class="co">#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))</span></span>
 <span><span class="va">mock_events</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">exon_id</span>, <span class="va">event_type</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/ranges-reduce.html" class="external-link">reduce_ranges_directed</a></span><span class="op">(</span></span>
@@ -1147,6 +1141,14 @@ pairs (<code>n</code>) and collapse other informative variables.</p>
 <span><span class="co">##   [3]   tx_4,tx_5         4,3        tx_0</span></span>
 <span><span class="co">##   -------</span></span>
 <span><span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></span></code></pre>
+<p>Note that <code>exon_id</code> is usually found in the metadata
+columns in the input exons. If not available, we can build it from the
+gene and the exon coordinates — the same exon then gets the same id in
+every transcript that contains it, as in this un-evaluated code
+chunk:</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mock_events</span> <span class="op">&lt;-</span> <span class="va">mock_events</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>exon_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gene_id</span>, <span class="st">":"</span>, <span class="va">start</span>, <span class="st">"-"</span>, <span class="va">end</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="complex-events">Identifying complex events<a class="anchor" aria-label="anchor" href="#complex-events"></a>
@@ -1164,7 +1166,7 @@ them. The examples again reuse <code>mock_events</code> from <a href="#transcrip
 that lead into complex splicicing events. To do this, we can group the
 events by transcript pairs, since each event is defined by a pair of
 transcripts.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">events_by_pair</span> <span class="op">&lt;-</span> <span class="va">mock_events</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    tx_pair <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
@@ -1221,7 +1223,7 @@ transcripts.</p>
 <p><code>tx_0-tx_5</code> carries two events, the skipped exon and the
 alternative 3’ splice site. Pulling the two transcripts of a pair back
 out of the preprocessed exons lets us look at the event in context:</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ev</span> <span class="op">&lt;-</span> <span class="va">events_by_pair</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">tx_pair</span> <span class="op">==</span> <span class="st">"tx_0-tx_5"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
@@ -1234,7 +1236,7 @@ out of the preprocessed exons lets us look at the event in context:</p>
 <p><img src="splicelogic_files/figure-html/mock-pair-plot-1.png" class="r-plt" alt="Exon structures of the transcript pair tx_0 and tx_5" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="obtaining-exon-ranges">Obtaining exon ranges<a class="anchor" aria-label="anchor" href="#obtaining-exon-ranges"></a>
+<h2 id="exon-ranges-input">Exon ranges input for splicelogic<a class="anchor" aria-label="anchor" href="#exon-ranges-input"></a>
 </h2>
 <div class="section level3">
 <h3 id="using-prepare_exons">Using <code>prepare_exons()</code><a class="anchor" aria-label="anchor" href="#using-prepare_exons"></a>
@@ -1244,17 +1246,17 @@ out of the preprocessed exons lets us look at the event in context:</p>
 returns a flat <em>GRanges</em> ready for <code><a href="../reference/preprocess.html">preprocess()</a></code> and
 the <code>find_*</code> functions. Typical usage shown in the following
 code:</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a>exons <span class="ot">&lt;-</span> <span class="fu">prepare_exons</span>(</span>
-<span id="cb64-2"><a href="#cb64-2" tabindex="-1"></a>  <span class="at">txdb =</span> <span class="sc">&lt;</span>A TxDb OBJECT<span class="sc">&gt;</span>,</span>
-<span id="cb64-3"><a href="#cb64-3" tabindex="-1"></a>  <span class="at">dtu_table =</span> <span class="sc">&lt;</span>DTU_TABLE<span class="sc">&gt;</span>,</span>
-<span id="cb64-4"><a href="#cb64-4" tabindex="-1"></a>  <span class="at">coef_col =</span> <span class="st">"estimate"</span></span>
-<span id="cb64-5"><a href="#cb64-5" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" tabindex="-1"></a>exons <span class="ot">&lt;-</span> <span class="fu">prepare_exons</span>(</span>
+<span id="cb65-2"><a href="#cb65-2" tabindex="-1"></a>  <span class="at">txdb =</span> <span class="sc">&lt;</span>A TxDb OBJECT<span class="sc">&gt;</span>,</span>
+<span id="cb65-3"><a href="#cb65-3" tabindex="-1"></a>  <span class="at">dtu_table =</span> <span class="sc">&lt;</span>DTU_TABLE<span class="sc">&gt;</span>,</span>
+<span id="cb65-4"><a href="#cb65-4" tabindex="-1"></a>  <span class="at">coef_col =</span> <span class="st">"estimate"</span></span>
+<span id="cb65-5"><a href="#cb65-5" tabindex="-1"></a>)</span></code></pre></div>
 <p>We demonstrate using GENCODE v32 (human genes). The first step is to
 load a <em>TxDb</em> object. Typically, a user would supply their own
 GTF to <code>txdbmaker::makeTxDbFromGFF()</code> to generate this. For
 this demonstration we will load a pre-constructed <em>TxDb</em> from
 Bioconductor’s <em>AnnotationHub</em>.</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">AnnotationHub</span><span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/AnnotationDbi" class="external-link">AnnotationDbi</a></span><span class="op">)</span></span>
@@ -1263,7 +1265,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <span><span class="va">ah</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html" class="external-link">AnnotationHub</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH75191"</span><span class="op">]</span><span class="op">]</span> <span class="co"># GENCODE v32 (human)</span></span></code></pre></div>
 <pre><code><span><span class="co">## loading from cache</span></span></code></pre>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
@@ -1275,7 +1277,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>tx_num <span class="op">=</span> <span class="va">TXID</span>, tx_id <span class="op">=</span> <span class="va">TXNAME</span>, gene_id <span class="op">=</span> <span class="va">GENEID</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">gene_id</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 'select()' returned 1:1 mapping between keys and columns</span></span></code></pre>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">txps</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 227,462 × 3</span></span></span>
 <span><span class="co">##    tx_num tx_id             gene_id          </span></span>
@@ -1291,7 +1293,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <span><span class="co">## <span style="color: #BCBCBC;"> 9</span>      9 ENST00000641515.2 ENSG00000186092.6</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">10</span>     10 ENST00000335137.4 ENSG00000186092.6</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 227,452 more rows</span></span></span></code></pre>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># simulate DTU results</span></span>
 <span><span class="va">sim_dtu_table</span> <span class="op">&lt;-</span> <span class="va">txps</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -1315,7 +1317,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <span><span class="co">## <span style="color: #949494;"># ℹ 227,452 more rows</span></span></span></code></pre>
 <p>We now build the exons <em>GRanges</em> with
 <code><a href="../reference/prepare_exons.html">prepare_exons()</a></code>:</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_exons.html">prepare_exons</a></span><span class="op">(</span></span>
 <span>  <span class="va">txdb</span>, <span class="va">sim_dtu_table</span>, coef_col <span class="op">=</span> <span class="st">"effect_est"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -1323,7 +1325,7 @@ Bioconductor’s <em>AnnotationHub</em>.</p>
 <pre><code><span><span class="co">## Mapping transcript IDs...</span></span></code></pre>
 <pre><code><span><span class="co">## Merging DTU results onto exons...</span></span></code></pre>
 <pre><code><span><span class="co">## Done. Returned 1372308 exon ranges from 227462 unique transcripts.</span></span></code></pre>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">human_exons</span> <span class="op">&lt;-</span> <span class="va">human_exons</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">padj</span> <span class="op">&lt;</span> <span class="fl">.01</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"effect_est"</span><span class="op">)</span></span></code></pre></div>
@@ -1337,7 +1339,7 @@ needs more control over the process or want to understand how exon
 ranges are built from a <em>TxDb</em>.</p>
 <p>The following extracts the exons grouped by transcript from the
 <em>TxDb</em>:</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract exons as a GRangesList</span></span>
 <span><span class="va">exons_list</span> <span class="op">&lt;-</span> <span class="fu">GenomicFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcriptsBy.html" class="external-link">exonsBy</a></span><span class="op">(</span></span>
 <span>  <span class="va">txdb</span>,</span>
@@ -1347,13 +1349,13 @@ ranges are built from a <em>TxDb</em>.</p>
 <span><span class="co"># of the GRangesList. prepare_exons() handles alignment checks.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">exons_list</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">sim_dtu_table</span><span class="op">$</span><span class="va">tx_id</span></span></code></pre></div>
 <p>Next, we flatten the exons:</p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">flat_exons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">exons_list</span><span class="op">)</span></span>
 <span><span class="co"># swap tx_id with exon_name as the names of the GRanges</span></span>
 <span><span class="va">flat_exons</span><span class="op">$</span><span class="va">tx_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">)</span> <span class="co"># store transcript ids</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">flat_exons</span><span class="op">$</span><span class="va">exon_name</span></span></code></pre></div>
 <p>Finally, we add the DTU results and gene ID:</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">txp_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">flat_exons</span><span class="op">$</span><span class="va">tx_id</span>, <span class="va">sim_dtu_table</span><span class="op">$</span><span class="va">tx_id</span><span class="op">)</span></span>
 <span><span class="va">cols_to_add</span> <span class="op">&lt;-</span> <span class="va">sim_dtu_table</span><span class="op">[</span><span class="va">txp_idx</span>,<span class="op">]</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">tx_id</span>, <span class="va">tx_num</span><span class="op">)</span><span class="op">)</span></span>
@@ -1362,9 +1364,38 @@ ranges are built from a <em>TxDb</em>.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="related-tools">Related tools<a class="anchor" aria-label="anchor" href="#related-tools"></a>
+</h2>
+<p>Several alternative tools exist for detecting splicing events from
+RNA-seq data and analyzing their consequences:</p>
+<ul>
+<li><p><a href="https://www.bioconductor.org/packages/IsoformSwitchAnalyzeR" class="external-link">IsoformSwitchAnalyzeR</a>
+— a comprehensive workflow that performs DTU testing, annotates the
+resulting isoform switches with splicing event types, and predicts
+functional consequences such as domain loss and NMD.</p></li>
+<li><p><a href="https://www.bioconductor.org/packages/GeneStructureTools" class="external-link">GeneStructureTools</a>
+— takes differential splicing results from read-based tools such as
+Whippet or leafcutter (which detect splicing events from junction
+counts), classifies the event types, and assesses their structural and
+functional consequences such as ORF changes, NMD potential, and UTR
+structure.</p></li>
+<li><p><a href="https://github.com/luciorq/isoformic" class="external-link">isoformic</a> — a
+visualization and functional interpretation pipeline for pre-computed
+differential transcript expression results. It organizes transcripts by
+biotype (protein-coding, lncRNA, NMD, etc.) and provides expression
+profile plots and functional enrichment analysis.</p></li>
+</ul>
+<p><em>splicelogic</em> differs from these in its main input and focus:
+it does not perform DTU testing, and also does not take pre-computed
+splicing events as input. Instead, it works from two groups of
+transcripts (either an explicit partition or transcript-level DTU
+results already mapped onto exon structures) and directly classifies the
+type of splicing event from the comparison of the two groups.</p>
+</div>
+<div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.5.2 (2025-10-31)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>

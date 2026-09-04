@@ -37,8 +37,15 @@ following types of splicing events:
 - **Alternative 5’ (A5SS)** – exons in up-regulated transcripts that
   share the same 3’ splice site but differ at the 5’ splice site from
   exons in down-regulated transcripts
-- **Alternative 3’ (A3SS)** – as above, but differing in the 3’ splice
-  site
+- **Alternative 3’ (A3SS)** – exons in up-regulated transcripts that
+  share the same 5’ splice site but differ at the 3’ splice site from
+  exons in down-regulated transcripts
+- **Alternative transcription start sites (ATSS)** – first exons in
+  up-regulated transcripts that begin transcription at a different
+  coordinate from the first exons of down-regulated transcripts
+- **Alternative transcription end sites (ATES)** – last exons in
+  up-regulated transcripts that end transcription at a different
+  coordinate from the last exons of down-regulated transcripts
 
 These are detected using a series of functions,
 e.g. [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
@@ -46,32 +53,9 @@ e.g. [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_even
 etc., summarized in [the `find_*()` functions](#find-functions).
 
 Several alternative tools exist for detecting splicing events from
-RNA-seq data and analyzing their consequences:
-
-- [IsoformSwitchAnalyzeR](https://www.bioconductor.org/packages/IsoformSwitchAnalyzeR)
-  — a comprehensive workflow that performs DTU testing, annotates the
-  resulting isoform switches with splicing event types, and predicts
-  functional consequences such as domain loss and NMD.
-
-- [GeneStructureTools](https://www.bioconductor.org/packages/GeneStructureTools)
-  — takes differential splicing results from read-based tools such as
-  Whippet or leafcutter (which detect splicing events from junction
-  counts), classifies the event types, and assesses their structural and
-  functional consequences such as ORF changes, NMD potential, and UTR
-  structure.
-
-- [isoformic](https://github.com/luciorq/isoformic) — a visualization
-  and functional interpretation pipeline for pre-computed differential
-  transcript expression results. It organizes transcripts by biotype
-  (protein-coding, lncRNA, NMD, etc.) and provides expression profile
-  plots and functional enrichment analysis.
-
-*splicelogic* differs from these in its main input and focus: it does
-not perform DTU testing, and also does not take pre-computed splicing
-events as input. Instead, it works from two groups of transcripts
-(either an explicit partition or transcript-level DTU results already
-mapped onto exon structures) and directly classifies the type of
-splicing event from the comparison of the two groups.
+RNA-seq data and analyzing their consequences; *splicelogic* is compared
+with them in [related tools](#related-tools) at the end of this
+vignette.
 
 By operating on exon-level *GRanges* with attached DTU statistics,
 *splicelogic* provides a flexible framework for users to identify and
@@ -160,8 +144,8 @@ what those two groups are; that is settled upstream, in one of two ways:
 
 *splicelogic* also assumes the user has information about the genomic
 ranges for the exons of each transcript. *splicelogic* provides a set of
-helper functions for generating these exon ranges, see [obtaining exon
-ranges](#obtaining-exon-ranges).
+helper functions for generating these exon ranges, see [exon ranges
+input for splicelogic](#exon-ranges-input).
 
 Either way, the `exons` are provided in a flat *GRanges* object (one
 range per exon), containing exon-level metadata in `mcols(exons)`: the
@@ -206,13 +190,13 @@ transcripts do relative to them.
 | Function | `event_type` | Detects | Exons returned |
 |----|----|----|----|
 | [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"se"` | An exon of a down transcript that is absent from an up transcript of the same gene, whose two flanking exons are adjacent in that up transcript | The skipped exon, from the down transcript |
-| [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ie"` | The mirror image of SE: an exon of an up transcript absent from a down transcript of the same gene | The included exon, from the up transcript |
+| [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ie"` | An exon of an up transcript that is absent from a down transcript of the same gene, whose two flanking exons are adjacent in that down transcript | The included exon, from the up transcript |
 | [`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"mxe"` | Two non-overlapping exons, one in each transcript, sitting between the same pair of flanking exons | Both exons of the pair, one row each, interleaved |
 | [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ri"` | An intron of a down transcript that falls entirely within a single exon of an up transcript of the same gene | The exon retaining the intron, from the up transcript |
-| [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a5ss"` | An up exon whose 5’ splice site (donor) differs from that of an overlapping down exon of the same gene. A last exon has no donor, so it is never reported here | The exon with the alternative donor, from the up transcript |
-| [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a3ss"` | The reverse: a differing 3’ splice site (acceptor). A first exon has no acceptor, so it is never reported here | The exon with the alternative acceptor, from the up transcript |
+| [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a5ss"` | An up exon whose 5’ splice site (donor) differs from that of an overlapping down exon of the same gene | The exon with the alternative donor, from the up transcript |
+| [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a3ss"` | An up exon whose 3’ splice site (acceptor) differs from that of an overlapping down exon of the same gene | The exon with the alternative acceptor, from the up transcript |
 | [`find_atss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"atss"` | The first exon of an up transcript beginning transcription at a different coordinate from the first exon of a down transcript of the same gene. No overlap is required, so an alternative promoter elsewhere in the gene is still found | The first exon, from the up transcript |
-| [`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ates"` | The mirror image: a last exon ending transcription at a different coordinate | The last exon, from the up transcript |
+| [`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ates"` | The last exon of an up transcript ending transcription at a different coordinate from the last exon of a down transcript of the same gene. No overlap is required, so an alternative terminal exon elsewhere in the gene is still found | The last exon, from the up transcript |
 | [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | all of the above | Runs the eight finders in turn and binds the results | All exons returned by the individual finders |
 
 Neither boundary of an exon has to match its partner, so an exon that
@@ -220,10 +204,13 @@ has moved both its acceptor and its donor is reported by
 [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
 *and* by
 [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
-Because `exon_rank` runs in transcription order, the first/last
-restrictions above hold on either strand: on the minus strand the first
-exon is the rightmost one, and its transcription start is its genomic
-end.
+Because `exon_rank` runs in transcription order, the first and last
+exons used by
+[`find_atss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+and
+[`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+are the same on either strand: on the minus strand the first exon is the
+rightmost one, and its transcription start is its genomic end.
 
 [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
@@ -231,9 +218,13 @@ end.
 and
 [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
 also take a `type` argument, controlling how an exon flanking a
-candidate is matched to an exon of the partner transcript: `"boundary"`
-(the default) requires only the shared splice site to coincide, `"over"`
-accepts any overlap, and `"in"` requires the two exons to be identical.
+candidate is matched to an exon of the partner transcript. `"boundary"`
+(the default) requires the two exons to overlap *and* to share a start
+or an end coordinate, so they may still differ in length at the other
+end; `"over"` accepts any overlap, with no coordinate in common; and
+`"in"` requires the two exons to be identical. Note that `"boundary"`
+accepts a match at either end — it does not single out the splice site
+facing the candidate.
 
 Every finder has a long-form alias that spells the event type out —
 [`find_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
@@ -267,7 +258,7 @@ describe the *paired* transcript against which the event is defined:
 
 | Column | Description |
 |----|----|
-| `event_type` | Type of splicing event detected (`"se"`, `"ie"`, `"mxe"`, `"ri"`, `"a5ss"`, or `"a3ss"`). |
+| `event_type` | Type of splicing event detected (`"se"`, `"ie"`, `"mxe"`, `"ri"`, `"a5ss"`, `"a3ss"`, `"atss"`, or `"ates"`). |
 | `event_tx_id` | Transcript ID of the *paired* transcript that, together with the detected exon’s transcript (`tx_id`), defines the event. |
 | `event_estimate` | DTU coefficient (`estimate`) of the paired transcript. |
 | `event_<col>` | One column per name in `metadata(gr)$additional_columns`, prefixed with `event_`, carrying the corresponding value from the paired transcript. |
@@ -328,7 +319,7 @@ Alternatively, if exon coordinates are already available as a *GRanges*,
 those can be passed directly.
 
 For more details on preparing exons as input see the vignette section
-[comparing two_sets](#comparing-two-sets).
+[exon ranges input for splicelogic](#exon-ranges-input).
 
 #### A synthetic exon set
 
@@ -547,8 +538,9 @@ direction of the comparison, so nothing has to be partitioned by hand.
 
 In this section we load the small example dataset that has been prepared
 for this vignette. Note that in a typical *splicelogic* workflow, the
-exons *GRanges* would be loaded from a *TxDb*. See the [obtaining exon
-ranges](#obtaining-exon-ranges) section below for further details.
+exons *GRanges* would be loaded from a *TxDb*. See the [exon ranges
+input for splicelogic](#exon-ranges-input) section below for further
+details.
 
 We load the differential transcript usage analysis from the Jones *et
 al.* paper. Specifically, we load the transcripts found to exhibit DTU
@@ -995,8 +987,9 @@ barplot(
 ```
 
 ![Barplot of event
-types](splicelogic_files/figure-html/events-barplot-1.png) \## Upstream
-DTU methods {#upstream-methods}
+types](splicelogic_files/figure-html/events-barplot-1.png)
+
+### Upstream DTU methods
 
 In this section we talk about one of the two routes into *splicelogic*:
 the one where the two groups of transcripts come out of a differential
@@ -1045,8 +1038,9 @@ Common upstream DTU methods include:
 Regardless of which method is used, the per-transcript DTU statistics
 (effect estimates and adjusted p-values) have to be mapped onto the
 individual exons of each transcript to produce an exon-level *GRanges*
-(see [Obtaining exon ranges](#obtaining-exon-ranges)). This annotated
-*GRanges* is the starting point for *splicelogic*, beginning with
+(see [Exon ranges input for splicelogic](#exon-ranges-input)). This
+annotated *GRanges* is the starting point for *splicelogic*, beginning
+with
 [`preprocess()`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)
 and then followed by event-specific functions
 ([`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
@@ -1074,11 +1068,6 @@ informative variables.
 
 # define a helper function
 my_paste <- \(x) paste(unique(x), collapse = ",")
-# `exon_id` is usually found in the metadata columns in the input exons. 
-# If not available, we can build it from the gene and the exon coordinates — the same 
-# exon then gets the same id in every transcript that contains it:
-#   mock_events <- mock_events |>
-#     dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
 mock_events |>
   dplyr::group_by(exon_id, event_type) |>
   plyranges::reduce_ranges_directed(
@@ -1102,6 +1091,17 @@ mock_events |>
     ##   [3]   tx_4,tx_5         4,3        tx_0
     ##   -------
     ##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+Note that `exon_id` is usually found in the metadata columns in the
+input exons. If not available, we can build it from the gene and the
+exon coordinates — the same exon then gets the same id in every
+transcript that contains it, as in this un-evaluated code chunk:
+
+``` r
+
+mock_events <- mock_events |>
+  dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
+```
 
 ## Identifying complex events
 
@@ -1199,7 +1199,7 @@ wiggleplotr::plotTranscripts(
 ![Exon structures of the transcript pair tx_0 and
 tx_5](splicelogic_files/figure-html/mock-pair-plot-1.png)
 
-## Obtaining exon ranges
+## Exon ranges input for splicelogic
 
 ### Using `prepare_exons()`
 
@@ -1364,6 +1364,36 @@ cols_to_add <- sim_dtu_table[txp_idx,] |>
 merged_DF <- cbind(mcols(flat_exons), cols_to_add)
 mcols(flat_exons) <- merged_DF
 ```
+
+## Related tools
+
+Several alternative tools exist for detecting splicing events from
+RNA-seq data and analyzing their consequences:
+
+- [IsoformSwitchAnalyzeR](https://www.bioconductor.org/packages/IsoformSwitchAnalyzeR)
+  — a comprehensive workflow that performs DTU testing, annotates the
+  resulting isoform switches with splicing event types, and predicts
+  functional consequences such as domain loss and NMD.
+
+- [GeneStructureTools](https://www.bioconductor.org/packages/GeneStructureTools)
+  — takes differential splicing results from read-based tools such as
+  Whippet or leafcutter (which detect splicing events from junction
+  counts), classifies the event types, and assesses their structural and
+  functional consequences such as ORF changes, NMD potential, and UTR
+  structure.
+
+- [isoformic](https://github.com/luciorq/isoformic) — a visualization
+  and functional interpretation pipeline for pre-computed differential
+  transcript expression results. It organizes transcripts by biotype
+  (protein-coding, lncRNA, NMD, etc.) and provides expression profile
+  plots and functional enrichment analysis.
+
+*splicelogic* differs from these in its main input and focus: it does
+not perform DTU testing, and also does not take pre-computed splicing
+events as input. Instead, it works from two groups of transcripts
+(either an explicit partition or transcript-level DTU results already
+mapped onto exon structures) and directly classifies the type of
+splicing event from the comparison of the two groups.
 
 ## Session info
 
