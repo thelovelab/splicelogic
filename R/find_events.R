@@ -7,13 +7,13 @@
 #' events from preprocessed GRanges exon data. Events include skipped exon (se),
 #' included exon (ie), mutatualy exclusive exons (mxe), retained intron (ri),
 #' alternative 5' and 3' splice sites (a5ss / a3ss), and alternative
-#' transcription start and end sites (aTSS / aTES).
+#' transcription start and end sites (atss / ates).
 #'
 #' `find_a5ss()` / `find_a3ss()` do not require either boundary of an exon
 #' to be shared with its partner, so an exon that moved both boundaries is
 #' reported as an a5ss *and* an a3ss. A first exon has no acceptor and a
 #' last exon has no donor, so those boundaries never produce an a3ss /
-#' a5ss; `find_aTSS()` / `find_aTES()` report them instead by comparing
+#' a5ss; `find_atss()` / `find_ates()` report them instead by comparing
 #' where each transcript begins and ends. `exon_rank` runs in
 #' transcription order, so this holds on both strands.
 #'
@@ -25,7 +25,7 @@
 #' \describe{
 #'   \item{\code{event_type}}{The type of splicing event detected (e.g.
 #'     \code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"},
-#'     \code{"a3ss"}, \code{"aTSS"}, \code{"aTES"}).}
+#'     \code{"a3ss"}, \code{"atss"}, \code{"ates"}).}
 #'   \item{\code{event_tx_id}}{Transcript ID of the paired transcript
 #'     involved in the event.}
 #'   \item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
@@ -328,7 +328,7 @@ find_alt_ss <- function(gr, by_start = TRUE) {
   # flag each transcript's first and last exon. a first exon has no
   # acceptor and a last exon has no donor, so a boundary moving there is
   # a transcription start / end change, not a splice site change --
-  # find_aTSS() / find_aTES() report those instead. exon_rank follows
+  # find_atss() / find_ates() report those instead. exon_rank follows
   # transcription, so rank 1 is the first exon on either strand and this
   # rule needs no strand handling of its own. min/max rather than
   # 1/nexons so that CDS-style offset ranks still work.
@@ -474,7 +474,7 @@ find_alternative_3_prime_splice_sites <- find_a3ss
 #'
 #' @param gr A preprocessed GRanges object
 #' @param at_start If TRUE, compares the first exon of each transcript
-#'   (aTSS); if FALSE, the last exon (aTES).
+#'   (atss); if FALSE, the last exon (ates).
 #' @return A GRanges of detected events
 #' @noRd
 find_alt_ts <- function(gr, at_start = TRUE) {
@@ -482,7 +482,7 @@ find_alt_ts <- function(gr, at_start = TRUE) {
   check_preprocessed(gr)
   keep_cols <- keep_cols(gr)
 
-  event_name <- if (at_start) "aTSS" else "aTES"
+  event_name <- if (at_start) "atss" else "ates"
 
   # flag each transcript's first and last exon, exactly as find_alt_ss()
   # does -- but there the flags only *veto* a label, while here they
@@ -550,7 +550,7 @@ find_alt_ts <- function(gr, at_start = TRUE) {
   match_tbl <- match_tbl |>
     dplyr::mutate(
       # this call only cares about one boundary: the  start
-      # for aTSS, the end for aTES. the same line in
+      # for atss, the end for ates. the same line in
       # find_alt_ss() reads xor(!by_start, on_minus), because there the
       # a5ss donor is the exon *end* on "+" rather than the start.
       site_is_start = xor(at_start, on_minus),
@@ -573,7 +573,7 @@ find_alt_ts <- function(gr, at_start = TRUE) {
 }
 
 #' @rdname find_events
-#' @return `find_aTSS()`: alternative transcription start sites — first
+#' @return `find_atss()`: alternative transcription start sites — first
 #'   exons that begin transcription at a different coordinate
 #' @examples
 #'
@@ -590,28 +590,28 @@ find_alt_ts <- function(gr, at_start = TRUE) {
 #'   plyranges::as_granges() |>
 #'   preprocess(coef_col = "estimate")
 #'
-#' find_aTSS(gr_tss)
+#' find_atss(gr_tss)
 #'
 #' @export
-find_aTSS <- function(gr) {
+find_atss <- function(gr) {
   find_alt_ts(gr, at_start = TRUE)
 }
 
 #' @rdname find_events
 #' @export
-find_alternative_start_sites <- find_aTSS
+find_alternative_start_sites <- find_atss
 
 #' @rdname find_events
-#' @return `find_aTES()`: alternative transcription end sites — last
+#' @return `find_ates()`: alternative transcription end sites — last
 #'   exons that end transcription at a different coordinate
 #' @export
-find_aTES <- function(gr) {
+find_ates <- function(gr) {
   find_alt_ts(gr, at_start = FALSE)
 }
 
 #' @rdname find_events
 #' @export
-find_alternative_end_sites <- find_aTES
+find_alternative_end_sites <- find_ates
 
 #' @rdname find_events
 #' @param verbose If TRUE, prints progress messages. Default TRUE.
@@ -659,10 +659,10 @@ find_all_events <- function(
   results$a3ss <- find_a3ss(gr)
 
   msg("Calculating alternative transcription start site events...")
-  results$aTSS <- find_aTSS(gr)
+  results$atss <- find_atss(gr)
 
   msg("Calculating alternative transcription end site events...")
-  results$aTES <- find_aTES(gr)
+  results$ates <- find_ates(gr)
 
   # keep only non-empty results
   results <- Filter(function(x) length(x) > 0L, results)

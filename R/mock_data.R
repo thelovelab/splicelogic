@@ -788,7 +788,7 @@ utils::globalVariables(c(
 
 #' Introduce an alternative transcription start or end site
 #'
-#' Shared implementation for generate_aTSS() / generate_aTES(). Two ways
+#' Shared implementation for generate_atss() / generate_ates(). Two ways
 #' of moving where a transcript begins or ends:
 #'
 #' - `"shift"` moves the *outer* boundary of the terminal exon (the one
@@ -896,7 +896,7 @@ generate_alt_ts <- function(gr, n_events = 1, at_start = TRUE,
 #'   outer boundary (so it still overlaps its partner), `"drop"` removes
 #'   the terminal exon and re-ranks (so the new terminal exon does not
 #'   overlap its partner at all).
-#' @return `generate_aTSS()`: A GRanges object with alternative
+#' @return `generate_atss()`: A GRanges object with alternative
 #' transcription start site events introduced
 #' @export
 #' @examples
@@ -904,17 +904,17 @@ generate_alt_ts <- function(gr, n_events = 1, at_start = TRUE,
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 #' )
-#' generate_aTSS(gr, n_events = 1)
+#' generate_atss(gr, n_events = 1)
 #'
 #' # the non-overlapping variant: drop the first exon altogether
-#' generate_aTSS(gr, n_events = 1, mode = "drop")
+#' generate_atss(gr, n_events = 1, mode = "drop")
 #'
-generate_aTSS <- function(gr, n_events = 1, mode = c("shift", "drop")) {
+generate_atss <- function(gr, n_events = 1, mode = c("shift", "drop")) {
   generate_alt_ts(gr, n_events, at_start = TRUE, mode = mode)
 }
 
 #' @rdname generate_events
-#' @return `generate_aTES()`: A GRanges object with alternative
+#' @return `generate_ates()`: A GRanges object with alternative
 #' transcription end site events introduced
 #' @export
 #' @examples
@@ -922,8 +922,8 @@ generate_aTSS <- function(gr, n_events = 1, mode = c("shift", "drop")) {
 #' gr <- create_mock_data(
 #'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 #' )
-#' generate_aTES(gr, n_events = 1)
+#' generate_ates(gr, n_events = 1)
 #'
-generate_aTES <- function(gr, n_events = 1, mode = c("shift", "drop")) {
+generate_ates <- function(gr, n_events = 1, mode = c("shift", "drop")) {
   generate_alt_ts(gr, n_events, at_start = FALSE, mode = mode)
 }

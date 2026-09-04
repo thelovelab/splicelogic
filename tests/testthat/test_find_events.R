@@ -236,69 +236,69 @@ test_that("find_a5ss and find_a3ss respect the minus strand", {
   expect_equal(length(find_a5ss(gr_a3)), 0L)
 })
 
-# Test for find_aTSS
-test_that("find_aTSS test", {
+# Test for find_atss
+test_that("find_atss test", {
   gr <- create_mock_data(3, 3, 6)
   gr <- preprocess(gr, coef_col = "estimate")
-  gr <- generate_aTSS(gr, n_events = 3)
+  gr <- generate_atss(gr, n_events = 3)
 
-  result <- find_aTSS(gr)
+  result <- find_atss(gr)
 
   expect_s4_class(result, "GRanges")
   expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event_type == "aTSS"))
+  expect_true(any(result$event_type == "atss"))
 })
 
-# Test for find_aTES
-test_that("find_aTES test", {
+# Test for find_ates
+test_that("find_ates test", {
   gr <- create_mock_data(3, 3, 6)
   gr <- preprocess(gr, coef_col = "estimate")
-  gr <- generate_aTES(gr, n_events = 3)
+  gr <- generate_ates(gr, n_events = 3)
 
-  result <- find_aTES(gr)
+  result <- find_ates(gr)
 
   expect_s4_class(result, "GRanges")
   expect_true("event_type" %in% names(GenomicRanges::mcols(result)))
-  expect_true(any(result$event_type == "aTES"))
+  expect_true(any(result$event_type == "ates"))
 })
 
 # Test the non-overlapping variant: the terminal exon is dropped, so the
 # next exon along becomes terminal and does not overlap its partner
-test_that("find_aTSS and find_aTES detect mode = 'drop' events", {
+test_that("find_atss and find_ates detect mode = 'drop' events", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- generate_aTSS(gr, n_events = 3, mode = "drop")
-  expect_true(any(find_aTSS(gr)$event_type == "aTSS"))
+  gr <- generate_atss(gr, n_events = 3, mode = "drop")
+  expect_true(any(find_atss(gr)$event_type == "atss"))
 
   gr <- create_mock_data(3, 3, 6)
-  gr <- generate_aTES(gr, n_events = 3, mode = "drop")
-  expect_true(any(find_aTES(gr)$event_type == "aTES"))
+  gr <- generate_ates(gr, n_events = 3, mode = "drop")
+  expect_true(any(find_ates(gr)$event_type == "ates"))
 })
 
 # Test that the two are not confused with each other
 test_that("a moved start is not reported as a moved end", {
   gr <- create_mock_data(3, 3, 6)
-  gr <- generate_aTSS(gr, n_events = 3)
-  expect_gt(length(find_aTSS(gr)), 0L)
-  expect_equal(length(find_aTES(gr)), 0L)
+  gr <- generate_atss(gr, n_events = 3)
+  expect_gt(length(find_atss(gr)), 0L)
+  expect_equal(length(find_ates(gr)), 0L)
 
   gr <- create_mock_data(3, 3, 6)
-  gr <- generate_aTES(gr, n_events = 3)
-  expect_gt(length(find_aTES(gr)), 0L)
-  expect_equal(length(find_aTSS(gr)), 0L)
+  gr <- generate_ates(gr, n_events = 3)
+  expect_gt(length(find_ates(gr)), 0L)
+  expect_equal(length(find_atss(gr)), 0L)
 })
 
 # Test that the labels follow the strand: on "-" the first exon by rank
 # is the rightmost one, so its transcription start is its genomic end
-test_that("find_aTSS and find_aTES work on the minus strand", {
+test_that("find_atss and find_ates work on the minus strand", {
   gr <- create_mock_data(3, 3, 6, strand = "-")
-  gr <- generate_aTSS(gr, n_events = 3)
-  expect_true(any(find_aTSS(gr)$event_type == "aTSS"))
-  expect_equal(length(find_aTES(gr)), 0L)
+  gr <- generate_atss(gr, n_events = 3)
+  expect_true(any(find_atss(gr)$event_type == "atss"))
+  expect_equal(length(find_ates(gr)), 0L)
 
   gr <- create_mock_data(3, 3, 6, strand = "-")
-  gr <- generate_aTES(gr, n_events = 3)
-  expect_true(any(find_aTES(gr)$event_type == "aTES"))
-  expect_equal(length(find_aTSS(gr)), 0L)
+  gr <- generate_ates(gr, n_events = 3)
+  expect_true(any(find_ates(gr)$event_type == "ates"))
+  expect_equal(length(find_atss(gr)), 0L)
 })
 
 # Test for find_se with new mock data
