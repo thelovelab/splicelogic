@@ -50,7 +50,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="splicelogic-splicing-events-from-transcript-sets">splicelogic: splicing events from transcript sets<a class="anchor" aria-label="anchor" href="#splicelogic-splicing-events-from-transcript-sets"></a>
 </h1></div>
-<p><em>splicelogic</em> turns sets of transcripts into discrete splicing events. Unlike event-based tools that work at the junction level, <em>splicelogic</em> operates on whole transcript structures: within each gene it compares two groups of transcripts and all of their exons, so events are derived with full isoform context. It detects skipped exons, included exons, mutually exclusive exons, retained introns, and alternative 5’ and 3’ splice sites.</p>
+<p><em>splicelogic</em> turns sets of transcripts into discrete splicing events. Unlike event-based tools that work at the junction level, <em>splicelogic</em> operates on whole transcript structures: within each gene it compares two groups of transcripts and all of their exons, so events are derived with full isoform context. It detects skipped exons, included exons, mutually exclusive exons, retained introns, alternative 5’ and 3’ splice sites, and alternative transcription start and end sites.</p>
 <p><em>splicelogic</em> allows the two groups of transcripts to be compared to be defined upstream in one of two ways. They can come from an explicit partition of the transcripts into two sets, e.g. a set of novel transcripts against a set of annotated reference transcripts, or transcripts found in disease samples relative to those found in control samples. Or they can come from a differential transcript usage (DTU) analysis, which gives each transcript an effect estimate whose sign defines the comparison. Because it takes transcript-level results tables as input, <em>splicelogic</em> is compatible with any upstream DTU method (including DRIMSeq, DEXSeq, satuRn, and edgeR), supporting flexible experimental designs.</p>
 <p><em>splicelogic</em> operates on exon-level data stored as <em>GRanges</em> objects within R/Bioconductor. Given a set of exons carrying the gene ID, transcript ID and exon rank, <em>splicelogic</em> can be used to identify a variety of splicing events. See the <a href="https://thelovelab.github.io/splicelogic/articles/splicelogic.html">vignette</a> for more details. <em>splicelogic</em> works well within the <a href="https://github.com/tidyomics/" class="external-link">tidyomics</a> framework. Event results including the exons and introns underlying each event can be further manipulated downstream using <a href="https://tidyomics.github.io/plyranges" class="external-link">plyranges</a>.</p>
 </div>
@@ -107,9 +107,10 @@ all_events &lt;- exons |&gt; find_all_events()</code></pre>
 <h1 id="future-directions">Future directions<a class="anchor" aria-label="anchor" href="#future-directions"></a>
 </h1>
 <ul>
-<li>Support detection of alternative UTR events (alternative 5’ and 3’ UTRs), when the reference annotation includes UTR coordinates (e.g. GENCODE).</li>
 <li>Support detection of additional event types, such as consecutive skipped exons or loss of retained introns.</li>
 <li>Extraction and labelling of the specific splice junctions associated with each event, adding metadata columns such as the donor–acceptor dinucleotide sequence (e.g. AG-GT) and a logical indicating whether the junction is canonical, for downstream interpretation.</li>
+<li>Custom plotting functions to easily visualize the results, showing the exons involved in each event alongside the transcripts they come from and the event annotation.</li>
+<li>Support detection of alternative UTR events (alternative 5’ and 3’ UTRs), when the reference annotation includes UTR coordinates (e.g. GENCODE), building on the alternative transcription start and end sites reported by <code><a href="reference/find_events.html">find_atss()</a></code> and <code><a href="reference/find_events.html">find_ates()</a></code>.</li>
 <li>Facilitating RNA-binding protein (RBP) motif detection.</li>
 <li>Facilitating interpretation of downstream structural consequences.</li>
 </ul>

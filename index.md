@@ -5,8 +5,8 @@ Unlike event-based tools that work at the junction level, *splicelogic*
 operates on whole transcript structures: within each gene it compares
 two groups of transcripts and all of their exons, so events are derived
 with full isoform context. It detects skipped exons, included exons,
-mutually exclusive exons, retained introns, and alternative 5’ and 3’
-splice sites.
+mutually exclusive exons, retained introns, alternative 5’ and 3’ splice
+sites, and alternative transcription start and end sites.
 
 *splicelogic* allows the two groups of transcripts to be compared to be
 defined upstream in one of two ways. They can come from an explicit
@@ -82,15 +82,22 @@ branch on GitHub:
 
 # Future directions
 
-- Support detection of alternative UTR events (alternative 5’ and 3’
-  UTRs), when the reference annotation includes UTR coordinates
-  (e.g. GENCODE).
 - Support detection of additional event types, such as consecutive
   skipped exons or loss of retained introns.
 - Extraction and labelling of the specific splice junctions associated
   with each event, adding metadata columns such as the donor–acceptor
   dinucleotide sequence (e.g. AG-GT) and a logical indicating whether
   the junction is canonical, for downstream interpretation.
+- Custom plotting functions to easily visualize the results, showing the
+  exons involved in each event alongside the transcripts they come from
+  and the event annotation.
+- Support detection of alternative UTR events (alternative 5’ and 3’
+  UTRs), when the reference annotation includes UTR coordinates
+  (e.g. GENCODE), building on the alternative transcription start and
+  end sites reported by
+  [`find_atss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  and
+  [`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
 - Facilitating RNA-binding protein (RBP) motif detection.
 - Facilitating interpretation of downstream structural consequences.
 
