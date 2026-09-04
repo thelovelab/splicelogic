@@ -1,5 +1,5 @@
 
-# splicelogic 1.1.3
+# splicelogic 1.1.4
 
 * Added `prepare_exons_by_partition()` for building input from two sets
   of transcripts, without needing a estimate column from a DTU analysis.
@@ -19,7 +19,8 @@
   `find_included_exons()`, `find_mutually_exclusive_exons()`,
   `find_retained_introns()`, `find_alternative_5_prime_splice_sites()`,
   `find_alternative_3_prime_splice_sites()`,
-  `find_alternative_start_sites()`, `find_alternative_end_sites()`).
+  `find_alternative_transcription_start_sites()`,
+  `find_alternative_transcription_end_sites()`).
 
 # splicelogic 0.99.0
 
