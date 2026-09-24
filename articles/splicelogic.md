@@ -1431,7 +1431,7 @@ sessionInfo()
     ##  [7] dbplyr_2.6.0           readr_2.2.0            plyranges_1.30.1      
     ## [10] dplyr_1.2.1            GenomicRanges_1.62.1   Seqinfo_1.0.0         
     ## [13] IRanges_2.44.0         S4Vectors_0.48.1       BiocGenerics_0.56.0   
-    ## [16] generics_0.1.4         splicelogic_1.1.3     
+    ## [16] generics_0.1.4         splicelogic_1.1.4     
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] tidyselect_1.2.1            blob_1.3.0                 
@@ -1445,7 +1445,7 @@ sessionInfo()
     ## [17] compiler_4.5.2              rlang_1.3.0                
     ## [19] sass_0.4.10                 tools_4.5.2                
     ## [21] utf8_1.2.6                  yaml_2.3.12                
-    ## [23] rtracklayer_1.70.1          knitr_1.51                 
+    ## [23] rtracklayer_1.70.1          knitr_1.52                 
     ## [25] S4Arrays_1.10.1             labeling_0.4.3             
     ## [27] htmlwidgets_1.6.4           bit_4.6.0                  
     ## [29] curl_8.0.0                  DelayedArray_0.36.1        
@@ -1477,6 +1477,6 @@ sessionInfo()
     ## [81] lattice_0.23-1              png_0.1-9                  
     ## [83] Rsamtools_2.26.0            cigarillo_1.0.0            
     ## [85] memoise_2.0.1               bslib_0.12.0               
-    ## [87] SparseArray_1.10.10         xfun_0.60                  
+    ## [87] SparseArray_1.10.10         xfun_0.61                  
     ## [89] fs_2.1.0                    MatrixGenerics_1.22.0      
     ## [91] pkgconfig_2.0.3
