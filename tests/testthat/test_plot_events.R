@@ -28,8 +28,10 @@ plot_fixture <- function(gene_id = "g1", seqnames = "chr1", tx_suffix = "") {
 layer_tx_lines <- 1
 layer_exons <- 2
 layer_event_exons <- 3
-layer_tx_labels <- 4
-layer_event_labels <- 5
+layer_stripes <- 4
+layer_event_outlines <- 5
+layer_tx_labels <- 6
+layer_event_labels <- 7
 # the strand arrows are always the last layer
 strand_arrows <- function(p) {
   ggplot2::layer_data(p, length(p$layers))
@@ -106,6 +108,45 @@ test_that("plot_transcripts highlights the event exons only", {
     event_rects$fill,
     unname(event_palette()[c("se", "a3ss")])
   )
+})
+
+test_that("plot_transcripts stripes an exon called as two event types", {
+  skip_if_not_installed("ggplot2")
+  gr <- plot_fixture()
+  events <- find_all_events(gr, verbose = FALSE)
+  p <- plot_transcripts(events, gr)
+
+  # 221-280 is both an a5ss and an a3ss: filled with the first type and
+  # striped with the second
+  stripes <- ggplot2::layer_data(p, layer_stripes)
+  expect_gt(length(unique(stripes$group)), 1L)
+  expect_equal(unique(stripes$fill), unname(event_palette()["a5ss"]))
+
+  # every stripe stays inside the exon box, which the outline draws over
+  event_rects <- ggplot2::layer_data(p, layer_event_exons)
+  striped <- event_rects[event_rects$fill == event_palette()[["a3ss"]], ]
+  # a clipped vertex lands on the edge of the box, hence the tolerance
+  inside <- function(v, lo, hi) all(v > lo - 1e-8 & v < hi + 1e-8)
+  expect_true(inside(stripes$x, striped$xmin, striped$xmax))
+  expect_true(inside(stripes$y, striped$ymin, striped$ymax))
+  outlines <- ggplot2::layer_data(p, layer_event_outlines)
+  expect_equal(nrow(outlines), 2L)
+  expect_true(all(is.na(outlines$fill)))
+
+  # both types are in the legend, as both are on the plot
+  legend_labels <- function(p) {
+    ggplot2::ggplot_build(p)$plot$scales$get_scales("fill")$get_labels()
+  }
+  expect_setequal(
+    legend_labels(p),
+    c("up (estimate > 0)", "down (estimate < 0)", "SE", "A5SS", "A3SS")
+  )
+
+  # turned off, the exon keeps the fill of its first type alone, and the
+  # second type leaves the legend with it
+  plain <- plot_transcripts(events, gr, stripe_multi_events = FALSE)
+  expect_equal(nrow(ggplot2::layer_data(plain, layer_stripes)), 0L)
+  expect_false("A5SS" %in% legend_labels(plain))
 })
 
 test_that("plot_transcripts colours transcripts by the sign of estimate", {

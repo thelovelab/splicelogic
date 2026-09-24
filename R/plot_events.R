@@ -8,9 +8,10 @@
 utils::globalVariables(c(
   "tx_id", "estimate", "event_tx_id", "event_estimate", "event_type",
   "gene_id", "tx_pair", "row_y", "direction", "tx_label", "fill_key",
-  "event_label", "is_event", "plot_start", "plot_end", "joint_start",
-  "joint_plot_start", "x", "xend", "lfc", "annot", "width", "strand",
-  "start", "end", "tss_x", "arrow_dir", "y", "point"
+  "fill_keys", "event_label", "is_event", "plot_start", "plot_end",
+  "joint_start", "joint_plot_start", "x", "xend", "lfc", "annot", "width",
+  "strand", "start", "end", "tss_x", "arrow_dir", "y", "point", "u", "v",
+  "edge", "vertex", "inside", "poly_id", "step", "type_i", "lo", "hi"
 ))
 
 #' Default fill colours for splicelogic event types
@@ -211,7 +212,9 @@ layout_transcripts <- function(exons, rescale_introns, new_intron_length,
 #' Events are matched to exons on transcript and coordinates, which a finder
 #' copies unchanged from the exons it was given. An exon can carry several
 #' event types (e.g. a5ss and a3ss when both boundaries moved), so they are
-#' collapsed into one label, and the fill follows the first type.
+#' collapsed into one label. `fill_key` is the first type, the colour the box
+#' is filled with; `fill_keys` keeps all of them, which [exon_stripes()] uses
+#' to stripe the box with the ones the fill leaves out.
 #' @noRd
 event_exons <- function(events, layout_exons) {
   events_tbl <- tibble::as_tibble(events) |>
@@ -233,9 +236,136 @@ event_exons <- function(events, layout_exons) {
     dplyr::group_by(tx_id, start, end) |>
     dplyr::summarise(
       event_label = toupper(paste(sort(unique(event_type)), collapse = "+")),
-      fill_key = sort(unique(event_type))[1],
+      fill_keys = list(sort(unique(as.character(event_type)))),
+      fill_key = fill_keys[[1]][1],
       .groups = "drop"
     )
+}
+
+#' Clip a convex polygon by the half plane `fn(u, v) >= 0`
+#'
+#' Sutherland-Hodgman: walk the edges, keep every vertex inside the half
+#' plane, and add the crossing point wherever an edge leaves or enters it.
+#' The vertices have to stay in drawing order, so the edges are indexed and
+#' the two candidate points per edge interleaved, rather than appended in a
+#' loop.
+#'
+#' @return A tibble of `u` / `v` vertices, possibly empty.
+#' @noRd
+clip_half_plane <- function(poly, fn) {
+  n <- nrow(poly)
+  if (n == 0L) {
+    return(poly)
+  }
+  nxt <- c(seq_len(n)[-1], 1L)
+  d <- fn(poly$u, poly$v)
+  inside <- d >= 0
+  # NaN where an edge lies in the boundary line, dropped with the row below
+  frac <- d / (d - d[nxt])
+
+  tibble::tibble(
+    edge = rep(seq_len(n), 2L),
+    vertex = rep(c(1L, 2L), each = n),
+    inside = c(inside, inside != inside[nxt]),
+    u = c(poly$u, poly$u + frac * (poly$u[nxt] - poly$u)),
+    v = c(poly$v, poly$v + frac * (poly$v[nxt] - poly$v))
+  ) |>
+    dplyr::filter(inside) |>
+    dplyr::arrange(edge, vertex) |>
+    dplyr::select(u, v)
+}
+
+#' One diagonal band of an exon box
+#'
+#' The box `[u1, u2] x [v1, v2]` clipped to the band `lo <= v - u <= hi`.
+#' @noRd
+clip_stripe <- function(u1, u2, v1, v2, lo, hi) {
+  tibble::tibble(u = c(u1, u2, u2, u1), v = c(v1, v1, v2, v2)) |>
+    clip_half_plane(function(u, v) (v - u) - lo) |>
+    clip_half_plane(function(u, v) hi - (v - u))
+}
+
+#' Diagonal stripes for exons called as more than one event type
+#'
+#' An exon can be called as several types at once, e.g. an a5ss and an a3ss
+#' when both of its boundaries moved. The box is filled with the first type
+#' and striped with the others, so no type is hidden behind another and the
+#' legend entry for each of them still points at something on the plot.
+#'
+#' The stripes are one global set of diagonal bands, cut into `n` sub-bands
+#' of equal width, one per type of the exon. The first sub-band is left to
+#' the fill of the box and the rest are drawn over it, so a two-type exon
+#' comes out half filled and half striped. Being global, the bands line up
+#' between exons on the same diagonal.
+#'
+#' Position is in plot units, where x is bp and y is rows, so a 45 degree
+#' slope there would depend on the gene. The bands are built in panel
+#' fractions instead (`u`, `v`), which makes them diagonal on the page, and
+#' `period` — the width of one full set of bands, also a panel fraction —
+#' keeps every stripe the same width whatever the exon.
+#'
+#' @return A tibble of polygon vertices with `poly_id`, `x`, `y` and
+#'   `fill_key`, empty when no exon carries more than one type.
+#' @noRd
+exon_stripes <- function(rects, limits, y_limits, half_height,
+                         period = 0.05) {
+  empty <- tibble::tibble(
+    poly_id = character(0), x = numeric(0), y = numeric(0),
+    fill_key = character(0)
+  )
+  multi <- rects |>
+    dplyr::filter(is_event, lengths(fill_keys) > 1L)
+  if (nrow(multi) == 0L) {
+    return(empty)
+  }
+  x_range <- diff(limits)
+  y_range <- diff(y_limits)
+
+  bands <- lapply(seq_len(nrow(multi)), function(i) {
+    types <- multi$fill_keys[[i]]
+    n_types <- length(types)
+    u1 <- (multi$plot_start[i] - limits[1]) / x_range
+    u2 <- (multi$plot_end[i] - limits[1]) / x_range
+    v1 <- (multi$row_y[i] - half_height - y_limits[1]) / y_range
+    v2 <- (multi$row_y[i] + half_height - y_limits[1]) / y_range
+    # v - u is lowest in the bottom right corner of the box and highest in
+    # the top left one, so these are the band sets the box can reach
+    steps <- seq(floor((v1 - u2) / period), floor((v2 - u1) / period))
+
+    band_tbl <- tibble::tibble(
+      step = rep(steps, each = n_types - 1L),
+      type_i = rep(seq_len(n_types)[-1], times = length(steps))
+    ) |>
+      dplyr::mutate(
+        lo = step * period + (type_i - 1L) * period / n_types,
+        hi = lo + period / n_types,
+        fill_key = types[type_i],
+        poly_id = paste(
+          multi$tx_id[i], multi$start[i], multi$end[i], step, type_i,
+          sep = ":"
+        )
+      )
+
+    # one polygon per band, each clipped on its own: a tibble cannot hold
+    # them together, as a band keeps between zero and six vertices
+    lapply(seq_len(nrow(band_tbl)), function(j) {
+      clip_stripe(u1, u2, v1, v2, band_tbl$lo[j], band_tbl$hi[j]) |>
+        dplyr::mutate(
+          poly_id = band_tbl$poly_id[j],
+          x = limits[1] + u * x_range,
+          y = y_limits[1] + v * y_range,
+          fill_key = band_tbl$fill_key[j]
+        ) |>
+        dplyr::select(poly_id, x, y, fill_key)
+    }) |>
+      dplyr::bind_rows()
+  })
+
+  dplyr::bind_rows(c(list(empty), bands)) |>
+    # a band can miss the box entirely, or touch it in a single corner
+    dplyr::group_by(poly_id) |>
+    dplyr::filter(dplyr::n() >= 3L) |>
+    dplyr::ungroup()
 }
 
 #' Bent arrows marking where each transcript starts and which way it runs
@@ -292,8 +422,11 @@ tss_arrows <- function(layout_exons, tx_rows, limits, base, rise,
 #' Draws one row per transcript appearing in `tx_id` or `event_tx_id` of
 #' `events`. Transcripts are coloured by the sign of their estimate (blue when
 #' positive, red when negative), and the exons called as events are filled by
-#' event type, outlined, and labelled with the type. A bent arrow over the
-#' first exon marks where each transcript starts and which way it runs.
+#' event type, outlined, and labelled with the type. An exon called as several
+#' types at once, e.g. an a5ss and an a3ss when both of its boundaries moved,
+#' is filled with the first type and striped diagonally with the others. A
+#' bent arrow over the first exon marks where each transcript starts and which
+#' way it runs.
 #'
 #' All events passed in are drawn on one panel, so they must come from a
 #' single gene; events from several genes are an error. Subset first, or use
@@ -326,6 +459,9 @@ tss_arrows <- function(layout_exons, tx_rows, limits, base, rise,
 #'   above each row. Default `TRUE`.
 #' @param label_events Whether to print the event type below each event exon.
 #'   Default `TRUE`.
+#' @param stripe_multi_events Whether an exon called as several event types is
+#'   striped with the types its fill leaves out. Default `TRUE`; `FALSE` fills
+#'   it with the first type alone, and drops the others from the legend.
 #' @param label_size Size of the event labels. Default `2.6`.
 #' @param legend Whether to draw the fill legend. Default `TRUE`.
 #' @param tx_annot Optional character vector named by transcript id, appended
@@ -371,7 +507,8 @@ plot_transcripts <- function(
   label_events = TRUE,
   label_size = 2.6,
   legend = TRUE,
-  tx_annot = NULL
+  tx_annot = NULL,
+  stripe_multi_events = TRUE
 ) {
   check_ggplot2()
   check_plot_events(events)
@@ -429,13 +566,22 @@ plot_transcripts <- function(
       fill_key = dplyr::coalesce(fill_key, direction)
     )
 
+  stripes <- rects |>
+    # a scalar FALSE empties the layer without taking it out of the plot, so
+    # the layer order does not depend on the argument
+    dplyr::filter(stripe_multi_events) |>
+    exon_stripes(layout$limits, y_limits, exon_half_height)
+
+  # the legend covers what is drawn, so a type only striped onto an exon is
+  # in it, and one striping was asked not to draw is not
+  drawn_keys <- unique(c(rects$fill_key, stripes$fill_key))
   palette <- c(event_colors, up = up_color, down = down_color)
-  unknown_types <- setdiff(unique(rects$fill_key), names(palette))
+  unknown_types <- setdiff(drawn_keys, names(palette))
   palette <- c(
     palette,
     stats::setNames(rep(unknown_color, length(unknown_types)), unknown_types)
   )
-  present <- intersect(names(palette), rects$fill_key)
+  present <- intersect(names(palette), drawn_keys)
   breaks <- c(
     intersect(c("up", "down"), present),
     setdiff(present, c("up", "down"))
@@ -486,7 +632,22 @@ plot_transcripts <- function(
         xmin = plot_start, xmax = plot_end,
         ymin = row_y - exon_half_height, ymax = row_y + exon_half_height,
         fill = fill_key
+      )
+    ) +
+    # stripes for the types the fill leaves out, then the outline over them:
+    # a stripe is clipped to the box, so it would eat into a border drawn
+    # with the fill
+    ggplot2::geom_polygon(
+      data = stripes,
+      ggplot2::aes(x = x, y = y, group = poly_id, fill = fill_key)
+    ) +
+    ggplot2::geom_rect(
+      data = dplyr::filter(rects, is_event),
+      ggplot2::aes(
+        xmin = plot_start, xmax = plot_end,
+        ymin = row_y - exon_half_height, ymax = row_y + exon_half_height
       ),
+      fill = NA,
       colour = "grey15",
       linewidth = 0.3
     ) +
