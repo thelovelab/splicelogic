@@ -186,11 +186,10 @@ find_introns <- function(gr) {
     gene_id = gr$gene_id,
     tx_id = gr$tx_id,
     estimate = gr$estimate,
-    intron = TRUE
+    # rep() so that the no introns found case returns an
+    # empty GRanges with the same metadata columns
+    intron = rep(TRUE, length(gr))
   )
-  # TO DO: include case where no introns are found
-  # eg create_mock_data(1,1,1) and check that the output
-  # is an empty GRanges with the correct metadata columns
 }
 # for candidates_by_presence
 utils::globalVariables(c("overlap_count", "n_txp_pos"))
