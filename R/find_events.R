@@ -37,7 +37,10 @@
 NULL
 
 # for find_se
-utils::globalVariables(c("cand_idx", "l", "r", "event_type", "event_tx_id"))
+utils::globalVariables(c(
+  "cand_idx", "l", "r", "l_idx", "r_idx", "pos_idx", "event_type",
+  "event_tx_id"
+))
 
 #' @rdname find_events
 #' @param type How an exon flanking a candidate is matched to an exon of
@@ -98,13 +101,21 @@ find_se <- function(
 
   # join left and right by (cand_idx, tx_id), filter adjacent exons
   pairs <- dplyr::inner_join(
-    left_match_tbl |> dplyr::select(cand_idx, tx_id, l),
-    right_match_tbl |> dplyr::select(cand_idx, tx_id, r),
+    left_match_tbl |> dplyr::select(cand_idx, tx_id, l, l_idx = pos_idx),
+    right_match_tbl |> dplyr::select(cand_idx, tx_id, r, r_idx = pos_idx),
     by = c("cand_idx", "tx_id")
   ) |>
     # for SE/included exon, flanking exons must be
     # adjacent (rank difference of 1)
     dplyr::filter(abs(l - r) == 1) |>
+    # neither matched partner exon may reach into the candidate: one fused
+    # with a flank (retained intron) means the partner does not skip it
+    dplyr::filter(
+      pos_tbl$end[l_idx] < cand_tbl$start[cand_idx] |
+        pos_tbl$start[l_idx] > cand_tbl$end[cand_idx],
+      pos_tbl$end[r_idx] < cand_tbl$start[cand_idx] |
+        pos_tbl$start[r_idx] > cand_tbl$end[cand_idx]
+    ) |>
     dplyr::distinct(cand_idx, tx_id)
 
   if (nrow(pairs) == 0L) {
@@ -173,8 +184,8 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
 
   # join left and right by (cand_idx, tx_id), filter for mx exons (l-r==2)
   pairs <- dplyr::inner_join(
-    left_match_tbl |> dplyr::select(cand_idx, tx_id, l),
-    right_match_tbl |> dplyr::select(cand_idx, tx_id, r),
+    left_match_tbl |> dplyr::select(cand_idx, tx_id, l, l_idx = pos_idx),
+    right_match_tbl |> dplyr::select(cand_idx, tx_id, r, r_idx = pos_idx),
     by = c("cand_idx", "tx_id")
   ) |>
     # for MX, flanking exons must have a gap of
@@ -203,9 +214,16 @@ find_mxe <- function(gr, type = c("boundary", "in", "over")) {
     # many exons sit between the flanks, so the gap stays 2 and an
     # alternative 5'/3' splice site would otherwise be reported as MX too.
     # similar to filter by non overlapping middle pos exon
+    # false positive 3: a matched flank pos exon fused with the candidate
+    # (retained intron, e.g. 11-25 over flank 11-15 and candidate 21-25)
+    # keeps the gap at 2 while the pos txp still contains the candidate.
     dplyr::filter(
       pos_tbl$end[pos_row] < cand_tbl$start[cand_idx] |
-        pos_tbl$start[pos_row] > cand_tbl$end[cand_idx]
+        pos_tbl$start[pos_row] > cand_tbl$end[cand_idx],
+      pos_tbl$end[l_idx] < cand_tbl$start[cand_idx] |
+        pos_tbl$start[l_idx] > cand_tbl$end[cand_idx],
+      pos_tbl$end[r_idx] < cand_tbl$start[cand_idx] |
+        pos_tbl$start[r_idx] > cand_tbl$end[cand_idx]
     )
 
   if (nrow(pairs) == 0L) {
