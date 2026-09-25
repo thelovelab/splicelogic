@@ -21,12 +21,12 @@ biocViews:
     RNASeq, LongRead, Annotation, FunctionalGenomics
 BugReports: https://github.com/thelovelab/splicelogic/issues
 Depends:
-    R (>= 4.5.0)
+    R (>= 4.5.0),
+    plyranges
 Imports:
     dplyr,
     magrittr,
     GenomicRanges,
-    plyranges,
     tibble,
     IRanges,
     S4Vectors,
