@@ -58,6 +58,11 @@ library(AnnotationHub)
 #> Loading required package: BiocFileCache
 #> Loading required package: dbplyr
 #> 
+#> Attaching package: ‘dbplyr’
+#> The following objects are masked from ‘package:dplyr’:
+#> 
+#>     ident, sql, sql_escape_ident, sql_escape_string
+#> 
 #> Attaching package: ‘AnnotationHub’
 #> The following object is masked from ‘package:rtracklayer’:
 #> 
@@ -74,6 +79,11 @@ library(AnnotationDbi)
 #> The following object is masked from ‘package:AnnotationHub’:
 #> 
 #>     cache
+#> 
+#> Attaching package: ‘AnnotationDbi’
+#> The following object is masked from ‘package:dplyr’:
+#> 
+#>     select
 library(GenomicFeatures)
 library(tibble)
 
