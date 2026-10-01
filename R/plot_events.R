@@ -213,7 +213,7 @@ layout_transcripts <- function(exons, rescale_introns, new_intron_length,
 #' copies unchanged from the exons it was given. An exon can carry several
 #' event types (e.g. a5ss and a3ss when both boundaries moved), so they are
 #' collapsed into one label. `fill_key` is the first type, the colour the box
-#' is filled with; `fill_keys` keeps all of them, which [exon_stripes()] uses
+#' is filled with; `fill_keys` keeps all of them, which `exon_stripes()` uses
 #' to stripe the box with the ones the fill leaves out.
 #' @noRd
 event_exons <- function(events, layout_exons) {
