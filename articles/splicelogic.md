@@ -7,8 +7,8 @@ Unlike event-based tools that work at the junction level, *splicelogic*
 operates on whole transcript structures: within each gene it compares
 two groups of transcripts and all of their exons, so events are derived
 with full isoform context. It detects skipped exons, included exons,
-mutually exclusive exons, retained introns, alternative 5’ and 3’ splice
-sites, and alternative transcription start and end sites.
+mutually exclusive exons, retained and spliced introns, alternative 5’
+and 3’ splice sites, and alternative transcription start and end sites.
 
 *splicelogic* allows the two groups of transcripts to be compared to be
 defined upstream in one of two ways. They can come from an explicit
@@ -34,6 +34,9 @@ following types of splicing events:
   to down-regulated transcripts
 - **Retained introns (RI)** – intronic regions that are retained as part
   of an exon in up-regulated transcripts
+- **Spliced introns (SI)** – intronic regions that are spliced out in
+  up-regulated transcripts but retained as part of an exon in
+  down-regulated transcripts
 - **Alternative 5’ (A5SS)** – exons in up-regulated transcripts that
   share the same 3’ splice site but differ at the 5’ splice site from
   exons in down-regulated transcripts
@@ -193,11 +196,12 @@ transcripts do relative to them.
 | [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ie"` | An exon of an up transcript that is absent from a down transcript of the same gene, whose two flanking exons are adjacent in that down transcript | The included exon, from the up transcript |
 | [`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"mxe"` | Two non-overlapping exons, one in each transcript, sitting between the same pair of flanking exons | Both exons of the pair, one row each, interleaved |
 | [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ri"` | An intron of a down transcript that falls entirely within a single exon of an up transcript of the same gene | The exon retaining the intron, from the up transcript |
+| [`find_si()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"si"` | An intron of an up transcript that falls entirely within a single exon of a down transcript of the same gene | The exon retaining the intron, from the down transcript |
 | [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a5ss"` | An up exon whose 5’ splice site (donor) differs from that of an overlapping down exon of the same gene | The exon with the alternative donor, from the up transcript |
 | [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"a3ss"` | An up exon whose 3’ splice site (acceptor) differs from that of an overlapping down exon of the same gene | The exon with the alternative acceptor, from the up transcript |
 | [`find_atss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"atss"` | The first exon of an up transcript beginning transcription at a different coordinate from the first exon of a down transcript of the same gene. No overlap is required, so an alternative promoter elsewhere in the gene is still found | The first exon, from the up transcript |
 | [`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | `"ates"` | The last exon of an up transcript ending transcription at a different coordinate from the last exon of a down transcript of the same gene. No overlap is required, so an alternative terminal exon elsewhere in the gene is still found | The last exon, from the up transcript |
-| [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | all of the above | Runs the eight finders in turn and binds the results | All exons returned by the individual finders |
+| [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md) | all of the above | Runs the nine finders in turn and binds the results | All exons returned by the individual finders |
 
 Neither boundary of an exon has to match its partner, so an exon that
 has moved both its acceptor and its donor is reported by
@@ -231,6 +235,7 @@ Every finder has a long-form alias that spells the event type out —
 [`find_included_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_mutually_exclusive_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+[`find_spliced_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_alternative_3_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
 [`find_alternative_transcription_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
@@ -258,7 +263,7 @@ describe the *paired* transcript against which the event is defined:
 
 | Column | Description |
 |----|----|
-| `event_type` | Type of splicing event detected (`"se"`, `"ie"`, `"mxe"`, `"ri"`, `"a5ss"`, `"a3ss"`, `"atss"`, or `"ates"`). |
+| `event_type` | Type of splicing event detected (`"se"`, `"ie"`, `"mxe"`, `"ri"`, `"si"`, `"a5ss"`, `"a3ss"`, `"atss"`, or `"ates"`). |
 | `event_tx_id` | Transcript ID of the *paired* transcript that, together with the detected exon’s transcript (`tx_id`), defines the event. |
 | `event_estimate` | DTU coefficient (`estimate`) of the paired transcript. |
 | `event_<col>` | One column per name in `metadata(gr)$additional_columns`, prefixed with `event_`, carrying the corresponding value from the paired transcript. |
@@ -418,7 +423,7 @@ mock |> head(2)
 #### Finding events
 
 [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
-wraps the eight event finders ([the `find_*()`
+wraps the nine event finders ([the `find_*()`
 functions](#find-functions)), which can also be called one at a time —
 see [finding individual events](#individual-events) below:
 

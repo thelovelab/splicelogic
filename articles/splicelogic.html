@@ -73,9 +73,9 @@ events. Unlike event-based tools that work at the junction level,
 <em>splicelogic</em> operates on whole transcript structures: within
 each gene it compares two groups of transcripts and all of their exons,
 so events are derived with full isoform context. It detects skipped
-exons, included exons, mutually exclusive exons, retained introns,
-alternative 5’ and 3’ splice sites, and alternative transcription start
-and end sites.</p>
+exons, included exons, mutually exclusive exons, retained and spliced
+introns, alternative 5’ and 3’ splice sites, and alternative
+transcription start and end sites.</p>
 <p><em>splicelogic</em> allows the two groups of transcripts to be
 compared to be defined upstream in one of two ways. They can come from
 an explicit partition of the transcripts into two sets, e.g. a set of
@@ -106,6 +106,10 @@ transcripts compared to down-regulated transcripts</li>
 <li>
 <strong>Retained introns (RI)</strong> – intronic regions that are
 retained as part of an exon in up-regulated transcripts</li>
+<li>
+<strong>Spliced introns (SI)</strong> – intronic regions that are
+spliced out in up-regulated transcripts but retained as part of an exon
+in down-regulated transcripts</li>
 <li>
 <strong>Alternative 5’ (A5SS)</strong> – exons in up-regulated
 transcripts that share the same 3’ splice site but differ at the 5’
@@ -319,20 +323,27 @@ exon of an up transcript of the same gene</td>
 <td>The exon retaining the intron, from the up transcript</td>
 </tr>
 <tr class="odd">
+<td><code><a href="../reference/find_events.html">find_si()</a></code></td>
+<td><code>"si"</code></td>
+<td>An intron of an up transcript that falls entirely within a single
+exon of a down transcript of the same gene</td>
+<td>The exon retaining the intron, from the down transcript</td>
+</tr>
+<tr class="even">
 <td><code><a href="../reference/find_events.html">find_a5ss()</a></code></td>
 <td><code>"a5ss"</code></td>
 <td>An up exon whose 5’ splice site (donor) differs from that of an
 overlapping down exon of the same gene</td>
 <td>The exon with the alternative donor, from the up transcript</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code><a href="../reference/find_events.html">find_a3ss()</a></code></td>
 <td><code>"a3ss"</code></td>
 <td>An up exon whose 3’ splice site (acceptor) differs from that of an
 overlapping down exon of the same gene</td>
 <td>The exon with the alternative acceptor, from the up transcript</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code><a href="../reference/find_events.html">find_atss()</a></code></td>
 <td><code>"atss"</code></td>
 <td>The first exon of an up transcript beginning transcription at a
@@ -341,7 +352,7 @@ same gene. No overlap is required, so an alternative promoter elsewhere
 in the gene is still found</td>
 <td>The first exon, from the up transcript</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code><a href="../reference/find_events.html">find_ates()</a></code></td>
 <td><code>"ates"</code></td>
 <td>The last exon of an up transcript ending transcription at a
@@ -350,10 +361,10 @@ gene. No overlap is required, so an alternative terminal exon elsewhere
 in the gene is still found</td>
 <td>The last exon, from the up transcript</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code><a href="../reference/find_events.html">find_all_events()</a></code></td>
 <td>all of the above</td>
-<td>Runs the eight finders in turn and binds the results</td>
+<td>Runs the nine finders in turn and binds the results</td>
 <td>All exons returned by the individual finders</td>
 </tr>
 </tbody>
@@ -380,6 +391,7 @@ does not single out the splice site facing the candidate.</p>
 <code><a href="../reference/find_events.html">find_skipped_exons()</a></code>, <code><a href="../reference/find_events.html">find_included_exons()</a></code>,
 <code><a href="../reference/find_events.html">find_mutually_exclusive_exons()</a></code>,
 <code><a href="../reference/find_events.html">find_retained_introns()</a></code>,
+<code><a href="../reference/find_events.html">find_spliced_introns()</a></code>,
 <code><a href="../reference/find_events.html">find_alternative_5_prime_splice_sites()</a></code>,
 <code><a href="../reference/find_events.html">find_alternative_3_prime_splice_sites()</a></code>,
 <code><a href="../reference/find_events.html">find_alternative_transcription_start_sites()</a></code> and
@@ -413,8 +425,8 @@ against which the event is defined:</p>
 <td><code>event_type</code></td>
 <td>Type of splicing event detected (<code>"se"</code>,
 <code>"ie"</code>, <code>"mxe"</code>, <code>"ri"</code>,
-<code>"a5ss"</code>, <code>"a3ss"</code>, <code>"atss"</code>, or
-<code>"ates"</code>).</td>
+<code>"si"</code>, <code>"a5ss"</code>, <code>"a3ss"</code>,
+<code>"atss"</code>, or <code>"ates"</code>).</td>
 </tr>
 <tr class="even">
 <td><code>event_tx_id</code></td>
@@ -578,7 +590,7 @@ derived from, which makes it the anchor: we put it on its own in
 <div class="section level4">
 <h4 id="finding-events">Finding events<a class="anchor" aria-label="anchor" href="#finding-events"></a>
 </h4>
-<p><code><a href="../reference/find_events.html">find_all_events()</a></code> wraps the eight event finders (<a href="#find-functions">the <code>find_*()</code> functions</a>), which
+<p><code><a href="../reference/find_events.html">find_all_events()</a></code> wraps the nine event finders (<a href="#find-functions">the <code>find_*()</code> functions</a>), which
 can also be called one at a time — see <a href="#individual-events">finding individual events</a> below:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mock_events</span> <span class="op">&lt;-</span> <span class="va">mock</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/find_events.html">find_all_events</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>

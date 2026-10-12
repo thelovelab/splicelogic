@@ -3,8 +3,13 @@
 Functions to find different types of alternative splicing events from
 preprocessed GRanges exon data. Events include skipped exon (se),
 included exon (ie), mutatualy exclusive exons (mxe), retained intron
-(ri), alternative 5' and 3' splice sites (a5ss / a3ss), and alternative
-transcription start and end sites (atss / ates).
+(ri), spliced intron (si), alternative 5' and 3' splice sites (a5ss /
+a3ss), and alternative transcription start and end sites (atss / ates).
+
+`find_ie()` and `find_si()` are the reverse of `find_se()` and
+`find_ri()`: the same comparison with the up and down transcripts
+swapped. A spliced intron is an intron of an up transcript that a down
+transcript retains, i.e. an intron that the up transcript splices out.
 
 `find_a5ss()` / `find_a3ss()` do not require either boundary of an exon
 to be shared with its partner, so an exon that moved both boundaries is
@@ -13,6 +18,13 @@ last exon has no donor, so those boundaries never produce an a3ss /
 a5ss; `find_atss()` / `find_ates()` report them instead by comparing
 where each transcript begins and ends. `exon_rank` runs in transcription
 order, so this holds on both strands.
+
+When an exon overlaps two or more exons of its partner (a retained or
+spliced intron), the boundaries facing the intron are left to
+`find_ri()` / `find_si()`; only the outer boundaries of the group are
+compared. An exon that retains an intron *and* uses a different outer
+splice site is therefore reported as both an ri (or si) and an a5ss /
+a3ss.
 
 ## Usage
 
@@ -29,9 +41,13 @@ find_mxe(gr, type = c("boundary", "in", "over"))
 
 find_mutually_exclusive_exons(gr, type = c("boundary", "in", "over"))
 
-find_ri(gr)
+find_ri(gr, inverse = FALSE)
 
-find_retained_introns(gr)
+find_retained_introns(gr, inverse = FALSE)
+
+find_si(gr)
+
+find_spliced_introns(gr)
 
 find_a5ss(gr)
 
@@ -81,7 +97,9 @@ find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
 
 - inverse:
 
-  If TRUE, identifies included exons instead of skipped exons.
+  If TRUE, swaps the up and down transcripts: `find_se()` then
+  identifies included exons instead of skipped exons, and `find_ri()`
+  spliced introns instead of retained introns.
 
 - verbose:
 
@@ -95,7 +113,7 @@ additional metadata columns:
 - `event_type`:
 
   The type of splicing event detected (e.g. `"se"`, `"ie"`, `"mxe"`,
-  `"ri"`, `"a5ss"`, `"a3ss"`, `"atss"`, `"ates"`).
+  `"ri"`, `"si"`, `"a5ss"`, `"a3ss"`, `"atss"`, `"ates"`).
 
 - `event_tx_id`:
 
@@ -118,6 +136,8 @@ additional metadata columns:
 `find_mxe()`: mutually exclusive exons
 
 `find_ri()`: retained introns
+
+`find_si()`: spliced introns
 
 `find_a5ss()`: alternative 5' splice sites
 
@@ -198,6 +218,22 @@ find_ri(gr_ri)
 #>       <logical> <character>   <numeric>      <numeric>
 #>   [1]      TRUE          ri           1      -0.783753
 #>   [2]      TRUE          ri           4      -0.944088
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+# the same data with the signs flipped: the introns retained above are
+# now spliced out by the up transcripts
+gr_si <- gr_ri |> dplyr::mutate(estimate = -estimate)
+find_si(gr_si)
+#> GRanges object with 2 ranges and 8 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer>  <numeric>
+#>   [1]     chr1     11-25      + |         1         2         2 -0.0213647
+#>   [2]     chr1     11-25      + |         1         2         2 -0.0213647
+#>       sim_event  event_type event_tx_id event_estimate
+#>       <logical> <character>   <numeric>      <numeric>
+#>   [1]      TRUE          si           1       0.783753
+#>   [2]      TRUE          si           4       0.944088
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 

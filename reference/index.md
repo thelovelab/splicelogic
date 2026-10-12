@@ -25,6 +25,8 @@
   [`find_mutually_exclusive_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_retained_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_si()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  [`find_spliced_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_alternative_5_prime_splice_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
