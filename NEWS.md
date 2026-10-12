@@ -6,6 +6,10 @@
 * Added `find_atss()` and `find_ates()`
   for detecting alternative transcription start and end sites. Both
   are included in `find_all_events()`.
+* Added `find_si()` (alias `find_spliced_introns()`), the reverse of
+  `find_ri()`: an intron that an up transcript splices out but a down
+  transcript retains. `find_ri()` gains an `inverse` argument, as
+  `find_se()` has for `find_ie()`. Included in `find_all_events()`.
 * `find_a5ss()` and `find_a3ss()` now label events per moved boundary,
   so an exon that moves both of its boundaries is reported as both an
   a5ss and an a3ss.
