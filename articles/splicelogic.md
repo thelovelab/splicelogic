@@ -1439,7 +1439,7 @@ sessionInfo()
     ##  [5] Biostrings_2.78.0           S7_0.2.2                   
     ##  [7] bitops_1.1-0                fastmap_1.2.0              
     ##  [9] RCurl_1.98-1.20             GenomicAlignments_1.46.0   
-    ## [11] XML_3.99-0.24               digest_0.6.39              
+    ## [11] XML_3.99-0.25               digest_0.6.39              
     ## [13] lifecycle_1.0.5             KEGGREST_1.50.0            
     ## [15] RSQLite_3.53.3              magrittr_2.0.5             
     ## [17] compiler_4.5.2              rlang_1.3.0                
