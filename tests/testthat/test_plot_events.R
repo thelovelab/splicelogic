@@ -40,7 +40,7 @@ strand_arrows <- function(p) {
 test_that("event_palette covers every event type the finders return", {
   expect_setequal(
     names(event_palette()),
-    c("se", "ie", "mxe", "ri", "a5ss", "a3ss", "atss", "ates")
+    c("se", "ie", "mxe", "ri", "si", "a5ss", "a3ss", "atss", "ates")
   )
   # the up / down transcript colours are not reused for an event type
   direction_colors <- unlist(

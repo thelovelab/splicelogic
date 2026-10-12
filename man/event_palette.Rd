@@ -12,7 +12,7 @@ A character vector of colours, named by event type.
 \description{
 One pastel colour per \code{event_type} returned by the \verb{find_*()} functions,
 chosen together with the soft blue and red \code{\link[=plot_transcripts]{plot_transcripts()}} uses for
-the up- and down-regulated transcripts, so the ten stay as far apart as
+the up- and down-regulated transcripts, so the eleven stay as far apart as
 pastels allow, including under protanopia and deuteranopia. Pastels leave
 less room between colours than saturated ones, which is why event exons
 are also outlined and labelled with their type.

@@ -18,7 +18,7 @@ utils::globalVariables(c(
 #'
 #' One pastel colour per `event_type` returned by the `find_*()` functions,
 #' chosen together with the soft blue and red [plot_transcripts()] uses for
-#' the up- and down-regulated transcripts, so the ten stay as far apart as
+#' the up- and down-regulated transcripts, so the eleven stay as far apart as
 #' pastels allow, including under protanopia and deuteranopia. Pastels leave
 #' less room between colours than saturated ones, which is why event exons
 #' are also outlined and labelled with their type.
@@ -35,6 +35,7 @@ event_palette <- function() {
     ie = "#74B9B7",
     mxe = "#AAA7F1",
     ri = "#DDE699",
+    si = "#62F9EA",
     a5ss = "#7BE8FE",
     a3ss = "#FFC4D6",
     atss = "#99D6A8",
