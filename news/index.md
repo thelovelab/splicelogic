@@ -13,6 +13,21 @@
   for detecting alternative transcription start and end sites. Both are
   included in
   [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
+- Added
+  [`find_si()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  (alias
+  [`find_spliced_introns()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)),
+  the reverse of
+  [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md):
+  an intron that an up transcript splices out but a down transcript
+  retains.
+  [`find_ri()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  gains an `inverse` argument, as
+  [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  has for
+  [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
+  Included in
+  [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
 - [`find_a5ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   and
   [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
