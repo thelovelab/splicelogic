@@ -169,6 +169,139 @@ test_that("find_ri test", {
   expect_true(any(result$event_type == "ri"))
 })
 
+# Test that find_si is find_ri with the up and down transcripts swapped
+test_that("find_si reports the intron spliced out by an up transcript", {
+  # split has the 16-20 intron, fused retains it in its 11-25 exon
+  make_gr <- function(split_estimate) {
+    dplyr::bind_rows(
+      data.frame(
+        start = c(1, 11, 21, 31), end = c(5, 15, 25, 35),
+        tx_id = "split", estimate = split_estimate
+      ),
+      data.frame(
+        start = c(1, 11, 31), end = c(5, 25, 35),
+        tx_id = "fused", estimate = -split_estimate
+      )
+    ) |>
+      dplyr::mutate(seqnames = "chr1", strand = "+", gene_id = "g1") |>
+      dplyr::group_by(tx_id) |>
+      dplyr::mutate(exon_rank = dplyr::row_number()) |>
+      dplyr::ungroup() |>
+      plyranges::as_granges() |>
+      preprocess(coef_col = "estimate")
+  }
+
+  # split is up: it splices out the intron that fused (down) retains
+  gr <- make_gr(1)
+  si <- find_si(gr)
+  expect_equal(length(si), 1L)
+  expect_equal(as.integer(GenomicRanges::start(si)), 11L)
+  expect_equal(as.integer(GenomicRanges::end(si)), 25L)
+  expect_equal(si$tx_id, "fused")
+  expect_equal(si$event_tx_id, "split")
+  expect_equal(si$event_type, "si")
+  expect_equal(si$event_estimate, 1)
+  expect_equal(length(find_ri(gr)), 0L)
+  # the exons either side of the intron are not alternative splice sites
+  # of the fused exon
+  expect_equal(length(find_a5ss(gr)), 0L)
+  expect_equal(length(find_a3ss(gr)), 0L)
+  expect_equal(find_all_events(gr, verbose = FALSE)$event_type, "si")
+
+  # split is down: the same exon is now a retained intron instead
+  gr <- make_gr(-1)
+  ri <- find_ri(gr)
+  expect_equal(length(ri), 1L)
+  expect_equal(as.integer(GenomicRanges::start(ri)), 11L)
+  expect_equal(ri$tx_id, "fused")
+  expect_equal(ri$event_type, "ri")
+  expect_equal(length(find_si(gr)), 0L)
+  expect_equal(find_all_events(gr, verbose = FALSE)$event_type, "ri")
+
+  # flipping every sign turns each retained intron into a spliced intron
+  gr <- create_mock_data(3, 6, 3) |> generate_ri(n_events = 3)
+  ri <- find_ri(gr)
+  si <- find_si(gr |> dplyr::mutate(estimate = -estimate))
+  expect_gt(length(ri), 0L)
+  expect_equal(GenomicRanges::granges(si), GenomicRanges::granges(ri))
+  expect_equal(si$tx_id, ri$tx_id)
+  expect_equal(si$event_tx_id, ri$event_tx_id)
+  expect_true(all(si$event_type == "si"))
+})
+
+# an exon that retains an intron can also move its outer boundary, as in
+# TMEM259-201 vs -209 (ENST00000333175 / ENST00000592590). only the outer
+# boundaries of the group are compared, so the moved one is an a5ss / a3ss
+# and the ones facing the intron are left to find_ri() / find_si().
+test_that("a retained intron with a moved outer boundary is also alt ss", {
+  # split has the 16-20 intron; fused retains it in 13-25, whose start
+  # also moved from 11 to 13
+  make_gr <- function(split_estimate, strand) {
+    dplyr::bind_rows(
+      data.frame(
+        start = c(1, 11, 21, 31), end = c(5, 15, 25, 35),
+        tx_id = "split", estimate = split_estimate
+      ),
+      data.frame(
+        start = c(1, 13, 31), end = c(5, 25, 35),
+        tx_id = "fused", estimate = -split_estimate
+      )
+    ) |>
+      dplyr::mutate(seqnames = "chr1", strand = strand, gene_id = "g1") |>
+      dplyr::group_by(tx_id) |>
+      dplyr::mutate(
+        exon_rank = dplyr::if_else(
+          strand == "-",
+          dplyr::row_number(dplyr::desc(start)),
+          dplyr::row_number(start)
+        )
+      ) |>
+      dplyr::ungroup() |>
+      plyranges::as_granges() |>
+      preprocess(coef_col = "estimate")
+  }
+
+  # the start is the acceptor on "+" and the donor on "-"
+  for (strand in c("+", "-")) {
+    moved <- if (strand == "+") "a3ss" else "a5ss"
+    other <- if (strand == "+") "a5ss" else "a3ss"
+    find_moved <- if (strand == "+") find_a3ss else find_a5ss
+    find_other <- if (strand == "+") find_a5ss else find_a3ss
+
+    # split is up: fused splices the intron back in (si), and split's
+    # 11-15 uses a different outer site than fused's 13-25
+    gr <- make_gr(1, strand)
+    alt <- find_moved(gr)
+    expect_equal(length(alt), 1L)
+    expect_equal(as.integer(GenomicRanges::start(alt)), 11L)
+    expect_equal(as.integer(GenomicRanges::end(alt)), 15L)
+    expect_equal(alt$tx_id, "split")
+    expect_equal(alt$event_tx_id, "fused")
+    expect_equal(alt$event_type, moved)
+    # 15 and 21 face the intron: not alternative splice sites
+    expect_equal(length(find_other(gr)), 0L)
+    expect_equal(
+      sort(find_all_events(gr, verbose = FALSE)$event_type),
+      sort(c("si", moved))
+    )
+
+    # fused is up: the same change from the other side
+    gr <- make_gr(-1, strand)
+    alt <- find_moved(gr)
+    expect_equal(length(alt), 1L)
+    expect_equal(as.integer(GenomicRanges::start(alt)), 13L)
+    expect_equal(as.integer(GenomicRanges::end(alt)), 25L)
+    expect_equal(alt$tx_id, "fused")
+    expect_equal(alt$event_tx_id, "split")
+    expect_equal(alt$event_type, moved)
+    expect_equal(length(find_other(gr)), 0L)
+    expect_equal(
+      sort(find_all_events(gr, verbose = FALSE)$event_type),
+      sort(c("ri", moved))
+    )
+  }
+})
+
 # Test for find_a3ss
 test_that("find_a3ss test", {
   gr <- create_mock_data(3, 3, 6)
@@ -385,7 +518,7 @@ test_that("find_all_events returns empty GRanges when no events exist", {
 
 # Test every finder against a minus-strand fixture
 test_that("all find_* functions work on minus-strand data", {
-  # six "-" strand genes, one engineered event each. exon_rank runs right
+  # seven "-" strand genes, one engineered event each. exon_rank runs right
   # to left, so this checks that the finders key off exon_rank and strand
   # rather than off genomic order.
   gr <- preprocess(minus_strand_mock_data(), coef_col = "estimate")
@@ -433,6 +566,16 @@ test_that("all find_* functions work on minus-strand data", {
   expect_equal(ri$event_tx_id, "neg3")
   expect_equal(ri$event_type, "ri")
 
+  # g7: the roles are reversed, so neg7 retains the 616-620 intron of pos7
+  si <- find_si(gr)
+  expect_s4_class(si, "GRanges")
+  expect_equal(length(si), 1L)
+  expect_equal(GenomicRanges::start(si), 611L)
+  expect_equal(GenomicRanges::end(si), 625L)
+  expect_equal(si$tx_id, "neg7")
+  expect_equal(si$event_tx_id, "pos7")
+  expect_equal(si$event_type, "si")
+
   # g4: the exon start moves (311-315 -> 313-315). on "-" the start is the
   # donor, so this is an a5ss and must not be reported as an a3ss.
   a5ss <- find_a5ss(gr)
@@ -478,13 +621,13 @@ test_that("all find_* functions work on minus-strand data", {
     )
   )
 
-  # and the wrapper picks up all six types, with nothing extra
+  # and the wrapper picks up all seven types, with nothing extra
   all_events <- find_all_events(gr, verbose = FALSE)
   expect_s4_class(all_events, "GRanges")
-  expect_equal(length(all_events), 7L)
+  expect_equal(length(all_events), 8L)
   expect_equal(
     sort(unique(all_events$event_type)),
-    c("a3ss", "a5ss", "ie", "mxe", "ri", "se")
+    c("a3ss", "a5ss", "ie", "mxe", "ri", "se", "si")
   )
   expect_true(all(as.character(GenomicRanges::strand(all_events)) == "-"))
 })

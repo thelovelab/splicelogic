@@ -225,7 +225,7 @@ intron_split_mock_data <- function() {
 
 #' Create a sample GRanges on the minus strand covering every event type
 #'
-#' Six one-gene loci, all on `-`, each engineered for a single event. What
+#' Seven one-gene loci, all on `-`, each engineered for a single event. What
 #' distinguishes this fixture from the `+` strand ones is that exon_rank
 #' runs right to left in genomic coordinates (rank 1 is the rightmost
 #' exon), so the exon of rank k - 1 sits to the genomic *right* of rank k,
@@ -245,12 +245,15 @@ intron_split_mock_data <- function() {
 #'         pos5 [400-405] [411-413] [421-425]
 #' g6 ie   neg6 [500-505] [511-515]           [531-535] [541-545]
 #'         pos6 [500-505] [511-515] [521-525] [531-535] [541-545]
+#' g7 si   neg7 [600-605] [===611-625===]
+#'         pos7 [600-605] [611-615] [621-625]
 #' ```
 #'
 #' In g4 the moved boundary is the exon start, which on `-` is the donor,
 #' so it is an a5ss; in g5 it is the exon end, the acceptor, so it is an
-#' a3ss. Both are the mirror image of the `+` strand case.
-#' @return A GRanges object with twelve transcripts in six genes
+#' a3ss. Both are the mirror image of the `+` strand case. g6 and g7 are
+#' g1 and g3 with the up and down roles swapped.
+#' @return A GRanges object with fourteen transcripts in seven genes
 #' @noRd
 minus_strand_mock_data <- function() {
   tx <- function(gene_id, tx_id, start, end, estimate) {
@@ -288,7 +291,9 @@ minus_strand_mock_data <- function() {
     tx(
       "g6", "pos6",
       c(500, 511, 521, 531, 541), c(505, 515, 525, 535, 545), 1
-    )
+    ),
+    tx("g7", "neg7", c(600, 611), c(605, 625), -1),
+    tx("g7", "pos7", c(600, 611, 621), c(605, 615, 625), 1)
   ) |>
     plyranges::as_granges()
 }
