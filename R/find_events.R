@@ -6,8 +6,13 @@
 #' @description Functions to find different types of alternative splicing
 #' events from preprocessed GRanges exon data. Events include skipped exon (se),
 #' included exon (ie), mutatualy exclusive exons (mxe), retained intron (ri),
-#' alternative 5' and 3' splice sites (a5ss / a3ss), and alternative
-#' transcription start and end sites (atss / ates).
+#' spliced intron (si), alternative 5' and 3' splice sites (a5ss / a3ss), and
+#' alternative transcription start and end sites (atss / ates).
+#'
+#' `find_ie()` and `find_si()` are the reverse of `find_se()` and
+#' `find_ri()`: the same comparison with the up and down transcripts
+#' swapped. A spliced intron is an intron of an up transcript that a down
+#' transcript retains, i.e. an intron that the up transcript splices out.
 #'
 #' `find_a5ss()` / `find_a3ss()` do not require either boundary of an exon
 #' to be shared with its partner, so an exon that moved both boundaries is
@@ -24,8 +29,8 @@
 #' additional metadata columns:
 #' \describe{
 #'   \item{\code{event_type}}{The type of splicing event detected (e.g.
-#'     \code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"},
-#'     \code{"a3ss"}, \code{"atss"}, \code{"ates"}).}
+#'     \code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"si"},
+#'     \code{"a5ss"}, \code{"a3ss"}, \code{"atss"}, \code{"ates"}).}
 #'   \item{\code{event_tx_id}}{Transcript ID of the paired transcript
 #'     involved in the event.}
 #'   \item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
@@ -54,8 +59,9 @@ utils::globalVariables(c(
 #'   \item{\code{"in"}}{the two exons are identical (same start and same
 #'     end). The strictest setting.}
 #' }
-#' @param inverse If TRUE, identifies included exons
-#' instead of skipped exons.
+#' @param inverse If TRUE, swaps the up and down transcripts: `find_se()`
+#' then identifies included exons instead of skipped exons, and `find_ri()`
+#' spliced introns instead of retained introns.
 #' @return `find_se()`: skipped exons
 #' @export
 #' @examples
@@ -275,15 +281,27 @@ utils::globalVariables(c(
 #' 
 #' find_ri(gr_ri)
 #'
+#' # the same data with the signs flipped: the introns retained above are
+#' # now spliced out by the up transcripts
+#' gr_si <- gr_ri |> dplyr::mutate(estimate = -estimate)
+#' find_si(gr_si)
+#'
 #' @export
-find_ri <- function(gr) {
+find_ri <- function(gr, inverse = FALSE) {
   # if preprocessing didn't happen
   check_preprocessed(gr)
   keep_cols <- keep_cols(gr)
+  if (inverse) {
+    factor <- -1
+    event_name <- "si" # spliced intron
+  } else {
+    factor <- 1
+    event_name <- "ri" # retained intron
+  }
 
-  # find introns in the negative coef transcripts
-  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1)
-  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1)
+  # find introns in the negative coef transcripts (positive when inverse)
+  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1 * factor)
+  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1 * factor)
   introns <- neg_exons |> find_introns()
 
   if (length(introns) == 0L || length(pos_exons) == 0L) {
@@ -321,7 +339,7 @@ find_ri <- function(gr) {
   # build result: one row per (pos exon, intron transcript) pair
   hits_tbl <- pos_tbl[match_tbl$pos_idx, ] |>
     dplyr::mutate(
-      event_type = "ri", # retained intron
+      event_type = event_name,
       event_tx_id = match_tbl$tx_id_intron
     )
 
@@ -332,6 +350,17 @@ find_ri <- function(gr) {
 #' @rdname find_events
 #' @export
 find_retained_introns <- find_ri
+
+#' @rdname find_events
+#' @return `find_si()`: spliced introns
+#' @export
+find_si <- function(gr) {
+  find_ri(gr, inverse = TRUE)
+}
+
+#' @rdname find_events
+#' @export
+find_spliced_introns <- find_si
 
 # for find_alt_ss
 utils::globalVariables(c(
@@ -683,6 +712,9 @@ find_all_events <- function(
 
   msg("Calculating retained intron events...")
   results$ri <- find_ri(gr)
+
+  msg("Calculating spliced intron events...")
+  results$si <- find_si(gr)
 
   msg("Calculating alternative 5' splice site events...")
   results$a5ss <- find_a5ss(gr)
