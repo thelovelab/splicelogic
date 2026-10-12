@@ -236,6 +236,49 @@ test_that("find_a5ss and find_a3ss respect the minus strand", {
   expect_equal(length(find_a5ss(gr_a3)), 0L)
 })
 
+# Test that an overlapping gene cannot hide an alternative splice site
+test_that("find_a5ss and find_a3ss compare exons within the same gene", {
+  # gene A has a real a5ss: posA moves the donor of the 21-25 exon to 23.
+  # gene B is a readthrough over A whose negative transcript reuses the
+  # shifted 21-23 exon exactly. the identity check must stay within each
+  # gene, or the 21-23 candidate is dropped as "shared" with gene B.
+  gene_a <- data.frame(
+    start = c(1, 11, 21, 31, 41),
+    end = c(5, 15, 25, 35, 45),
+    exon_rank = 1:5,
+    gene_id = "A"
+  )
+  gr <- dplyr::bind_rows(
+    gene_a |> dplyr::mutate(tx_id = "negA", estimate = -1),
+    gene_a |>
+      dplyr::mutate(
+        tx_id = "posA",
+        estimate = 1,
+        end = replace(end, 3, 23)
+      ),
+    data.frame(
+      start = c(21, 31, 51, 61),
+      end = c(23, 35, 55, 65),
+      exon_rank = 1:4,
+      gene_id = "B",
+      tx_id = "negB",
+      estimate = -1
+    )
+  ) |>
+    dplyr::mutate(seqnames = "chr1", strand = "+") |>
+    plyranges::as_granges() |>
+    preprocess(coef_col = "estimate")
+
+
+  a5ss <- find_a5ss(gr)
+  expect_equal(length(a5ss), 1L)
+  expect_equal(as.integer(GenomicRanges::start(a5ss)), 21L)
+  expect_equal(as.integer(GenomicRanges::end(a5ss)), 23L)
+  expect_equal(as.character(a5ss$tx_id), "posA")
+  expect_equal(as.character(a5ss$event_tx_id), "negA")
+  expect_equal(length(find_a3ss(gr)), 0L)
+})
+
 # Test for find_atss
 test_that("find_atss test", {
   gr <- create_mock_data(3, 3, 6)

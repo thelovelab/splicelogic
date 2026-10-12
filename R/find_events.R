@@ -371,10 +371,15 @@ find_alt_ss <- function(gr, by_start = TRUE) {
   pos_exons <- gr_flagged |> dplyr::filter(sign(estimate) == 1)
   neg_exons <- gr_flagged |> dplyr::filter(sign(estimate) == -1)
 
-  # candidates: pos exons not exactly identical to any neg exon,
-  # but overlapping at least one neg exon (directed)
+  # candidates: pos exons not exactly identical to any neg exon of the
+  # same gene, but overlapping at least one neg exon (directed).
+  # as.character() on a GRanges gives "chr:start-end:strand", so prefixing
+  # the gene_id keeps the identity check within each gene.
   candidates <- pos_exons |>
-    dplyr::filter(!(pos_exons %in% neg_exons)) |>
+    dplyr::filter(
+      !(paste(gene_id, as.character(pos_exons)) %in%
+          paste(neg_exons$gene_id, as.character(neg_exons)))
+    ) |>
     plyranges::filter_by_overlaps_directed(neg_exons)
 
   if (length(candidates) == 0L) {
