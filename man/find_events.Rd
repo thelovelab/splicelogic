@@ -10,6 +10,8 @@
 \alias{find_mutually_exclusive_exons}
 \alias{find_ri}
 \alias{find_retained_introns}
+\alias{find_si}
+\alias{find_spliced_introns}
 \alias{find_a5ss}
 \alias{find_alternative_5_prime_splice_sites}
 \alias{find_a3ss}
@@ -33,9 +35,13 @@ find_mxe(gr, type = c("boundary", "in", "over"))
 
 find_mutually_exclusive_exons(gr, type = c("boundary", "in", "over"))
 
-find_ri(gr)
+find_ri(gr, inverse = FALSE)
 
-find_retained_introns(gr)
+find_retained_introns(gr, inverse = FALSE)
+
+find_si(gr)
+
+find_spliced_introns(gr)
 
 find_a5ss(gr)
 
@@ -71,8 +77,9 @@ required. The most permissive setting.}
 end). The strictest setting.}
 }}
 
-\item{inverse}{If TRUE, identifies included exons
-instead of skipped exons.}
+\item{inverse}{If TRUE, swaps the up and down transcripts: \code{find_se()}
+then identifies included exons instead of skipped exons, and \code{find_ri()}
+spliced introns instead of retained introns.}
 
 \item{verbose}{If TRUE, prints progress messages. Default TRUE.}
 }
@@ -81,8 +88,8 @@ A GRanges object with the detected exon ranges and the following
 additional metadata columns:
 \describe{
 \item{\code{event_type}}{The type of splicing event detected (e.g.
-\code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"},
-\code{"a3ss"}, \code{"atss"}, \code{"ates"}).}
+\code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"si"},
+\code{"a5ss"}, \code{"a3ss"}, \code{"atss"}, \code{"ates"}).}
 \item{\code{event_tx_id}}{Transcript ID of the paired transcript
 involved in the event.}
 \item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
@@ -98,6 +105,8 @@ carrying the corresponding value from the paired transcript.}
 \code{find_mxe()}: mutually exclusive exons
 
 \code{find_ri()}: retained introns
+
+\code{find_si()}: spliced introns
 
 \code{find_a5ss()}: alternative 5' splice sites
 
@@ -115,8 +124,13 @@ exons that end transcription at a different coordinate
 Functions to find different types of alternative splicing
 events from preprocessed GRanges exon data. Events include skipped exon (se),
 included exon (ie), mutatualy exclusive exons (mxe), retained intron (ri),
-alternative 5' and 3' splice sites (a5ss / a3ss), and alternative
-transcription start and end sites (atss / ates).
+spliced intron (si), alternative 5' and 3' splice sites (a5ss / a3ss), and
+alternative transcription start and end sites (atss / ates).
+
+\code{find_ie()} and \code{find_si()} are the reverse of \code{find_se()} and
+\code{find_ri()}: the same comparison with the up and down transcripts
+swapped. A spliced intron is an intron of an up transcript that a down
+transcript retains, i.e. an intron that the up transcript splices out.
 
 \code{find_a5ss()} / \code{find_a3ss()} do not require either boundary of an exon
 to be shared with its partner, so an exon that moved both boundaries is
@@ -125,6 +139,13 @@ last exon has no donor, so those boundaries never produce an a3ss /
 a5ss; \code{find_atss()} / \code{find_ates()} report them instead by comparing
 where each transcript begins and ends. \code{exon_rank} runs in
 transcription order, so this holds on both strands.
+
+When an exon overlaps two or more exons of its partner (a retained or
+spliced intron), the boundaries facing the intron are left to
+\code{find_ri()} / \code{find_si()}; only the outer boundaries of the group are
+compared. An exon that retains an intron \emph{and} uses a different outer
+splice site is therefore reported as both an ri (or si) and an a5ss /
+a3ss.
 }
 \examples{
 
@@ -157,6 +178,11 @@ gr_ri <- create_mock_data(
   generate_ri(n_events = 1)
 
 find_ri(gr_ri)
+
+# the same data with the signs flipped: the introns retained above are
+# now spliced out by the up transcripts
+gr_si <- gr_ri |> dplyr::mutate(estimate = -estimate)
+find_si(gr_si)
 
 
 # detect alternative 5' splice sites
