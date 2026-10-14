@@ -6,8 +6,13 @@
 #' @description Functions to find different types of alternative splicing
 #' events from preprocessed GRanges exon data. Events include skipped exon (se),
 #' included exon (ie), mutatualy exclusive exons (mxe), retained intron (ri),
-#' alternative 5' and 3' splice sites (a5ss / a3ss), and alternative
-#' transcription start and end sites (atss / ates).
+#' spliced intron (si), alternative 5' and 3' splice sites (a5ss / a3ss), and
+#' alternative transcription start and end sites (atss / ates).
+#'
+#' `find_ie()` and `find_si()` are the reverse of `find_se()` and
+#' `find_ri()`: the same comparison with the up and down transcripts
+#' swapped. A spliced intron is an intron of an up transcript that a down
+#' transcript retains, i.e. an intron that the up transcript splices out.
 #'
 #' `find_a5ss()` / `find_a3ss()` do not require either boundary of an exon
 #' to be shared with its partner, so an exon that moved both boundaries is
@@ -17,6 +22,13 @@
 #' where each transcript begins and ends. `exon_rank` runs in
 #' transcription order, so this holds on both strands.
 #'
+#' When an exon overlaps two or more exons of its partner (a retained or
+#' spliced intron), the boundaries facing the intron are left to
+#' `find_ri()` / `find_si()`; only the outer boundaries of the group are
+#' compared. An exon that retains an intron *and* uses a different outer
+#' splice site is therefore reported as both an ri (or si) and an a5ss /
+#' a3ss.
+#'
 #' @param gr A GRanges object with exon annotations, including 'tx_id', 'exon',
 #' and 'coef_col' metadata columns and preprocessed with preprocess().
 #'
@@ -24,8 +36,8 @@
 #' additional metadata columns:
 #' \describe{
 #'   \item{\code{event_type}}{The type of splicing event detected (e.g.
-#'     \code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"a5ss"},
-#'     \code{"a3ss"}, \code{"atss"}, \code{"ates"}).}
+#'     \code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"si"},
+#'     \code{"a5ss"}, \code{"a3ss"}, \code{"atss"}, \code{"ates"}).}
 #'   \item{\code{event_tx_id}}{Transcript ID of the paired transcript
 #'     involved in the event.}
 #'   \item{\code{event_estimate}}{DTU coefficient of the paired transcript.}
@@ -54,8 +66,9 @@ utils::globalVariables(c(
 #'   \item{\code{"in"}}{the two exons are identical (same start and same
 #'     end). The strictest setting.}
 #' }
-#' @param inverse If TRUE, identifies included exons
-#' instead of skipped exons.
+#' @param inverse If TRUE, swaps the up and down transcripts: `find_se()`
+#' then identifies included exons instead of skipped exons, and `find_ri()`
+#' spliced introns instead of retained introns.
 #' @return `find_se()`: skipped exons
 #' @export
 #' @examples
@@ -275,15 +288,27 @@ utils::globalVariables(c(
 #' 
 #' find_ri(gr_ri)
 #'
+#' # the same data with the signs flipped: the introns retained above are
+#' # now spliced out by the up transcripts
+#' gr_si <- gr_ri |> dplyr::mutate(estimate = -estimate)
+#' find_si(gr_si)
+#'
 #' @export
-find_ri <- function(gr) {
+find_ri <- function(gr, inverse = FALSE) {
   # if preprocessing didn't happen
   check_preprocessed(gr)
   keep_cols <- keep_cols(gr)
+  if (inverse) {
+    factor <- -1
+    event_name <- "si" # spliced intron
+  } else {
+    factor <- 1
+    event_name <- "ri" # retained intron
+  }
 
-  # find introns in the negative coef transcripts
-  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1)
-  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1)
+  # find introns in the negative coef transcripts (positive when inverse)
+  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1 * factor)
+  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1 * factor)
   introns <- neg_exons |> find_introns()
 
   if (length(introns) == 0L || length(pos_exons) == 0L) {
@@ -321,7 +346,7 @@ find_ri <- function(gr) {
   # build result: one row per (pos exon, intron transcript) pair
   hits_tbl <- pos_tbl[match_tbl$pos_idx, ] |>
     dplyr::mutate(
-      event_type = "ri", # retained intron
+      event_type = event_name,
       event_tx_id = match_tbl$tx_id_intron
     )
 
@@ -333,11 +358,25 @@ find_ri <- function(gr) {
 #' @export
 find_retained_introns <- find_ri
 
+#' @rdname find_events
+#' @return `find_si()`: spliced introns
+#' @export
+find_si <- function(gr) {
+  find_ri(gr, inverse = TRUE)
+}
+
+#' @rdname find_events
+#' @export
+find_spliced_introns <- find_si
+
 # for find_alt_ss
 utils::globalVariables(c(
   "estimate", "cand_idx", "neg_idx", "gene_id_cand", "gene_id_neg",
-  "tx_id_neg", "n", "match_start", "match_end", "event_type", "event_tx_id",
-  "on_minus", "is_first", "is_last", "site_is_start", "site_matches"
+  "tx_id_neg", "tx_id_cand", "n", "match_start", "match_end", "event_type",
+  "event_tx_id", "on_minus", "is_first", "is_last", "site_is_start",
+  "site_matches", "neg_start", "neg_end", "neg_outer_start", "neg_outer_end",
+  "pos_start", "pos_end", "pos_min_start", "pos_max_end", "start_is_outer",
+  "end_is_outer", "site_is_outer"
 ))
 
 #' @rdname find_events
@@ -371,10 +410,15 @@ find_alt_ss <- function(gr, by_start = TRUE) {
   pos_exons <- gr_flagged |> dplyr::filter(sign(estimate) == 1)
   neg_exons <- gr_flagged |> dplyr::filter(sign(estimate) == -1)
 
-  # candidates: pos exons not exactly identical to any neg exon,
-  # but overlapping at least one neg exon (directed)
+  # candidates: pos exons not exactly identical to any neg exon of the
+  # same gene, but overlapping at least one neg exon (directed).
+  # as.character() on a GRanges gives "chr:start-end:strand", so prefixing
+  # the gene_id keeps the identity check within each gene.
   candidates <- pos_exons |>
-    dplyr::filter(!(pos_exons %in% neg_exons)) |>
+    dplyr::filter(
+      !(paste(gene_id, as.character(pos_exons)) %in%
+          paste(neg_exons$gene_id, as.character(neg_exons)))
+    ) |>
     plyranges::filter_by_overlaps_directed(neg_exons)
 
   if (length(candidates) == 0L) {
@@ -409,19 +453,60 @@ find_alt_ss <- function(gr, by_start = TRUE) {
       on_minus = as.character(cand_tbl$strand[cand_idx]) == "-",
       is_first = cand_tbl$is_first[cand_idx],
       is_last = cand_tbl$is_last[cand_idx],
-      tx_id_neg = neg_tbl$tx_id[neg_idx]
+      tx_id_neg = neg_tbl$tx_id[neg_idx],
+      tx_id_cand = cand_tbl$tx_id[cand_idx]
     ) |>
     # restrict to same gene
     dplyr::filter(gene_id_cand == gene_id_neg)
 
-  # exclude candidates that overlap 2+ neg exons in the same neg
-  # transcript — those are retained introns, not alternative splice sites
-  multi_overlap <- match_tbl |>
-    dplyr::count(cand_idx, tx_id_neg) |>
-    dplyr::filter(n >= 2)
+  # an exon overlapping 2+ exons of the partner transcript retains an
+  # intron (find_ri() / find_si()). the boundaries facing that intron
+  # differ because of it, not because a splice site moved, so in such a
+  # group only the outermost boundaries are compared: the start of the
+  # leftmost exon and the end of the rightmost. genomic left / right, not
+  # exon_rank, so this needs no strand handling; which of the two is the
+  # donor is decided below as for any other exon.
+  # neg side: is this neg exon the leftmost / rightmost of the exons of
+  # tx_id_neg that the candidate overlaps?
+  match_tbl <- match_tbl |>
+    dplyr::mutate(
+      neg_start = neg_tbl$start[neg_idx],
+      neg_end = neg_tbl$end[neg_idx]
+    ) |>
+    dplyr::group_by(cand_idx, tx_id_neg) |>
+    dplyr::mutate(
+      neg_outer_start = neg_start == min(neg_start),
+      neg_outer_end = neg_end == max(neg_end)
+    ) |>
+    dplyr::ungroup()
+
+  # cand side: the span of the exons of tx_id_cand that the neg exon
+  # overlaps. counted against every pos exon, not only the candidates,
+  # since a flank shared with another neg transcript is not a candidate
+  # but still marks the intron.
+  pos_hits <- GenomicRanges::findOverlaps(neg_exons, pos_exons)
+  pos_hit_idx <- S4Vectors::subjectHits(pos_hits)
+  pos_span <- tibble::tibble(
+    neg_idx = S4Vectors::queryHits(pos_hits),
+    tx_id_cand = pos_exons$tx_id[pos_hit_idx],
+    pos_start = GenomicRanges::start(pos_exons)[pos_hit_idx],
+    pos_end = GenomicRanges::end(pos_exons)[pos_hit_idx]
+  ) |>
+    dplyr::group_by(neg_idx, tx_id_cand) |>
+    dplyr::summarise(
+      pos_min_start = min(pos_start),
+      pos_max_end = max(pos_end),
+      .groups = "drop"
+    )
 
   match_tbl <- match_tbl |>
-    dplyr::anti_join(multi_overlap, by = c("cand_idx", "tx_id_neg")) |>
+    dplyr::left_join(pos_span, by = c("neg_idx", "tx_id_cand")) |>
+    dplyr::mutate(
+      start_is_outer = neg_outer_start &
+        cand_tbl$start[cand_idx] == pos_min_start,
+      end_is_outer = neg_outer_end &
+        cand_tbl$end[cand_idx] == pos_max_end
+    ) |>
     dplyr::mutate(
       # this call only cares about one boundary: the donor for a5ss, the
       # acceptor for a3ss. the donor is the exon end on "+" and the exon
@@ -429,10 +514,14 @@ find_alt_ss <- function(gr, by_start = TRUE) {
       # looks at the *other* boundary, so an exon that moved both is
       # reported by find_a5ss() and find_a3ss() alike.
       site_is_start = xor(!by_start, on_minus),
-      site_matches = dplyr::if_else(site_is_start, match_start, match_end)
+      site_matches = dplyr::if_else(site_is_start, match_start, match_end),
+      site_is_outer = dplyr::if_else(
+        site_is_start, start_is_outer, end_is_outer
+      )
     ) |>
     dplyr::filter(
-      # the site moved
+      # the site does not face a retained intron, and it moved
+      site_is_outer,
       !site_matches,
       # and it exists: the last exon has no donor, the first no acceptor
       if (by_start) !is_last else !is_first
@@ -678,6 +767,9 @@ find_all_events <- function(
 
   msg("Calculating retained intron events...")
   results$ri <- find_ri(gr)
+
+  msg("Calculating spliced intron events...")
+  results$si <- find_si(gr)
 
   msg("Calculating alternative 5' splice site events...")
   results$a5ss <- find_a5ss(gr)
