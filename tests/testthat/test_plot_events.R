@@ -214,7 +214,7 @@ test_that("plot_transcripts highlights every event on minus-strand data", {
   events <- find_all_events(gr, verbose = FALSE)
 
   plots <- expect_no_warning(plot_transcripts_by_gene(events, gr))
-  expect_named(plots, paste0("g", 1:6), ignore.order = TRUE)
+  expect_named(plots, paste0("g", 1:7), ignore.order = TRUE)
 
   # one event exon per gene, except the mxe pair in g2
   n_event_exons <- vapply(
@@ -223,8 +223,8 @@ test_that("plot_transcripts highlights every event on minus-strand data", {
     integer(1)
   )
   expect_equal(
-    n_event_exons[paste0("g", 1:6)],
-    c(g1 = 1L, g2 = 2L, g3 = 1L, g4 = 1L, g5 = 1L, g6 = 1L)
+    n_event_exons[paste0("g", 1:7)],
+    c(g1 = 1L, g2 = 2L, g3 = 1L, g4 = 1L, g5 = 1L, g6 = 1L, g7 = 1L)
   )
 
   # transcription runs right to left: every arrow starts on the right edge of
@@ -368,7 +368,7 @@ test_that("plot_transcripts_by_gene skips a gene it cannot draw", {
     "Dropping transcript"
   )
   plots <- suppressWarnings(plot_transcripts_by_gene(events, exons))
-  expect_named(plots, paste0("g", 2:6), ignore.order = TRUE)
+  expect_named(plots, paste0("g", 2:7), ignore.order = TRUE)
 })
 
 test_that("plot_transcripts_by_pair returns one plot per unordered pair", {
