@@ -58,13 +58,16 @@ utils::globalVariables(c(
 #' @param type How an exon flanking a candidate is matched to an exon of
 #' the partner transcript. One of:
 #' \describe{
-#'   \item{\code{"boundary"}}{(default) the two exons overlap *and* share
-#'     a start or an end coordinate, so they may still differ in length at
-#'     the other end.}
-#'   \item{\code{"over"}}{any overlap, with no coordinate in common
-#'     required. The most permissive setting.}
-#'   \item{\code{"in"}}{the two exons are identical (same start and same
-#'     end). The strictest setting.}
+#'   \item{\code{"over"}}{(default) any overlap, with no coordinate in
+#'     common required. The most permissive setting.}
+#'   \item{\code{"boundary"}}{the two exons overlap *and* share the inner
+#'     boundary of the flank, the splice site facing the candidate: the
+#'     donor of the upstream flank and the acceptor of the downstream one.
+#'     On \code{"+"} that is the end of the left exon and the start of the
+#'     right one; on \code{"-"} the reverse. The outer boundaries may
+#'     differ.}
+#'   \item{\code{"identical"}}{the two exons are identical (same start and
+#'     same end). The strictest setting.}
 #' }
 #' @param inverse If TRUE, swaps the up and down transcripts: `find_se()`
 #' then identifies included exons instead of skipped exons, and `find_ri()`
@@ -85,7 +88,7 @@ utils::globalVariables(c(
 #'
 find_se <- function(
   gr,
-  type = c("boundary", "over", "in"),
+  type = c("over", "boundary", "identical"),
   inverse = FALSE
 ) {
   type <- match.arg(type)
@@ -149,7 +152,7 @@ find_skipped_exons <- find_se
 #' @rdname find_events
 #' @return `find_ie()`: included exons
 #' @export
-find_ie <- function(gr, type = c("boundary", "over", "in")) {
+find_ie <- function(gr, type = c("over", "boundary", "identical")) {
   find_se(gr, type, inverse = TRUE)
 }
 
@@ -177,7 +180,7 @@ utils::globalVariables(c(
 #' find_mxe(gr_mx, type = "boundary")
 #'
 #' @export
-find_mxe <- function(gr, type = c("boundary", "in", "over")) {
+find_mxe <- function(gr, type = c("over", "boundary", "identical")) {
   type <- match.arg(type)
   # if preprocessing didn't happen
   check_preprocessed(gr)
@@ -747,7 +750,7 @@ find_alternative_transcription_end_sites <- find_ates
 #' @export
 find_all_events <- function(
   gr,
-  type = c("boundary", "over", "in"),
+  type = c("over", "boundary", "identical"),
   verbose = TRUE
 ) {
   type <- match.arg(type)

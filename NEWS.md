@@ -13,6 +13,11 @@
 * `find_a5ss()` and `find_a3ss()` now label events per moved boundary,
   so an exon that moves both of its boundaries is reported as both an
   a5ss and an a3ss.
+* The default `type` of `find_se()`, `find_ie()`, `find_mxe()` and
+  `find_all_events()` is now `"over"`. `"boundary"` now requires the
+  flank to share its inner boundary — the splice site facing the
+  candidate — rather than either its start or its end, and is
+  strand-aware. The `"in"` match type is renamed `"identical"`.
 * Added `get_seq()` to extract exon sequences from a `GRanges` against
   a genome.
 * Results now carry `event_type`,
