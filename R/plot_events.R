@@ -138,7 +138,7 @@ transcript_rows <- function(events) {
     dplyr::distinct(tx_id, .keep_all = TRUE) |>
     dplyr::arrange(dplyr::desc(estimate)) |>
     dplyr::mutate(
-      row_y = rev(seq_len(dplyr::n())) * 1.5,
+      row_y = rev(seq_len(dplyr::n())) * 1.1,
       direction = dplyr::if_else(estimate < 0, "down", "up")
     )
 }
@@ -149,7 +149,7 @@ transcript_rows <- function(events) {
 #' plot by its own labels, so the two line up when placed side by side.
 #' @noRd
 row_limits <- function(tx_rows) {
-  c(min(tx_rows$row_y) - 1.1, max(tx_rows$row_y) + 1.1)
+  c(min(tx_rows$row_y) - 0.7, max(tx_rows$row_y) + 0.8)
 }
 
 #' Plot coordinates for every exon of a set of transcripts
@@ -497,8 +497,8 @@ plot_transcripts <- function(
   events,
   exons,
   title = NULL,
-  up_color = "#2b6af4",
-  down_color = "#d6372c",
+  up_color = "#1f77b4",
+  down_color = "#d62728",
   event_colors = event_palette(),
   unknown_color = "#999999",
   rescale_introns = TRUE,
@@ -550,7 +550,7 @@ plot_transcripts <- function(
 
   # exon boxes span row_y +/- exon_half_height. the strand arrow sits on the
   # top edge of the first exon, and the transcript label above the arrow
-  exon_half_height <- 0.22
+  exon_half_height <- 0.12
 
   rects <- layout$exons |>
     dplyr::left_join(
@@ -616,7 +616,10 @@ plot_transcripts <- function(
       ggplot2::aes(
         x = x, xend = xend, y = row_y, yend = row_y, colour = direction
       ),
-      linewidth = 0.4,
+      # an intron line thick enough to read as the transcript backbone, with
+      # the exons only a little taller than it
+      linewidth = 1.4,
+      lineend = "butt",
       show.legend = FALSE
     ) +
     ggplot2::geom_rect(
@@ -649,8 +652,8 @@ plot_transcripts <- function(
         ymin = row_y - exon_half_height, ymax = row_y + exon_half_height
       ),
       fill = NA,
-      colour = "grey15",
-      linewidth = 0.3
+      colour = "grey25",
+      linewidth = 0.25
     ) +
     ggplot2::scale_fill_manual(
       values = palette, breaks = breaks, labels = legend_labels, name = NULL
@@ -661,12 +664,23 @@ plot_transcripts <- function(
       xlim = layout$limits, ylim = y_limits, expand = FALSE
     ) +
     ggplot2::labs(x = layout$xlabel, y = NULL, title = title) +
-    ggplot2::theme_light() +
+    # a genome browser look: no frame, the x axis only, and faint dashed
+    # gridlines at the axis breaks
+    ggplot2::theme_minimal() +
     ggplot2::theme(
-      panel.grid = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_line(
+        colour = "grey88", linewidth = 0.3, linetype = "dashed"
+      ),
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      axis.line.x = ggplot2::element_line(colour = "grey30", linewidth = 0.4),
+      axis.ticks.x = ggplot2::element_line(colour = "grey30", linewidth = 0.4),
+      axis.text.x = ggplot2::element_text(colour = "grey30"),
+      axis.title.x = ggplot2::element_text(colour = "grey30", size = 9),
       axis.text.y = ggplot2::element_blank(),
-      axis.ticks.y = ggplot2::element_blank(),
       legend.position = if (legend) "bottom" else "none",
+      legend.key.size = ggplot2::unit(3.5, "mm"),
+      legend.text = ggplot2::element_text(size = 8, colour = "grey30"),
       plot.title = ggplot2::element_text(face = "bold", size = 11)
     )
 
@@ -677,12 +691,11 @@ plot_transcripts <- function(
       ggplot2::geom_text(
         data = tx_lines,
         ggplot2::aes(
-          x = x, y = row_y + 0.6, label = tx_label, colour = direction
+          x = x, y = row_y + 0.32, label = tx_label, colour = direction
         ),
         hjust = 0,
         vjust = 0,
         size = 3,
-        fontface = "bold",
         show.legend = FALSE
       )
   }
@@ -696,7 +709,7 @@ plot_transcripts <- function(
         ),
         vjust = 1,
         size = label_size,
-        colour = "grey15"
+        colour = "grey30"
       )
   }
   # strand arrows rise half an exon box. added last, so the layer does not
@@ -710,10 +723,10 @@ plot_transcripts <- function(
       data = arrows,
       ggplot2::aes(x = x, y = y, group = tx_id),
       colour = "black",
-      linewidth = 0.5,
+      linewidth = 0.4,
       linejoin = "mitre",
       arrow = ggplot2::arrow(
-        length = ggplot2::unit(1.2, "mm"), type = "closed"
+        length = ggplot2::unit(1, "mm"), type = "closed"
       )
     )
 }

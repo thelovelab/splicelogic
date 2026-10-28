@@ -75,15 +75,15 @@ test_that("plot_transcripts draws a strand arrow over each first exon", {
   p <- plot_transcripts(events, gr)
 
   # three points per transcript, drawn in black: the transcription start on
-  # the top edge of the first exon, up half an exon box (boxes are 0.44
+  # the top edge of the first exon, up half an exon box (boxes are 0.24
   # tall), then 1.1% of the panel across
   arrows <- strand_arrows(p)
   expect_equal(nrow(arrows), 6L)
   expect_true(all(arrows$colour == "black"))
 
   up_se <- arrows[arrows$group == min(arrows$group), ]
-  row_y <- up_se$y[1] - 0.22
-  expect_equal(up_se$y - row_y, c(0.22, 0.44, 0.44))
+  row_y <- up_se$y[1] - 0.12
+  expect_equal(up_se$y - row_y, c(0.12, 0.24, 0.24))
   # first exon 1-100 is drawn from 50, after the 50 bp flank, and the panel
   # runs 0-649 (last exon ends at 599, plus the flank); "+" points right
   expect_equal(up_se$x, c(50, 50, 50 + 0.011 * 649))
