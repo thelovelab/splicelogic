@@ -42,7 +42,10 @@
   is now `"over"`. `"boundary"` now requires the flank to share its
   inner boundary — the splice site facing the candidate — rather than
   either its start or its end, and is strand-aware. The `"in"` match
-  type is renamed `"identical"`.
+  type is renamed `"identical"`. Extra arguments (`...`) are passed on
+  to
+  [`GenomicRanges::findOverlaps()`](https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html)
+  when matching flanking exons.
 - Added
   [`get_seq()`](https://thelovelab.github.io/splicelogic/reference/get_seq.md)
   to extract exon sequences from a `GRanges` against a genome.

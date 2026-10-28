@@ -29,21 +29,26 @@ a3ss.
 ## Usage
 
 ``` r
-find_se(gr, type = c("over", "boundary", "identical"), inverse = FALSE)
+find_se(gr, type = c("over", "boundary", "identical"), inverse = FALSE, ...)
 
 find_skipped_exons(
   gr,
   type = c("over", "boundary", "identical"),
-  inverse = FALSE
+  inverse = FALSE,
+  ...
 )
 
-find_ie(gr, type = c("over", "boundary", "identical"))
+find_ie(gr, type = c("over", "boundary", "identical"), ...)
 
-find_included_exons(gr, type = c("over", "boundary", "identical"))
+find_included_exons(gr, type = c("over", "boundary", "identical"), ...)
 
-find_mxe(gr, type = c("over", "boundary", "identical"))
+find_mxe(gr, type = c("over", "boundary", "identical"), ...)
 
-find_mutually_exclusive_exons(gr, type = c("over", "boundary", "identical"))
+find_mutually_exclusive_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  ...
+)
 
 find_ri(gr, inverse = FALSE)
 
@@ -69,7 +74,12 @@ find_ates(gr)
 
 find_alternative_transcription_end_sites(gr)
 
-find_all_events(gr, type = c("over", "boundary", "identical"), verbose = TRUE)
+find_all_events(
+  gr,
+  type = c("over", "boundary", "identical"),
+  verbose = TRUE,
+  ...
+)
 ```
 
 ## Arguments
@@ -107,6 +117,14 @@ find_all_events(gr, type = c("over", "boundary", "identical"), verbose = TRUE)
   If TRUE, swaps the up and down transcripts: `find_se()` then
   identifies included exons instead of skipped exons, and `find_ri()`
   spliced introns instead of retained introns.
+
+- ...:
+
+  Further arguments passed to
+  [`GenomicRanges::findOverlaps()`](https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html)
+  when matching flanking exons, e.g. `ignore.strand = TRUE`. Do not pass
+  `select`, which changes the return type. `maxgap` lets `"over"` and
+  `"boundary"` match exons that do not overlap at all.
 
 - verbose:
 
