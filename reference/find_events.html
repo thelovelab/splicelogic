@@ -103,17 +103,21 @@ a3ss.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">find_se</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">find_se</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"over"</span>, <span class="st">"boundary"</span>, <span class="st">"identical"</span><span class="op">)</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">find_skipped_exons</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu">find_skipped_exons</span><span class="op">(</span></span>
+<span>  <span class="va">gr</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"over"</span>, <span class="st">"boundary"</span>, <span class="st">"identical"</span><span class="op">)</span>,</span>
+<span>  inverse <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">find_ie</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">find_ie</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"over"</span>, <span class="st">"boundary"</span>, <span class="st">"identical"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">find_included_exons</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">find_included_exons</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"over"</span>, <span class="st">"boundary"</span>, <span class="st">"identical"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">find_mxe</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"in"</span>, <span class="st">"over"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">find_mxe</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"over"</span>, <span class="st">"boundary"</span>, <span class="st">"identical"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">find_mutually_exclusive_exons</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"in"</span>, <span class="st">"over"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">find_mutually_exclusive_exons</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"over"</span>, <span class="st">"boundary"</span>, <span class="st">"identical"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">find_ri</span><span class="op">(</span><span class="va">gr</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
@@ -139,7 +143,7 @@ a3ss.</p>
 <span></span>
 <span><span class="fu">find_alternative_transcription_end_sites</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">find_all_events</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"boundary"</span>, <span class="st">"over"</span>, <span class="st">"in"</span><span class="op">)</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">find_all_events</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"over"</span>, <span class="st">"boundary"</span>, <span class="st">"identical"</span><span class="op">)</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -153,18 +157,21 @@ and 'coef_col' metadata columns and preprocessed with preprocess().</p></dd>
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p>How an exon flanking a candidate is matched to an exon of
-the partner transcript. One of:</p><dl><dt><code>"boundary"</code></dt>
-<dd><p>(default) the two exons overlap <em>and</em> share
-a start or an end coordinate, so they may still differ in length at
-the other end.</p></dd>
+the partner transcript. One of:</p><dl><dt><code>"over"</code></dt>
+<dd><p>(default) any overlap, with no coordinate in
+common required. The most permissive setting.</p></dd>
 
-<dt><code>"over"</code></dt>
-<dd><p>any overlap, with no coordinate in common
-required. The most permissive setting.</p></dd>
+<dt><code>"boundary"</code></dt>
+<dd><p>the two exons overlap <em>and</em> share the inner
+boundary of the flank, the splice site facing the candidate: the
+donor of the upstream flank and the acceptor of the downstream one.
+On <code>"+"</code> that is the end of the left exon and the start of the
+right one; on <code>"-"</code> the reverse. The outer boundaries may
+differ.</p></dd>
 
-<dt><code>"in"</code></dt>
-<dd><p>the two exons are identical (same start and same
-end). The strictest setting.</p></dd>
+<dt><code>"identical"</code></dt>
+<dd><p>the two exons are identical (same start and
+same end). The strictest setting.</p></dd>
 
 
 </dl></dd>

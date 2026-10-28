@@ -222,13 +222,13 @@ rightmost one, and its transcription start is its genomic end.
 and
 [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
 also take a `type` argument, controlling how an exon flanking a
-candidate is matched to an exon of the partner transcript. `"boundary"`
-(the default) requires the two exons to overlap *and* to share a start
-or an end coordinate, so they may still differ in length at the other
-end; `"over"` accepts any overlap, with no coordinate in common; and
-`"in"` requires the two exons to be identical. Note that `"boundary"`
-accepts a match at either end — it does not single out the splice site
-facing the candidate.
+candidate is matched to an exon of the partner transcript. `"over"` (the
+default) accepts any overlap, with no coordinate in common; `"boundary"`
+requires the two exons to overlap *and* to share the flank’s inner
+boundary — the splice site facing the candidate, i.e. the end of the
+upstream flank and the start of the downstream one on `+`, and the
+reverse on `-` — so they may still differ at the outer end; and
+`"identical"` requires the two exons to be identical.
 
 Every finder has a long-form alias that spells the event type out —
 [`find_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
@@ -1457,7 +1457,7 @@ sessionInfo()
     ## [23] rtracklayer_1.70.1          knitr_1.52                 
     ## [25] S4Arrays_1.10.1             labeling_0.4.3             
     ## [27] htmlwidgets_1.6.4           bit_4.6.0                  
-    ## [29] curl_8.0.0                  DelayedArray_0.36.1        
+    ## [29] curl_8.1.0                  DelayedArray_0.36.1        
     ## [31] RColorBrewer_1.1-3          abind_1.4-8                
     ## [33] BiocParallel_1.44.0         wiggleplotr_1.34.1         
     ## [35] withr_3.0.3                 purrr_1.2.2                
@@ -1486,6 +1486,6 @@ sessionInfo()
     ## [81] lattice_0.23-1              png_0.1-9                  
     ## [83] Rsamtools_2.26.0            cigarillo_1.0.0            
     ## [85] memoise_2.0.1               bslib_0.12.0               
-    ## [87] SparseArray_1.10.10         xfun_0.61                  
+    ## [87] SparseArray_1.10.10         xfun_0.62                  
     ## [89] fs_2.1.0                    MatrixGenerics_1.22.0      
     ## [91] pkgconfig_2.0.3

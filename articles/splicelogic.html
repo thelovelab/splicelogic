@@ -57,7 +57,7 @@ Campillo</h4>
                                     <h4 data-toc-skip class="author">Michael
 I. Love</h4>
                         
-            <h4 data-toc-skip class="date">10/12/2026</h4>
+            <h4 data-toc-skip class="date">10/28/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/thelovelab/splicelogic/blob/devel/vignettes/splicelogic.Rmd" class="external-link"><code>vignettes/splicelogic.Rmd</code></a></small>
       <div class="d-none name"><code>splicelogic.Rmd</code></div>
@@ -380,13 +380,14 @@ is its genomic end.</p>
 <p><code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>,
 <code><a href="../reference/find_events.html">find_mxe()</a></code> and <code><a href="../reference/find_events.html">find_all_events()</a></code> also take a
 <code>type</code> argument, controlling how an exon flanking a candidate
-is matched to an exon of the partner transcript. <code>"boundary"</code>
-(the default) requires the two exons to overlap <em>and</em> to share a
-start or an end coordinate, so they may still differ in length at the
-other end; <code>"over"</code> accepts any overlap, with no coordinate
-in common; and <code>"in"</code> requires the two exons to be identical.
-Note that <code>"boundary"</code> accepts a match at either end — it
-does not single out the splice site facing the candidate.</p>
+is matched to an exon of the partner transcript. <code>"over"</code>
+(the default) accepts any overlap, with no coordinate in common;
+<code>"boundary"</code> requires the two exons to overlap <em>and</em>
+to share the flank’s inner boundary — the splice site facing the
+candidate, i.e. the end of the upstream flank and the start of the
+downstream one on <code>+</code>, and the reverse on <code>-</code> — so
+they may still differ at the outer end; and <code>"identical"</code>
+requires the two exons to be identical.</p>
 <p>Every finder has a long-form alias that spells the event type out —
 <code><a href="../reference/find_events.html">find_skipped_exons()</a></code>, <code><a href="../reference/find_events.html">find_included_exons()</a></code>,
 <code><a href="../reference/find_events.html">find_mutually_exclusive_exons()</a></code>,
@@ -1457,7 +1458,7 @@ type of splicing event from the comparison of the two groups.</p>
 <span><span class="co">## [23] rtracklayer_1.70.1          knitr_1.52                 </span></span>
 <span><span class="co">## [25] S4Arrays_1.10.1             labeling_0.4.3             </span></span>
 <span><span class="co">## [27] htmlwidgets_1.6.4           bit_4.6.0                  </span></span>
-<span><span class="co">## [29] curl_8.0.0                  DelayedArray_0.36.1        </span></span>
+<span><span class="co">## [29] curl_8.1.0                  DelayedArray_0.36.1        </span></span>
 <span><span class="co">## [31] RColorBrewer_1.1-3          abind_1.4-8                </span></span>
 <span><span class="co">## [33] BiocParallel_1.44.0         wiggleplotr_1.34.1         </span></span>
 <span><span class="co">## [35] withr_3.0.3                 purrr_1.2.2                </span></span>
@@ -1486,7 +1487,7 @@ type of splicing event from the comparison of the two groups.</p>
 <span><span class="co">## [81] lattice_0.23-1              png_0.1-9                  </span></span>
 <span><span class="co">## [83] Rsamtools_2.26.0            cigarillo_1.0.0            </span></span>
 <span><span class="co">## [85] memoise_2.0.1               bslib_0.12.0               </span></span>
-<span><span class="co">## [87] SparseArray_1.10.10         xfun_0.61                  </span></span>
+<span><span class="co">## [87] SparseArray_1.10.10         xfun_0.62                  </span></span>
 <span><span class="co">## [89] fs_2.1.0                    MatrixGenerics_1.22.0      </span></span>
 <span><span class="co">## [91] pkgconfig_2.0.3</span></span></code></pre>
 </div>

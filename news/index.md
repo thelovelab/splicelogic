@@ -33,6 +33,16 @@
   [`find_a3ss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   now label events per moved boundary, so an exon that moves both of its
   boundaries is reported as both an a5ss and an a3ss.
+- The default `type` of
+  [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+  [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+  [`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  and
+  [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  is now `"over"`. `"boundary"` now requires the flank to share its
+  inner boundary — the splice site facing the candidate — rather than
+  either its start or its end, and is strand-aware. The `"in"` match
+  type is renamed `"identical"`.
 - Added
   [`get_seq()`](https://thelovelab.github.io/splicelogic/reference/get_seq.md)
   to extract exon sequences from a `GRanges` against a genome.

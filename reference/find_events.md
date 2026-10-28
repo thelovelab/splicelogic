@@ -29,17 +29,21 @@ a3ss.
 ## Usage
 
 ``` r
-find_se(gr, type = c("boundary", "over", "in"), inverse = FALSE)
+find_se(gr, type = c("over", "boundary", "identical"), inverse = FALSE)
 
-find_skipped_exons(gr, type = c("boundary", "over", "in"), inverse = FALSE)
+find_skipped_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  inverse = FALSE
+)
 
-find_ie(gr, type = c("boundary", "over", "in"))
+find_ie(gr, type = c("over", "boundary", "identical"))
 
-find_included_exons(gr, type = c("boundary", "over", "in"))
+find_included_exons(gr, type = c("over", "boundary", "identical"))
 
-find_mxe(gr, type = c("boundary", "in", "over"))
+find_mxe(gr, type = c("over", "boundary", "identical"))
 
-find_mutually_exclusive_exons(gr, type = c("boundary", "in", "over"))
+find_mutually_exclusive_exons(gr, type = c("over", "boundary", "identical"))
 
 find_ri(gr, inverse = FALSE)
 
@@ -65,7 +69,7 @@ find_ates(gr)
 
 find_alternative_transcription_end_sites(gr)
 
-find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
+find_all_events(gr, type = c("over", "boundary", "identical"), verbose = TRUE)
 ```
 
 ## Arguments
@@ -80,17 +84,20 @@ find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
   How an exon flanking a candidate is matched to an exon of the partner
   transcript. One of:
 
-  `"boundary"`
-
-  :   (default) the two exons overlap *and* share a start or an end
-      coordinate, so they may still differ in length at the other end.
-
   `"over"`
 
-  :   any overlap, with no coordinate in common required. The most
-      permissive setting.
+  :   (default) any overlap, with no coordinate in common required. The
+      most permissive setting.
 
-  `"in"`
+  `"boundary"`
+
+  :   the two exons overlap *and* share the inner boundary of the flank,
+      the splice site facing the candidate: the donor of the upstream
+      flank and the acceptor of the downstream one. On `"+"` that is the
+      end of the left exon and the start of the right one; on `"-"` the
+      reverse. The outer boundaries may differ.
+
+  `"identical"`
 
   :   the two exons are identical (same start and same end). The
       strictest setting.
