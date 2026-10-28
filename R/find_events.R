@@ -58,17 +58,24 @@ utils::globalVariables(c(
 #' @param type How an exon flanking a candidate is matched to an exon of
 #' the partner transcript. One of:
 #' \describe{
-#'   \item{\code{"boundary"}}{(default) the two exons overlap *and* share
-#'     a start or an end coordinate, so they may still differ in length at
-#'     the other end.}
-#'   \item{\code{"over"}}{any overlap, with no coordinate in common
-#'     required. The most permissive setting.}
-#'   \item{\code{"in"}}{the two exons are identical (same start and same
-#'     end). The strictest setting.}
+#'   \item{\code{"over"}}{(default) any overlap, with no coordinate in
+#'     common required. The most permissive setting.}
+#'   \item{\code{"boundary"}}{the two exons overlap *and* share the inner
+#'     boundary of the flank, the splice site facing the candidate: the
+#'     donor of the upstream flank and the acceptor of the downstream one.
+#'     On \code{"+"} that is the end of the left exon and the start of the
+#'     right one; on \code{"-"} the reverse. The outer boundaries may
+#'     differ.}
+#'   \item{\code{"identical"}}{the two exons are identical (same start and
+#'     same end). The strictest setting.}
 #' }
 #' @param inverse If TRUE, swaps the up and down transcripts: `find_se()`
 #' then identifies included exons instead of skipped exons, and `find_ri()`
 #' spliced introns instead of retained introns.
+#' @param ... Further arguments passed to [GenomicRanges::findOverlaps()]
+#' when matching flanking exons, e.g. `ignore.strand = TRUE`. Do not pass
+#' `select`, which changes the return type. `maxgap` lets `"over"` and
+#' `"boundary"` match exons that do not overlap at all.
 #' @return `find_se()`: skipped exons
 #' @export
 #' @examples
@@ -85,8 +92,9 @@ utils::globalVariables(c(
 #'
 find_se <- function(
   gr,
-  type = c("boundary", "over", "in"),
-  inverse = FALSE
+  type = c("over", "boundary", "identical"),
+  inverse = FALSE,
+  ...
 ) {
   type <- match.arg(type)
   # if preprocessing didn't happen
@@ -101,7 +109,7 @@ find_se <- function(
     event_name <- "se" # skipped exon
   }
 
-  matches <- find_candidates_and_flanks(gr, type, factor)
+  matches <- find_candidates_and_flanks(gr, type, factor, ...)
   #check if early return is needed
   if (length(matches) == 0L) {
     return(GenomicRanges::GRanges())
@@ -149,8 +157,8 @@ find_skipped_exons <- find_se
 #' @rdname find_events
 #' @return `find_ie()`: included exons
 #' @export
-find_ie <- function(gr, type = c("boundary", "over", "in")) {
-  find_se(gr, type, inverse = TRUE)
+find_ie <- function(gr, type = c("over", "boundary", "identical"), ...) {
+  find_se(gr, type, inverse = TRUE, ...)
 }
 
 
@@ -177,13 +185,13 @@ utils::globalVariables(c(
 #' find_mxe(gr_mx, type = "boundary")
 #'
 #' @export
-find_mxe <- function(gr, type = c("boundary", "in", "over")) {
+find_mxe <- function(gr, type = c("over", "boundary", "identical"), ...) {
   type <- match.arg(type)
   # if preprocessing didn't happen
   check_preprocessed(gr)
   keep_cols <- keep_cols(gr)
 
-  matches <- find_candidates_and_flanks(gr, type, 1)
+  matches <- find_candidates_and_flanks(gr, type, 1, ...)
 
   #check if early return is needed
   if (length(matches) == 0L) {
@@ -747,8 +755,9 @@ find_alternative_transcription_end_sites <- find_ates
 #' @export
 find_all_events <- function(
   gr,
-  type = c("boundary", "over", "in"),
-  verbose = TRUE
+  type = c("over", "boundary", "identical"),
+  verbose = TRUE,
+  ...
 ) {
   type <- match.arg(type)
   check_preprocessed(gr)
@@ -757,13 +766,13 @@ find_all_events <- function(
   results <- list()
 
   msg("Calculating skipped exon events...")
-  results$se <- find_se(gr, type)
+  results$se <- find_se(gr, type, ...)
 
   msg("Calculating included exon events...")
-  results$ie <- find_ie(gr, type)
+  results$ie <- find_ie(gr, type, ...)
 
   msg("Calculating mutually exclusive exon events...")
-  results$mx <- find_mxe(gr, type)
+  results$mx <- find_mxe(gr, type, ...)
 
   msg("Calculating retained intron events...")
   results$ri <- find_ri(gr)

@@ -224,13 +224,13 @@ genomic end.
 
 `find_se()`, `find_ie()`, `find_mxe()` and `find_all_events()` also
 take a `type` argument, controlling how an exon flanking a candidate
-is matched to an exon of the partner transcript. `"boundary"` (the
-default) requires the two exons to overlap *and* to share a start or an
-end coordinate, so they may still differ in length at the other end;
-`"over"` accepts any overlap, with no coordinate in common; and `"in"`
-requires the two exons to be identical. Note that `"boundary"` accepts
-a match at either end — it does not single out the splice site facing
-the candidate.
+is matched to an exon of the partner transcript. `"over"` (the default)
+accepts any overlap, with no coordinate in common; `"boundary"`
+requires the two exons to overlap *and* to share the flank's inner
+boundary — the splice site facing the candidate, i.e. the end of the
+upstream flank and the start of the downstream one on `+`, and the
+reverse on `-` — so they may still differ at the outer end; and
+`"identical"` requires the two exons to be identical.
 
 Every finder has a long-form alias that spells the event type out —
 `find_skipped_exons()`, `find_included_exons()`,

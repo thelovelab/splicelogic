@@ -6,7 +6,7 @@ utils::globalVariables(c("."))
 #' a tibble that is the same as pos_exons but with two additional columns
 #' 'match_left' and 'match_right' indicating whether each exon matches the left
 #' and right exons respectively. The matching is done based on the 'type'
-#' parameter which can be "in", "over", or "boundary".
+#' parameter which can be "identical", "over", or "boundary".
 #' @param gr A GRanges object with exon annotations
 #' @param left_exon A GRanges object with left exon(s) to match
 #' @param right_exon A GRanges object with right exon(s) to match
@@ -21,7 +21,7 @@ compute_matches <- function(
   gr,
   left_exon,
   right_exon,
-  type = c("boundary", "over", "in")
+  type = c("over", "boundary", "identical")
 ) {
   type <- match.arg(type)
   gr_matched <- switch(
@@ -34,7 +34,7 @@ compute_matches <- function(
         ) |>
         tibble::as_tibble()
     },
-    "in" = {
+    "identical" = {
       gr %>%
         dplyr::mutate(
           match_left = . == left_exon,
@@ -260,10 +260,11 @@ candidates_by_presence <- function(gr, neg_exons, pos_exons) {
   }
   # keys of the two rank-adjacent flanks of each candidate. "left" and
   # "right" follow exon_rank, not the genome: on "-" the rank k - 1 exon
-  # sits to the genomic right, so the two are swapped there. that is safe
-  # because nothing downstream depends on which side is which --
-  # find_matches_batch matches on overlap / equality / shared boundary,
-  # all symmetric, and find_se / find_mxe filter on abs(l - r). the
+  # sits to the genomic right, so the two are swapped there. "over" and
+  # "identical" are symmetric and find_se / find_mxe filter on
+  # abs(l - r), so they do not care; "boundary" does, and
+  # find_matches_batch picks the inner boundary from the rank-named side
+  # plus the strand. the
   # minus-strand test in test_find_events.R covers all three match types.
   left_keys <- paste0(candidates$tx_id, "-", candidates$exon_rank - 1L)
   right_keys <- paste0(candidates$tx_id, "-", candidates$exon_rank + 1L)
@@ -292,33 +293,54 @@ utils::globalVariables(c("queryHits", "subjectHits"))
 #' @param query A GRanges object (e.g. pos_exons)
 #' @param subject A GRanges object (e.g. all left or right
 #' exons from the candidates (neg exons set))
-#' @param type Match type: "over" for any overlap, "in" for exact match,
-#'   "boundary" for shared start or end coordinate
+#' @param type Match type: "over" for any overlap, "identical" for exact
+#'   match, "boundary" for a shared inner boundary (the splice site facing
+#'   the candidate)
+#' @param side Which flank `subject` holds, "left" (rank k - 1) or
+#'   "right" (rank k + 1). Required for `type = "boundary"`, ignored
+#'   otherwise.
 #' @return A Hits object with queryHits and subjectHits indices
 #' @noRd
 find_matches_batch <- function(
   query,
   subject,
-  type = c("boundary", "over", "in")
+  type = c("over", "boundary", "identical"),
+  side = NULL,
+  ...
 ) {
   type <- match.arg(type)
   switch(
     type,
     "over" = {
-      GenomicRanges::findOverlaps(query, subject)
+      GenomicRanges::findOverlaps(query, subject, ...)
     },
-    "in" = {
+    "identical" = {
       # exact coordinate match
-      GenomicRanges::findOverlaps(query, subject, type = "equal")
+      GenomicRanges::findOverlaps(query, subject, type = "equal", ...)
     },
     "boundary" = {
-      # match on shared start OR shared end
-      hits_start <- GenomicRanges::findOverlaps(query, subject) |>
+      if (is.null(side)) {
+        stop("`side` must be \"left\" or \"right\" for type = \"boundary\"")
+      }
+      side <- match.arg(side, c("left", "right"))
+      # match on the flank's inner boundary, the splice site facing the
+      # candidate: the donor of the left flank (rank k - 1) and the
+      # acceptor of the right flank (rank k + 1). the donor is the exon
+      # end on "+" but the start on "-" ("*" is treated as "+"), so the
+      # coordinate compared depends on both the side and the strand
+      on_minus <- as.character(GenomicRanges::strand(subject)) == "-"
+      q_start <- IRanges::start(query)
+      q_end <- IRanges::end(query)
+      s_start <- IRanges::start(subject)
+      s_end <- IRanges::end(subject)
+      hits_start <- GenomicRanges::findOverlaps(query, subject, ...) |>
         S4Vectors::as.data.frame() |>
         dplyr::filter(
-          IRanges::start(query[queryHits]) ==
-            IRanges::start(subject[subjectHits]) |
-            IRanges::end(query[queryHits]) == IRanges::end(subject[subjectHits])
+          dplyr::if_else(
+            (side == "left") != on_minus[subjectHits],
+            q_end[queryHits] == s_end[subjectHits],
+            q_start[queryHits] == s_start[subjectHits]
+          )
         )
       S4Vectors::Hits(
         from = hits_start$queryHits,
@@ -345,6 +367,8 @@ utils::globalVariables(c("estimate", "pos_idx", "gene_id_pos", "cand_idx"))
 #' @param type Match type passed to find_matches_batch
 #' @param factor Sign multiplier: 1 for normal, -1 for
 #'   inverse (included exons)
+#' @param ... Passed to find_matches_batch, and from there to
+#'   GenomicRanges::findOverlaps
 #' @return A named list with pos_tbl, cand_tbl, left_match_tbl,
 #'   right_match_tbl tibbles for downstream processing.
 #'   Returns NULL if no candidates are found.
@@ -352,7 +376,8 @@ utils::globalVariables(c("estimate", "pos_idx", "gene_id_pos", "cand_idx"))
 find_candidates_and_flanks <- function(
   gr,
   type,
-  factor
+  factor,
+  ...
 ) {
   # separate positive and negative exons
   pos_exons <- gr |> dplyr::filter(sign(estimate) == 1 * factor)
@@ -370,8 +395,12 @@ find_candidates_and_flanks <- function(
     return(list())
   }
 
-  left_hits <- find_matches_batch(pos_exons, left_exons, type)
-  right_hits <- find_matches_batch(pos_exons, right_exons, type)
+  left_hits <- find_matches_batch(
+    pos_exons, left_exons, type, side = "left", ...
+  )
+  right_hits <- find_matches_batch(
+    pos_exons, right_exons, type, side = "right", ...
+  )
   pos_tbl <- tibble::as_tibble(pos_exons)
   cand_tbl <- tibble::as_tibble(candidates)
   cand_tbl$cand_idx <- seq_len(nrow(cand_tbl))

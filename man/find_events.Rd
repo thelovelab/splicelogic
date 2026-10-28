@@ -23,17 +23,26 @@
 \alias{find_all_events}
 \title{Find splice events from annotated exons}
 \usage{
-find_se(gr, type = c("boundary", "over", "in"), inverse = FALSE)
+find_se(gr, type = c("over", "boundary", "identical"), inverse = FALSE, ...)
 
-find_skipped_exons(gr, type = c("boundary", "over", "in"), inverse = FALSE)
+find_skipped_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  inverse = FALSE,
+  ...
+)
 
-find_ie(gr, type = c("boundary", "over", "in"))
+find_ie(gr, type = c("over", "boundary", "identical"), ...)
 
-find_included_exons(gr, type = c("boundary", "over", "in"))
+find_included_exons(gr, type = c("over", "boundary", "identical"), ...)
 
-find_mxe(gr, type = c("boundary", "in", "over"))
+find_mxe(gr, type = c("over", "boundary", "identical"), ...)
 
-find_mutually_exclusive_exons(gr, type = c("boundary", "in", "over"))
+find_mutually_exclusive_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  ...
+)
 
 find_ri(gr, inverse = FALSE)
 
@@ -59,7 +68,12 @@ find_ates(gr)
 
 find_alternative_transcription_end_sites(gr)
 
-find_all_events(gr, type = c("boundary", "over", "in"), verbose = TRUE)
+find_all_events(
+  gr,
+  type = c("over", "boundary", "identical"),
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{gr}{A GRanges object with exon annotations, including 'tx_id', 'exon',
@@ -68,18 +82,26 @@ and 'coef_col' metadata columns and preprocessed with preprocess().}
 \item{type}{How an exon flanking a candidate is matched to an exon of
 the partner transcript. One of:
 \describe{
-\item{\code{"boundary"}}{(default) the two exons overlap \emph{and} share
-a start or an end coordinate, so they may still differ in length at
-the other end.}
-\item{\code{"over"}}{any overlap, with no coordinate in common
-required. The most permissive setting.}
-\item{\code{"in"}}{the two exons are identical (same start and same
-end). The strictest setting.}
+\item{\code{"over"}}{(default) any overlap, with no coordinate in
+common required. The most permissive setting.}
+\item{\code{"boundary"}}{the two exons overlap \emph{and} share the inner
+boundary of the flank, the splice site facing the candidate: the
+donor of the upstream flank and the acceptor of the downstream one.
+On \code{"+"} that is the end of the left exon and the start of the
+right one; on \code{"-"} the reverse. The outer boundaries may
+differ.}
+\item{\code{"identical"}}{the two exons are identical (same start and
+same end). The strictest setting.}
 }}
 
 \item{inverse}{If TRUE, swaps the up and down transcripts: \code{find_se()}
 then identifies included exons instead of skipped exons, and \code{find_ri()}
 spliced introns instead of retained introns.}
+
+\item{...}{Further arguments passed to \code{\link[GenomicRanges:findOverlaps-methods]{GenomicRanges::findOverlaps()}}
+when matching flanking exons, e.g. \code{ignore.strand = TRUE}. Do not pass
+\code{select}, which changes the return type. \code{maxgap} lets \code{"over"} and
+\code{"boundary"} match exons that do not overlap at all.}
 
 \item{verbose}{If TRUE, prints progress messages. Default TRUE.}
 }
