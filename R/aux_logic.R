@@ -305,17 +305,18 @@ find_matches_batch <- function(
   query,
   subject,
   type = c("over", "boundary", "identical"),
-  side = NULL
+  side = NULL,
+  ...
 ) {
   type <- match.arg(type)
   switch(
     type,
     "over" = {
-      GenomicRanges::findOverlaps(query, subject)
+      GenomicRanges::findOverlaps(query, subject, ...)
     },
     "identical" = {
       # exact coordinate match
-      GenomicRanges::findOverlaps(query, subject, type = "equal")
+      GenomicRanges::findOverlaps(query, subject, type = "equal", ...)
     },
     "boundary" = {
       if (is.null(side)) {
@@ -332,7 +333,7 @@ find_matches_batch <- function(
       q_end <- IRanges::end(query)
       s_start <- IRanges::start(subject)
       s_end <- IRanges::end(subject)
-      hits_start <- GenomicRanges::findOverlaps(query, subject) |>
+      hits_start <- GenomicRanges::findOverlaps(query, subject, ...) |>
         S4Vectors::as.data.frame() |>
         dplyr::filter(
           dplyr::if_else(
@@ -366,6 +367,8 @@ utils::globalVariables(c("estimate", "pos_idx", "gene_id_pos", "cand_idx"))
 #' @param type Match type passed to find_matches_batch
 #' @param factor Sign multiplier: 1 for normal, -1 for
 #'   inverse (included exons)
+#' @param ... Passed to find_matches_batch, and from there to
+#'   GenomicRanges::findOverlaps
 #' @return A named list with pos_tbl, cand_tbl, left_match_tbl,
 #'   right_match_tbl tibbles for downstream processing.
 #'   Returns NULL if no candidates are found.
@@ -373,7 +376,8 @@ utils::globalVariables(c("estimate", "pos_idx", "gene_id_pos", "cand_idx"))
 find_candidates_and_flanks <- function(
   gr,
   type,
-  factor
+  factor,
+  ...
 ) {
   # separate positive and negative exons
   pos_exons <- gr |> dplyr::filter(sign(estimate) == 1 * factor)
@@ -391,9 +395,11 @@ find_candidates_and_flanks <- function(
     return(list())
   }
 
-  left_hits <- find_matches_batch(pos_exons, left_exons, type, side = "left")
+  left_hits <- find_matches_batch(
+    pos_exons, left_exons, type, side = "left", ...
+  )
   right_hits <- find_matches_batch(
-    pos_exons, right_exons, type, side = "right"
+    pos_exons, right_exons, type, side = "right", ...
   )
   pos_tbl <- tibble::as_tibble(pos_exons)
   cand_tbl <- tibble::as_tibble(candidates)

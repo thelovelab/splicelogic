@@ -694,3 +694,31 @@ test_that("type = 'boundary' matches the flank's inner boundary", {
     expect_equal(length(find_se(gr, type = "identical")), 0L)
   }
 })
+
+test_that("extra arguments are passed on to findOverlaps", {
+  # up's first exon (13-15) stops 2 bp short of down's left flank (1-10),
+  # so the flank only matches once maxgap covers the gap
+  gr <- dplyr::bind_rows(
+    data.frame(
+      start = c(1, 21, 41), end = c(10, 30, 50), tx_id = "down", estimate = -1
+    ),
+    data.frame(start = c(13, 41), end = c(15, 50), tx_id = "up", estimate = 1)
+  ) |>
+    dplyr::mutate(seqnames = "chr1", strand = "+", gene_id = "g1") |>
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(exon_rank = dplyr::row_number()) |>
+    dplyr::ungroup() |>
+    plyranges::as_granges() |>
+    preprocess(coef_col = "estimate")
+
+  expect_equal(length(find_se(gr)), 0L)
+  se <- find_se(gr, maxgap = 2L)
+  expect_equal(length(se), 1L)
+  expect_equal(as.integer(GenomicRanges::start(se)), 21L)
+
+  # and through the wrapper
+  expect_false("se" %in% find_all_events(gr, verbose = FALSE)$event_type)
+  expect_true(
+    "se" %in% find_all_events(gr, verbose = FALSE, maxgap = 2L)$event_type
+  )
+})

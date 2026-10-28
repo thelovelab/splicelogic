@@ -23,21 +23,26 @@
 \alias{find_all_events}
 \title{Find splice events from annotated exons}
 \usage{
-find_se(gr, type = c("over", "boundary", "identical"), inverse = FALSE)
+find_se(gr, type = c("over", "boundary", "identical"), inverse = FALSE, ...)
 
 find_skipped_exons(
   gr,
   type = c("over", "boundary", "identical"),
-  inverse = FALSE
+  inverse = FALSE,
+  ...
 )
 
-find_ie(gr, type = c("over", "boundary", "identical"))
+find_ie(gr, type = c("over", "boundary", "identical"), ...)
 
-find_included_exons(gr, type = c("over", "boundary", "identical"))
+find_included_exons(gr, type = c("over", "boundary", "identical"), ...)
 
-find_mxe(gr, type = c("over", "boundary", "identical"))
+find_mxe(gr, type = c("over", "boundary", "identical"), ...)
 
-find_mutually_exclusive_exons(gr, type = c("over", "boundary", "identical"))
+find_mutually_exclusive_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  ...
+)
 
 find_ri(gr, inverse = FALSE)
 
@@ -63,7 +68,12 @@ find_ates(gr)
 
 find_alternative_transcription_end_sites(gr)
 
-find_all_events(gr, type = c("over", "boundary", "identical"), verbose = TRUE)
+find_all_events(
+  gr,
+  type = c("over", "boundary", "identical"),
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{gr}{A GRanges object with exon annotations, including 'tx_id', 'exon',
@@ -87,6 +97,11 @@ same end). The strictest setting.}
 \item{inverse}{If TRUE, swaps the up and down transcripts: \code{find_se()}
 then identifies included exons instead of skipped exons, and \code{find_ri()}
 spliced introns instead of retained introns.}
+
+\item{...}{Further arguments passed to \code{\link[GenomicRanges:findOverlaps-methods]{GenomicRanges::findOverlaps()}}
+when matching flanking exons, e.g. \code{ignore.strand = TRUE}. Do not pass
+\code{select}, which changes the return type. \code{maxgap} lets \code{"over"} and
+\code{"boundary"} match exons that do not overlap at all.}
 
 \item{verbose}{If TRUE, prints progress messages. Default TRUE.}
 }

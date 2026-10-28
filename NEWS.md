@@ -17,7 +17,9 @@
   `find_all_events()` is now `"over"`. `"boundary"` now requires the
   flank to share its inner boundary — the splice site facing the
   candidate — rather than either its start or its end, and is
-  strand-aware. The `"in"` match type is renamed `"identical"`.
+  strand-aware. The `"in"` match type is renamed `"identical"`. Extra
+  arguments (`...`) are passed on to `GenomicRanges::findOverlaps()`
+  when matching flanking exons.
 * Added `get_seq()` to extract exon sequences from a `GRanges` against
   a genome.
 * Results now carry `event_type`,
