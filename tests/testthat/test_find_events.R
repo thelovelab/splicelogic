@@ -722,3 +722,81 @@ test_that("extra arguments are passed on to findOverlaps", {
     "se" %in% find_all_events(gr, verbose = FALSE, maxgap = 2L)$event_type
   )
 })
+
+test_that("minoverlap is passed on to findOverlaps", {
+  # down skips nothing; its 21-30 exon is the candidate. up's first exon
+  # (8-10) overlaps down's left flank (1-10) by 3 bp and shares its end,
+  # so both "over" and "boundary" match it until minoverlap exceeds 3
+  make_gr <- function(up_first) {
+    dplyr::bind_rows(
+      data.frame(
+        start = c(1, 21, 41), end = c(10, 30, 50), tx_id = "down", estimate = -1
+      ),
+      data.frame(
+        start = c(up_first[1], 41), end = c(up_first[2], 50),
+        tx_id = "up", estimate = 1
+      )
+    ) |>
+      dplyr::mutate(seqnames = "chr1", strand = "+", gene_id = "g1") |>
+      dplyr::group_by(tx_id) |>
+      dplyr::mutate(exon_rank = dplyr::row_number()) |>
+      dplyr::ungroup() |>
+      plyranges::as_granges() |>
+      preprocess(coef_col = "estimate")
+  }
+
+  # 8-10 overlaps the flank by 3 bp and shares its end
+  gr <- make_gr(c(8, 10))
+  for (type in c("over", "boundary")) {
+    expect_equal(length(find_se(gr, type = type)), 1L, info = type)
+    expect_equal(length(find_se(gr, type = type, minoverlap = 3L)), 1L,
+      info = type
+    )
+    expect_equal(length(find_se(gr, type = type, minoverlap = 4L)), 0L,
+      info = type
+    )
+  }
+
+  # inverse and the wrapper honour it too
+  expect_equal(length(find_se(gr, minoverlap = 4L, inverse = TRUE)), 0L)
+  expect_true("se" %in% find_all_events(gr, verbose = FALSE)$event_type)
+  expect_false(
+    "se" %in% find_all_events(gr, verbose = FALSE, minoverlap = 4L)$event_type
+  )
+})
+
+test_that("type = 'identical' needs both flanks to match exactly", {
+  # down skips nothing; its 21-30 exon is the candidate. up_same keeps both
+  # flanks as they are, up_left is 1 bp longer on the left flank, up_right
+  # 1 bp shorter on the right one (only its outer end moves)
+  gr <- dplyr::bind_rows(
+    data.frame(
+      start = c(1, 21, 41), end = c(10, 30, 50), tx_id = "down", estimate = -1
+    ),
+    data.frame(start = c(1, 41), end = c(10, 50), tx_id = "up_same", estimate = 1),
+    data.frame(start = c(1, 41), end = c(11, 50), tx_id = "up_left", estimate = 1),
+    data.frame(start = c(1, 41), end = c(10, 49), tx_id = "up_right", estimate = 1)
+  ) |>
+    dplyr::mutate(seqnames = "chr1", strand = "+", gene_id = "g1") |>
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(exon_rank = dplyr::row_number()) |>
+    dplyr::ungroup() |>
+    plyranges::as_granges() |>
+    preprocess(coef_col = "estimate")
+
+  identical <- find_se(gr, type = "identical")
+  expect_equal(length(identical), 1L)
+  expect_equal(as.integer(GenomicRanges::start(identical)), 21L)
+  expect_equal(identical$event_tx_id, "up_same")
+
+  # looser types take the near misses too: up_left's inner boundary (11)
+  # moved, so "boundary" drops it, while up_right's (41) is intact
+  expect_equal(
+    sort(find_se(gr, type = "boundary")$event_tx_id),
+    c("up_right", "up_same")
+  )
+  expect_equal(
+    sort(find_se(gr, type = "over")$event_tx_id),
+    c("up_left", "up_right", "up_same")
+  )
+})

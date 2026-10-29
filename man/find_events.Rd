@@ -98,10 +98,11 @@ same end). The strictest setting.}
 then identifies included exons instead of skipped exons, and \code{find_ri()}
 spliced introns instead of retained introns.}
 
-\item{...}{Further arguments passed to \code{\link[GenomicRanges:findOverlaps-methods]{GenomicRanges::findOverlaps()}}
-when matching flanking exons, e.g. \code{ignore.strand = TRUE}. Do not pass
-\code{select}, which changes the return type. \code{maxgap} lets \code{"over"} and
-\code{"boundary"} match exons that do not overlap at all.}
+\item{...}{Further arguments passed to \code{\link[GenomicRanges:findOverlaps]{GenomicRanges::findOverlaps()}}
+when matching flanking exons, e.g. \code{minoverlap = 5L} to require at least
+5 bp of overlap. Do not pass \code{select}, which changes the return type.
+\code{maxgap} can also be used, to let \code{"over"} and \code{"boundary"} match exons
+that do not overlap at all.}
 
 \item{verbose}{If TRUE, prints progress messages. Default TRUE.}
 }
