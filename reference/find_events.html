@@ -194,10 +194,11 @@ spliced introns instead of retained introns.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Further arguments passed to <code><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">GenomicRanges::findOverlaps()</a></code>
-when matching flanking exons, e.g. <code>ignore.strand = TRUE</code>. Do not pass
-<code>select</code>, which changes the return type. <code>maxgap</code> lets <code>"over"</code> and
-<code>"boundary"</code> match exons that do not overlap at all.</p></dd>
+<dd><p>Further arguments passed to <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">GenomicRanges::findOverlaps()</a></code>
+when matching flanking exons, e.g. <code>minoverlap = 5L</code> to require at least
+5 bp of overlap. Do not pass <code>select</code>, which changes the return type.
+<code>maxgap</code> can also be used, to let <code>"over"</code> and <code>"boundary"</code> match exons
+that do not overlap at all.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>

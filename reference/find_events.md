@@ -121,10 +121,11 @@ find_all_events(
 - ...:
 
   Further arguments passed to
-  [`GenomicRanges::findOverlaps()`](https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html)
-  when matching flanking exons, e.g. `ignore.strand = TRUE`. Do not pass
-  `select`, which changes the return type. `maxgap` lets `"over"` and
-  `"boundary"` match exons that do not overlap at all.
+  [`GenomicRanges::findOverlaps()`](https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html)
+  when matching flanking exons, e.g. `minoverlap = 5L` to require at
+  least 5 bp of overlap. Do not pass `select`, which changes the return
+  type. `maxgap` can also be used, to let `"over"` and `"boundary"`
+  match exons that do not overlap at all.
 
 - verbose:
 
