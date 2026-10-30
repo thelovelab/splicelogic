@@ -96,21 +96,21 @@ find_all_events(
 
   `"over"`
 
-  :   (default) any overlap, with no coordinate in common required. The
-      most permissive setting.
+  : (default) any overlap, with no coordinate in common required. The
+    most permissive setting.
 
   `"boundary"`
 
-  :   the two exons overlap *and* share the inner boundary of the flank,
-      the splice site facing the candidate: the donor of the upstream
-      flank and the acceptor of the downstream one. On `"+"` that is the
-      end of the left exon and the start of the right one; on `"-"` the
-      reverse. The outer boundaries may differ.
+  : the two exons overlap *and* share the inner boundary of the flank,
+    the splice site facing the candidate: the donor of the upstream
+    flank and the acceptor of the downstream one. On `"+"` that is the
+    end of the left exon and the start of the right one; on `"-"` the
+    reverse. The outer boundaries may differ.
 
   `"identical"`
 
-  :   the two exons are identical (same start and same end). The
-      strictest setting.
+  : the two exons are identical (same start and same end). The strictest
+    setting.
 
 - inverse:
 

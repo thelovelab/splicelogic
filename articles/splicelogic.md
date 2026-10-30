@@ -1011,7 +1011,7 @@ usage statistics can be used with *splicelogic*, provided that results
 include:
 
 1.  a per-transcript directional effect estimate (e.g. a model
-    coefficient, change in isoform fraction, deltaPSI, etc.), and  
+    coefficient, change in isoform fraction, deltaPSI, etc.), and\
 2.  an adjusted p-value (or equivalent significance metric by
     thresholding).
 
@@ -1411,9 +1411,9 @@ splicing event from the comparison of the two groups.
 sessionInfo()
 ```
 
-    ## R version 4.5.2 (2025-10-31)
+    ## R version 4.6.1 (2026-06-24)
     ## Platform: x86_64-pc-linux-gnu
-    ## Running under: Ubuntu 24.04.3 LTS
+    ## Running under: Ubuntu 24.04.4 LTS
     ## 
     ## Matrix products: default
     ## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -1435,57 +1435,57 @@ sessionInfo()
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] tibble_3.3.1           GenomicFeatures_1.62.0 AnnotationDbi_1.72.0  
-    ##  [4] Biobase_2.70.0         AnnotationHub_4.0.0    BiocFileCache_3.0.0   
+    ##  [1] tibble_3.3.1           GenomicFeatures_1.64.0 AnnotationDbi_1.74.0  
+    ##  [4] Biobase_2.72.0         AnnotationHub_4.2.2    BiocFileCache_3.2.0   
     ##  [7] dbplyr_2.6.0           readr_2.2.0            splicelogic_1.1.4     
-    ## [10] plyranges_1.30.1       dplyr_1.2.1            GenomicRanges_1.62.1  
-    ## [13] Seqinfo_1.0.0          IRanges_2.44.0         S4Vectors_0.48.1      
-    ## [16] BiocGenerics_0.56.0    generics_0.1.4        
+    ## [10] plyranges_1.32.0       dplyr_1.2.1            GenomicRanges_1.64.0  
+    ## [13] Seqinfo_1.2.0          IRanges_2.46.0         S4Vectors_0.50.3      
+    ## [16] BiocGenerics_0.58.1    generics_0.1.4        
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] tidyselect_1.2.1            blob_1.3.0                 
     ##  [3] farver_2.1.2                filelock_1.0.3             
-    ##  [5] Biostrings_2.78.0           S7_0.2.2                   
+    ##  [5] Biostrings_2.80.2           S7_0.2.2                   
     ##  [7] bitops_1.1-0                fastmap_1.2.0              
-    ##  [9] RCurl_1.98-1.20             GenomicAlignments_1.46.0   
+    ##  [9] RCurl_1.98-1.20             GenomicAlignments_1.48.0   
     ## [11] XML_3.99-0.25               digest_0.6.39              
-    ## [13] lifecycle_1.0.5             KEGGREST_1.50.0            
+    ## [13] lifecycle_1.0.5             KEGGREST_1.52.2            
     ## [15] RSQLite_3.53.3              magrittr_2.0.5             
-    ## [17] compiler_4.5.2              rlang_1.3.0                
-    ## [19] sass_0.4.10                 tools_4.5.2                
+    ## [17] compiler_4.6.1              rlang_1.3.0                
+    ## [19] sass_0.4.10                 tools_4.6.1                
     ## [21] utf8_1.2.6                  yaml_2.3.12                
-    ## [23] rtracklayer_1.70.1          knitr_1.52                 
-    ## [25] S4Arrays_1.10.1             labeling_0.4.3             
+    ## [23] rtracklayer_1.72.0          knitr_1.52                 
+    ## [25] S4Arrays_1.12.1             labeling_0.4.3             
     ## [27] htmlwidgets_1.6.4           bit_4.6.0                  
-    ## [29] curl_8.1.0                  DelayedArray_0.36.1        
+    ## [29] curl_8.1.0                  DelayedArray_0.38.2        
     ## [31] RColorBrewer_1.1-3          abind_1.4-8                
-    ## [33] BiocParallel_1.44.0         wiggleplotr_1.34.1         
+    ## [33] BiocParallel_1.46.0         wiggleplotr_1.36.0         
     ## [35] withr_3.0.3                 purrr_1.2.2                
-    ## [37] desc_1.4.3                  grid_4.5.2                 
+    ## [37] desc_1.4.3                  grid_4.6.1                 
     ## [39] ggplot2_4.0.3               scales_1.4.0               
-    ## [41] SummarizedExperiment_1.40.0 cli_3.6.6                  
+    ## [41] SummarizedExperiment_1.42.0 cli_3.6.6                  
     ## [43] rmarkdown_2.32              crayon_1.5.3               
     ## [45] ragg_1.5.2                  otel_0.2.0                 
     ## [47] httr_1.4.9                  tzdb_0.5.0                 
     ## [49] rjson_0.2.23                DBI_1.3.0                  
     ## [51] cachem_1.1.0                assertthat_0.2.1           
-    ## [53] parallel_4.5.2              BiocManager_1.30.27        
-    ## [55] XVector_0.50.0              restfulr_0.0.17            
+    ## [53] parallel_4.6.1              BiocManager_1.30.27        
+    ## [55] XVector_0.52.0              restfulr_0.0.17            
     ## [57] matrixStats_1.5.0           vctrs_0.7.3                
     ## [59] Matrix_1.7-6                jsonlite_2.0.0             
     ## [61] hms_1.1.4                   bit64_4.8.6                
     ## [63] systemfonts_1.3.2           jquerylib_0.1.4            
     ## [65] glue_1.8.1                  pkgdown_2.2.1              
     ## [67] codetools_0.2-20            gtable_0.3.6               
-    ## [69] BiocVersion_3.22.0          GenomeInfoDb_1.46.2        
-    ## [71] BiocIO_1.20.0               UCSC.utils_1.6.1           
+    ## [69] BiocVersion_3.23.1          GenomeInfoDb_1.48.0        
+    ## [71] BiocIO_1.22.0               UCSC.utils_1.8.0           
     ## [73] pillar_1.11.1               rappdirs_0.3.4             
     ## [75] htmltools_0.5.9             httr2_1.3.0                
     ## [77] R6_2.6.1                    textshaping_1.0.5          
     ## [79] vroom_1.7.1                 evaluate_1.0.5             
     ## [81] lattice_0.23-1              png_0.1-9                  
-    ## [83] Rsamtools_2.26.0            cigarillo_1.0.0            
+    ## [83] Rsamtools_2.28.0            cigarillo_1.2.1            
     ## [85] memoise_2.0.1               bslib_0.12.0               
-    ## [87] SparseArray_1.10.10         xfun_0.62                  
-    ## [89] fs_2.1.0                    MatrixGenerics_1.22.0      
+    ## [87] SparseArray_1.12.3          xfun_0.62                  
+    ## [89] fs_2.1.0                    MatrixGenerics_1.24.0      
     ## [91] pkgconfig_2.0.3
