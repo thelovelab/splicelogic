@@ -1437,7 +1437,7 @@ sessionInfo()
     ## other attached packages:
     ##  [1] tibble_3.3.1           GenomicFeatures_1.64.0 AnnotationDbi_1.74.0  
     ##  [4] Biobase_2.72.0         AnnotationHub_4.2.2    BiocFileCache_3.2.0   
-    ##  [7] dbplyr_2.6.0           readr_2.2.0            splicelogic_1.1.4     
+    ##  [7] dbplyr_2.6.0           readr_2.2.0            splicelogic_1.1.5     
     ## [10] plyranges_1.32.0       dplyr_1.2.1            GenomicRanges_1.64.0  
     ## [13] Seqinfo_1.2.0          IRanges_2.46.0         S4Vectors_0.50.3      
     ## [16] BiocGenerics_0.58.1    generics_0.1.4        
