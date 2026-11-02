@@ -1,4 +1,38 @@
 
+# splicelogic 1.2.0
+
+* New event types: alternative transcription start and end sites
+  (`find_atss()`, `find_ates()`) and spliced introns (`find_si()`).
+* New input option: `prepare_exons_by_partition()` builds the input from two sets of
+  transcripts, without a DTU analysis.
+* `get_seq()` extracts exon sequences against a genome.
+* Plotting functions for event results: `plot_transcripts()`,
+  `plot_transcripts_by_gene()`, `plot_transcripts_by_pair()`,
+  `plot_transcript_lfc()` and `event_palette()`.
+* Long-form aliases for every finder, e.g. `find_skipped_exons()`.
+* `find_se()`, `find_ie()`, `find_mxe()` and `find_all_events()` pass
+  extra arguments on to `GenomicRanges::findOverlaps()`.
+* Results carry `event_type`, `event_tx_id`, `event_estimate` and
+  `event_<col>` for any `additional_columns`.
+* The default `type` is now `"over"`; `"boundary"` matches only the
+  splice site facing the candidate; and `"in"` is renamed `"identical"`.
+
+# splicelogic 1.1.5
+
+* Added plotting functions for event results: `plot_transcripts()`,
+  `plot_transcripts_by_gene()`, `plot_transcripts_by_pair()`,
+  `plot_transcript_lfc()` and `event_palette()` (require `ggplot2`).
+* Added `find_si()` for spliced introns, the reverse of `find_ri()`.
+* The default `type` of `find_se()`, `find_ie()`, `find_mxe()` and
+  `find_all_events()` is now `"over"` (was `"boundary"`).
+* `type = "boundary"` now matches only the splice site of each flanking
+  exon that faces the candidate exon, on either strand.
+* The `"in"` match type is renamed `"identical"`.
+* `find_se()`, `find_ie()`, `find_mxe()` and `find_all_events()` pass
+  extra arguments on to `GenomicRanges::findOverlaps()`, e.g.
+  `minoverlap = 5L`.
+* `plyranges` moved to Depends, so it is attached with `splicelogic`.
+
 # splicelogic 1.1.4
 
 * Added `prepare_exons_by_partition()` for building input from two sets
