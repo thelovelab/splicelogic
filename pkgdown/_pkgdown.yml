@@ -24,6 +24,10 @@ reference:
     contents:
       - starts_with("find_")
       - find_all_events
+  - title: "Plotting"
+    contents:
+      - starts_with("plot_")
+      - event_palette
   - title: "Sequence extraction"
     contents:
       - get_seq
