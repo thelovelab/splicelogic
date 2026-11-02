@@ -151,6 +151,22 @@ as part of the EOSS program.
   [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
   : Find splice events from annotated exons
 
+## Plotting
+
+- [`plot_transcript_lfc()`](https://thelovelab.github.io/splicelogic/reference/plot_transcript_lfc.md)
+  : Plot a per-transcript fold change for the transcripts of splicelogic
+  events
+- [`plot_transcripts()`](https://thelovelab.github.io/splicelogic/reference/plot_transcripts.md)
+  : Plot the transcripts involved in splicelogic events
+- [`plot_transcripts_by_gene()`](https://thelovelab.github.io/splicelogic/reference/plot_transcripts_by_gene.md)
+  : Plot the transcripts involved in splicelogic events, one plot per
+  gene
+- [`plot_transcripts_by_pair()`](https://thelovelab.github.io/splicelogic/reference/plot_transcripts_by_pair.md)
+  : Plot the transcripts involved in splicelogic events, one plot per
+  pair
+- [`event_palette()`](https://thelovelab.github.io/splicelogic/reference/event_palette.md)
+  : Default fill colours for splicelogic event types
+
 ## Sequence extraction
 
 - [`get_seq()`](https://thelovelab.github.io/splicelogic/reference/get_seq.md)

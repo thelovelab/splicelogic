@@ -20,6 +20,9 @@ Useful links:
 
 Authors:
 
+- Beatriz Campillo <beatrizcampillo29@gmail.com>
+  ([ORCID](https://orcid.org/0000-0001-7323-9125))
+
 - Michael Love <michaelisaiahlove@gmail.com>
   ([ORCID](https://orcid.org/0000-0001-8401-0545))
 

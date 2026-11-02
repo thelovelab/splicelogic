@@ -8,10 +8,15 @@
 <url><loc>https://thelovelab.github.io/splicelogic/index.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/news/index.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/create_mock_data.html</loc></url>
+<url><loc>https://thelovelab.github.io/splicelogic/reference/event_palette.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/find_events.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/generate_events.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/get_seq.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/index.html</loc></url>
+<url><loc>https://thelovelab.github.io/splicelogic/reference/plot_transcript_lfc.html</loc></url>
+<url><loc>https://thelovelab.github.io/splicelogic/reference/plot_transcripts.html</loc></url>
+<url><loc>https://thelovelab.github.io/splicelogic/reference/plot_transcripts_by_gene.html</loc></url>
+<url><loc>https://thelovelab.github.io/splicelogic/reference/plot_transcripts_by_pair.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/prepare_exons.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.html</loc></url>
 <url><loc>https://thelovelab.github.io/splicelogic/reference/preprocess.html</loc></url>

@@ -34,6 +34,32 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.2.0" id="splicelogic-120">splicelogic 1.2.0<a class="anchor" aria-label="anchor" href="#splicelogic-120"></a></h2>
+<ul><li>New event types: alternative transcription start and end sites (<code><a href="../reference/find_events.html">find_atss()</a></code>, <code><a href="../reference/find_events.html">find_ates()</a></code>) and spliced introns (<code><a href="../reference/find_events.html">find_si()</a></code>).</li>
+<li>New input option: <code><a href="../reference/prepare_exons_by_partition.html">prepare_exons_by_partition()</a></code> builds the input from two user-defined sets of transcripts (up and down). Unlike <code><a href="../reference/prepare_exons.html">prepare_exons()</a></code>, it does not need DTU results.</li>
+<li>
+<code><a href="../reference/get_seq.html">get_seq()</a></code> extracts exon sequences against a genome.</li>
+<li>Plotting functions for event results: <code><a href="../reference/plot_transcripts.html">plot_transcripts()</a></code>, <code><a href="../reference/plot_transcripts_by_gene.html">plot_transcripts_by_gene()</a></code>, <code><a href="../reference/plot_transcripts_by_pair.html">plot_transcripts_by_pair()</a></code>, <code><a href="../reference/plot_transcript_lfc.html">plot_transcript_lfc()</a></code> and <code><a href="../reference/event_palette.html">event_palette()</a></code>.</li>
+<li>Long-form aliases for every finder, e.g. <code><a href="../reference/find_events.html">find_skipped_exons()</a></code>.</li>
+<li>
+<code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>, <code><a href="../reference/find_events.html">find_mxe()</a></code> and <code><a href="../reference/find_events.html">find_all_events()</a></code> pass extra arguments on to <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">GenomicRanges::findOverlaps()</a></code>.</li>
+<li>Results carry <code>event_type</code>, <code>event_tx_id</code>, <code>event_estimate</code> and <code>event_&lt;col&gt;</code> for any <code>additional_columns</code>.</li>
+<li>The default <code>type</code> is now <code>"over"</code>; <code>"boundary"</code> matches only the splice site facing the candidate; and <code>"in"</code> is renamed <code>"identical"</code>.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.5" id="splicelogic-115">splicelogic 1.1.5<a class="anchor" aria-label="anchor" href="#splicelogic-115"></a></h2>
+<ul><li>Added plotting functions for event results: <code><a href="../reference/plot_transcripts.html">plot_transcripts()</a></code>, <code><a href="../reference/plot_transcripts_by_gene.html">plot_transcripts_by_gene()</a></code>, <code><a href="../reference/plot_transcripts_by_pair.html">plot_transcripts_by_pair()</a></code>, <code><a href="../reference/plot_transcript_lfc.html">plot_transcript_lfc()</a></code> and <code><a href="../reference/event_palette.html">event_palette()</a></code> (require <code>ggplot2</code>).</li>
+<li>Added <code><a href="../reference/find_events.html">find_si()</a></code> for spliced introns, the reverse of <code><a href="../reference/find_events.html">find_ri()</a></code>.</li>
+<li>The default <code>type</code> of <code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>, <code><a href="../reference/find_events.html">find_mxe()</a></code> and <code><a href="../reference/find_events.html">find_all_events()</a></code> is now <code>"over"</code> (was <code>"boundary"</code>).</li>
+<li>
+<code>type = "boundary"</code> now matches only the splice site of each flanking exon that faces the candidate exon, on either strand.</li>
+<li>The <code>"in"</code> match type is renamed <code>"identical"</code>.</li>
+<li>
+<code><a href="../reference/find_events.html">find_se()</a></code>, <code><a href="../reference/find_events.html">find_ie()</a></code>, <code><a href="../reference/find_events.html">find_mxe()</a></code> and <code><a href="../reference/find_events.html">find_all_events()</a></code> pass extra arguments on to <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">GenomicRanges::findOverlaps()</a></code>, e.g. <code>minoverlap = 5L</code>.</li>
+<li>
+<code>plyranges</code> moved to Depends, so it is attached with <code>splicelogic</code>.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.4" id="splicelogic-114">splicelogic 1.1.4<a class="anchor" aria-label="anchor" href="#splicelogic-114"></a></h2>
 <ul><li>Added <code><a href="../reference/prepare_exons_by_partition.html">prepare_exons_by_partition()</a></code> for building input from two sets of transcripts, without needing a estimate column from a DTU analysis.</li>
 <li>Added <code><a href="../reference/find_events.html">find_atss()</a></code> and <code><a href="../reference/find_events.html">find_ates()</a></code> for detecting alternative transcription start and end sites. Both are included in <code><a href="../reference/find_events.html">find_all_events()</a></code>.</li>
