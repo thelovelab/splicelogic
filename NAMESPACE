@@ -36,8 +36,10 @@ export(plot_transcripts_by_pair)
 export(prepare_exons)
 export(prepare_exons_by_partition)
 export(preprocess)
-importFrom(GenomicRanges,end)
-importFrom(GenomicRanges,start)
+importFrom(GenomicRanges,
+  end,
+  start
+)
 importFrom(magrittr,"%>%")
 importFrom(methods,is)
 importFrom(stats,runif)
