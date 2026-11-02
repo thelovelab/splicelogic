@@ -3,8 +3,9 @@
 
 * New event types: alternative transcription start and end sites
   (`find_atss()`, `find_ates()`) and spliced introns (`find_si()`).
-* New input option: `prepare_exons_by_partition()` builds the input from two sets of
-  transcripts, without a DTU analysis.
+* New input option: `prepare_exons_by_partition()` builds the input from
+  two user-defined sets of transcripts (up and down). Unlike
+  `prepare_exons()`, it does not need DTU results.
 * `get_seq()` extracts exon sequences against a genome.
 * Plotting functions for event results: `plot_transcripts()`,
   `plot_transcripts_by_gene()`, `plot_transcripts_by_pair()`,
