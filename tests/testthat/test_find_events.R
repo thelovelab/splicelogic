@@ -369,6 +369,82 @@ test_that("find_a5ss and find_a3ss respect the minus strand", {
   expect_equal(length(find_a5ss(gr_a3)), 0L)
 })
 
+# Test that the first / last exon rule applies to both exons of a pair
+test_that("a partner's first or last exon gives no a3ss or a5ss", {
+  # `exons` is a list of c(start, end) in genomic order; ranks follow
+  # transcription, so they are reversed on "-"
+  make_tx <- function(exons, tx_id, estimate, strand) {
+    n <- length(exons)
+    data.frame(
+      seqnames = "chr1",
+      start = vapply(exons, function(e) e[1], numeric(1)),
+      end = vapply(exons, function(e) e[2], numeric(1)),
+      strand = strand,
+      gene_id = "g1",
+      tx_id = tx_id,
+      exon_rank = if (strand == "-") rev(seq_len(n)) else seq_len(n),
+      estimate = estimate
+    )
+  }
+  # `sign` = 1 keeps the terminal exon in the down transcript, -1 swaps
+  # the two so that it sits in the up transcript instead
+  make_gr <- function(terminal, internal, strand = "+", sign = 1) {
+    dplyr::bind_rows(
+      make_tx(terminal, "terminal", -1 * sign, strand),
+      make_tx(internal, "internal", 1 * sign, strand)
+    ) |>
+      plyranges::as_granges() |>
+      preprocess(coef_col = "estimate")
+  }
+  types <- function(gr) {
+    # as.character() so that two empty results give character(0), not NULL
+    as.character(c(find_a5ss(gr)$event_type, find_a3ss(gr)$event_type))
+  }
+
+  # 15-30 is the first exon of one transcript and overlaps the internal
+  # exon 21-30 of the other. the two starts differ, but 15 is where
+  # transcription begins, not an acceptor: an atss and nothing else
+  first <- list(c(15, 30), c(41, 50))
+  inner <- list(c(1, 6), c(21, 30), c(41, 50))
+  # 21-36 is the last exon of one transcript and overlaps the internal
+  # exon 21-30 of the other. 36 is where transcription ends, not a donor
+  last <- list(c(1, 10), c(21, 36))
+  inner_last <- list(c(1, 10), c(21, 30), c(41, 50))
+
+  for (sign in c(1, -1)) {
+    gr <- make_gr(first, inner, sign = sign)
+    expect_equal(types(gr), character(0))
+    expect_equal(length(find_atss(gr)), 1L)
+
+    gr <- make_gr(last, inner_last, sign = sign)
+    expect_equal(types(gr), character(0))
+    expect_equal(length(find_ates(gr)), 1L)
+  }
+
+  # on "-" the same coordinates are read right to left: 21-36 is now a
+  # first exon whose start is the donor, and 15-30 a last exon
+  for (sign in c(1, -1)) {
+    gr <- make_gr(last, inner_last, strand = "-", sign = sign)
+    expect_equal(types(gr), character(0))
+    expect_equal(length(find_atss(gr)), 1L)
+
+    gr <- make_gr(first, inner, strand = "-", sign = sign)
+    expect_equal(types(gr), character(0))
+    expect_equal(length(find_ates(gr)), 1L)
+  }
+
+  # the other boundary of a first / last exon is a real splice site, so
+  # it is still compared. first exon 15-30 against 21-34: the donor moved
+  # (a5ss), the start is still not an acceptor (no a3ss)
+  for (sign in c(1, -1)) {
+    gr <- make_gr(first, list(c(1, 6), c(21, 34), c(41, 50)), sign = sign)
+    expect_equal(types(gr), "a5ss")
+    # last exon 21-36 against 17-30: the acceptor moved, 36 is no donor
+    gr <- make_gr(last, list(c(1, 10), c(17, 30), c(41, 50)), sign = sign)
+    expect_equal(types(gr), "a3ss")
+  }
+})
+
 # Test that an overlapping gene cannot hide an alternative splice site
 test_that("find_a5ss and find_a3ss compare exons within the same gene", {
   # gene A has a real a5ss: posA moves the donor of the 21-25 exon to 23.
@@ -799,4 +875,95 @@ test_that("type = 'identical' needs both flanks to match exactly", {
     sort(find_se(gr, type = "over")$event_tx_id),
     c("up_left", "up_right", "up_same")
   )
+})
+
+# builds a preprocessed GRanges from a named list of transcripts, each
+# list(estimate, exons) with exons as c(start, end) in genomic order. ranks
+# follow transcription, so they are reversed on "-"
+block_gr <- function(txs, strand = "+", gene_id = "g1") {
+  rows <- lapply(names(txs), function(tx) {
+    exons <- txs[[tx]][[2]]
+    n <- length(exons)
+    data.frame(
+      seqnames = "chr1",
+      start = vapply(exons, function(e) e[1], numeric(1)),
+      end = vapply(exons, function(e) e[2], numeric(1)),
+      strand = strand,
+      gene_id = gene_id,
+      tx_id = tx,
+      exon_rank = if (strand == "-") rev(seq_len(n)) else seq_len(n),
+      estimate = txs[[tx]][[1]]
+    )
+  })
+  dplyr::bind_rows(rows) |>
+    plyranges::as_granges() |>
+    preprocess(coef_col = "estimate")
+}
+# "tx:start-end>partner" for every row, sorted
+event_keys <- function(res) {
+  if (length(res) == 0L) {
+    return(character(0))
+  }
+  sort(paste0(
+    res$tx_id, ":", GenomicRanges::start(res), "-", GenomicRanges::end(res),
+    ">", res$event_tx_id
+  ))
+}
+
+# ---- a5ss / a3ss: exons shared with a down isoform ----
+
+test_that("an exon shared with one down isoform still pairs with the others", {
+  # up's 21-35 is identical to an exon of down_b, and differs from the
+  # 21-30 of down_a by its right-hand boundary
+  txs <- list(
+    down_a = list(-1, list(c(1, 10), c(21, 30), c(41, 50))),
+    down_b = list(-1, list(c(1, 10), c(21, 35), c(41, 50))),
+    up = list(1, list(c(1, 10), c(21, 35), c(41, 50)))
+  )
+  gr <- block_gr(txs)
+  expect_equal(event_keys(find_a5ss(gr)), "up:21-35>down_a")
+  expect_equal(length(find_a3ss(gr)), 0L)
+  # on "-" the right-hand boundary is the acceptor
+  gr_minus <- block_gr(txs, "-")
+  expect_equal(event_keys(find_a3ss(gr_minus)), "up:21-35>down_a")
+  expect_equal(length(find_a5ss(gr_minus)), 0L)
+
+  # the same transcripts with up and down exchanged give the same pair,
+  # reported from the other side. down_b is identical to up there and
+  # gives nothing
+  flipped <- gr |> dplyr::mutate(estimate = -estimate)
+  expect_equal(event_keys(find_a5ss(flipped)), "down_a:21-30>up")
+  expect_equal(length(find_a3ss(flipped)), 0L)
+})
+
+test_that("a5ss and a3ss do not depend on which transcript is up", {
+  # "type tx-tx" with the pair unordered, so both directions compare equal
+  pair_keys <- function(gr) {
+    keys <- lapply(list(find_a5ss(gr), find_a3ss(gr)), function(res) {
+      if (length(res) == 0L) {
+        return(character(0))
+      }
+      tx <- as.character(res$tx_id)
+      partner <- as.character(res$event_tx_id)
+      paste(res$event_type, pmin(tx, partner), pmax(tx, partner))
+    })
+    sort(unique(unlist(keys)))
+  }
+  n_pairs <- 0L
+  for (seed in seq_len(10)) {
+    set.seed(seed)
+    gr <- create_mock_data(
+      n_genes = 3, n_tx_per_gene = 5, n_exons_per_tx = 6,
+      strand = c("+", "-")[seed %% 2 + 1]
+    ) |>
+      generate_a5ss(n_events = 2) |>
+      generate_a3ss(n_events = 2) |>
+      generate_ri(n_events = 1) |>
+      generate_atss(n_events = 1)
+    flipped <- gr |> dplyr::mutate(estimate = -estimate)
+    expect_equal(pair_keys(gr), pair_keys(flipped))
+    n_pairs <- n_pairs + length(pair_keys(gr))
+  }
+  # the comparison above is not vacuous
+  expect_gt(n_pairs, 0L)
 })

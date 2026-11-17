@@ -18,9 +18,12 @@
 #' to be shared with its partner, so an exon that moved both boundaries is
 #' reported as an a5ss *and* an a3ss. A first exon has no acceptor and a
 #' last exon has no donor, so those boundaries never produce an a3ss /
-#' a5ss; `find_atss()` / `find_ates()` report them instead by comparing
-#' where each transcript begins and ends. `exon_rank` runs in
-#' transcription order, so this holds on both strands.
+#' a5ss, whether the first or last exon belongs to the up or to the down
+#' transcript of the pair; `find_atss()` / `find_ates()` report them
+#' instead by comparing where each transcript begins and ends. The other
+#' boundary of a first or last exon is a real splice site and is still
+#' compared. `exon_rank` runs in transcription order, so this holds on
+#' both strands.
 #'
 #' When an exon overlaps two or more exons of its partner (a retained or
 #' spliced intron), the boundaries facing the intron are left to
@@ -382,7 +385,8 @@ find_spliced_introns <- find_si
 utils::globalVariables(c(
   "estimate", "cand_idx", "neg_idx", "gene_id_cand", "gene_id_neg",
   "tx_id_neg", "tx_id_cand", "n", "match_start", "match_end", "event_type",
-  "event_tx_id", "on_minus", "is_first", "is_last", "site_is_start",
+  "event_tx_id", "on_minus", "is_first", "is_last", "neg_is_first",
+  "neg_is_last", "site_is_start",
   "site_matches", "neg_start", "neg_end", "neg_outer_start", "neg_outer_end",
   "pos_start", "pos_end", "pos_min_start", "pos_max_end", "start_is_outer",
   "end_is_outer", "site_is_outer"
@@ -406,7 +410,9 @@ find_alt_ss <- function(gr, by_start = TRUE) {
   # find_atss() / find_ates() report those instead. exon_rank follows
   # transcription, so rank 1 is the first exon on either strand and this
   # rule needs no strand handling of its own. min/max rather than
-  # 1/nexons so that CDS-style offset ranks still work.
+  # 1/nexons so that CDS-style offset ranks still work. the flags are
+  # set on every exon because the rule applies to both exons of a pair,
+  # the candidate and its partner.
   gr_flagged <- gr |>
     dplyr::group_by(tx_id) |>
     dplyr::mutate(
@@ -419,15 +425,15 @@ find_alt_ss <- function(gr, by_start = TRUE) {
   pos_exons <- gr_flagged |> dplyr::filter(sign(estimate) == 1)
   neg_exons <- gr_flagged |> dplyr::filter(sign(estimate) == -1)
 
-  # candidates: pos exons not exactly identical to any neg exon of the
-  # same gene, but overlapping at least one neg exon (directed).
-  # as.character() on a GRanges gives "chr:start-end:strand", so prefixing
-  # the gene_id keeps the identity check within each gene.
+  # candidates: every pos exon overlapping at least one neg exon
+  # (directed). there is deliberately no test here for a pos exon being
+  # identical to a neg exon. an identical pair has both boundaries in
+  # common and is dropped pair by pair by the `site_matches` filter below.
+  # removing such an exon up front, against every neg exon of the gene,
+  # also threw away its events against the *other* neg isoforms -- and
+  # only on the pos side, so the result depended on which transcript was
+  # up.
   candidates <- pos_exons |>
-    dplyr::filter(
-      !(paste(gene_id, as.character(pos_exons)) %in%
-          paste(neg_exons$gene_id, as.character(neg_exons)))
-    ) |>
     plyranges::filter_by_overlaps_directed(neg_exons)
 
   if (length(candidates) == 0L) {
@@ -462,6 +468,10 @@ find_alt_ss <- function(gr, by_start = TRUE) {
       on_minus = as.character(cand_tbl$strand[cand_idx]) == "-",
       is_first = cand_tbl$is_first[cand_idx],
       is_last = cand_tbl$is_last[cand_idx],
+      # the same flags for the partner exon: its outer boundary is a
+      # transcription start / end too, whichever transcript it sits in
+      neg_is_first = neg_tbl$is_first[neg_idx],
+      neg_is_last = neg_tbl$is_last[neg_idx],
       tx_id_neg = neg_tbl$tx_id[neg_idx],
       tx_id_cand = cand_tbl$tx_id[cand_idx]
     ) |>
@@ -532,8 +542,15 @@ find_alt_ss <- function(gr, by_start = TRUE) {
       # the site does not face a retained intron, and it moved
       site_is_outer,
       !site_matches,
-      # and it exists: the last exon has no donor, the first no acceptor
-      if (by_start) !is_last else !is_first
+      # and it exists on both sides of the pair: the last exon has no
+      # donor, the first no acceptor. checking the candidate alone would
+      # compare a real splice site against the partner's transcription
+      # start / end, and make the result depend on which transcript is up
+      if (by_start) {
+        !is_last & !neg_is_last
+      } else {
+        !is_first & !neg_is_first
+      }
     )
 
   if (nrow(match_tbl) == 0L) {
