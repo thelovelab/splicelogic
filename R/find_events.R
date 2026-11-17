@@ -381,15 +381,13 @@ find_si <- function(gr) {
 #' @export
 find_spliced_introns <- find_si
 
-# for find_alt_ss
+# for find_alt_ss and find_alt_ts
 utils::globalVariables(c(
-  "estimate", "cand_idx", "neg_idx", "gene_id_cand", "gene_id_neg",
-  "tx_id_neg", "tx_id_cand", "n", "match_start", "match_end", "event_type",
-  "event_tx_id", "on_minus", "is_first", "is_last", "neg_is_first",
-  "neg_is_last", "site_is_start",
-  "site_matches", "neg_start", "neg_end", "neg_outer_start", "neg_outer_end",
-  "pos_start", "pos_end", "pos_min_start", "pos_max_end", "start_is_outer",
-  "end_is_outer", "site_is_outer"
+  "estimate", "cand_idx", "pos_idx", "neg_idx", "tx_id_neg", "event_type",
+  "event_tx_id", "on_minus", "is_first", "is_last", "site_is_start",
+  "match_start", "match_end", "site_matches", "pos_start", "pos_end",
+  "neg_start", "neg_end", "pos_flank_idx", "neg_flank_idx", "site_exists",
+  "pos_flank_clear", "neg_flank_clear"
 ))
 
 #' @rdname find_events
@@ -404,161 +402,103 @@ find_alt_ss <- function(gr, by_start = TRUE) {
 
   event_name <- if (by_start) "a5ss" else "a3ss"
 
-  # flag each transcript's first and last exon. a first exon has no
-  # acceptor and a last exon has no donor, so a boundary moving there is
-  # a transcription start / end change, not a splice site change --
-  # find_atss() / find_ates() report those instead. exon_rank follows
-  # transcription, so rank 1 is the first exon on either strand and this
-  # rule needs no strand handling of its own. min/max rather than
-  # 1/nexons so that CDS-style offset ranks still work. the flags are
-  # set on every exon because the rule applies to both exons of a pair,
-  # the candidate and its partner.
-  gr_flagged <- gr |>
-    dplyr::group_by(tx_id) |>
-    dplyr::mutate(
-      is_first = exon_rank == min(exon_rank),
-      is_last = exon_rank == max(exon_rank)
-    ) |>
-    dplyr::ungroup()
-
   # separate positive and negative exons
-  pos_exons <- gr_flagged |> dplyr::filter(sign(estimate) == 1)
-  neg_exons <- gr_flagged |> dplyr::filter(sign(estimate) == -1)
+  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1)
+  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1)
 
-  # candidates: every pos exon overlapping at least one neg exon
-  # (directed). there is deliberately no test here for a pos exon being
-  # identical to a neg exon. an identical pair has both boundaries in
-  # common and is dropped pair by pair by the `site_matches` filter below.
-  # removing such an exon up front, against every neg exon of the gene,
-  # also threw away its events against the *other* neg isoforms -- and
-  # only on the pos side, so the result depended on which transcript was
-  # up.
-  candidates <- pos_exons |>
-    plyranges::filter_by_overlaps_directed(neg_exons)
-
-  if (length(candidates) == 0L) {
-    return(GenomicRanges::GRanges())
-  }
-
-  # batch findOverlaps: candidates against neg_exons
-  hits <- GenomicRanges::findOverlaps(candidates, neg_exons)
+  # batch findOverlaps: every pos exon against every neg exon it overlaps
+  # (strand-aware). there is deliberately no test here for a pos exon
+  # being identical to a neg exon. an identical pair has both boundaries
+  # in common and is dropped pair by pair by the `site_matches` filter
+  # below. removing such an exon up front, against every neg exon of the
+  # gene, also threw away its events against the *other* neg isoforms --
+  # and only on the pos side, so the result depended on which transcript
+  # was up.
+  hits <- GenomicRanges::findOverlaps(pos_exons, neg_exons)
 
   if (length(hits) == 0L) {
     return(GenomicRanges::GRanges())
   }
 
-  cand_tbl <- tibble::as_tibble(candidates)
+  pos_tbl <- tibble::as_tibble(pos_exons)
   neg_tbl <- tibble::as_tibble(neg_exons)
 
-  # build match tibble with boundary checks
+  # this call only cares about one splice site: the donor for a5ss, the
+  # acceptor for a3ss. its flank is the exon on the other side of the
+  # intron that the site borders, in the exon's own transcript: the next
+  # exon (rank k + 1) for the donor, the previous one (rank k - 1) for the
+  # acceptor. exon_rank follows transcription, so this is the same on
+  # both strands. the flank is looked up by key, as
+  # candidates_by_presence() does for the flanks of a skipped exon.
+  # an exon with no such flank gets NA: a last exon has no donor and a
+  # first exon no acceptor.
+  rank_step <- if (by_start) 1L else -1L
+  pos_flank <- match(
+    paste0(pos_tbl$tx_id, "-", pos_tbl$exon_rank + rank_step), pos_tbl$key
+  )
+  neg_flank <- match(
+    paste0(neg_tbl$tx_id, "-", neg_tbl$exon_rank + rank_step), neg_tbl$key
+  )
+
+  # one row per (pos exon, neg exon) pair, with the checks as columns
   match_tbl <- tibble::tibble(
-    cand_idx = S4Vectors::queryHits(hits),
+    pos_idx = S4Vectors::queryHits(hits),
     neg_idx = S4Vectors::subjectHits(hits)
   ) |>
+    # restrict to same gene
+    dplyr::filter(pos_tbl$gene_id[pos_idx] == neg_tbl$gene_id[neg_idx]) |>
     dplyr::mutate(
-      gene_id_cand = cand_tbl$gene_id[cand_idx],
-      gene_id_neg = neg_tbl$gene_id[neg_idx],
-      match_start = cand_tbl$start[cand_idx] == neg_tbl$start[neg_idx],
-      match_end = cand_tbl$end[cand_idx] == neg_tbl$end[neg_idx],
+      pos_start = pos_tbl$start[pos_idx],
+      pos_end = pos_tbl$end[pos_idx],
+      neg_start = neg_tbl$start[neg_idx],
+      neg_end = neg_tbl$end[neg_idx],
       # which boundary carries the donor depends on the strand: on "+" the
       # exon end is the donor (5' splice site) and the start the acceptor,
-      # on "-" transcription runs the other way and the two swap. candidates
-      # are found with directed overlaps, so the candidate's strand is also
-      # the partner's. "*" falls through as "+".
-      on_minus = as.character(cand_tbl$strand[cand_idx]) == "-",
-      is_first = cand_tbl$is_first[cand_idx],
-      is_last = cand_tbl$is_last[cand_idx],
-      # the same flags for the partner exon: its outer boundary is a
-      # transcription start / end too, whichever transcript it sits in
-      neg_is_first = neg_tbl$is_first[neg_idx],
-      neg_is_last = neg_tbl$is_last[neg_idx],
-      tx_id_neg = neg_tbl$tx_id[neg_idx],
-      tx_id_cand = cand_tbl$tx_id[cand_idx]
-    ) |>
-    # restrict to same gene
-    dplyr::filter(gene_id_cand == gene_id_neg)
-
-  # an exon overlapping 2+ exons of the partner transcript retains an
-  # intron (find_ri() / find_si()). the boundaries facing that intron
-  # differ because of it, not because a splice site moved, so in such a
-  # group only the outermost boundaries are compared: the start of the
-  # leftmost exon and the end of the rightmost. genomic left / right, not
-  # exon_rank, so this needs no strand handling; which of the two is the
-  # donor is decided below as for any other exon.
-  # neg side: is this neg exon the leftmost / rightmost of the exons of
-  # tx_id_neg that the candidate overlaps?
-  match_tbl <- match_tbl |>
-    dplyr::mutate(
-      neg_start = neg_tbl$start[neg_idx],
-      neg_end = neg_tbl$end[neg_idx]
-    ) |>
-    dplyr::group_by(cand_idx, tx_id_neg) |>
-    dplyr::mutate(
-      neg_outer_start = neg_start == min(neg_start),
-      neg_outer_end = neg_end == max(neg_end)
-    ) |>
-    dplyr::ungroup()
-
-  # cand side: the span of the exons of tx_id_cand that the neg exon
-  # overlaps. counted against every pos exon, not only the candidates,
-  # since a flank shared with another neg transcript is not a candidate
-  # but still marks the intron.
-  pos_hits <- GenomicRanges::findOverlaps(neg_exons, pos_exons)
-  pos_hit_idx <- S4Vectors::subjectHits(pos_hits)
-  pos_span <- tibble::tibble(
-    neg_idx = S4Vectors::queryHits(pos_hits),
-    tx_id_cand = pos_exons$tx_id[pos_hit_idx],
-    pos_start = GenomicRanges::start(pos_exons)[pos_hit_idx],
-    pos_end = GenomicRanges::end(pos_exons)[pos_hit_idx]
-  ) |>
-    dplyr::group_by(neg_idx, tx_id_cand) |>
-    dplyr::summarise(
-      pos_min_start = min(pos_start),
-      pos_max_end = max(pos_end),
-      .groups = "drop"
-    )
-
-  match_tbl <- match_tbl |>
-    dplyr::left_join(pos_span, by = c("neg_idx", "tx_id_cand")) |>
-    dplyr::mutate(
-      start_is_outer = neg_outer_start &
-        cand_tbl$start[cand_idx] == pos_min_start,
-      end_is_outer = neg_outer_end &
-        cand_tbl$end[cand_idx] == pos_max_end
-    ) |>
-    dplyr::mutate(
-      # this call only cares about one boundary: the donor for a5ss, the
-      # acceptor for a3ss. the donor is the exon end on "+" and the exon
-      # start on "-"; the acceptor is the other way round. nothing here
-      # looks at the *other* boundary, so an exon that moved both is
-      # reported by find_a5ss() and find_a3ss() alike.
+      # on "-" transcription runs the other way and the two swap. the
+      # overlaps are strand-aware, so the pos exon's strand is also its
+      # partner's. "*" falls through as "+". nothing here looks at the
+      # *other* boundary, so an exon that moved both is reported by
+      # find_a5ss() and find_a3ss() alike.
+      on_minus = as.character(pos_tbl$strand[pos_idx]) == "-",
       site_is_start = xor(!by_start, on_minus),
-      site_matches = dplyr::if_else(site_is_start, match_start, match_end),
-      site_is_outer = dplyr::if_else(
-        site_is_start, start_is_outer, end_is_outer
-      )
+      site_matches = dplyr::if_else(
+        site_is_start, pos_start == neg_start, pos_end == neg_end
+      ),
+      pos_flank_idx = pos_flank[pos_idx],
+      neg_flank_idx = neg_flank[neg_idx],
+      # the site exists on both sides of the pair. checking the pos exon
+      # alone would compare a real splice site against the partner's
+      # transcription start / end -- find_atss() / find_ates() report
+      # those -- and make the result depend on which transcript is up
+      site_exists = !is.na(pos_flank_idx) & !is.na(neg_flank_idx),
+      # neither flank may reach into the partner exon. if one does, the
+      # partner spans the intron at this site (find_ri() / find_si()) and
+      # the two boundaries differ because of that intron, not because a
+      # splice site moved. same test as find_se() applies to its flanks.
+      # the boundary on the other side of the exon is not affected, so an
+      # exon that retains an intron *and* moves its outer splice site is
+      # still reported
+      pos_flank_clear = pos_tbl$end[pos_flank_idx] < neg_start |
+        pos_tbl$start[pos_flank_idx] > neg_end,
+      neg_flank_clear = neg_tbl$end[neg_flank_idx] < pos_start |
+        neg_tbl$start[neg_flank_idx] > pos_end,
+      tx_id_neg = neg_tbl$tx_id[neg_idx]
     ) |>
     dplyr::filter(
-      # the site does not face a retained intron, and it moved
-      site_is_outer,
+      site_exists,
+      # the site moved
       !site_matches,
-      # and it exists on both sides of the pair: the last exon has no
-      # donor, the first no acceptor. checking the candidate alone would
-      # compare a real splice site against the partner's transcription
-      # start / end, and make the result depend on which transcript is up
-      if (by_start) {
-        !is_last & !neg_is_last
-      } else {
-        !is_first & !neg_is_first
-      }
+      # and it does not face a retained intron
+      pos_flank_clear,
+      neg_flank_clear
     )
 
   if (nrow(match_tbl) == 0L) {
     return(GenomicRanges::GRanges())
   }
 
-  # build result: one row per (candidate, moved boundary)
-  hits_tbl <- cand_tbl[match_tbl$cand_idx, ] |>
+  # build result: one row per (pos exon, neg transcript) pair
+  hits_tbl <- pos_tbl[match_tbl$pos_idx, ] |>
     dplyr::mutate(event_type = event_name, event_tx_id = match_tbl$tx_id_neg)
   # convert back to GRanges for return
   tbl_to_granges(hits_tbl, keep_cols, gr)
