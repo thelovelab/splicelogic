@@ -62,6 +62,7 @@ library(AnnotationHub)
 #> The following objects are masked from ‘package:dplyr’:
 #> 
 #>     ident, sql, sql_escape_ident, sql_escape_string
+#> Warning: replacing previous import ‘BiocGenerics::version’ by ‘BiocManager::version’ when loading ‘AnnotationHub’
 #> 
 #> Attaching package: ‘AnnotationHub’
 #> The following object is masked from ‘package:rtracklayer’:

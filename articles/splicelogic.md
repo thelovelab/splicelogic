@@ -315,10 +315,8 @@ with a *TxDb* object that *splicelogic* uses to look up the exon
 coordinates. A *TxDb* can be built from a GTF file (e.g. from Ensembl or
 GENCODE) using:
 
-``` r
-
-txdb <- txdbmaker::makeTxDbFromGFF("path/to/annotation.gtf")
-```
+\
+`txdb`` ``<-`` ``txdbmaker``::``makeTxDbFromGFF``(``"path/to/annotation.gtf"``)`
 
 Alternatively, if exon coordinates are already available as a *GRanges*,
 those can be passed directly.
@@ -346,21 +344,19 @@ Because BED can only carry chrom/start/end/name/score/strand, the ranges
 and the metadata columns *splicelogic* needs are stored in two files and
 joined on read — the same pairing used for the Jones exons below.
 
-``` r
-
-library(splicelogic)
-library(plyranges)
-dir <- system.file("extdata", package = "splicelogic")
-mock_exons <- plyranges::read_bed(file.path(dir, "mock_exons.bed.gz"))
-GenomicRanges::mcols(mock_exons) <- S4Vectors::DataFrame(
-  readr::read_tsv(
-    file.path(dir, "mock_exons_mcols.tsv.gz"),
-    show_col_types = FALSE
-  )
-)
-mock_exons |>
-  dplyr::select(-gene_id)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`splicelogic`](https://github.com/thelovelab/splicelogic)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`plyranges`](https://tidyomics.github.io/plyranges)`)`\
+`dir`` ``<-`` `[`system.file`](https://rdrr.io/r/base/system.file.html)`(``"extdata"``, package ``=`` ``"splicelogic"``)`\
+`mock_exons`` ``<-`` ``plyranges``::`[`read_bed`](https://tidyomics.github.io/plyranges/reference/io-bed-read.html)`(`[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dir``, ``"mock_exons.bed.gz"``)``)`\
+`GenomicRanges``::``mcols``(``mock_exons``)`` ``<-`` ``S4Vectors``::`[`DataFrame`](https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html)`(`\
+`  ``readr``::`[`read_tsv`](https://readr.tidyverse.org/reference/read_delim.html)`(`\
+`    `[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dir``, ``"mock_exons_mcols.tsv.gz"``)``,`\
+`    show_col_types ``=`` ``FALSE`\
+`  ``)`\
+`)`\
+`mock_exons`` ``|>`\
+`  ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``-``gene_id``)`
 
     ## GRanges object with 23 ranges and 3 metadata columns:
     ##        seqnames    ranges strand |       tx_id          exon_id exon_rank
@@ -382,11 +378,9 @@ mock_exons |>
 We can visualize the five transcripts with
 [`wiggleplotr::plotTranscripts()`](https://rdrr.io/pkg/wiggleplotr/man/plotTranscripts.html).
 
-``` r
-
-mock_grl <- S4Vectors::split(mock_exons, mock_exons$tx_id)
-wiggleplotr::plotTranscripts(mock_grl, rescale_introns = FALSE)
-```
+\
+`mock_grl`` ``<-`` ``S4Vectors``::`[`split`](https://rdrr.io/pkg/S4Vectors/man/splitAsList.html)`(``mock_exons``, ``mock_exons``$``tx_id``)`\
+`wiggleplotr``::`[`plotTranscripts`](https://rdrr.io/pkg/wiggleplotr/man/plotTranscripts.html)`(``mock_grl``, rescale_introns ``=`` ``FALSE``)`
 
 ![Exon structures of the five synthetic transcripts of
 gene_1](splicelogic_files/figure-html/mock-transcripts-1.png)
@@ -398,15 +392,13 @@ which makes it the anchor: we put it on its own in `down` and all of the
 remaining transcripts in `up`, so that each variant is read against the
 baseline.
 
-``` r
-
-mock <- prepare_exons_by_partition(
-  up = mock_exons |> dplyr::filter(tx_id != "tx_0"),
-  down = mock_exons |> dplyr::filter(tx_id == "tx_0")
-) |>
-  preprocess(coef_col = "estimate")
-mock |> head(2)
-```
+\
+`mock`` ``<-`` `[`prepare_exons_by_partition`](https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.md)`(`\
+`  up ``=`` ``mock_exons`` ``|>`` ``dplyr``::`[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``tx_id`` ``!=`` ``"tx_0"``)``,`\
+`  down ``=`` ``mock_exons`` ``|>`` ``dplyr``::`[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``tx_id`` ``==`` ``"tx_0"``)`\
+`)`` ``|>`\
+`  `[`preprocess`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)`(``coef_col ``=`` ``"estimate"``)`\
+`mock`` ``|>`` `[`head`](https://rdrr.io/r/utils/head.html)`(``2``)`
 
     ## GRanges object with 2 ranges and 8 metadata columns:
     ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
@@ -427,10 +419,8 @@ wraps the nine event finders ([the `find_*()`
 functions](#find-functions)), which can also be called one at a time —
 see [finding individual events](#individual-events) below:
 
-``` r
-
-mock_events <- mock |> find_all_events()
-```
+\
+`mock_events`` ``<-`` ``mock`` ``|>`` `[`find_all_events`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`
 
     ## Calculating skipped exon events...
 
@@ -452,10 +442,8 @@ mock_events <- mock |> find_all_events()
 
     ## Done! 5 events detected.
 
-``` r
-
-mock_events
-```
+\
+`mock_events`
 
     ## GRanges object with 5 ranges and 8 metadata columns:
     ##       seqnames    ranges strand |     gene_id       tx_id          exon_id
@@ -565,37 +553,31 @@ we have adjusted p-values allowing us to subset to an FDR bounded set,
 and that we have a numeric value indicating the direction of change
 associated with each transcript.
 
-``` r
-
-library(readr)
-# load DTU results
-dir <- system.file("extdata", package="splicelogic")
-dtu_table <- readr::read_delim(file.path(dir, "dtu_table.tsv"))
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`readr`](https://readr.tidyverse.org)`)`\
+`# load DTU results`\
+`dir`` ``<-`` `[`system.file`](https://rdrr.io/r/base/system.file.html)`(``"extdata"``, package``=``"splicelogic"``)`\
+`dtu_table`` ``<-`` ``readr``::`[`read_delim`](https://readr.tidyverse.org/reference/read_delim.html)`(`[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dir``, ``"dtu_table.tsv"``)``)`
 
 We load from BED file the 601 exons from GENCODE M31 annotation for the
 49 differential transcripts, and attach the metadata columns.
 
-``` r
-
-library(plyranges)
-exons_file <- "exons_M31.bed.gz"
-exons_mcols_file <- "exons_mcols.tsv.gz"
-exons <- plyranges::read_bed(file.path(dir, exons_file))
-mcols(exons) <- DataFrame(
-  readr::read_delim(file.path(dir, exons_mcols_file))
-)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`plyranges`](https://tidyomics.github.io/plyranges)`)`\
+`exons_file`` ``<-`` ``"exons_M31.bed.gz"`\
+`exons_mcols_file`` ``<-`` ``"exons_mcols.tsv.gz"`\
+`exons`` ``<-`` ``plyranges``::`[`read_bed`](https://tidyomics.github.io/plyranges/reference/io-bed-read.html)`(`[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dir``, ``exons_file``)``)`\
+[`mcols`](https://rdrr.io/pkg/S4Vectors/man/Vector-class.html)`(``exons``)`` ``<-`` `[`DataFrame`](https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html)`(`\
+`  ``readr``::`[`read_delim`](https://readr.tidyverse.org/reference/read_delim.html)`(`[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dir``, ``exons_mcols_file``)``)`\
+`)`
 
 Finally, we add `Seqinfo` for mm49, the reference mouse genome for
 GENCODE M31.
 
-``` r
-
-si <- Seqinfo::Seqinfo(genome="mm39")
-seqlevels(exons) <- seqlevels(si)
-seqinfo(exons) <- si
-```
+\
+`si`` ``<-`` ``Seqinfo``::`[`Seqinfo`](https://rdrr.io/pkg/Seqinfo/man/Seqinfo-class.html)`(``genome``=``"mm39"``)`\
+[`seqlevels`](https://rdrr.io/pkg/Seqinfo/man/seqinfo.html)`(``exons``)`` ``<-`` `[`seqlevels`](https://rdrr.io/pkg/Seqinfo/man/seqinfo.html)`(``si``)`\
+[`seqinfo`](https://rdrr.io/pkg/Seqinfo/man/seqinfo.html)`(``exons``)`` ``<-`` ``si`
 
 Next, we join the DTU results onto the `exons` GRanges. This is
 necessary for the *splicelogic* functions to know which transcripts are
@@ -606,33 +588,27 @@ The code below matches the transcript IDs in the `exons` metadata with
 the DTU results table, and then binds the two tables before assigning
 back to `exons`.
 
-``` r
-
-txp_idx <- match(exons$tx_id, dtu_table$tx_id)
-cols_to_add <- dtu_table[txp_idx, ] |> dplyr::select(-tx_id)
-merged_DF <- S4Vectors::cbind(mcols(exons), cols_to_add)
-mcols(exons) <- merged_DF
-```
+\
+`txp_idx`` ``<-`` `[`match`](https://rdrr.io/pkg/BiocGenerics/man/match.html)`(``exons``$``tx_id``, ``dtu_table``$``tx_id``)`\
+`cols_to_add`` ``<-`` ``dtu_table``[``txp_idx``, ``]`` ``|>`` ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``-``tx_id``)`\
+`merged_DF`` ``<-`` ``S4Vectors``::``cbind``(`[`mcols`](https://rdrr.io/pkg/S4Vectors/man/Vector-class.html)`(``exons``)``, ``cols_to_add``)`\
+[`mcols`](https://rdrr.io/pkg/S4Vectors/man/Vector-class.html)`(``exons``)`` ``<-`` ``merged_DF`
 
 As of Bioc 3.23 and *plyranges* version 1.32, the above code to add
 metadata columns from an additional table can be replaced with the
 following:
 
-``` r
-
-exons <- exons |>
-  plyranges::join_mcols_left(dtu_table, by = "tx_id")
-```
+\
+`exons`` ``<-`` ``exons`` ``|>`\
+`  ``plyranges``::`[`join_mcols_left`](https://tidyomics.github.io/plyranges/reference/mcols-joins.html)`(``dtu_table``, by ``=`` ``"tx_id"``)`
 
 *splicelogic* is designed to take as input the exons from significantly
 changed transcripts, so we first filter out transcripts that were not
 signficant at FDR 10%.
 
-``` r
-
-sig_exons <- exons |> filter(padj < .1)
-sig_exons |> head(2)
-```
+\
+`sig_exons`` ``<-`` ``exons`` ``|>`` `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``padj`` ``<`` ``.1``)`\
+`sig_exons`` ``|>`` `[`head`](https://rdrr.io/r/utils/head.html)`(``2``)`
 
     ## GRanges object with 2 ranges and 8 metadata columns:
     ##       seqnames            ranges strand |   exon_id            exon_name
@@ -657,12 +633,10 @@ The first step is to run
 which prepares the `exons` for event detection. This function checks the
 input data, ensures that the necessary columns are present:
 
-``` r
-
-sig_exons <- sig_exons |>
-  preprocess(coef_col = "estimate")
-sig_exons |> head(2)
-```
+\
+`sig_exons`` ``<-`` ``sig_exons`` ``|>`\
+`  `[`preprocess`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)`(``coef_col ``=`` ``"estimate"``)`\
+`sig_exons`` ``|>`` `[`head`](https://rdrr.io/r/utils/head.html)`(``2``)`
 
     ## GRanges object with 2 ranges and 11 metadata columns:
     ##       seqnames            ranges strand |   exon_id            exon_name
@@ -701,11 +675,9 @@ transcripts relative to down-regulated transcripts, across all genes. As
 these are skipped in the up-regulated transcripts, it is expected that
 the exons returned belong to down-regulated transcripts:
 
-``` r
-
-skipped <- sig_exons |> find_se()
-skipped
-```
+\
+`skipped`` ``<-`` ``sig_exons`` ``|>`` `[`find_se`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`\
+`skipped`
 
     ## GRanges object with 1 range and 11 metadata columns:
     ##       seqnames            ranges strand |   exon_id            exon_name
@@ -722,11 +694,9 @@ skipped
 
 **Included exons (IE)**
 
-``` r
-
-included <- sig_exons |> find_ie()
-included
-```
+\
+`included`` ``<-`` ``sig_exons`` ``|>`` `[`find_ie`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`\
+`included`
 
     ## GRanges object with 3 ranges and 11 metadata columns:
     ##       seqnames              ranges strand |   exon_id            exon_name
@@ -749,11 +719,9 @@ included
 
 **Mutually exclusive exons (MXE)**
 
-``` r
-
-mx <- sig_exons |> find_mxe()
-mx
-```
+\
+`mx`` ``<-`` ``sig_exons`` ``|>`` `[`find_mxe`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`\
+`mx`
 
     ## GRanges object with 2 ranges and 11 metadata columns:
     ##       seqnames            ranges strand |   exon_id            exon_name
@@ -776,11 +744,9 @@ mx
 Here we do not find retained introns, and the function returns an empty
 vector.
 
-``` r
-
-ri <- sig_exons |> find_ri()
-ri
-```
+\
+`ri`` ``<-`` ``sig_exons`` ``|>`` `[`find_ri`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`\
+`ri`
 
     ## GRanges object with 0 ranges and 0 metadata columns:
     ##    seqnames    ranges strand
@@ -790,11 +756,9 @@ ri
 
 **Alternative 5’ and 3’ splice sites (A5/3SS)**
 
-``` r
-
-a5ss <- sig_exons |> find_a5ss()
-a5ss
-```
+\
+`a5ss`` ``<-`` ``sig_exons`` ``|>`` `[`find_a5ss`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`\
+`a5ss`
 
     ## GRanges object with 1 range and 11 metadata columns:
     ##       seqnames            ranges strand |   exon_id            exon_name
@@ -809,11 +773,9 @@ a5ss
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
-``` r
-
-a3ss <- sig_exons |> find_a3ss()
-a3ss
-```
+\
+`a3ss`` ``<-`` ``sig_exons`` ``|>`` `[`find_a3ss`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`\
+`a3ss`
 
     ## GRanges object with 2 ranges and 11 metadata columns:
     ##       seqnames              ranges strand |   exon_id            exon_name
@@ -839,11 +801,9 @@ coordinate. Unlike the splice-site finders they do not require the two
 exons to overlap, so an alternative promoter somewhere else in the gene
 is still reported:
 
-``` r
-
-atss <- sig_exons |> find_atss()
-atss
-```
+\
+`atss`` ``<-`` ``sig_exons`` ``|>`` `[`find_atss`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`\
+`atss`
 
     ## GRanges object with 7 ranges and 11 metadata columns:
     ##       seqnames              ranges strand |   exon_id            exon_name
@@ -876,11 +836,9 @@ atss
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
-``` r
-
-ates <- sig_exons |> find_ates()
-ates
-```
+\
+`ates`` ``<-`` ``sig_exons`` ``|>`` `[`find_ates`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`\
+`ates`
 
     ## GRanges object with 6 ranges and 11 metadata columns:
     ##       seqnames              ranges strand |   exon_id            exon_name
@@ -914,10 +872,8 @@ ates
 
 The following function wraps the above ones to find all events.
 
-``` r
-
-all_events <- sig_exons |> find_all_events()
-```
+\
+`all_events`` ``<-`` ``sig_exons`` ``|>`` `[`find_all_events`](https://thelovelab.github.io/splicelogic/reference/find_events.md)`(``)`
 
     ## Calculating skipped exon events...
 
@@ -939,10 +895,8 @@ all_events <- sig_exons |> find_all_events()
 
     ## Done! 22 events detected.
 
-``` r
-
-all_events
-```
+\
+`all_events`
 
     ## GRanges object with 22 ranges and 11 metadata columns:
     ##        seqnames              ranges strand |   exon_id            exon_name
@@ -987,13 +941,11 @@ all_events
     ##   -------
     ##   seqinfo: 61 sequences (1 circular) from mm39 genome
 
-``` r
-
-barplot(
-  table(all_events$event_type), horiz=TRUE, las=1,
-  xlab="exons participating in an event"
-)
-```
+\
+[`barplot`](https://rdrr.io/r/graphics/barplot.html)`(`\
+`  `[`table`](https://rdrr.io/pkg/BiocGenerics/man/table.html)`(``all_events``$``event_type``)``, horiz``=``TRUE``, las``=``1``,`\
+`  xlab``=``"exons participating in an event"`\
+`)`
 
 ![Barplot of event
 types](splicelogic_files/figure-html/events-barplot-1.png)
@@ -1073,19 +1025,17 @@ the ranges and concatenate the partner transcript IDs. The new columns
 after grouping tell us the number of pairs (`n`) and collapse other
 informative variables.
 
-``` r
-
-# define a helper function
-my_paste <- \(x) paste(unique(x), collapse = ",")
-mock_events |>
-  dplyr::group_by(exon_id, event_type) |>
-  plyranges::reduce_ranges_directed(
-    n = plyranges::n(),
-    tx_id = my_paste(tx_id),
-    exon_rank = my_paste(exon_rank),
-    event_tx_id = my_paste(event_tx_id),
-  )
-```
+\
+`# define a helper function`\
+`my_paste`` ``<-`` \``(``x``)`` `[`paste`](https://rdrr.io/pkg/BiocGenerics/man/paste.html)`(`[`unique`](https://rdrr.io/pkg/BiocGenerics/man/unique.html)`(``x``)``, collapse ``=`` ``","``)`\
+`mock_events`` ``|>`\
+`  ``dplyr``::`[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``exon_id``, ``event_type``)`` ``|>`\
+`  ``plyranges``::`[`reduce_ranges_directed`](https://tidyomics.github.io/plyranges/reference/ranges-reduce.html)`(`\
+`    n ``=`` ``plyranges``::`[`n`](https://tidyomics.github.io/plyranges/reference/n.html)`(``)``,`\
+`    tx_id ``=`` ``my_paste``(``tx_id``)``,`\
+`    exon_rank ``=`` ``my_paste``(``exon_rank``)``,`\
+`    event_tx_id ``=`` ``my_paste``(``event_tx_id``)``,`\
+`  ``)`
 
     ## GRanges object with 3 ranges and 6 metadata columns:
     ##       seqnames    ranges strand |          exon_id  event_type         n
@@ -1106,11 +1056,9 @@ input exons. If not available, we can build it from the gene and the
 exon coordinates — the same exon then gets the same id in every
 transcript that contains it, as in this un-evaluated code chunk:
 
-``` r
-
-mock_events <- mock_events |>
-  dplyr::mutate(exon_id = paste0(gene_id, ":", start, "-", end))
-```
+\
+`mock_events`` ``<-`` ``mock_events`` ``|>`\
+`  ``dplyr``::`[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(``exon_id ``=`` `[`paste0`](https://rdrr.io/r/base/paste.html)`(``gene_id``, ``":"``, ``start``, ``"-"``, ``end``)``)`
 
 ## Identifying complex events
 
@@ -1130,16 +1078,14 @@ lead into complex splicicing events. To do this, we can group the events
 by transcript pairs, since each event is defined by a pair of
 transcripts.
 
-``` r
-
-events_by_pair <- mock_events |>
-  dplyr::mutate(
-    tx_pair = paste0(
-      pmin(tx_id, event_tx_id), "-", pmax(tx_id, event_tx_id)
-    )
-  )
-S4Vectors::split(events_by_pair, events_by_pair$tx_pair)
-```
+\
+`events_by_pair`` ``<-`` ``mock_events`` ``|>`\
+`  ``dplyr``::`[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    tx_pair ``=`` `[`paste0`](https://rdrr.io/r/base/paste.html)`(`\
+`      `[`pmin`](https://rdrr.io/pkg/BiocGenerics/man/Extremes.html)`(``tx_id``, ``event_tx_id``)``, ``"-"``, `[`pmax`](https://rdrr.io/pkg/BiocGenerics/man/Extremes.html)`(``tx_id``, ``event_tx_id``)`\
+`    ``)`\
+`  ``)`\
+`S4Vectors``::`[`split`](https://rdrr.io/pkg/S4Vectors/man/splitAsList.html)`(``events_by_pair``, ``events_by_pair``$``tx_pair``)`
 
     ## GRangesList object of length 4:
     ## $`tx_0-tx_1`
@@ -1192,18 +1138,16 @@ S4Vectors::split(events_by_pair, events_by_pair$tx_pair)
 splice site. Pulling the two transcripts of a pair back out of the
 preprocessed exons lets us look at the event in context:
 
-``` r
-
-ev <- events_by_pair |>
-  dplyr::filter(tx_pair == "tx_0-tx_5") |>
-  head(1)
-pair <- mock |>
-  dplyr::filter(tx_id %in% c(ev$tx_id, ev$event_tx_id))
-wiggleplotr::plotTranscripts(
-  S4Vectors::split(pair, pair$tx_id),
-  rescale_introns = FALSE
-)
-```
+\
+`ev`` ``<-`` ``events_by_pair`` ``|>`\
+`  ``dplyr``::`[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``tx_pair`` ``==`` ``"tx_0-tx_5"``)`` ``|>`\
+`  `[`head`](https://rdrr.io/r/utils/head.html)`(``1``)`\
+`pair`` ``<-`` ``mock`` ``|>`\
+`  ``dplyr``::`[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``tx_id`` `[`%in%`](https://rdrr.io/pkg/BiocGenerics/man/match.html)` `[`c`](https://rdrr.io/r/base/c.html)`(``ev``$``tx_id``, ``ev``$``event_tx_id``)``)`\
+`wiggleplotr``::`[`plotTranscripts`](https://rdrr.io/pkg/wiggleplotr/man/plotTranscripts.html)`(`\
+`  ``S4Vectors``::`[`split`](https://rdrr.io/pkg/S4Vectors/man/splitAsList.html)`(``pair``, ``pair``$``tx_id``)``,`\
+`  rescale_introns ``=`` ``FALSE`\
+`)`
 
 ![Exon structures of the transcript pair tx_0 and
 tx_5](splicelogic_files/figure-html/mock-pair-plot-1.png)
@@ -1232,39 +1176,38 @@ load a *TxDb* object. Typically, a user would supply their own GTF to
 we will load a pre-constructed *TxDb* from Bioconductor’s
 *AnnotationHub*.
 
-``` r
+\
+[`suppressPackageStartupMessages`](https://rdrr.io/r/base/message.html)`(``{`\
+`  `[`library`](https://rdrr.io/r/base/library.html)`(``AnnotationHub``)`\
+`  `[`library`](https://rdrr.io/r/base/library.html)`(`[`AnnotationDbi`](https://bioconductor.org/packages/AnnotationDbi)`)`\
+`  `[`library`](https://rdrr.io/r/base/library.html)`(`[`GenomicFeatures`](https://bioconductor.org/packages/GenomicFeatures)`)`\
+`}``)`
 
-suppressPackageStartupMessages({
-  library(AnnotationHub)
-  library(AnnotationDbi)
-  library(GenomicFeatures)
-})
-ah <- AnnotationHub()
-txdb <- ah[["AH75191"]] # GENCODE v32 (human)
-```
+    ## Warning: replacing previous import 'BiocGenerics::version' by
+    ## 'BiocManager::version' when loading 'AnnotationHub'
+
+\
+`ah`` ``<-`` `[`AnnotationHub`](https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html)`(``)`\
+`txdb`` ``<-`` ``ah``[[``"AH75191"``]``]`` ``# GENCODE v32 (human)`
 
     ## loading from cache
 
-``` r
-
-suppressPackageStartupMessages({
-  library(tibble)
-})
-txps <- txdb |>
-  AnnotationDbi::select(
-    keys(txdb, "TXID"), c("TXNAME","GENEID"), "TXID"
-  ) |>
-  tibble::as_tibble() |>
-  dplyr::select(tx_num = TXID, tx_id = TXNAME, gene_id = GENEID) |>
-  dplyr::filter(!is.na(gene_id))
-```
+\
+[`suppressPackageStartupMessages`](https://rdrr.io/r/base/message.html)`(``{`\
+`  `[`library`](https://rdrr.io/r/base/library.html)`(`[`tibble`](https://tibble.tidyverse.org/)`)`\
+`}``)`\
+`txps`` ``<-`` ``txdb`` ``|>`\
+`  ``AnnotationDbi``::`[`select`](https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html)`(`\
+`    `[`keys`](https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html)`(``txdb``, ``"TXID"``)``, `[`c`](https://rdrr.io/r/base/c.html)`(``"TXNAME"``,``"GENEID"``)``, ``"TXID"`\
+`  ``)`` ``|>`\
+`  ``tibble``::`[`as_tibble`](https://tibble.tidyverse.org/reference/as_tibble.html)`(``)`` ``|>`\
+`  ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``tx_num ``=`` ``TXID``, tx_id ``=`` ``TXNAME``, gene_id ``=`` ``GENEID``)`` ``|>`\
+`  ``dplyr``::`[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``!`[`is.na`](https://rdrr.io/r/base/NA.html)`(``gene_id``)``)`
 
     ## 'select()' returned 1:1 mapping between keys and columns
 
-``` r
-
-txps
-```
+\
+`txps`
 
     ## # A tibble: 227,462 × 3
     ##    tx_num tx_id             gene_id          
@@ -1281,16 +1224,14 @@ txps
     ## 10     10 ENST00000335137.4 ENSG00000186092.6
     ## # ℹ 227,452 more rows
 
-``` r
-
-# simulate DTU results
-sim_dtu_table <- txps |>
-  dplyr::mutate(
-    padj = runif(dplyr::n()),
-    effect_est = rnorm(dplyr::n())
-  )
-sim_dtu_table
-```
+\
+`# simulate DTU results`\
+`sim_dtu_table`` ``<-`` ``txps`` ``|>`\
+`  ``dplyr``::`[`mutate`](https://dplyr.tidyverse.org/reference/mutate.html)`(`\
+`    padj ``=`` `[`runif`](https://rdrr.io/r/stats/Uniform.html)`(``dplyr``::`[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``)``,`\
+`    effect_est ``=`` `[`rnorm`](https://rdrr.io/r/stats/Normal.html)`(``dplyr``::`[`n`](https://dplyr.tidyverse.org/reference/context.html)`(``)``)`\
+`  ``)`\
+`sim_dtu_table`
 
     ## # A tibble: 227,462 × 5
     ##    tx_num tx_id             gene_id              padj effect_est
@@ -1310,12 +1251,10 @@ sim_dtu_table
 We now build the exons *GRanges* with
 [`prepare_exons()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md):
 
-``` r
-
-human_exons <- prepare_exons(
-  txdb, sim_dtu_table, coef_col = "effect_est", verbose = TRUE
-)
-```
+\
+`human_exons`` ``<-`` `[`prepare_exons`](https://thelovelab.github.io/splicelogic/reference/prepare_exons.md)`(`\
+`  ``txdb``, ``sim_dtu_table``, coef_col ``=`` ``"effect_est"``, verbose ``=`` ``TRUE`\
+`)`
 
     ## Extracting exons from TxDb...
 
@@ -1325,12 +1264,10 @@ human_exons <- prepare_exons(
 
     ## Done. Returned 1372308 exon ranges from 227462 unique transcripts.
 
-``` r
-
-human_exons <- human_exons |>
-  filter(padj < .01) |>
-  preprocess(coef_col = "effect_est")
-```
+\
+`human_exons`` ``<-`` ``human_exons`` ``|>`\
+`  `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``padj`` ``<`` ``.01``)`` ``|>`\
+`  `[`preprocess`](https://thelovelab.github.io/splicelogic/reference/preprocess.md)`(``coef_col ``=`` ``"effect_est"``)`
 
 ### Manual construction
 
@@ -1341,38 +1278,32 @@ process or want to understand how exon ranges are built from a *TxDb*.
 
 The following extracts the exons grouped by transcript from the *TxDb*:
 
-``` r
-
-# extract exons as a GRangesList
-exons_list <- GenomicFeatures::exonsBy(
-  txdb,
-  by="tx"
-  )
-# Our DTU table aligns with txps, which aligns with the names
-# of the GRangesList. prepare_exons() handles alignment checks.
-names(exons_list) <- sim_dtu_table$tx_id
-```
+\
+`# extract exons as a GRangesList`\
+`exons_list`` ``<-`` ``GenomicFeatures``::`[`exonsBy`](https://rdrr.io/pkg/GenomicFeatures/man/transcriptsBy.html)`(`\
+`  ``txdb``,`\
+`  by``=``"tx"`\
+`  ``)`\
+`# Our DTU table aligns with txps, which aligns with the names`\
+`# of the GRangesList. prepare_exons() handles alignment checks.`\
+[`names`](https://rdrr.io/r/base/names.html)`(``exons_list``)`` ``<-`` ``sim_dtu_table``$``tx_id`
 
 Next, we flatten the exons:
 
-``` r
-
-flat_exons <- unlist(exons_list)
-# swap tx_id with exon_name as the names of the GRanges
-flat_exons$tx_id <- names(flat_exons) # store transcript ids
-names(flat_exons) <- flat_exons$exon_name
-```
+\
+`flat_exons`` ``<-`` `[`unlist`](https://rdrr.io/pkg/BiocGenerics/man/unlist.html)`(``exons_list``)`\
+`# swap tx_id with exon_name as the names of the GRanges`\
+`flat_exons``$``tx_id`` ``<-`` `[`names`](https://rdrr.io/r/base/names.html)`(``flat_exons``)`` ``# store transcript ids`\
+[`names`](https://rdrr.io/r/base/names.html)`(``flat_exons``)`` ``<-`` ``flat_exons``$``exon_name`
 
 Finally, we add the DTU results and gene ID:
 
-``` r
-
-txp_idx <- match(flat_exons$tx_id, sim_dtu_table$tx_id)
-cols_to_add <- sim_dtu_table[txp_idx,] |>
-  dplyr::select(-c(tx_id, tx_num))
-merged_DF <- cbind(mcols(flat_exons), cols_to_add)
-mcols(flat_exons) <- merged_DF
-```
+\
+`txp_idx`` ``<-`` `[`match`](https://rdrr.io/pkg/BiocGenerics/man/match.html)`(``flat_exons``$``tx_id``, ``sim_dtu_table``$``tx_id``)`\
+`cols_to_add`` ``<-`` ``sim_dtu_table``[``txp_idx``,``]`` ``|>`\
+`  ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``-`[`c`](https://rdrr.io/r/base/c.html)`(``tx_id``, ``tx_num``)``)`\
+`merged_DF`` ``<-`` `[`cbind`](https://rdrr.io/pkg/BiocGenerics/man/cbind.html)`(`[`mcols`](https://rdrr.io/pkg/S4Vectors/man/Vector-class.html)`(``flat_exons``)``, ``cols_to_add``)`\
+[`mcols`](https://rdrr.io/pkg/S4Vectors/man/Vector-class.html)`(``flat_exons``)`` ``<-`` ``merged_DF`
 
 ## Related tools
 
@@ -1406,14 +1337,12 @@ splicing event from the comparison of the two groups.
 
 ## Session info
 
-``` r
-
-sessionInfo()
-```
+\
+[`sessionInfo`](https://rdrr.io/r/utils/sessionInfo.html)`(``)`
 
     ## R version 4.6.1 (2026-06-24)
     ## Platform: x86_64-pc-linux-gnu
-    ## Running under: Ubuntu 24.04.4 LTS
+    ## Running under: Ubuntu 24.04.5 LTS
     ## 
     ## Matrix products: default
     ## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -1435,57 +1364,40 @@ sessionInfo()
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] tibble_3.3.1           GenomicFeatures_1.64.0 AnnotationDbi_1.74.0  
-    ##  [4] Biobase_2.72.0         AnnotationHub_4.2.2    BiocFileCache_3.2.0   
+    ##  [1] tibble_3.3.1           GenomicFeatures_1.65.0 AnnotationDbi_1.75.2  
+    ##  [4] Biobase_2.73.2         AnnotationHub_4.3.3    BiocFileCache_3.3.3   
     ##  [7] dbplyr_2.6.0           readr_2.2.0            splicelogic_1.1.5     
-    ## [10] plyranges_1.32.0       dplyr_1.2.1            GenomicRanges_1.64.0  
-    ## [13] Seqinfo_1.2.0          IRanges_2.46.0         S4Vectors_0.50.3      
-    ## [16] BiocGenerics_0.58.1    generics_0.1.4        
+    ## [10] plyranges_1.33.2       dplyr_1.2.1            GenomicRanges_1.65.4  
+    ## [13] Seqinfo_1.3.2          IRanges_2.47.5         S4Vectors_0.51.10     
+    ## [16] BiocGenerics_0.59.13   generics_0.1.4        
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] tidyselect_1.2.1            blob_1.3.0                 
-    ##  [3] farver_2.1.2                filelock_1.0.3             
-    ##  [5] Biostrings_2.80.2           S7_0.2.2                   
-    ##  [7] bitops_1.1-0                fastmap_1.2.0              
-    ##  [9] RCurl_1.98-1.20             GenomicAlignments_1.48.0   
-    ## [11] XML_3.99-0.25               digest_0.6.39              
-    ## [13] lifecycle_1.0.5             KEGGREST_1.52.2            
-    ## [15] RSQLite_3.53.3              magrittr_2.0.5             
-    ## [17] compiler_4.6.1              rlang_1.3.0                
-    ## [19] sass_0.4.10                 tools_4.6.1                
-    ## [21] utf8_1.2.6                  yaml_2.3.12                
-    ## [23] rtracklayer_1.72.0          knitr_1.52                 
-    ## [25] S4Arrays_1.12.1             labeling_0.4.3             
-    ## [27] htmlwidgets_1.6.4           bit_4.6.0                  
-    ## [29] curl_8.1.0                  DelayedArray_0.38.2        
-    ## [31] RColorBrewer_1.1-3          abind_1.4-8                
-    ## [33] BiocParallel_1.46.0         wiggleplotr_1.36.0         
-    ## [35] withr_3.0.3                 purrr_1.2.2                
-    ## [37] desc_1.4.3                  grid_4.6.1                 
-    ## [39] ggplot2_4.0.3               scales_1.4.0               
-    ## [41] SummarizedExperiment_1.42.0 cli_3.6.6                  
-    ## [43] rmarkdown_2.32              crayon_1.5.3               
-    ## [45] ragg_1.5.2                  otel_0.2.0                 
-    ## [47] httr_1.4.9                  tzdb_0.5.0                 
-    ## [49] rjson_0.2.23                DBI_1.3.0                  
-    ## [51] cachem_1.1.0                assertthat_0.2.1           
-    ## [53] parallel_4.6.1              BiocManager_1.30.27        
-    ## [55] XVector_0.52.0              restfulr_0.0.17            
-    ## [57] matrixStats_1.5.0           vctrs_0.7.3                
-    ## [59] Matrix_1.7-6                jsonlite_2.0.0             
-    ## [61] hms_1.1.4                   bit64_4.8.6                
-    ## [63] systemfonts_1.3.2           jquerylib_0.1.4            
-    ## [65] glue_1.8.1                  pkgdown_2.2.1              
-    ## [67] codetools_0.2-20            gtable_0.3.6               
-    ## [69] BiocVersion_3.23.1          GenomeInfoDb_1.48.0        
-    ## [71] BiocIO_1.22.0               UCSC.utils_1.8.0           
-    ## [73] pillar_1.11.1               rappdirs_0.3.4             
-    ## [75] htmltools_0.5.9             httr2_1.3.0                
-    ## [77] R6_2.6.1                    textshaping_1.0.5          
-    ## [79] vroom_1.7.1                 evaluate_1.0.5             
-    ## [81] lattice_0.23-1              png_0.1-9                  
-    ## [83] Rsamtools_2.28.0            cigarillo_1.2.1            
-    ## [85] memoise_2.0.1               bslib_0.12.0               
-    ## [87] SparseArray_1.12.3          xfun_0.62                  
-    ## [89] fs_2.1.0                    MatrixGenerics_1.24.0      
-    ## [91] pkgconfig_2.0.3
+    ##  [1] tidyselect_1.2.1         farver_2.1.2             blob_1.3.0              
+    ##  [4] filelock_1.0.3           Biostrings_2.81.9        S7_0.2.2                
+    ##  [7] bitops_1.1-0             fastmap_1.2.0            RCurl_1.98-1.20         
+    ## [10] GenomicAlignments_1.49.2 XML_3.99-0.25            digest_0.6.39           
+    ## [13] lifecycle_1.0.5          KEGGREST_1.53.6          RSQLite_3.53.3          
+    ## [16] magrittr_2.0.5           compiler_4.6.1           rlang_1.3.0             
+    ## [19] sass_0.4.10              tools_4.6.1              utf8_1.2.6              
+    ## [22] yaml_2.3.12              rtracklayer_1.73.0       knitr_1.52              
+    ## [25] labeling_0.4.3           htmlwidgets_1.6.4        bit_4.6.0               
+    ## [28] curl_8.1.0               RColorBrewer_1.1-3       BiocParallel_1.47.0     
+    ## [31] wiggleplotr_1.37.0       withr_3.0.3              purrr_1.2.2             
+    ## [34] desc_1.4.3               grid_4.6.1               ggplot2_4.0.3           
+    ## [37] scales_1.4.0             cli_3.6.6                rmarkdown_2.32          
+    ## [40] crayon_1.5.3             ragg_1.5.2               otel_0.2.0              
+    ## [43] httr_1.4.9               tzdb_0.5.0               rjson_0.2.23            
+    ## [46] BiocBaseUtils_1.15.1     DBI_1.3.0                cachem_1.1.0            
+    ## [49] assertthat_0.2.1         parallel_4.6.1           BiocManager_1.30.27     
+    ## [52] XVector_0.53.0           restfulr_0.0.17          vctrs_0.7.3             
+    ## [55] Matrix_1.7-6             jsonlite_2.0.0           hms_1.1.4               
+    ## [58] bit64_4.8.6              systemfonts_1.3.2        jquerylib_0.1.4         
+    ## [61] glue_1.8.1               pkgdown_2.2.1            codetools_0.2-20        
+    ## [64] gtable_0.3.6             BiocVersion_3.24.0       GenomeInfoDb_1.49.3     
+    ## [67] BiocIO_1.23.3            UCSC.utils_1.9.1         pillar_1.11.1           
+    ## [70] rappdirs_0.3.4           htmltools_0.5.9          R6_2.6.1                
+    ## [73] httr2_1.3.0              textshaping_1.0.5        vroom_1.7.1             
+    ## [76] evaluate_1.0.5           lattice_0.23-1           png_0.1-9               
+    ## [79] Rsamtools_2.29.0         cigarillo_1.3.1          memoise_2.0.1           
+    ## [82] bslib_0.12.0             xfun_0.62                fs_2.1.0                
+    ## [85] pkgconfig_2.0.3

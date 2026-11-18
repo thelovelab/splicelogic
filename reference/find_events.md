@@ -15,9 +15,12 @@ transcript retains, i.e. an intron that the up transcript splices out.
 to be shared with its partner, so an exon that moved both boundaries is
 reported as an a5ss *and* an a3ss. A first exon has no acceptor and a
 last exon has no donor, so those boundaries never produce an a3ss /
-a5ss; `find_atss()` / `find_ates()` report them instead by comparing
-where each transcript begins and ends. `exon_rank` runs in transcription
-order, so this holds on both strands.
+a5ss, whether the first or last exon belongs to the up or to the down
+transcript of the pair; `find_atss()` / `find_ates()` report them
+instead by comparing where each transcript begins and ends. The other
+boundary of a first or last exon is a real splice site and is still
+compared. `exon_rank` runs in transcription order, so this holds on both
+strands.
 
 When an exon overlaps two or more exons of its partner (a retained or
 spliced intron), the boundaries facing the intron are left to

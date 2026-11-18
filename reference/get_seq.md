@@ -48,12 +48,12 @@ range in `gr`, in the same order. Assign it onto `gr` (e.g.
 
   get_seq(gr, "hg38")
 #> DNAStringSet object of length 2:
-#>     width seq
+#>     width sequence
 #> [1]    50 GGTGGAGCGCGCCGCCACGGACCACGGGCGGGCTGGCGGGCGAGCGGCGA
 #> [2]    50 CCAGCTATTCTGGAGACTGAGGCAGGAGGATCACTTGAGCCCAGGAGTTT
   get_seq(gr, "hg38", as_rna = TRUE)
 #> RNAStringSet object of length 2:
-#>     width seq
+#>     width sequence
 #> [1]    50 GGUGGAGCGCGCCGCCACGGACCACGGGCGGGCUGGCGGGCGAGCGGCGA
 #> [2]    50 CCAGCUAUUCUGGAGACUGAGGCAGGAGGAUCACUUGAGCCCAGGAGUUU
 

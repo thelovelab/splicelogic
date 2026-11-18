@@ -21,10 +21,10 @@ Campillo B, Love M (2026). *splicelogic: splicelogic: differential
 transcripts to splice events*. R package version 1.1.5,
 <https://github.com/thelovelab/splicelogic>.
 
-    @Manual{,
-      title = {splicelogic: splicelogic: differential transcripts to splice events},
-      author = {Beatriz Campillo and Michael Love},
-      year = {2026},
-      note = {R package version 1.1.5},
-      url = {https://github.com/thelovelab/splicelogic},
-    }
+@Manual{,\
+  title = {splicelogic: splicelogic: differential transcripts to splice events},\
+  author = {Beatriz Campillo and Michael Love},\
+  year = {2026},\
+  note = {R package version 1.1.5},\
+  url = {https://github.com/thelovelab/splicelogic},\
+}
