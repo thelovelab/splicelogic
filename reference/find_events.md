@@ -2,14 +2,25 @@
 
 Functions to find different types of alternative splicing events from
 preprocessed GRanges exon data. Events include skipped exon (se),
-included exon (ie), mutatualy exclusive exons (mxe), retained intron
+included exon (ie), consecutive skipped exons (cse), consecutive
+included exons (cie), mutatualy exclusive exons (mxe), retained intron
 (ri), spliced intron (si), alternative 5' and 3' splice sites (a5ss /
 a3ss), and alternative transcription start and end sites (atss / ates).
 
-`find_ie()` and `find_si()` are the reverse of `find_se()` and
-`find_ri()`: the same comparison with the up and down transcripts
-swapped. A spliced intron is an intron of an up transcript that a down
-transcript retains, i.e. an intron that the up transcript splices out.
+`find_ie()`, `find_cie()` and `find_si()` are the reverse of
+`find_se()`, `find_cse()` and `find_ri()`: the same comparison with the
+up and down transcripts swapped. A spliced intron is an intron of an up
+transcript that a down transcript retains, i.e. an intron that the up
+transcript splices out.
+
+`find_se()` reports an exon skipped on its own: both of its neighbours
+are kept by the partner transcript. Two or more consecutive exons
+skipped together are reported by `find_cse()` instead, one row per exon,
+when the exons on either side of the run match rank-adjacent exons of
+the partner and no exon of the run overlaps the partner. The exons of
+one run are the consecutive `exon_rank` values within a `tx_id` /
+`event_tx_id` pair. A run that reaches the first or last exon is not a
+cse; `find_atss()` / `find_ates()` cover it.
 
 `find_a5ss()` / `find_a3ss()` do not require either boundary of an exon
 to be shared with its partner, so an exon that moved both boundaries is
@@ -44,6 +55,23 @@ find_skipped_exons(
 find_ie(gr, type = c("over", "boundary", "identical"), ...)
 
 find_included_exons(gr, type = c("over", "boundary", "identical"), ...)
+
+find_cse(gr, type = c("over", "boundary", "identical"), inverse = FALSE, ...)
+
+find_consecutive_skipped_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  inverse = FALSE,
+  ...
+)
+
+find_cie(gr, type = c("over", "boundary", "identical"), ...)
+
+find_consecutive_included_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  ...
+)
 
 find_mxe(gr, type = c("over", "boundary", "identical"), ...)
 
@@ -118,8 +146,9 @@ find_all_events(
 - inverse:
 
   If TRUE, swaps the up and down transcripts: `find_se()` then
-  identifies included exons instead of skipped exons, and `find_ri()`
-  spliced introns instead of retained introns.
+  identifies included exons instead of skipped exons, `find_cse()`
+  consecutive included exons, and `find_ri()` spliced introns instead of
+  retained introns.
 
 - ...:
 
@@ -141,8 +170,9 @@ additional metadata columns:
 
 - `event_type`:
 
-  The type of splicing event detected (e.g. `"se"`, `"ie"`, `"mxe"`,
-  `"ri"`, `"si"`, `"a5ss"`, `"a3ss"`, `"atss"`, `"ates"`).
+  The type of splicing event detected (e.g. `"se"`, `"ie"`, `"cse"`,
+  `"cie"`, `"mxe"`, `"ri"`, `"si"`, `"a5ss"`, `"a3ss"`, `"atss"`,
+  `"ates"`).
 
 - `event_tx_id`:
 
@@ -161,6 +191,11 @@ additional metadata columns:
 `find_se()`: skipped exons
 
 `find_ie()`: included exons
+
+`find_cse()`: consecutive skipped exons, i.e. runs of two or more
+adjacent exons skipped together, one row per exon
+
+`find_cie()`: consecutive included exons
 
 `find_mxe()`: mutually exclusive exons
 
@@ -202,6 +237,42 @@ find_se(gr, type = "boundary")
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
 find_ie(gr, type = "boundary")
+#> GRanges object with 0 ranges and 0 metadata columns:
+#>    seqnames    ranges strand
+#>       <Rle> <IRanges>  <Rle>
+#>   -------
+#>   seqinfo: no sequences
+
+
+# "up" skips two consecutive exons of "down"
+gr_cse <- data.frame(
+  seqnames = "chr1",
+  start = c(1, 21, 41, 61, 1, 61),
+  end = c(10, 30, 50, 70, 10, 70),
+  strand = "+",
+  gene_id = "g1",
+  tx_id = rep(c("down", "up"), c(4, 2)),
+  exon_rank = c(1:4, 1:2),
+  estimate = rep(c(-1, 1), c(4, 2))
+) |>
+  plyranges::as_granges() |>
+  preprocess(coef_col = "estimate")
+
+find_cse(gr_cse)
+#> GRanges object with 2 ranges and 7 metadata columns:
+#>       seqnames    ranges strand |     gene_id       tx_id exon_rank  estimate
+#>          <Rle> <IRanges>  <Rle> | <character> <character> <integer> <numeric>
+#>   [1]     chr1     21-30      + |          g1        down         2        -1
+#>   [2]     chr1     41-50      + |          g1        down         3        -1
+#>        event_type event_tx_id event_estimate
+#>       <character> <character>      <numeric>
+#>   [1]         cse          up              1
+#>   [2]         cse          up              1
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+# find_se() only reports an exon skipped on its own
+find_se(gr_cse)
 #> GRanges object with 0 ranges and 0 metadata columns:
 #>    seqnames    ranges strand
 #>       <Rle> <IRanges>  <Rle>
