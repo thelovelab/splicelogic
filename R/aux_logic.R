@@ -496,3 +496,118 @@ build_flank_match_tbl <- function(hits, pos_tbl) {
       gene_id_pos = pos_tbl$gene_id[pos_idx]
     )
 }
+
+# for find_skip_blocks
+utils::globalVariables(c(
+  "neg_tx", "pos_tx", "neg_rank", "pos_rank", "a", "b", "l", "r", "n_block",
+  "pos_idx", "neg_idx", "event_tx_id", "exon_rank", "tx_id", "estimate"
+))
+
+#' Find blocks of consecutive exons that a partner transcript skips
+#'
+#' Generalises the flank lookup of find_candidates_and_flanks(). There the
+#' flanks of a candidate are fixed at rank k - 1 and k + 1, so a candidate
+#' whose neighbour is skipped as well never finds its flank. Here the flanks
+#' are any two exons `a` < `b` of a neg transcript, and the exons between
+#' them form a block that a pos transcript skips when
+#' \itemize{
+#'   \item `a` matches an exon `l` of the pos transcript as an upstream
+#'     flank and `b` matches an exon `r` as a downstream flank, under `type`,
+#'   \item `l` and `r` are rank-adjacent, i.e. the pos transcript splices
+#'     straight from one flank to the other, and
+#'   \item no exon between `a` and `b` overlaps any exon of the pos
+#'     transcript.
+#' }
+#' A block of one exon is what find_se() reports; find_cse() keeps the
+#' blocks of two or more. `a`, `b`, `l` and `r` are exon ranks, which follow
+#' transcription, so nothing here depends on the strand beyond what
+#' find_matches_batch() already handles for `type = "boundary"`.
+#'
+#' @param gr A preprocessed GRanges object
+#' @param type Match type passed to find_matches_batch
+#' @param factor Sign multiplier: 1 for skipped blocks, -1 for the inverse
+#'   (included blocks)
+#' @param ... Passed to find_matches_batch for the flanks, and from there
+#'   to GenomicRanges::findOverlaps. Whether an exon inside a block is
+#'   absent from the pos transcript is always a plain overlap test.
+#' @return A tibble with one row per (exon in a block, pos transcript):
+#'   the columns of the neg exon plus `event_tx_id` and `n_block`, the
+#'   number of exons in its block. NULL if there are no pos or no neg exons.
+#' @noRd
+find_skip_blocks <- function(gr, type, factor, ...) {
+  # separate positive and negative exons
+  pos_exons <- gr |> dplyr::filter(sign(estimate) == 1 * factor)
+  neg_exons <- gr |> dplyr::filter(sign(estimate) == -1 * factor)
+
+  if (length(pos_exons) == 0L || length(neg_exons) == 0L) {
+    return(NULL)
+  }
+  pos_tbl <- tibble::as_tibble(pos_exons)
+  neg_tbl <- tibble::as_tibble(neg_exons)
+
+  # one row per (pos exon, neg exon) hit, as transcript and rank. hits are
+  # genome-wide, so they are restricted to the same gene here: every later
+  # step is keyed by the (neg_tx, pos_tx) pair, which keeps an overlapping
+  # gene from supplying a flank or from masking a skipped exon.
+  pair_tbl <- function(hits) {
+    tibble::tibble(
+      pos_idx = S4Vectors::queryHits(hits),
+      neg_idx = S4Vectors::subjectHits(hits)
+    ) |>
+      dplyr::filter(pos_tbl$gene_id[pos_idx] == neg_tbl$gene_id[neg_idx]) |>
+      dplyr::transmute(
+        neg_tx = neg_tbl$tx_id[neg_idx],
+        neg_rank = neg_tbl$exon_rank[neg_idx],
+        pos_tx = pos_tbl$tx_id[pos_idx],
+        pos_rank = pos_tbl$exon_rank[pos_idx]
+      )
+  }
+
+  # every neg exon as a possible upstream flank (a, matched to l) and as a
+  # possible downstream flank (b, matched to r)
+  left <- find_matches_batch(
+    pos_exons, neg_exons, type, side = "left", ...
+  ) |>
+    pair_tbl() |>
+    dplyr::rename(a = neg_rank, l = pos_rank)
+  right <- find_matches_batch(
+    pos_exons, neg_exons, type, side = "right", ...
+  ) |>
+    pair_tbl() |>
+    dplyr::rename(b = neg_rank, r = pos_rank)
+  # which neg exons each pos transcript overlaps at all
+  present <- GenomicRanges::findOverlaps(pos_exons, neg_exons) |>
+    pair_tbl() |>
+    dplyr::distinct(neg_tx, neg_rank, pos_tx)
+
+  # l and r rank-adjacent, as abs(l - r) == 1 in find_se(). written as two
+  # equality joins so the work stays proportional to the number of matches
+  # instead of pairing every left match with every right match.
+  right_adjacent <- dplyr::bind_rows(
+    right |> dplyr::mutate(l = r - 1L),
+    right |> dplyr::mutate(l = r + 1L)
+  )
+  blocks <- dplyr::inner_join(
+    left, right_adjacent,
+    by = c("neg_tx", "pos_tx", "l"),
+    relationship = "many-to-many"
+  ) |>
+    # at least one exon between the two flanks
+    dplyr::filter(b - a >= 2) |>
+    dplyr::distinct(neg_tx, pos_tx, a, b) |>
+    # and none of the exons in between is present in the pos transcript
+    dplyr::anti_join(
+      present,
+      by = dplyr::join_by(neg_tx, pos_tx, a < neg_rank, b > neg_rank)
+    )
+
+  # one row per exon inside a block
+  neg_tbl |>
+    dplyr::inner_join(
+      blocks,
+      by = dplyr::join_by(tx_id == neg_tx, exon_rank > a, exon_rank < b)
+    ) |>
+    dplyr::mutate(event_tx_id = pos_tx, n_block = b - a - 1L) |>
+    dplyr::arrange(tx_id, event_tx_id, exon_rank) |>
+    dplyr::select(-pos_tx, -a, -b)
+}

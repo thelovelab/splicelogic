@@ -6,6 +6,10 @@
 \alias{find_skipped_exons}
 \alias{find_ie}
 \alias{find_included_exons}
+\alias{find_cse}
+\alias{find_consecutive_skipped_exons}
+\alias{find_cie}
+\alias{find_consecutive_included_exons}
 \alias{find_mxe}
 \alias{find_mutually_exclusive_exons}
 \alias{find_ri}
@@ -35,6 +39,23 @@ find_skipped_exons(
 find_ie(gr, type = c("over", "boundary", "identical"), ...)
 
 find_included_exons(gr, type = c("over", "boundary", "identical"), ...)
+
+find_cse(gr, type = c("over", "boundary", "identical"), inverse = FALSE, ...)
+
+find_consecutive_skipped_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  inverse = FALSE,
+  ...
+)
+
+find_cie(gr, type = c("over", "boundary", "identical"), ...)
+
+find_consecutive_included_exons(
+  gr,
+  type = c("over", "boundary", "identical"),
+  ...
+)
 
 find_mxe(gr, type = c("over", "boundary", "identical"), ...)
 
@@ -95,8 +116,9 @@ same end). The strictest setting.}
 }}
 
 \item{inverse}{If TRUE, swaps the up and down transcripts: \code{find_se()}
-then identifies included exons instead of skipped exons, and \code{find_ri()}
-spliced introns instead of retained introns.}
+then identifies included exons instead of skipped exons, \code{find_cse()}
+consecutive included exons, and \code{find_ri()} spliced introns instead of
+retained introns.}
 
 \item{...}{Further arguments passed to \code{\link[GenomicRanges:findOverlaps]{GenomicRanges::findOverlaps()}}
 when matching flanking exons, e.g. \code{minoverlap = 5L} to require at least
@@ -111,7 +133,8 @@ A GRanges object with the detected exon ranges and the following
 additional metadata columns:
 \describe{
 \item{\code{event_type}}{The type of splicing event detected (e.g.
-\code{"se"}, \code{"ie"}, \code{"mxe"}, \code{"ri"}, \code{"si"},
+\code{"se"}, \code{"ie"}, \code{"cse"}, \code{"cie"},
+\code{"mxe"}, \code{"ri"}, \code{"si"},
 \code{"a5ss"}, \code{"a3ss"}, \code{"atss"}, \code{"ates"}).}
 \item{\code{event_tx_id}}{Transcript ID of the paired transcript
 involved in the event.}
@@ -124,6 +147,11 @@ carrying the corresponding value from the paired transcript.}
 \code{find_se()}: skipped exons
 
 \code{find_ie()}: included exons
+
+\code{find_cse()}: consecutive skipped exons, i.e. runs of two or more
+adjacent exons skipped together, one row per exon
+
+\code{find_cie()}: consecutive included exons
 
 \code{find_mxe()}: mutually exclusive exons
 
@@ -146,14 +174,25 @@ exons that end transcription at a different coordinate
 \description{
 Functions to find different types of alternative splicing
 events from preprocessed GRanges exon data. Events include skipped exon (se),
-included exon (ie), mutatualy exclusive exons (mxe), retained intron (ri),
+included exon (ie), consecutive skipped exons (cse), consecutive included
+exons (cie), mutatualy exclusive exons (mxe), retained intron (ri),
 spliced intron (si), alternative 5' and 3' splice sites (a5ss / a3ss), and
 alternative transcription start and end sites (atss / ates).
 
-\code{find_ie()} and \code{find_si()} are the reverse of \code{find_se()} and
-\code{find_ri()}: the same comparison with the up and down transcripts
-swapped. A spliced intron is an intron of an up transcript that a down
-transcript retains, i.e. an intron that the up transcript splices out.
+\code{find_ie()}, \code{find_cie()} and \code{find_si()} are the reverse of
+\code{find_se()}, \code{find_cse()} and \code{find_ri()}: the same comparison with the
+up and down transcripts swapped. A spliced intron is an intron of an up
+transcript that a down transcript retains, i.e. an intron that the up
+transcript splices out.
+
+\code{find_se()} reports an exon skipped on its own: both of its neighbours
+are kept by the partner transcript. Two or more consecutive exons skipped
+together are reported by \code{find_cse()} instead, one row per exon, when
+the exons on either side of the run match rank-adjacent exons of the
+partner and no exon of the run overlaps the partner. The exons of one
+run are the consecutive \code{exon_rank} values within a \code{tx_id} /
+\code{event_tx_id} pair. A run that reaches the first or last exon is not a
+cse; \code{find_atss()} / \code{find_ates()} cover it.
 
 \code{find_a5ss()} / \code{find_a3ss()} do not require either boundary of an exon
 to be shared with its partner, so an exon that moved both boundaries is
@@ -184,6 +223,26 @@ gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4) |>
 find_se(gr, type = "boundary")
 
 find_ie(gr, type = "boundary")
+
+
+# "up" skips two consecutive exons of "down"
+gr_cse <- data.frame(
+  seqnames = "chr1",
+  start = c(1, 21, 41, 61, 1, 61),
+  end = c(10, 30, 50, 70, 10, 70),
+  strand = "+",
+  gene_id = "g1",
+  tx_id = rep(c("down", "up"), c(4, 2)),
+  exon_rank = c(1:4, 1:2),
+  estimate = rep(c(-1, 1), c(4, 2))
+) |>
+  plyranges::as_granges() |>
+  preprocess(coef_col = "estimate")
+
+find_cse(gr_cse)
+
+# find_se() only reports an exon skipped on its own
+find_se(gr_cse)
 
 
 # detect mutually exclusive exons
