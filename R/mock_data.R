@@ -427,19 +427,167 @@ create_mock_data <- function(
 #' @description Functions to introduce specific types of alternative splicing
 #' events into mock GRanges data for testing purposes.
 #'
+#' Each generator edits the transcripts on one side and marks, in a
+#' logical `sim_event` column, the exons the matching finder should
+#' report. `generate_se()`, `generate_cse()`, `generate_ri()`,
+#' `generate_a5ss()`, `generate_a3ss()`, `generate_atss()` and
+#' `generate_ates()` edit up (positive `estimate`) transcripts.
+#' `generate_ie()`, `generate_cie()` and `generate_si()` are their mirrors:
+#' the same edit made to a down (negative `estimate`) transcript.
+#' `generate_mxe()` edits one transcript on each side.
+#'
 #' @param gr A GRanges object with metadata columns: 'exon_rank', 'gene_id',
 #' 'tx_id', and 'estimate'.
 NULL
 
-# for generate_se
+# for sample_per_gene
+utils::globalVariables(c("gene_id"))
+
+#' Draw one candidate per gene, then up to n_events of those genes
+#'
+#' The sampling every generator uses, so that `n_events` means the same
+#' thing for all of them: the number of genes that get an event. Two events
+#' in one gene would edit the same transcripts and could break each other
+#' (or one could hide the other), so a gene never gets more than one.
+#'
+#' @param candidates A data frame with a `gene_id` column and one row per
+#'   candidate edit
+#' @param n_events Number of events to generate
+#' @return At most `n_events` rows of `candidates`, from distinct genes.
+#'   Warns, and returns one row per gene, when fewer genes than `n_events`
+#'   have a candidate.
+#' @noRd
+sample_per_gene <- function(candidates, n_events) {
+  per_gene <- candidates |>
+    dplyr::group_by(gene_id) |>
+    dplyr::slice_sample(n = 1) |>
+    dplyr::ungroup()
+
+  n_available <- nrow(per_gene)
+  if (n_events > n_available) {
+    warning(
+      sprintf(
+        paste0(
+          "n_events (%d) exceeds available genes with candidates (%d); ",
+          "capping at %d."
+        ),
+        n_events, n_available, n_available
+      ),
+      call. = FALSE
+    )
+    n_events <- n_available
+  }
+
+  per_gene |>
+    dplyr::slice_sample(n = n_events)
+}
+
+# for generate_skip_block
 utils::globalVariables(c(
-  "estimate", "internal", "key", "gene_id", "sim_event", "coord_sig"
+  "estimate", "internal", "key", "gene_id", "sim_event", "coord_sig",
+  "tx_id", "exon_rank", "last_rank", "run_step"
 ))
 
+#' Remove a run of consecutive internal exons from one transcript per gene
+#'
+#' Shared implementation for generate_se() / generate_ie() /
+#' generate_cse() / generate_cie(). One run start is sampled per gene,
+#' up to `n_events` genes are drawn from that pool, and the `n_skip` exons
+#' from each start onwards (by rank) are removed from that transcript. The
+#' other transcripts of the gene keep those exons, so on the ones of the
+#' opposite sign they are the event, and that is where `sim_event` is set.
+#'
+#' Without `inverse` an up transcript loses the run, so a down transcript's
+#' copy is skipped (se / cse); with `inverse` a down transcript loses it,
+#' so an up transcript's copy is included (ie / cie). Every exon of the run
+#' must be internal, so that both flanks exist. Ranks follow transcription,
+#' so the run is the same on either strand.
+#'
+#' @param gr A GRanges object with an 'estimate' column
+#' @param n_events Number of events to generate, at most one per gene
+#' @param n_skip Number of consecutive exons removed
+#' @param inverse If TRUE, removes the run from a down transcript
+#' @return A GRanges object with the events introduced
+#' @noRd
+generate_skip_block <- function(gr, n_events = 1, n_skip = 1L,
+                                inverse = FALSE) {
+  # if preprocessing didn't happen
+  if (
+    !all(
+      c("key", "nexons", "internal") %in%
+        names(GenomicRanges::mcols(gr))
+    )
+  ) {
+    gr <- preprocess(gr, coef_col = "estimate")
+  }
+  # 1: the run is removed from an up transcript; -1: from a down one
+  factor <- if (inverse) -1 else 1
+
+  # candidate run starts: internal exons on the edited side whose whole run
+  # stays clear of the last exon. with n_skip = 1 the run filter is implied
+  # by `internal`, so this is every internal exon.
+  candidates <- tibble::as_tibble(gr) |>
+    dplyr::group_by(tx_id) |>
+    dplyr::mutate(last_rank = max(exon_rank)) |>
+    dplyr::ungroup() |>
+    dplyr::filter(
+      estimate * factor > 0 & internal == TRUE &
+        exon_rank + n_skip - 1L < last_rank
+    ) |>
+    dplyr::distinct(gene_id, key, tx_id, exon_rank)
+
+  # keys of the whole run, from each sampled start onwards by rank
+  run_keys <- candidates |>
+    sample_per_gene(n_events) |>
+    dplyr::cross_join(tibble::tibble(run_step = seq_len(n_skip) - 1L)) |>
+    dplyr::mutate(key = paste0(tx_id, "-", exon_rank + run_step)) |>
+    dplyr::pull(key)
+
+  event_coords <- gr |>
+    as.data.frame() |>
+    dplyr::filter(key %in% run_keys) |>
+    dplyr::mutate(coord_sig = paste(start, end, gene_id)) |>
+    dplyr::pull(coord_sig)
+
+  gr <- gr |>
+    dplyr::filter(!key %in% run_keys)
+  gr <- rerank_exons(gr)
+
+  # the event is on the opposite side, whose transcripts still have the run
+  gr <- gr |>
+    dplyr::mutate(
+      sim_event = estimate * factor < 0 &
+        paste(start, end, gene_id) %in% event_coords
+    )
+  return(gr)
+}
+
+#' Stop unless n_skip is a single whole number of at least 2
+#' @param n_skip Value passed to generate_cse() / generate_cie()
+#' @return `n_skip` as an integer, invisibly
+#' @noRd
+check_n_skip <- function(n_skip) {
+  if (
+    !is.numeric(n_skip) || length(n_skip) != 1L || is.na(n_skip) ||
+      n_skip < 2 || n_skip %% 1 != 0
+  ) {
+    stop(
+      "n_skip must be a single whole number of at least 2; a run of one ",
+      "exon is what generate_se() / generate_ie() make.",
+      call. = FALSE
+    )
+  }
+  invisible(as.integer(n_skip))
+}
+
 #' @rdname generate_events
-#' @param n_events Number of events to generate
+#' @param n_events Number of events to generate, i.e. the number of genes
+#'   that get one. Every generator puts at most one event in a gene, so two
+#'   events never edit the same transcripts. When fewer genes than
+#'   `n_events` have a candidate, it warns and makes one in each of those.
 #' @return `generate_se()`: A GRanges object with skipped exon
-#' events introduced
+#' events introduced: an internal exon is removed from one up transcript
+#' per gene
 #' @export
 #' @examples
 #'
@@ -449,44 +597,63 @@ utils::globalVariables(c(
 #' generate_se(gr, n_events = 1)
 #'
 generate_se <- function(gr, n_events = 1) {
-  # one candidate key per gene (sampled from internal positive-estimate exons),
-  # then draw up to n_events genes from that pool
-  candidates <- gr |>
-    as.data.frame() |>
-    dplyr::filter(estimate > 0 & internal == TRUE) |>
-    dplyr::distinct(gene_id, key) |>
-    dplyr::group_by(gene_id) |>
-    dplyr::slice_sample(n = 1) |>
-    dplyr::ungroup()
+  generate_skip_block(gr, n_events, n_skip = 1L)
+}
 
-  n_available <- nrow(candidates)
-  if (n_events > n_available) {
-    warning(sprintf(
-      "n_events (%d) exceeds available genes with candidates (%d); capping at %d.",
-      n_events, n_available, n_available
-    ))
-    n_events <- n_available
-  }
+#' @rdname generate_events
+#' @return `generate_ie()`: A GRanges object with included exon events
+#' introduced: an internal exon is removed from one down transcript per
+#' gene, so the up transcripts include it
+#' @export
+#' @examples
+#'
+#' gr <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+#' )
+#' generate_ie(gr, n_events = 1)
+#'
+generate_ie <- function(gr, n_events = 1) {
+  generate_skip_block(gr, n_events, n_skip = 1L, inverse = TRUE)
+}
 
-  se_exons_key <- candidates |>
-    dplyr::slice_sample(n = n_events) |>
-    dplyr::pull(key)
+#' @rdname generate_events
+#' @param n_skip Number of consecutive exons skipped (or included) together,
+#'   at least 2. Every exon of the run is internal, so a transcript needs
+#'   at least `n_skip + 2` exons to host one.
+#' @return `generate_cse()`: A GRanges object with consecutive skipped exon
+#' events introduced: a run of `n_skip` internal exons is removed from one
+#' up transcript per gene
+#' @export
+#' @examples
+#'
+#' gr <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+#' )
+#' generate_cse(gr, n_events = 1)
+#'
+#' # a run of three needs at least five exons
+#' generate_cse(gr, n_events = 1, n_skip = 3)
+#'
+generate_cse <- function(gr, n_events = 1, n_skip = 2) {
+  n_skip <- check_n_skip(n_skip)
+  generate_skip_block(gr, n_events, n_skip)
+}
 
-  event_coords <- gr |>
-    as.data.frame() |>
-    dplyr::filter(key %in% se_exons_key) |>
-    dplyr::mutate(coord_sig = paste(start, end, gene_id)) |>
-    dplyr::pull(coord_sig)
-
-  gr <- gr |>
-    dplyr::filter(!key %in% se_exons_key)
-  gr <- rerank_exons(gr)
-
-  gr <- gr |>
-    dplyr::mutate(
-      sim_event = estimate < 0 & paste(start, end, gene_id) %in% event_coords
-    )
-  return(gr)
+#' @rdname generate_events
+#' @return `generate_cie()`: A GRanges object with consecutive included exon
+#' events introduced: a run of `n_skip` internal exons is removed from one
+#' down transcript per gene, so the up transcripts include it
+#' @export
+#' @examples
+#'
+#' gr <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+#' )
+#' generate_cie(gr, n_events = 1)
+#'
+generate_cie <- function(gr, n_events = 1, n_skip = 2) {
+  n_skip <- check_n_skip(n_skip)
+  generate_skip_block(gr, n_events, n_skip, inverse = TRUE)
 }
 
 # for generate_mxe
@@ -496,9 +663,10 @@ utils::globalVariables(c(
 ))
 
 #' @rdname generate_events
-#' @param n_events Number of events to generate
 #' @return `generate_mxe()`: A GRanges object with mutually exclusive exon
-#' events introduced
+#' events introduced: a down transcript loses internal exon k + 1 and an up
+#' transcript of the same gene loses exon k, so each keeps the exon the
+#' other lacks. One pair per gene.
 #' @export
 #' @examples
 #'
@@ -508,32 +676,44 @@ utils::globalVariables(c(
 #' generate_mxe(gr, n_events = 1)
 #'
 generate_mxe <- function(gr, n_events = 1) {
+  # if preprocessing didn't happen
+  if (
+    !all(
+      c("key", "nexons", "internal") %in%
+        names(GenomicRanges::mcols(gr))
+    )
+  ) {
+    gr <- preprocess(gr, coef_col = "estimate")
+  }
+
   # Find consecutive pairs of internal exons from neg transcripts
   # Both rank k and rank k+1 must be internal
   neg_internal <- gr |>
     as.data.frame() |>
     dplyr::filter(estimate < 0 & internal == TRUE)
 
-  # Find rank k where rank k+1 is also internal in same transcript
-  mx_candidates <- neg_internal |>
+  pos_txs <- gr |>
+    as.data.frame() |>
+    dplyr::filter(estimate > 0) |>
+    dplyr::distinct(gene_id, tx_id) |>
+    dplyr::rename(pos_tx_id = tx_id)
+
+  # candidate ranks k: rank k+1 is also internal in the same neg
+  # transcript, and the gene has a pos transcript to pair with
+  candidates <- neg_internal |>
     dplyr::mutate(
       next_key = paste0(tx_id, "-", exon_rank + 1L)
     ) |>
     dplyr::filter(next_key %in% neg_internal$key) |>
-    dplyr::slice_sample(n = n_events)
+    dplyr::semi_join(pos_txs, by = "gene_id") |>
+    dplyr::select(gene_id, tx_id, exon_rank)
 
   # Pair each selected neg transcript with one pos transcript from same gene
-  gr_df <- as.data.frame(gr)
-
-  pos_txs <- gr_df |>
-    dplyr::filter(estimate > 0) |>
-    dplyr::distinct(gene_id, tx_id)
-
-  mx_pairs <- mx_candidates |>
-    dplyr::select(gene_id, neg_tx_id = tx_id, exon_rank) |>
+  mx_pairs <- candidates |>
+    sample_per_gene(n_events) |>
+    dplyr::rename(neg_tx_id = tx_id) |>
     dplyr::inner_join(pos_txs, by = "gene_id") |>
-    dplyr::rename(pos_tx_id = tx_id) |>
-    dplyr::group_by(neg_tx_id, exon_rank) |>
+    dplyr::group_by(gene_id) |>
     dplyr::slice_sample(n = 1) |>
     dplyr::ungroup()
 
@@ -543,57 +723,75 @@ generate_mxe <- function(gr, n_events = 1) {
   pos_remove <- paste0(mx_pairs$pos_tx_id, "-", mx_pairs$exon_rank)
   neg_remove <- paste0(mx_pairs$neg_tx_id, "-", mx_pairs$exon_rank + 1L)
 
-  # pos-removed exon coords survive in neg; neg-removed exon coords survive in pos
-  pos_removed_coords <- gr |>
+  # the event is the exon each side of the pair keeps: rank k of the neg
+  # transcript and rank k+1 of the pos one. recorded by transcript and
+  # coordinates rather than by key, because the re-rank below changes keys
+  event_keys <- c(
+    paste0(mx_pairs$neg_tx_id, "-", mx_pairs$exon_rank),
+    paste0(mx_pairs$pos_tx_id, "-", mx_pairs$exon_rank + 1L)
+  )
+  event_coords <- gr |>
     as.data.frame() |>
-    dplyr::filter(key %in% pos_remove) |>
-    dplyr::mutate(coord_sig = paste(start, end, gene_id)) |>
-    dplyr::pull(coord_sig)
-  neg_removed_coords <- gr |>
-    as.data.frame() |>
-    dplyr::filter(key %in% neg_remove) |>
-    dplyr::mutate(coord_sig = paste(start, end, gene_id)) |>
+    dplyr::filter(key %in% event_keys) |>
+    dplyr::mutate(coord_sig = paste(tx_id, start, end)) |>
     dplyr::pull(coord_sig)
 
   gr <- gr |>
     dplyr::filter(!key %in% c(pos_remove, neg_remove))
   gr <- rerank_exons(gr)
 
+  # only the edited pair is marked. other isoforms of the gene that still
+  # have both exons are an se / ie against the pair, not an mxe.
   gr <- gr |>
-    dplyr::mutate(
-      sim_event = (estimate < 0 & paste(start, end, gene_id) %in% pos_removed_coords) |
-                  (estimate > 0 & paste(start, end, gene_id) %in% neg_removed_coords)
-    )
+    dplyr::mutate(sim_event = paste(tx_id, start, end) %in% event_coords)
   return(gr)
 }
 
-# for generate_ri
+# for generate_retained_intron
 utils::globalVariables(c("estimate", "strand", "coord_sig"))
 
-#' @rdname generate_events
-#' @param n_events Number of events to generate
-#' @return `generate_ri()`: A GRanges object with retained intron
-#' events introduced
-#' @examples
+#' Fuse exons 2 and 3 of a transcript, retaining the intron between them
 #'
-#' gr <- create_mock_data(
-#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
-#' )
-#' generate_ri(gr, n_events = 1)
+#' Shared implementation for generate_ri() / generate_si(). One transcript
+#' on the edited side is drawn per gene, then up to `n_events` of those
+#' genes, and in each one
+#' exon rank 2 is extended over rank 3, which is then dropped. The fused
+#' exon retains the intron that the transcripts of the opposite sign still
+#' splice out, and that is where `sim_event` is set.
 #'
-#' @export
-generate_ri <- function(gr, n_events = 1) {
+#' Without `inverse` an up transcript retains the intron (ri); with
+#' `inverse` a down transcript does, so the up transcripts splice it out
+#' (si). Either way the event is reported on the fused exon itself.
+#'
+#' @param gr A GRanges object with an 'estimate' column
+#' @param n_events Number of events to generate, at most one per gene
+#' @param inverse If TRUE, fuses the exons of a down transcript
+#' @return A GRanges object with the events introduced
+#' @noRd
+generate_retained_intron <- function(gr, n_events = 1, inverse = FALSE) {
+  # if preprocessing didn't happen
+  if (
+    !all(
+      c("key", "nexons", "internal") %in%
+        names(GenomicRanges::mcols(gr))
+    )
+  ) {
+    gr <- preprocess(gr, coef_col = "estimate")
+  }
+  # 1: an up transcript retains the intron; -1: a down one does
+  factor <- if (inverse) -1 else 1
+
   # generate retained introns by creating a new exon that
   # starts with exonrank x and ends at exons rank x+1 for each transcript
-  # only in transcripts with estimate > 0
+  # only in transcripts on the edited side
   # then remove the original exons being retained and
-  # add the new retained intron exon with estimate = 0
+  # add the new retained intron exon
   # and re-rank accordingly
   ri_tx_ids <- gr |>
     as.data.frame() |>
-    dplyr::filter(estimate > 0) |>
-    dplyr::distinct(tx_id) |>
-    dplyr::slice_sample(n = n_events) |>
+    dplyr::filter(estimate * factor > 0) |>
+    dplyr::distinct(gene_id, tx_id) |>
+    sample_per_gene(n_events) |>
     dplyr::pull(tx_id)
 
   exon_idx <- 2
@@ -634,11 +832,44 @@ generate_ri <- function(gr, n_events = 1) {
     plyranges::bind_ranges(new_txps_with_ri)
   gr <- rerank_exons(gr)
 
+  # the event is the fused exon itself, on the edited side
   gr <- gr |>
     dplyr::mutate(
-      sim_event = estimate > 0 & paste(start, end, gene_id) %in% ri_event_coords
+      sim_event = estimate * factor > 0 &
+        paste(start, end, gene_id) %in% ri_event_coords
     )
   return(gr)
+}
+
+#' @rdname generate_events
+#' @return `generate_ri()`: A GRanges object with retained intron
+#' events introduced: exons 2 and 3 of one up transcript per gene are fused
+#' @examples
+#'
+#' gr <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+#' )
+#' generate_ri(gr, n_events = 1)
+#'
+#' @export
+generate_ri <- function(gr, n_events = 1) {
+  generate_retained_intron(gr, n_events)
+}
+
+#' @rdname generate_events
+#' @return `generate_si()`: A GRanges object with spliced intron events
+#' introduced: exons 2 and 3 of one down transcript per gene are fused, so
+#' the up transcripts splice out the intron it retains
+#' @examples
+#'
+#' gr <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+#' )
+#' generate_si(gr, n_events = 1)
+#'
+#' @export
+generate_si <- function(gr, n_events = 1) {
+  generate_retained_intron(gr, n_events, inverse = TRUE)
 }
 
 # for rerank_exons
@@ -669,9 +900,9 @@ rerank_exons <- function(gr) {
 utils::globalVariables(c("estimate", "internal", "key"))
 
 #' @rdname generate_events
-#' @param n_events Number of events to generate
 #' @return `generate_a5ss()`: A GRanges object with alternative 5' splice site
-#' events introduced
+#' events introduced: the donor of an internal exon is moved by 2 bp in one
+#' up transcript per gene
 #' @export
 #' @examples
 #'
@@ -692,13 +923,13 @@ generate_a5ss <- function(gr, n_events = 1) {
   }
 
   # generate a5ss by modifying end() of random internal
-  # exons in transcripts with estimate > 0
+  # exons in transcripts with estimate > 0, one exon per gene
   a5ss_exon_key <- gr |>
     as.data.frame() |>
     # TO DO: include first and last exons
     dplyr::filter(estimate > 0 & internal == TRUE) |>
-    dplyr::distinct(key) |>
-    dplyr::slice_sample(n = n_events) |>
+    dplyr::distinct(gene_id, key) |>
+    sample_per_gene(n_events) |>
     dplyr::pull(key)
 
   # the donor (5' splice site) is the exon end on "+" but the exon start
@@ -731,9 +962,9 @@ generate_a5ss <- function(gr, n_events = 1) {
 utils::globalVariables(c("estimate", "internal", "key"))
 
 #' @rdname generate_events
-#' @param n_events Number of events to generate
 #' @return `generate_a3ss()`: A GRanges object with alternative 3' splice site
-#' events introduced
+#' events introduced: the acceptor of an internal exon is moved by 2 bp in
+#' one up transcript per gene
 #' @export
 #' @examples
 #'
@@ -754,12 +985,12 @@ generate_a3ss <- function(gr, n_events = 1) {
   }
 
   # generate a3ss by modifying start() of random internal
-  # exons in transcripts with estimate > 0
+  # exons in transcripts with estimate > 0, one exon per gene
   a3ss_exon_key <- gr |>
     as.data.frame() |>
     dplyr::filter(estimate > 0 & internal == TRUE) |>
-    dplyr::distinct(key) |>
-    dplyr::slice_sample(n = n_events) |>
+    dplyr::distinct(gene_id, key) |>
+    sample_per_gene(n_events) |>
     dplyr::pull(key)
 
   # the acceptor (3' splice site) is the exon start on "+" but the exon
@@ -808,7 +1039,7 @@ utils::globalVariables(c(
 #'   is the case an overlap-based finder could never reach.
 #'
 #' @param gr A GRanges object with an 'estimate' column
-#' @param n_events Number of events to generate
+#' @param n_events Number of events to generate, at most one per gene
 #' @param at_start If TRUE, alters the first exon; if FALSE, the last
 #' @param mode Either `"shift"` or `"drop"`, as above
 #' @return A GRanges object with the events introduced
@@ -826,9 +1057,10 @@ generate_alt_ts <- function(gr, n_events = 1, at_start = TRUE,
     gr <- preprocess(gr, coef_col = "estimate")
   }
 
-  # the first / last exon of each positive-coefficient transcript. the
-  # 'internal' mcol is no help: it marks both terminal exons at once.
-  # min/max rather than 1/nexons so CDS-style offset ranks still work.
+  # the first / last exon of each positive-coefficient transcript, then one
+  # of those per gene. the 'internal' mcol is no help: it marks both
+  # terminal exons at once. min/max rather than 1/nexons so CDS-style
+  # offset ranks still work.
   alt_exon_key <- tibble::as_tibble(gr) |>
     dplyr::group_by(tx_id) |>
     dplyr::mutate(
@@ -840,8 +1072,8 @@ generate_alt_ts <- function(gr, n_events = 1, at_start = TRUE,
     ) |>
     dplyr::ungroup() |>
     dplyr::filter(estimate > 0 & terminal) |>
-    dplyr::distinct(key) |>
-    dplyr::slice_sample(n = n_events) |>
+    dplyr::distinct(gene_id, key) |>
+    sample_per_gene(n_events) |>
     dplyr::pull(key)
 
   if (mode == "drop") {
@@ -899,13 +1131,14 @@ generate_alt_ts <- function(gr, n_events = 1, at_start = TRUE,
 }
 
 #' @rdname generate_events
-#' @param n_events Number of events to generate
 #' @param mode How to move the site: `"shift"` moves the terminal exon's
 #'   outer boundary (so it still overlaps its partner), `"drop"` removes
 #'   the terminal exon and re-ranks (so the new terminal exon does not
 #'   overlap its partner at all).
 #' @return `generate_atss()`: A GRanges object with alternative
-#' transcription start site events introduced
+#' transcription start site events introduced: the first exon of one up
+#' transcript per gene is shortened at its outer end (`"shift"`) or removed
+#' (`"drop"`)
 #' @export
 #' @examples
 #'
@@ -923,7 +1156,9 @@ generate_atss <- function(gr, n_events = 1, mode = c("shift", "drop")) {
 
 #' @rdname generate_events
 #' @return `generate_ates()`: A GRanges object with alternative
-#' transcription end site events introduced
+#' transcription end site events introduced: the last exon of one up
+#' transcript per gene is shortened at its outer end (`"shift"`) or removed
+#' (`"drop"`)
 #' @export
 #' @examples
 #'

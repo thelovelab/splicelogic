@@ -105,7 +105,14 @@ utils::globalVariables(c(
 #' # this should find the skipped exon events we generated
 #' find_se(gr, type = "boundary")
 #'
-#' find_ie(gr, type = "boundary")
+#' # included exons: the same edit made to a down transcript
+#' gr_ie <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+#' ) |>
+#'   preprocess(coef_col = "estimate") |>
+#'   generate_ie(n_events = 1)
+#'
+#' find_ie(gr_ie, type = "boundary")
 #'
 find_se <- function(
   gr,
@@ -191,23 +198,16 @@ utils::globalVariables(c("n_block", "event_type"))
 #'   adjacent exons skipped together, one row per exon
 #' @examples
 #'
-#' # "up" skips two consecutive exons of "down"
-#' gr_cse <- data.frame(
-#'   seqnames = "chr1",
-#'   start = c(1, 21, 41, 61, 1, 61),
-#'   end = c(10, 30, 50, 70, 10, 70),
-#'   strand = "+",
-#'   gene_id = "g1",
-#'   tx_id = rep(c("down", "up"), c(4, 2)),
-#'   exon_rank = c(1:4, 1:2),
-#'   estimate = rep(c(-1, 1), c(4, 2))
+#' # an up transcript skips a run of two consecutive exons
+#' gr_cse <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
 #' ) |>
-#'   plyranges::as_granges() |>
-#'   preprocess(coef_col = "estimate")
+#'   preprocess(coef_col = "estimate") |>
+#'   generate_cse(n_events = 1, n_skip = 2)
 #'
 #' find_cse(gr_cse)
 #'
-#' # find_se() only reports an exon skipped on its own
+#' # find_se() only reports an exon skipped on its own, so finds nothing
 #' find_se(gr_cse)
 #'
 #' @export
@@ -253,6 +253,17 @@ find_consecutive_skipped_exons <- find_cse
 
 #' @rdname find_events
 #' @return `find_cie()`: consecutive included exons
+#' @examples
+#'
+#' # an up transcript includes a run of two exons that a down one skips
+#' gr_cie <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+#' ) |>
+#'   preprocess(coef_col = "estimate") |>
+#'   generate_cie(n_events = 1, n_skip = 2)
+#'
+#' find_cie(gr_cie)
+#'
 #' @export
 find_cie <- function(gr, type = c("over", "boundary", "identical"), ...) {
   find_cse(gr, type, inverse = TRUE, ...)
@@ -392,9 +403,14 @@ utils::globalVariables(c(
 #' 
 #' find_ri(gr_ri)
 #'
-#' # the same data with the signs flipped: the introns retained above are
-#' # now spliced out by the up transcripts
-#' gr_si <- gr_ri |> dplyr::mutate(estimate = -estimate)
+#' # spliced introns: the same edit made to a down transcript, so the up
+#' # transcripts splice out the intron it retains
+#' gr_si <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+#' ) |>
+#'   preprocess(coef_col = "estimate") |>
+#'   generate_si(n_events = 1)
+#'
 #' find_si(gr_si)
 #'
 #' @export
@@ -751,20 +767,14 @@ find_alt_ts <- function(gr, at_start = TRUE) {
 #'   exons that begin transcription at a different coordinate
 #' @examples
 #'
-#' gr_tss <- data.frame(
-#'   seqnames = "chr1",
-#'   start = c(1, 21, 41, 5, 21, 41),
-#'   end = c(10, 30, 50, 10, 30, 50),
-#'   strand = "+",
-#'   gene_id = "g1",
-#'   tx_id = rep(c("down", "up"), each = 3),
-#'   exon_rank = rep(seq_len(3), 2),
-#'   estimate = rep(c(-1, 1), each = 3)
+#' # detect alternative transcription start sites
+#' gr_atss <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 #' ) |>
-#'   plyranges::as_granges() |>
-#'   preprocess(coef_col = "estimate")
+#'   preprocess(coef_col = "estimate") |>
+#'   generate_atss(n_events = 1)
 #'
-#' find_atss(gr_tss)
+#' find_atss(gr_atss)
 #'
 #' @export
 find_atss <- function(gr) {
@@ -778,6 +788,17 @@ find_alternative_transcription_start_sites <- find_atss
 #' @rdname find_events
 #' @return `find_ates()`: alternative transcription end sites — last
 #'   exons that end transcription at a different coordinate
+#' @examples
+#'
+#' # detect alternative transcription end sites
+#' gr_ates <- create_mock_data(
+#'   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+#' ) |>
+#'   preprocess(coef_col = "estimate") |>
+#'   generate_ates(n_events = 1)
+#'
+#' find_ates(gr_ates)
+#'
 #' @export
 find_ates <- function(gr) {
   find_alt_ts(gr, at_start = FALSE)

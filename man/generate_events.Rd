@@ -3,8 +3,12 @@
 \name{generate_events}
 \alias{generate_events}
 \alias{generate_se}
+\alias{generate_ie}
+\alias{generate_cse}
+\alias{generate_cie}
 \alias{generate_mxe}
 \alias{generate_ri}
+\alias{generate_si}
 \alias{generate_a5ss}
 \alias{generate_a3ss}
 \alias{generate_atss}
@@ -13,9 +17,17 @@
 \usage{
 generate_se(gr, n_events = 1)
 
+generate_ie(gr, n_events = 1)
+
+generate_cse(gr, n_events = 1, n_skip = 2)
+
+generate_cie(gr, n_events = 1, n_skip = 2)
+
 generate_mxe(gr, n_events = 1)
 
 generate_ri(gr, n_events = 1)
+
+generate_si(gr, n_events = 1)
 
 generate_a5ss(gr, n_events = 1)
 
@@ -29,7 +41,14 @@ generate_ates(gr, n_events = 1, mode = c("shift", "drop"))
 \item{gr}{A GRanges object with metadata columns: 'exon_rank', 'gene_id',
 'tx_id', and 'estimate'.}
 
-\item{n_events}{Number of events to generate}
+\item{n_events}{Number of events to generate, i.e. the number of genes
+that get one. Every generator puts at most one event in a gene, so two
+events never edit the same transcripts. When fewer genes than
+\code{n_events} have a candidate, it warns and makes one in each of those.}
+
+\item{n_skip}{Number of consecutive exons skipped (or included) together,
+at least 2. Every exon of the run is internal, so a transcript needs
+at least \code{n_skip + 2} exons to host one.}
 
 \item{mode}{How to move the site: \code{"shift"} moves the terminal exon's
 outer boundary (so it still overlaps its partner), \code{"drop"} removes
@@ -38,29 +57,63 @@ overlap its partner at all).}
 }
 \value{
 \code{generate_se()}: A GRanges object with skipped exon
-events introduced
+events introduced: an internal exon is removed from one up transcript
+per gene
+
+\code{generate_ie()}: A GRanges object with included exon events
+introduced: an internal exon is removed from one down transcript per
+gene, so the up transcripts include it
+
+\code{generate_cse()}: A GRanges object with consecutive skipped exon
+events introduced: a run of \code{n_skip} internal exons is removed from one
+up transcript per gene
+
+\code{generate_cie()}: A GRanges object with consecutive included exon
+events introduced: a run of \code{n_skip} internal exons is removed from one
+down transcript per gene, so the up transcripts include it
 
 \code{generate_mxe()}: A GRanges object with mutually exclusive exon
-events introduced
+events introduced: a down transcript loses internal exon k + 1 and an up
+transcript of the same gene loses exon k, so each keeps the exon the
+other lacks. One pair per gene.
 
 \code{generate_ri()}: A GRanges object with retained intron
-events introduced
+events introduced: exons 2 and 3 of one up transcript per gene are fused
+
+\code{generate_si()}: A GRanges object with spliced intron events
+introduced: exons 2 and 3 of one down transcript per gene are fused, so
+the up transcripts splice out the intron it retains
 
 \code{generate_a5ss()}: A GRanges object with alternative 5' splice site
-events introduced
+events introduced: the donor of an internal exon is moved by 2 bp in one
+up transcript per gene
 
 \code{generate_a3ss()}: A GRanges object with alternative 3' splice site
-events introduced
+events introduced: the acceptor of an internal exon is moved by 2 bp in
+one up transcript per gene
 
 \code{generate_atss()}: A GRanges object with alternative
-transcription start site events introduced
+transcription start site events introduced: the first exon of one up
+transcript per gene is shortened at its outer end (\code{"shift"}) or removed
+(\code{"drop"})
 
 \code{generate_ates()}: A GRanges object with alternative
-transcription end site events introduced
+transcription end site events introduced: the last exon of one up
+transcript per gene is shortened at its outer end (\code{"shift"}) or removed
+(\code{"drop"})
 }
 \description{
 Functions to introduce specific types of alternative splicing
 events into mock GRanges data for testing purposes.
+
+Each generator edits the transcripts on one side and marks, in a
+logical \code{sim_event} column, the exons the matching finder should
+report. \code{generate_se()}, \code{generate_cse()}, \code{generate_ri()},
+\code{generate_a5ss()}, \code{generate_a3ss()}, \code{generate_atss()} and
+\code{generate_ates()} edit up (positive \code{estimate}) transcripts.
+\code{generate_ie()}, \code{generate_cie()} and \code{generate_si()} are their mirrors:
+the same edit made to a down (negative \code{estimate}) transcript.
+\code{generate_mxe()} edits one transcript on each side.
 }
 \examples{
 
@@ -73,6 +126,27 @@ generate_se(gr, n_events = 1)
 gr <- create_mock_data(
   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 )
+generate_ie(gr, n_events = 1)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+)
+generate_cse(gr, n_events = 1)
+
+# a run of three needs at least five exons
+generate_cse(gr, n_events = 1, n_skip = 3)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+)
+generate_cie(gr, n_events = 1)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+)
 generate_mxe(gr, n_events = 1)
 
 
@@ -80,6 +154,12 @@ gr <- create_mock_data(
   n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 )
 generate_ri(gr, n_events = 1)
+
+
+gr <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+)
+generate_si(gr, n_events = 1)
 
 
 gr <- create_mock_data(

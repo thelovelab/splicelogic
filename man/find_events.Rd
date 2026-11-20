@@ -222,27 +222,37 @@ gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4) |>
 # this should find the skipped exon events we generated
 find_se(gr, type = "boundary")
 
-find_ie(gr, type = "boundary")
-
-
-# "up" skips two consecutive exons of "down"
-gr_cse <- data.frame(
-  seqnames = "chr1",
-  start = c(1, 21, 41, 61, 1, 61),
-  end = c(10, 30, 50, 70, 10, 70),
-  strand = "+",
-  gene_id = "g1",
-  tx_id = rep(c("down", "up"), c(4, 2)),
-  exon_rank = c(1:4, 1:2),
-  estimate = rep(c(-1, 1), c(4, 2))
+# included exons: the same edit made to a down transcript
+gr_ie <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
-  plyranges::as_granges() |>
-  preprocess(coef_col = "estimate")
+  preprocess(coef_col = "estimate") |>
+  generate_ie(n_events = 1)
+
+find_ie(gr_ie, type = "boundary")
+
+
+# an up transcript skips a run of two consecutive exons
+gr_cse <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+) |>
+  preprocess(coef_col = "estimate") |>
+  generate_cse(n_events = 1, n_skip = 2)
 
 find_cse(gr_cse)
 
-# find_se() only reports an exon skipped on its own
+# find_se() only reports an exon skipped on its own, so finds nothing
 find_se(gr_cse)
+
+
+# an up transcript includes a run of two exons that a down one skips
+gr_cie <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+) |>
+  preprocess(coef_col = "estimate") |>
+  generate_cie(n_events = 1, n_skip = 2)
+
+find_cie(gr_cie)
 
 
 # detect mutually exclusive exons
@@ -264,9 +274,14 @@ gr_ri <- create_mock_data(
 
 find_ri(gr_ri)
 
-# the same data with the signs flipped: the introns retained above are
-# now spliced out by the up transcripts
-gr_si <- gr_ri |> dplyr::mutate(estimate = -estimate)
+# spliced introns: the same edit made to a down transcript, so the up
+# transcripts splice out the intron it retains
+gr_si <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+) |>
+  preprocess(coef_col = "estimate") |>
+  generate_si(n_events = 1)
+
 find_si(gr_si)
 
 
@@ -289,20 +304,24 @@ gr_a3 <- create_mock_data(
 find_a3ss(gr_a3)
 
 
-gr_tss <- data.frame(
-  seqnames = "chr1",
-  start = c(1, 21, 41, 5, 21, 41),
-  end = c(10, 30, 50, 10, 30, 50),
-  strand = "+",
-  gene_id = "g1",
-  tx_id = rep(c("down", "up"), each = 3),
-  exon_rank = rep(seq_len(3), 2),
-  estimate = rep(c(-1, 1), each = 3)
+# detect alternative transcription start sites
+gr_atss <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
-  plyranges::as_granges() |>
-  preprocess(coef_col = "estimate")
+  preprocess(coef_col = "estimate") |>
+  generate_atss(n_events = 1)
 
-find_atss(gr_tss)
+find_atss(gr_atss)
+
+
+# detect alternative transcription end sites
+gr_ates <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+) |>
+  preprocess(coef_col = "estimate") |>
+  generate_ates(n_events = 1)
+
+find_ates(gr_ates)
 
 
 # detect all event types at once
