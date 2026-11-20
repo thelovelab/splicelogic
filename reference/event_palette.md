@@ -23,7 +23,7 @@ A character vector of colours, named by event type.
 ``` r
 event_palette()
 #>        se        ie       cse       cie       mxe        ri        si      a5ss 
-#> "#FFB38A" "#74B9B7" "#CB7F2F" "#4C928C" "#AAA7F1" "#DDE699" "#62F9EA" "#7BE8FE" 
+#> "#FFB38A" "#74B9B7" "#E87C9C" "#B784C4" "#AAA7F1" "#DDE699" "#62F9EA" "#7BE8FE" 
 #>      a3ss      atss      ates 
 #> "#FFC4D6" "#99D6A8" "#81bc5c" 
 ```
