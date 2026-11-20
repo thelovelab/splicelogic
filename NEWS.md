@@ -2,7 +2,15 @@
 # splicelogic 1.2.0
 
 * New event types: alternative transcription start and end sites
-  (`find_atss()`, `find_ates()`) and spliced introns (`find_si()`).
+  (`find_atss()`, `find_ates()`), spliced introns (`find_si()`), and
+  consecutive skipped and consecutive included exons (`find_cse()`,
+  `find_cie()`). The last two cover runs of two or more adjacent exons
+  skipped or included together, which `find_se()` / `find_ie()` do not
+  report: those report an exon only when it is skipped or included on its
+  own. 
+* New long-form aliases for every finder  that
+  spell out the event type, e.g. `find_skipped_exons()` for `find_se()`
+  or `find_alternative_transcription_start_sites()` for `find_atss()`.
 * New input option: `prepare_exons_by_partition()` builds the input from
   two user-defined sets of transcripts (up and down). Unlike
   `prepare_exons()`, it does not need DTU results.
@@ -10,13 +18,26 @@
 * Plotting functions for event results: `plot_transcripts()`,
   `plot_transcripts_by_gene()`, `plot_transcripts_by_pair()`,
   `plot_transcript_lfc()` and `event_palette()`.
-* Long-form aliases for every finder, e.g. `find_skipped_exons()`.
 * `find_se()`, `find_ie()`, `find_mxe()` and `find_all_events()` pass
   extra arguments on to `GenomicRanges::findOverlaps()`.
 * Results carry `event_type`, `event_tx_id`, `event_estimate` and
   `event_<col>` for any `additional_columns`.
 * The default `type` is now `"over"`; `"boundary"` matches only the
   splice site facing the candidate; and `"in"` is renamed `"identical"`.
+
+# splicelogic 1.1.6
+
+* Added `find_cse()` and `find_cie()` (long forms
+  `find_consecutive_skipped_exons()` and
+  `find_consecutive_included_exons()`) for runs of two or more adjacent
+  exons skipped or included together. Both are included in
+  `find_all_events()`, and `event_palette()` has a colour for each.
+* Added mock data generators `generate_ie()`, `generate_cse()`,
+  `generate_cie()` and `generate_si()`, so every finder has its own
+  generator.
+* Every generator now makes at most one event per gene: `n_events` is the
+  number of genes that get an event, and it warns and caps when fewer
+  genes have a candidate.
 
 # splicelogic 1.1.5
 
