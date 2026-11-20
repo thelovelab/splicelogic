@@ -4,9 +4,27 @@
 
 - New event types: alternative transcription start and end sites
   ([`find_atss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
-  [`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md))
-  and spliced introns
-  ([`find_si()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)).
+  [`find_ates()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)),
+  spliced introns
+  ([`find_si()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)),
+  and consecutive skipped and consecutive included exons
+  ([`find_cse()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+  [`find_cie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)).
+  The last two cover runs of two or more adjacent exons skipped or
+  included together, which
+  [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  /
+  [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  do not report: those report an exon only when it is skipped or
+  included on its own.
+- New long-form aliases for every finder that spell out the event type,
+  e.g. [`find_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  for
+  [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  or
+  [`find_alternative_transcription_start_sites()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  for
+  [`find_atss()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
 - New input option:
   [`prepare_exons_by_partition()`](https://thelovelab.github.io/splicelogic/reference/prepare_exons_by_partition.md)
   builds the input from two user-defined sets of transcripts (up and
@@ -22,8 +40,6 @@
   [`plot_transcript_lfc()`](https://thelovelab.github.io/splicelogic/reference/plot_transcript_lfc.md)
   and
   [`event_palette()`](https://thelovelab.github.io/splicelogic/reference/event_palette.md).
-- Long-form aliases for every finder,
-  e.g. [`find_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md).
 - [`find_se()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
   [`find_ie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
   [`find_mxe()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
@@ -35,6 +51,33 @@
   `event_<col>` for any `additional_columns`.
 - The default `type` is now `"over"`; `"boundary"` matches only the
   splice site facing the candidate; and `"in"` is renamed `"identical"`.
+
+## splicelogic 1.1.6
+
+- Added
+  [`find_cse()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  and
+  [`find_cie()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  (long forms
+  [`find_consecutive_skipped_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md)
+  and
+  [`find_consecutive_included_exons()`](https://thelovelab.github.io/splicelogic/reference/find_events.md))
+  for runs of two or more adjacent exons skipped or included together.
+  Both are included in
+  [`find_all_events()`](https://thelovelab.github.io/splicelogic/reference/find_events.md),
+  and
+  [`event_palette()`](https://thelovelab.github.io/splicelogic/reference/event_palette.md)
+  has a colour for each.
+- Added mock data generators
+  [`generate_ie()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md),
+  [`generate_cse()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md),
+  [`generate_cie()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  and
+  [`generate_si()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md),
+  so every finder has its own generator.
+- Every generator now makes at most one event per gene: `n_events` is
+  the number of genes that get an event, and it warns and caps when
+  fewer genes have a candidate.
 
 ## splicelogic 1.1.5
 
