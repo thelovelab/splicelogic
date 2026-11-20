@@ -95,6 +95,34 @@ test_that("generate_mxe removes exons pairwise", {
   expect_true(length(gr_mx) < original_len)
 })
 
+test_that("every generator makes at most one event per gene", {
+  # n_events is the number of genes that get an event, the same for every
+  # generator, so asking for more than there are genes warns and caps
+  set.seed(3)
+  gr <- create_mock_data(n_genes = 3, n_tx_per_gene = 4, n_exons_per_tx = 7)
+  bare <- gr |> dplyr::select(gene_id, tx_id, exon_rank, estimate)
+  generators <- list(
+    se = generate_se, ie = generate_ie, cse = generate_cse,
+    cie = generate_cie, mxe = generate_mxe, ri = generate_ri,
+    si = generate_si, a5ss = generate_a5ss, a3ss = generate_a3ss,
+    atss = generate_atss, ates = generate_ates,
+    atss_drop = function(gr, n_events) generate_atss(gr, n_events, "drop"),
+    ates_drop = function(gr, n_events) generate_ates(gr, n_events, "drop")
+  )
+  n_event_genes <- function(out) length(unique(out$gene_id[out$sim_event]))
+  for (ev in names(generators)) {
+    gen <- generators[[ev]]
+    expect_silent(out <- gen(gr, n_events = 2))
+    expect_equal(n_event_genes(out), 2L, info = ev)
+
+    expect_warning(out <- gen(gr, n_events = 5), "capping at 3", info = ev)
+    expect_equal(n_event_genes(out), 3L, info = ev)
+
+    # input that has not been through preprocess() is preprocessed first
+    expect_true(any(gen(bare, n_events = 1)$sim_event), info = ev)
+  }
+})
+
 # Test for generate_ri
 test_that("generate_ri merges exons", {
   gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 3, n_exons_per_tx = 6)
@@ -203,5 +231,129 @@ test_that("generate_se, mxe and ri work on the minus strand", {
     ri <- generate_ri(gr, n_events = 2)
     expect_true(all(GenomicRanges::width(ri) > 0))
     expect_gt(length(find_ri(ri)), 0L)
+  }
+})
+
+
+# one row per transcript that has fewer exons in `out` than in `gr`, with
+# its estimate (constant within a transcript) and how many exons it lost
+exons_lost <- function(gr, out) {
+  n_exons <- function(x) {
+    tibble::as_tibble(x) |>
+      dplyr::group_by(tx_id) |>
+      dplyr::summarise(
+        estimate = dplyr::first(estimate),
+        n = dplyr::n(),
+        .groups = "drop"
+      )
+  }
+  n_exons(gr) |>
+    dplyr::left_join(
+      n_exons(out) |> dplyr::select(tx_id, n_out = n),
+      by = "tx_id"
+    ) |>
+    dplyr::mutate(lost = n - dplyr::coalesce(n_out, 0L)) |>
+    dplyr::filter(lost > 0L) |>
+    dplyr::select(tx_id, estimate, lost)
+}
+
+test_that("generate_se, ie, cse and cie remove a run of internal exons", {
+  # each removes n_skip consecutive internal exons from one transcript per
+  # gene: an up transcript for se / cse, a down one for ie / cie. sim_event
+  # marks the copies the other side keeps, so it sits on the opposite sign.
+  # ranks follow transcription, so the run is the same on either strand
+  for (st in c("+", "-")) {
+    set.seed(5)
+    gr <- create_mock_data(
+      n_genes = 3, n_tx_per_gene = 3, n_exons_per_tx = 7, strand = st
+    )
+    cases <- list(
+      se = list(out = generate_se(gr, 3), n_skip = 1L, edited = 1),
+      ie = list(out = generate_ie(gr, 3), n_skip = 1L, edited = -1),
+      cse = list(out = generate_cse(gr, 3), n_skip = 2L, edited = 1),
+      cie = list(
+        out = generate_cie(gr, 3, n_skip = 3), n_skip = 3L, edited = -1
+      )
+    )
+    for (ev in names(cases)) {
+      case <- cases[[ev]]
+      info <- paste(ev, st)
+
+      # one transcript per gene, on the edited side, n_skip exons short
+      lost <- exons_lost(gr, case$out)
+      expect_equal(nrow(lost), 3L, info = info)
+      expect_true(all(sign(lost$estimate) == case$edited), info = info)
+      expect_true(all(lost$lost == case$n_skip), info = info)
+
+      # the run as the other side keeps it: n_skip consecutive internal
+      # exons per transcript
+      runs <- tibble::as_tibble(case$out) |>
+        dplyr::filter(sim_event) |>
+        dplyr::group_by(tx_id) |>
+        dplyr::summarise(
+          side = unique(sign(estimate)),
+          n = dplyr::n(),
+          consecutive = all(diff(sort(exon_rank)) == 1L),
+          all_internal = all(internal),
+          .groups = "drop"
+        )
+      expect_gt(nrow(runs), 0L)
+      expect_true(all(runs$side == -case$edited), info = info)
+      expect_true(all(runs$n == case$n_skip), info = info)
+      expect_true(all(runs$consecutive & runs$all_internal), info = info)
+    }
+  }
+})
+
+test_that("generate_cse and generate_cie check n_skip and cap n_events", {
+  gr <- create_mock_data(n_genes = 2, n_tx_per_gene = 2, n_exons_per_tx = 4)
+  # a run of one is generate_se() / generate_ie()
+  expect_error(generate_cse(gr, n_skip = 1), "n_skip")
+  expect_error(generate_cie(gr, n_skip = 2.5), "n_skip")
+  expect_error(generate_cse(gr, n_skip = c(2, 3)), "n_skip")
+
+  # four exons leave two internal ones: room for a run of two, not three
+  expect_silent(generate_cse(gr, n_events = 2))
+  expect_warning(
+    out <- generate_cie(gr, n_events = 1, n_skip = 3), "capping at 0"
+  )
+  expect_equal(length(out), length(gr))
+  expect_false(any(out$sim_event))
+})
+
+test_that("generate_ri and generate_si fuse exons on opposite sides", {
+  # both fuse exons 2 and 3 of a transcript: an up one for ri, a down one
+  # for si. sim_event is the fused exon itself, on the edited side
+  for (st in c("+", "-")) {
+    set.seed(9)
+    gr <- create_mock_data(
+      n_genes = 3, n_tx_per_gene = 2, n_exons_per_tx = 5, strand = st
+    )
+    cases <- list(
+      ri = list(out = generate_ri(gr, n_events = 2), edited = 1),
+      si = list(out = generate_si(gr, n_events = 2), edited = -1)
+    )
+    for (ev in names(cases)) {
+      case <- cases[[ev]]
+      info <- paste(ev, st)
+      # merging toward the wrong neighbour on "-" would invert the range
+      expect_true(all(GenomicRanges::width(case$out) > 0), info = info)
+
+      lost <- exons_lost(gr, case$out)
+      expect_equal(nrow(lost), 2L, info = info)
+      expect_true(all(sign(lost$estimate) == case$edited), info = info)
+      expect_true(all(lost$lost == 1L), info = info)
+
+      # each fused exon spans two exons of the transcript it came from
+      fused <- case$out |> dplyr::filter(sim_event)
+      expect_equal(length(fused), 2L, info = info)
+      expect_true(all(sign(fused$estimate) == case$edited), info = info)
+      # (the two edited transcripts are in different genes, which do not
+      # overlap, so each fused exon only meets its own transcript here)
+      n_spanned <- plyranges::count_overlaps(
+        fused, gr |> dplyr::filter(tx_id %in% fused$tx_id)
+      )
+      expect_true(all(n_spanned == 2L), info = info)
+    }
   }
 })

@@ -218,15 +218,15 @@ test_that("find_si reports the intron spliced out by an up transcript", {
   expect_equal(length(find_si(gr)), 0L)
   expect_equal(find_all_events(gr, verbose = FALSE)$event_type, "ri")
 
-  # flipping every sign turns each retained intron into a spliced intron
-  gr <- create_mock_data(3, 6, 3) |> generate_ri(n_events = 3)
-  ri <- find_ri(gr)
-  si <- find_si(gr |> dplyr::mutate(estimate = -estimate))
-  expect_gt(length(ri), 0L)
-  expect_equal(GenomicRanges::granges(si), GenomicRanges::granges(ri))
-  expect_equal(si$tx_id, ri$tx_id)
-  expect_equal(si$event_tx_id, ri$event_tx_id)
+  # generate_si fuses exons of a down transcript: find_si reports that
+  # fused exon, from the down transcript, and find_ri finds nothing
+  gr <- create_mock_data(3, 6, 3) |> generate_si(n_events = 3)
+  si <- find_si(gr)
+  expect_gt(length(si), 0L)
   expect_true(all(si$event_type == "si"))
+  expect_true(all(si$estimate < 0))
+  expect_true(all(si$event_estimate > 0))
+  expect_equal(length(find_ri(gr)), 0L)
 })
 
 # an exon that retains an intron can also move its outer boundary, as in
@@ -877,6 +877,8 @@ test_that("type = 'identical' needs both flanks to match exactly", {
   )
 })
 
+# ---- find_cse / find_cie: consecutive skipped / included exons ----
+
 # builds a preprocessed GRanges from a named list of transcripts, each
 # list(estimate, exons) with exons as c(start, end) in genomic order. ranks
 # follow transcription, so they are reversed on "-"
@@ -909,6 +911,287 @@ event_keys <- function(res) {
     ">", res$event_tx_id
   ))
 }
+
+test_that("find_cse finds consecutive skipped exons on both strands", {
+  two <- list(
+    down = list(-1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70))),
+    up = list(1, list(c(1, 10), c(61, 70)))
+  )
+  three <- list(
+    down = list(
+      -1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70), c(81, 90))
+    ),
+    up = list(1, list(c(1, 10), c(81, 90)))
+  )
+  for (strand in c("+", "-")) {
+    gr <- block_gr(two, strand)
+    cse <- find_cse(gr)
+    expect_equal(event_keys(cse), c("down:21-30>up", "down:41-50>up"))
+    expect_equal(unique(cse$event_type), "cse")
+    expect_equal(unique(cse$event_estimate), 1)
+    # neither exon is skipped on its own, and nothing is included
+    expect_equal(length(find_se(gr)), 0L)
+    expect_equal(length(find_cie(gr)), 0L)
+
+    expect_equal(
+      event_keys(find_cse(block_gr(three, strand))),
+      c("down:21-30>up", "down:41-50>up", "down:61-70>up")
+    )
+
+    # the same exons read from the other side are included, not skipped
+    flipped <- gr |> dplyr::mutate(estimate = -estimate)
+    cie <- find_cie(flipped)
+    expect_equal(event_keys(cie), c("down:21-30>up", "down:41-50>up"))
+    expect_equal(unique(cie$event_type), "cie")
+    expect_equal(length(find_cse(flipped)), 0L)
+  }
+})
+
+test_that("find_cse and find_se split blocks of one from longer blocks", {
+  # up_a skips 21-30 and 41-50 together, up_b skips 21-30 alone
+  gr <- block_gr(list(
+    down = list(-1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70))),
+    up_a = list(1, list(c(1, 10), c(61, 70))),
+    up_b = list(1, list(c(1, 10), c(41, 50), c(61, 70)))
+  ))
+  expect_equal(
+    event_keys(find_cse(gr)), c("down:21-30>up_a", "down:41-50>up_a")
+  )
+  expect_equal(event_keys(find_se(gr)), "down:21-30>up_b")
+
+  # two separate blocks between one pair of transcripts
+  gr <- block_gr(list(
+    down = list(-1, list(
+      c(1, 10), c(21, 30), c(41, 50), c(61, 70), c(81, 90), c(101, 110),
+      c(121, 130)
+    )),
+    up = list(1, list(c(1, 10), c(61, 70), c(121, 130)))
+  ))
+  expect_equal(
+    event_keys(find_cse(gr)),
+    c("down:101-110>up", "down:21-30>up", "down:41-50>up", "down:81-90>up")
+  )
+})
+
+test_that("find_cse needs both flanks and nothing in between", {
+  # the run reaches the first exon: an alternative start, not a skip
+  gr <- block_gr(list(
+    down = list(-1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70))),
+    up = list(1, list(c(41, 50), c(61, 70)))
+  ))
+  expect_equal(length(find_cse(gr)), 0L)
+
+  # two exons swapped for one: the flanks are not adjacent in up
+  gr <- block_gr(list(
+    down = list(-1, list(c(1, 10), c(21, 30), c(41, 50), c(81, 90))),
+    up = list(1, list(c(1, 10), c(61, 70), c(81, 90)))
+  ))
+  expect_equal(length(find_cse(gr)), 0L)
+  expect_equal(length(find_cie(gr)), 0L)
+
+  # up keeps the middle exon of three: nothing is skipped as a run
+  gr <- block_gr(list(
+    down = list(
+      -1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70), c(81, 90))
+    ),
+    up = list(1, list(c(1, 10), c(41, 50), c(81, 90)))
+  ))
+  expect_equal(length(find_cse(gr)), 0L)
+  expect_equal(
+    event_keys(find_se(gr)), c("down:21-30>up", "down:61-70>up")
+  )
+})
+
+test_that("find_cse applies the match type to the flanks of the block", {
+  # the upstream flank has a moved donor (1-10 against 1-14)
+  txs <- list(
+    down = list(-1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70))),
+    up = list(1, list(c(1, 14), c(61, 70)))
+  )
+  for (strand in c("+", "-")) {
+    gr <- block_gr(txs, strand)
+    expect_equal(length(find_cse(gr, type = "over")), 2L)
+    expect_equal(length(find_cse(gr, type = "boundary")), 0L)
+    expect_equal(length(find_cse(gr, type = "identical")), 0L)
+  }
+  # the outer boundary of a flank may differ under "boundary"
+  txs$up <- list(1, list(c(3, 10), c(61, 75)))
+  for (strand in c("+", "-")) {
+    gr <- block_gr(txs, strand)
+    expect_equal(length(find_cse(gr, type = "boundary")), 2L)
+    expect_equal(length(find_cse(gr, type = "identical")), 0L)
+  }
+})
+
+test_that("find_cse compares exons within the same gene", {
+  gene_a <- list(
+    down = list(-1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70))),
+    up = list(1, list(c(1, 10), c(61, 70)))
+  )
+  # gene B overlaps A. its up transcript covers the skipped block, which
+  # must not mask it, and its down transcript has two exons between
+  # flanks that only gene A's up transcript matches, which must not be
+  # reported against gene A
+  gene_b <- list(
+    up_b = list(1, list(c(15, 55), c(201, 210))),
+    down_b = list(-1, list(c(1, 10), c(22, 29), c(42, 49), c(61, 70)))
+  )
+  gr <- c(
+    block_gr(gene_a, gene_id = "A"), block_gr(gene_b, gene_id = "B")
+  ) |>
+    preprocess(coef_col = "estimate")
+  expect_equal(event_keys(find_cse(gr)), c("down:21-30>up", "down:41-50>up"))
+})
+
+test_that("blocks of one exon are exactly what find_se reports", {
+  for (seed in seq_len(12)) {
+    set.seed(seed)
+    gr <- create_mock_data(
+      n_genes = 3, n_tx_per_gene = 4, n_exons_per_tx = 6,
+      strand = c("+", "-")[seed %% 2 + 1]
+    ) |>
+      generate_se(n_events = 2) |>
+      generate_a5ss(n_events = 1) |>
+      generate_ri(n_events = 1)
+    for (type in c("over", "boundary", "identical")) {
+      for (inverse in c(FALSE, TRUE)) {
+        blocks <- find_skip_blocks(gr, type, if (inverse) -1 else 1)
+        # keys built inside mutate(), which recycles to zero rows; a bare
+        # paste0() of empty columns would return one ":->" string
+        single <- blocks |>
+          dplyr::filter(n_block == 1) |>
+          dplyr::mutate(
+            block_key = paste0(tx_id, ":", start, "-", end, ">", event_tx_id)
+          )
+        expect_equal(
+          sort(single$block_key),
+          event_keys(find_se(gr, type, inverse = inverse))
+        )
+      }
+    }
+  }
+})
+
+test_that("find_all_events includes cse and cie", {
+  gr <- block_gr(list(
+    down = list(-1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70))),
+    up = list(1, list(c(1, 10), c(61, 70)))
+  ))
+  expect_equal(
+    find_all_events(gr, verbose = FALSE)$event_type, c("cse", "cse")
+  )
+  # up includes the two exons that down splices past
+  gr <- block_gr(list(
+    down = list(-1, list(c(1, 10), c(61, 70))),
+    up = list(1, list(c(1, 10), c(21, 30), c(41, 50), c(61, 70)))
+  ))
+  expect_equal(
+    find_all_events(gr, verbose = FALSE)$event_type, c("cie", "cie")
+  )
+})
+
+# ---- generators: each finder recovers what its generator simulates ----
+
+# exons as "tx:start-end", sorted and unique: a finder reports an exon once
+# per partner transcript, sim_event marks it once
+exon_keys <- function(gr) {
+  sort(unique(paste0(
+    gr$tx_id, ":", GenomicRanges::start(gr), "-", GenomicRanges::end(gr)
+  )))
+}
+
+test_that("each finder reports exactly the exons its generator simulates", {
+  # generator and finder per event type. ie, cie and si have generators of
+  # their own, which edit a down transcript, so none of these needs the
+  # signs flipped. atss / ates run in both modes: "drop" is a separate
+  # code path in generate_alt_ts(), and the case an overlap could not
+  # reach. mxe has its own test below: the isoforms it leaves untouched
+  # are an se / ie against the edited pair, so the last check would fail.
+  drop_mode <- function(generate) {
+    function(gr, n_events) generate(gr, n_events, mode = "drop")
+  }
+  pairs <- list(
+    se = list(generate_se, find_se),
+    ie = list(generate_ie, find_ie),
+    cse = list(generate_cse, find_cse),
+    cie = list(generate_cie, find_cie),
+    ri = list(generate_ri, find_ri),
+    si = list(generate_si, find_si),
+    a5ss = list(generate_a5ss, find_a5ss),
+    a3ss = list(generate_a3ss, find_a3ss),
+    atss = list(generate_atss, find_atss),
+    ates = list(generate_ates, find_ates),
+    atss_drop = list(drop_mode(generate_atss), find_atss),
+    ates_drop = list(drop_mode(generate_ates), find_ates)
+  )
+  # one seed per strand: the test runs every pair on both strands, and
+  # more seeds only drew other random genes at a large cost in runtime
+  for (st in c("+", "-")) {
+    set.seed(1)
+    gr <- create_mock_data(
+      n_genes = 3, n_tx_per_gene = 4, n_exons_per_tx = 7, strand = st
+    )
+    for (ev in names(pairs)) {
+      info <- paste(ev, st)
+      sim <- pairs[[ev]][[1]](gr, n_events = 2)
+      found <- pairs[[ev]][[2]](sim)
+      expect_gt(length(found), 0L, label = info)
+      expect_equal(
+        exon_keys(found), exon_keys(sim[sim$sim_event]), info = info
+      )
+      # the generator makes this event and no other
+      expect_equal(
+        unique(find_all_events(sim, verbose = FALSE)$event_type),
+        sub("_drop$", "", ev),
+        info = info
+      )
+    }
+  }
+})
+
+test_that("generate_mxe marks the edited pair only, one pair per gene", {
+  # sim_event used to be set by coordinates, so every isoform sharing the
+  # two exons was marked, and two events could land in one gene. those
+  # other isoforms are an se / ie against the pair, so unlike the test
+  # above this does not check find_all_events() for other types
+  for (st in c("+", "-")) {
+    for (seed in 1:3) {
+      set.seed(seed)
+      gr <- create_mock_data(
+        n_genes = 3, n_tx_per_gene = 4, n_exons_per_tx = 7, strand = st
+      )
+      info <- paste("mxe", st, "seed", seed)
+      sim <- generate_mxe(gr, n_events = 2)
+      marked <- sim[sim$sim_event]
+      # one down and one up exon per event, in two different genes
+      expect_equal(length(marked), 4L, info = info)
+      expect_equal(length(unique(marked$gene_id)), 2L, info = info)
+      expect_equal(
+        sort(sign(marked$estimate)), c(-1, -1, 1, 1), info = info
+      )
+      expect_equal(exon_keys(find_mxe(sim)), exon_keys(marked), info = info)
+    }
+  }
+})
+
+test_that("a run of n_skip exons is a cse, never an se", {
+  set.seed(4)
+  gr <- create_mock_data(n_genes = 3, n_tx_per_gene = 2, n_exons_per_tx = 7)
+  for (n_skip in 2:4) {
+    cse <- generate_cse(gr, n_events = 3, n_skip = n_skip)
+    found <- find_cse(cse)
+    # one row per exon of the run, one run per gene
+    expect_equal(length(found), 3L * n_skip)
+    expect_equal(length(find_se(cse)), 0L)
+
+    cie <- generate_cie(gr, n_events = 3, n_skip = n_skip)
+    expect_equal(length(find_cie(cie)), 3L * n_skip)
+    expect_equal(length(find_ie(cie)), 0L)
+  }
+  # and a single skipped exon is an se, never a cse
+  expect_equal(length(find_cse(generate_se(gr, n_events = 3))), 0L)
+  expect_equal(length(find_cie(generate_ie(gr, n_events = 3))), 0L)
+})
 
 # ---- a5ss / a3ss: exons shared with a down isoform ----
 
