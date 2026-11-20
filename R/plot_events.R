@@ -33,8 +33,8 @@ event_palette <- function() {
   c(
     se = "#FFB38A",
     ie = "#74B9B7",
-    cse = "#E87C9C",
-    cie = "#B784C4",
+    cse = "#CB7F2F",
+    cie = "#4C928C",
     mxe = "#AAA7F1",
     ri = "#DDE699",
     si = "#62F9EA",
@@ -589,10 +589,9 @@ plot_transcripts <- function(
     intersect(c("up", "down"), present),
     setdiff(present, c("up", "down"))
   )
-  legend_labels <- dplyr::case_match(
-    breaks,
-    "up" ~ "up (estimate > 0)",
-    "down" ~ "down (estimate < 0)",
+  legend_labels <- dplyr::case_when(
+    breaks == "up" ~ "up (estimate > 0)",
+    breaks == "down" ~ "down (estimate < 0)",
     .default = toupper(breaks)
   )
 
