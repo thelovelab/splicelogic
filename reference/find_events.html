@@ -321,48 +321,89 @@ exons that end transcription at a different coordinate</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">find_ie</span><span class="op">(</span><span class="va">gr</span>, type <span class="op">=</span> <span class="st">"boundary"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 0 ranges and 0 metadata columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    seqnames    ranges strand</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: no sequences</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># "up" skips two consecutive exons of "down"</span></span></span>
-<span class="r-in"><span><span class="va">gr_cse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  seqnames <span class="op">=</span> <span class="st">"chr1"</span>,</span></span>
-<span class="r-in"><span>  start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">21</span>, <span class="fl">41</span>, <span class="fl">61</span>, <span class="fl">1</span>, <span class="fl">61</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">50</span>, <span class="fl">70</span>, <span class="fl">10</span>, <span class="fl">70</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  strand <span class="op">=</span> <span class="st">"+"</span>,</span></span>
-<span class="r-in"><span>  gene_id <span class="op">=</span> <span class="st">"g1"</span>,</span></span>
-<span class="r-in"><span>  tx_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"down"</span>, <span class="st">"up"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  exon_rank <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># included exons: the same edit made to a down transcript</span></span></span>
+<span class="r-in"><span><span class="va">gr_ie</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">4</span></span></span>
 <span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://tidyomics.github.io/plyranges/reference/ranges-construct.html" class="external-link">as_granges</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="generate_events.html">generate_ie</a></span><span class="op">(</span>n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">find_cse</span><span class="op">(</span><span class="va">gr_cse</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 7 metadata columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |     gene_id       tx_id exon_rank  estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr1     21-30      + |          g1        down         2        -1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]     chr1     41-50      + |          g1        down         3        -1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        event_type event_tx_id event_estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;character&gt; &lt;character&gt;      &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]         cse          up              1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]         cse          up              1</span>
+<span class="r-in"><span><span class="fu">find_ie</span><span class="op">(</span><span class="va">gr_ie</span>, type <span class="op">=</span> <span class="st">"boundary"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 1 range and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr1     11-15      + |         1         2         2  0.485274</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE          ie           1      -0.980135</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># find_se() only reports an exon skipped on its own</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># an up transcript skips a run of two consecutive exons</span></span></span>
+<span class="r-in"><span><span class="va">gr_cse</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">5</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="generate_events.html">generate_cse</a></span><span class="op">(</span>n_events <span class="op">=</span> <span class="fl">1</span>, n_skip <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">find_cse</span><span class="op">(</span><span class="va">gr_cse</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 6 ranges and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt;  &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr7     21-25      + |         1         1         3 -0.5858222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]     chr7     31-35      + |         1         1         4 -0.5858222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3]     chr7     21-25      + |         1         3         3 -0.9440879</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [4]     chr7     31-35      + |         1         3         4 -0.9440879</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [5]     chr7     21-25      + |         1         4         3 -0.0612314</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [6]     chr7     31-35      + |         1         4         4 -0.0612314</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE         cse           2       0.889367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE         cse           2       0.889367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3]      TRUE         cse           2       0.889367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [4]      TRUE         cse           2       0.889367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [5]      TRUE         cse           2       0.889367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [6]      TRUE         cse           2       0.889367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># find_se() only reports an exon skipped on its own, so finds nothing</span></span></span>
 <span class="r-in"><span><span class="fu">find_se</span><span class="op">(</span><span class="va">gr_cse</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 0 ranges and 0 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    seqnames    ranges strand</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: no sequences</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># an up transcript includes a run of two exons that a down one skips</span></span></span>
+<span class="r-in"><span><span class="va">gr_cie</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">5</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="generate_events.html">generate_cie</a></span><span class="op">(</span>n_events <span class="op">=</span> <span class="fl">1</span>, n_skip <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">find_cie</span><span class="op">(</span><span class="va">gr_cie</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 6 ranges and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr11   111-115      + |         2         6         2  0.597618</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr11   121-125      + |         2         6         3  0.597618</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3]    chr11   111-115      + |         2         7         2  0.326413</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [4]    chr11   121-125      + |         2         7         3  0.326413</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [5]    chr11   111-115      + |         2         8         2  0.713150</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [6]    chr11   121-125      + |         2         8         3  0.713150</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE         cie           5      -0.757729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE         cie           5      -0.757729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3]      TRUE         cie           5      -0.757729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [4]      TRUE         cie           5      -0.757729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [5]      TRUE         cie           5      -0.757729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [6]      TRUE         cie           5      -0.757729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># detect mutually exclusive exons</span></span></span>
@@ -376,12 +417,12 @@ exons that end transcription at a different coordinate</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 8 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr1     11-15      + |         1         1         2 -0.980135</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]     chr1     21-25      + |         1         2         2  0.485274</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr19     11-15      + |         1         4         2 -0.495589</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr19     21-25      + |         1         3         2  0.136705</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE         mxe           2       0.485274</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE         mxe           1      -0.980135</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE         mxe           3       0.136705</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE         mxe           4      -0.495589</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
@@ -394,31 +435,40 @@ exons that end transcription at a different coordinate</p>
 <span class="r-in"><span>  <span class="fu"><a href="generate_events.html">generate_ri</a></span><span class="op">(</span>n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">find_ri</span><span class="op">(</span><span class="va">gr_ri</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 3 ranges and 8 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr1     11-25      + |         1         2         2 0.0213647</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]     chr1     11-25      + |         1         2         2 0.0213647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr12     11-25      + |         1         2         2  0.355806</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr12     11-25      + |         1         2         2  0.355806</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3]    chr12     11-25      + |         1         2         2  0.355806</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE          ri           1      -0.783753</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE          ri           4      -0.944088</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE          ri           1     -0.6813640</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE          ri           3     -0.7873061</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3]      TRUE          ri           4     -0.0303944</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># the same data with the signs flipped: the introns retained above are</span></span></span>
-<span class="r-in"><span><span class="co"># now spliced out by the up transcripts</span></span></span>
-<span class="r-in"><span><span class="va">gr_si</span> <span class="op">&lt;-</span> <span class="va">gr_ri</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>estimate <span class="op">=</span> <span class="op">-</span><span class="va">estimate</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># spliced introns: the same edit made to a down transcript, so the up</span></span></span>
+<span class="r-in"><span><span class="co"># transcripts splice out the intron it retains</span></span></span>
+<span class="r-in"><span><span class="va">gr_si</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">4</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="generate_events.html">generate_si</a></span><span class="op">(</span>n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">find_si</span><span class="op">(</span><span class="va">gr_si</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 8 metadata columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt;  &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr1     11-25      + |         1         2         2 -0.0213647</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]     chr1     11-25      + |         1         2         2 -0.0213647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 3 ranges and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr20   101-115      + |         2         5         2 -0.350577</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr20   101-115      + |         2         5         2 -0.350577</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3]    chr20   101-115      + |         2         5         2 -0.350577</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE          si           1       0.783753</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE          si           4       0.944088</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE          si           6       0.667885</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE          si           7       0.518317</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3]      TRUE          si           8       0.672151</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
@@ -434,12 +484,12 @@ exons that end transcription at a different coordinate</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 8 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr18   101-107      + |         2         6         2  0.615734</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr18   101-107      + |         2         6         2  0.615734</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr7     11-13      + |         1         3         2  0.346896</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]     chr7     11-13      + |         1         3         2  0.346896</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE        a5ss           5      -0.082719</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE        a5ss           8      -0.761029</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE        a5ss           1      -0.462591</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE        a5ss           4      -0.257460</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
@@ -454,37 +504,52 @@ exons that end transcription at a different coordinate</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 8 metadata columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr11     13-15      + |         1         3         2  0.399659</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr11     13-15      + |         1         3         2  0.399659</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr20   113-115      + |         2         6         3 0.0455507</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr20   113-115      + |         2         6         3 0.0455507</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE        a3ss           1      -0.437331</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE        a3ss           4      -0.559999</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE        a3ss           5       -0.79801</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE        a3ss           8       -0.85807</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">gr_tss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  seqnames <span class="op">=</span> <span class="st">"chr1"</span>,</span></span>
-<span class="r-in"><span>  start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">21</span>, <span class="fl">41</span>, <span class="fl">5</span>, <span class="fl">21</span>, <span class="fl">41</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">50</span>, <span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">50</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  strand <span class="op">=</span> <span class="st">"+"</span>,</span></span>
-<span class="r-in"><span>  gene_id <span class="op">=</span> <span class="st">"g1"</span>,</span></span>
-<span class="r-in"><span>  tx_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"down"</span>, <span class="st">"up"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  exon_rank <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># detect alternative transcription start sites</span></span></span>
+<span class="r-in"><span><span class="va">gr_atss</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">4</span></span></span>
 <span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://tidyomics.github.io/plyranges/reference/ranges-construct.html" class="external-link">as_granges</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="generate_events.html">generate_atss</a></span><span class="op">(</span>n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">find_atss</span><span class="op">(</span><span class="va">gr_tss</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 1 range and 7 metadata columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |     gene_id       tx_id exon_rank  estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;character&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr1      5-10      + |          g1          up         1         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        event_type event_tx_id event_estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;character&gt; &lt;character&gt;      &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]        atss        down             -1</span>
+<span class="r-in"><span><span class="fu">find_atss</span><span class="op">(</span><span class="va">gr_atss</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr21       3-5      + |         1         4         1 0.0971829</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]    chr21       3-5      + |         1         4         1 0.0971829</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE        atss           1      -0.985379</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE        atss           3      -0.592199</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># detect alternative transcription end sites</span></span></span>
+<span class="r-in"><span><span class="va">gr_ates</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mock_data.html">create_mock_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n_genes <span class="op">=</span> <span class="fl">2</span>, n_tx_per_gene <span class="op">=</span> <span class="fl">4</span>, n_exons_per_tx <span class="op">=</span> <span class="fl">4</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="preprocess.html">preprocess</a></span><span class="op">(</span>coef_col <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="generate_events.html">generate_ates</a></span><span class="op">(</span>n_events <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">find_ates</span><span class="op">(</span><span class="va">gr_ates</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 1 range and 8 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]    chr16   121-123      + |         2         8         4  0.283883</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE        ates           5     -0.0835998</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>
@@ -498,14 +563,14 @@ exons that end transcription at a different coordinate</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">find_all_events</span><span class="op">(</span><span class="va">gr_all</span>, type <span class="op">=</span> <span class="st">"boundary"</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 2 ranges and 8 metadata columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr8     21-25      + |         1         1         3 -0.155684</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]     chr8     21-25      + |         1         3         3 -0.297502</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;integer&gt;  &lt;numeric&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr2   101-105      + |         2         5         2 -0.0390255</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]     chr2   101-105      + |         2         8         2 -0.7484215</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       sim_event  event_type event_tx_id event_estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;logical&gt; &lt;character&gt;   &lt;numeric&gt;      &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE          se           4       0.476183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE          se           4       0.476183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]      TRUE          se           6       0.857323</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2]      TRUE          se           6       0.857323</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 <span class="r-in"><span></span></span>

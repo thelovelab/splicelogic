@@ -68,8 +68,12 @@
 - [`create_mock_data()`](https://thelovelab.github.io/splicelogic/reference/create_mock_data.md)
   : Create mock GRanges data for splicing event testing
 - [`generate_se()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_ie()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_cse()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_cie()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_mxe()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_ri()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
+  [`generate_si()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_a5ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_a3ss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)
   [`generate_atss()`](https://thelovelab.github.io/splicelogic/reference/generate_events.md)

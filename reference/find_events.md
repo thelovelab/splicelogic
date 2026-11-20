@@ -236,48 +236,89 @@ find_se(gr, type = "boundary")
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
-find_ie(gr, type = "boundary")
-#> GRanges object with 0 ranges and 0 metadata columns:
-#>    seqnames    ranges strand
-#>       <Rle> <IRanges>  <Rle>
-#>   -------
-#>   seqinfo: no sequences
-
-
-# "up" skips two consecutive exons of "down"
-gr_cse <- data.frame(
-  seqnames = "chr1",
-  start = c(1, 21, 41, 61, 1, 61),
-  end = c(10, 30, 50, 70, 10, 70),
-  strand = "+",
-  gene_id = "g1",
-  tx_id = rep(c("down", "up"), c(4, 2)),
-  exon_rank = c(1:4, 1:2),
-  estimate = rep(c(-1, 1), c(4, 2))
+# included exons: the same edit made to a down transcript
+gr_ie <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
-  plyranges::as_granges() |>
-  preprocess(coef_col = "estimate")
+  preprocess(coef_col = "estimate") |>
+  generate_ie(n_events = 1)
 
-find_cse(gr_cse)
-#> GRanges object with 2 ranges and 7 metadata columns:
-#>       seqnames    ranges strand |     gene_id       tx_id exon_rank  estimate
-#>          <Rle> <IRanges>  <Rle> | <character> <character> <integer> <numeric>
-#>   [1]     chr1     21-30      + |          g1        down         2        -1
-#>   [2]     chr1     41-50      + |          g1        down         3        -1
-#>        event_type event_tx_id event_estimate
-#>       <character> <character>      <numeric>
-#>   [1]         cse          up              1
-#>   [2]         cse          up              1
+find_ie(gr_ie, type = "boundary")
+#> GRanges object with 1 range and 8 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]     chr1     11-15      + |         1         2         2  0.485274
+#>       sim_event  event_type event_tx_id event_estimate
+#>       <logical> <character>   <numeric>      <numeric>
+#>   [1]      TRUE          ie           1      -0.980135
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
-# find_se() only reports an exon skipped on its own
+
+# an up transcript skips a run of two consecutive exons
+gr_cse <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+) |>
+  preprocess(coef_col = "estimate") |>
+  generate_cse(n_events = 1, n_skip = 2)
+
+find_cse(gr_cse)
+#> GRanges object with 6 ranges and 8 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer>  <numeric>
+#>   [1]     chr7     21-25      + |         1         1         3 -0.5858222
+#>   [2]     chr7     31-35      + |         1         1         4 -0.5858222
+#>   [3]     chr7     21-25      + |         1         3         3 -0.9440879
+#>   [4]     chr7     31-35      + |         1         3         4 -0.9440879
+#>   [5]     chr7     21-25      + |         1         4         3 -0.0612314
+#>   [6]     chr7     31-35      + |         1         4         4 -0.0612314
+#>       sim_event  event_type event_tx_id event_estimate
+#>       <logical> <character>   <numeric>      <numeric>
+#>   [1]      TRUE         cse           2       0.889367
+#>   [2]      TRUE         cse           2       0.889367
+#>   [3]      TRUE         cse           2       0.889367
+#>   [4]      TRUE         cse           2       0.889367
+#>   [5]      TRUE         cse           2       0.889367
+#>   [6]      TRUE         cse           2       0.889367
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+# find_se() only reports an exon skipped on its own, so finds nothing
 find_se(gr_cse)
 #> GRanges object with 0 ranges and 0 metadata columns:
 #>    seqnames    ranges strand
 #>       <Rle> <IRanges>  <Rle>
 #>   -------
 #>   seqinfo: no sequences
+
+
+# an up transcript includes a run of two exons that a down one skips
+gr_cie <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 5
+) |>
+  preprocess(coef_col = "estimate") |>
+  generate_cie(n_events = 1, n_skip = 2)
+
+find_cie(gr_cie)
+#> GRanges object with 6 ranges and 8 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]    chr11   111-115      + |         2         6         2  0.597618
+#>   [2]    chr11   121-125      + |         2         6         3  0.597618
+#>   [3]    chr11   111-115      + |         2         7         2  0.326413
+#>   [4]    chr11   121-125      + |         2         7         3  0.326413
+#>   [5]    chr11   111-115      + |         2         8         2  0.713150
+#>   [6]    chr11   121-125      + |         2         8         3  0.713150
+#>       sim_event  event_type event_tx_id event_estimate
+#>       <logical> <character>   <numeric>      <numeric>
+#>   [1]      TRUE         cie           5      -0.757729
+#>   [2]      TRUE         cie           5      -0.757729
+#>   [3]      TRUE         cie           5      -0.757729
+#>   [4]      TRUE         cie           5      -0.757729
+#>   [5]      TRUE         cie           5      -0.757729
+#>   [6]      TRUE         cie           5      -0.757729
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
 
 # detect mutually exclusive exons
@@ -291,12 +332,12 @@ find_mxe(gr_mx, type = "boundary")
 #> GRanges object with 2 ranges and 8 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>   [1]     chr1     11-15      + |         1         1         2 -0.980135
-#>   [2]     chr1     21-25      + |         1         2         2  0.485274
+#>   [1]    chr19     11-15      + |         1         4         2 -0.495589
+#>   [2]    chr19     21-25      + |         1         3         2  0.136705
 #>       sim_event  event_type event_tx_id event_estimate
 #>       <logical> <character>   <numeric>      <numeric>
-#>   [1]      TRUE         mxe           2       0.485274
-#>   [2]      TRUE         mxe           1      -0.980135
+#>   [1]      TRUE         mxe           3       0.136705
+#>   [2]      TRUE         mxe           4      -0.495589
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -309,31 +350,40 @@ gr_ri <- create_mock_data(
   generate_ri(n_events = 1)
 
 find_ri(gr_ri)
-#> GRanges object with 2 ranges and 8 metadata columns:
+#> GRanges object with 3 ranges and 8 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>   [1]     chr1     11-25      + |         1         2         2 0.0213647
-#>   [2]     chr1     11-25      + |         1         2         2 0.0213647
+#>   [1]    chr12     11-25      + |         1         2         2  0.355806
+#>   [2]    chr12     11-25      + |         1         2         2  0.355806
+#>   [3]    chr12     11-25      + |         1         2         2  0.355806
 #>       sim_event  event_type event_tx_id event_estimate
 #>       <logical> <character>   <numeric>      <numeric>
-#>   [1]      TRUE          ri           1      -0.783753
-#>   [2]      TRUE          ri           4      -0.944088
+#>   [1]      TRUE          ri           1     -0.6813640
+#>   [2]      TRUE          ri           3     -0.7873061
+#>   [3]      TRUE          ri           4     -0.0303944
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
-# the same data with the signs flipped: the introns retained above are
-# now spliced out by the up transcripts
-gr_si <- gr_ri |> dplyr::mutate(estimate = -estimate)
+# spliced introns: the same edit made to a down transcript, so the up
+# transcripts splice out the intron it retains
+gr_si <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+) |>
+  preprocess(coef_col = "estimate") |>
+  generate_si(n_events = 1)
+
 find_si(gr_si)
-#> GRanges object with 2 ranges and 8 metadata columns:
-#>       seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate
-#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer>  <numeric>
-#>   [1]     chr1     11-25      + |         1         2         2 -0.0213647
-#>   [2]     chr1     11-25      + |         1         2         2 -0.0213647
+#> GRanges object with 3 ranges and 8 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]    chr20   101-115      + |         2         5         2 -0.350577
+#>   [2]    chr20   101-115      + |         2         5         2 -0.350577
+#>   [3]    chr20   101-115      + |         2         5         2 -0.350577
 #>       sim_event  event_type event_tx_id event_estimate
 #>       <logical> <character>   <numeric>      <numeric>
-#>   [1]      TRUE          si           1       0.783753
-#>   [2]      TRUE          si           4       0.944088
+#>   [1]      TRUE          si           6       0.667885
+#>   [2]      TRUE          si           7       0.518317
+#>   [3]      TRUE          si           8       0.672151
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -349,12 +399,12 @@ find_a5ss(gr_a5)
 #> GRanges object with 2 ranges and 8 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>   [1]    chr18   101-107      + |         2         6         2  0.615734
-#>   [2]    chr18   101-107      + |         2         6         2  0.615734
+#>   [1]     chr7     11-13      + |         1         3         2  0.346896
+#>   [2]     chr7     11-13      + |         1         3         2  0.346896
 #>       sim_event  event_type event_tx_id event_estimate
 #>       <logical> <character>   <numeric>      <numeric>
-#>   [1]      TRUE        a5ss           5      -0.082719
-#>   [2]      TRUE        a5ss           8      -0.761029
+#>   [1]      TRUE        a5ss           1      -0.462591
+#>   [2]      TRUE        a5ss           4      -0.257460
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -369,37 +419,52 @@ find_a3ss(gr_a3)
 #> GRanges object with 2 ranges and 8 metadata columns:
 #>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
 #>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>   [1]    chr11     13-15      + |         1         3         2  0.399659
-#>   [2]    chr11     13-15      + |         1         3         2  0.399659
+#>   [1]    chr20   113-115      + |         2         6         3 0.0455507
+#>   [2]    chr20   113-115      + |         2         6         3 0.0455507
 #>       sim_event  event_type event_tx_id event_estimate
 #>       <logical> <character>   <numeric>      <numeric>
-#>   [1]      TRUE        a3ss           1      -0.437331
-#>   [2]      TRUE        a3ss           4      -0.559999
+#>   [1]      TRUE        a3ss           5       -0.79801
+#>   [2]      TRUE        a3ss           8       -0.85807
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
 
-gr_tss <- data.frame(
-  seqnames = "chr1",
-  start = c(1, 21, 41, 5, 21, 41),
-  end = c(10, 30, 50, 10, 30, 50),
-  strand = "+",
-  gene_id = "g1",
-  tx_id = rep(c("down", "up"), each = 3),
-  exon_rank = rep(seq_len(3), 2),
-  estimate = rep(c(-1, 1), each = 3)
+# detect alternative transcription start sites
+gr_atss <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
 ) |>
-  plyranges::as_granges() |>
-  preprocess(coef_col = "estimate")
+  preprocess(coef_col = "estimate") |>
+  generate_atss(n_events = 1)
 
-find_atss(gr_tss)
-#> GRanges object with 1 range and 7 metadata columns:
-#>       seqnames    ranges strand |     gene_id       tx_id exon_rank  estimate
-#>          <Rle> <IRanges>  <Rle> | <character> <character> <integer> <numeric>
-#>   [1]     chr1      5-10      + |          g1          up         1         1
-#>        event_type event_tx_id event_estimate
-#>       <character> <character>      <numeric>
-#>   [1]        atss        down             -1
+find_atss(gr_atss)
+#> GRanges object with 2 ranges and 8 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]    chr21       3-5      + |         1         4         1 0.0971829
+#>   [2]    chr21       3-5      + |         1         4         1 0.0971829
+#>       sim_event  event_type event_tx_id event_estimate
+#>       <logical> <character>   <numeric>      <numeric>
+#>   [1]      TRUE        atss           1      -0.985379
+#>   [2]      TRUE        atss           3      -0.592199
+#>   -------
+#>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
+
+# detect alternative transcription end sites
+gr_ates <- create_mock_data(
+  n_genes = 2, n_tx_per_gene = 4, n_exons_per_tx = 4
+) |>
+  preprocess(coef_col = "estimate") |>
+  generate_ates(n_events = 1)
+
+find_ates(gr_ates)
+#> GRanges object with 1 range and 8 metadata columns:
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
+#>   [1]    chr16   121-123      + |         2         8         4  0.283883
+#>       sim_event  event_type event_tx_id event_estimate
+#>       <logical> <character>   <numeric>      <numeric>
+#>   [1]      TRUE        ates           5     -0.0835998
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -413,14 +478,14 @@ gr_all <- create_mock_data(
 
 find_all_events(gr_all, type = "boundary", verbose = FALSE)
 #> GRanges object with 2 ranges and 8 metadata columns:
-#>       seqnames    ranges strand |   gene_id     tx_id exon_rank  estimate
-#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer> <numeric>
-#>   [1]     chr8     21-25      + |         1         1         3 -0.155684
-#>   [2]     chr8     21-25      + |         1         3         3 -0.297502
+#>       seqnames    ranges strand |   gene_id     tx_id exon_rank   estimate
+#>          <Rle> <IRanges>  <Rle> | <integer> <numeric> <integer>  <numeric>
+#>   [1]     chr2   101-105      + |         2         5         2 -0.0390255
+#>   [2]     chr2   101-105      + |         2         8         2 -0.7484215
 #>       sim_event  event_type event_tx_id event_estimate
 #>       <logical> <character>   <numeric>      <numeric>
-#>   [1]      TRUE          se           4       0.476183
-#>   [2]      TRUE          se           4       0.476183
+#>   [1]      TRUE          se           6       0.857323
+#>   [2]      TRUE          se           6       0.857323
 #>   -------
 #>   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 ```
