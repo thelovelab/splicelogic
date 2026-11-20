@@ -1378,7 +1378,7 @@ splicing event from the comparison of the two groups.
     ## other attached packages:
     ##  [1] tibble_3.3.1           GenomicFeatures_1.65.0 AnnotationDbi_1.75.2  
     ##  [4] Biobase_2.73.2         AnnotationHub_4.3.3    BiocFileCache_3.3.3   
-    ##  [7] dbplyr_2.6.0           readr_2.2.0            splicelogic_1.1.5     
+    ##  [7] dbplyr_2.6.0           readr_2.2.0            splicelogic_1.1.6     
     ## [10] plyranges_1.33.2       dplyr_1.2.1            GenomicRanges_1.65.4  
     ## [13] Seqinfo_1.3.2          IRanges_2.47.5         S4Vectors_0.51.10     
     ## [16] BiocGenerics_0.59.13   generics_0.1.4        
