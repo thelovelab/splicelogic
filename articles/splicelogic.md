@@ -1,5 +1,8 @@
 # splicelogic: transcript sets to splice events
 
+If you use *splicelogic* in your research, please cite Campillo and Love
+(2026).
+
 ## Introduction
 
 *splicelogic* turns sets of transcripts into discrete splicing events.
@@ -1347,6 +1350,12 @@ events as input. Instead, it works from two groups of transcripts
 mapped onto exon structures) and directly classifies the type of
 splicing event from the comparison of the two groups.
 
+## References
+
+Campillo, Beatriz, and Michael I. Love. 2026. “Deducing Splicing Events
+from Transcript Sets with splicelogic.” *bioRxiv*, ahead of print.
+<https://doi.org/10.64898/2026.10.30.762958>.
+
 ## Session info
 
 \
@@ -1376,7 +1385,7 @@ splicing event from the comparison of the two groups.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] tibble_3.3.1           GenomicFeatures_1.65.0 AnnotationDbi_1.75.2  
+    ##  [1] tibble_3.3.1           GenomicFeatures_1.65.2 AnnotationDbi_1.75.2  
     ##  [4] Biobase_2.73.2         AnnotationHub_4.3.3    BiocFileCache_3.3.3   
     ##  [7] dbplyr_2.6.0           readr_2.2.0            splicelogic_1.1.6     
     ## [10] plyranges_1.33.2       dplyr_1.2.1            GenomicRanges_1.65.4  

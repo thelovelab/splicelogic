@@ -101,6 +101,16 @@ branch on GitHub:
 - Facilitating RNA-binding protein (RBP) motif detection.
 - Facilitating interpretation of downstream structural consequences.
 
+# Citation
+
+If you use *splicelogic* in your research, please cite:
+
+> Campillo B, Love MI (2026). Deducing splicing events from transcript
+> sets with splicelogic. *bioRxiv*.
+> [doi:10.64898/2026.10.30.762958](https://doi.org/10.64898/2026.10.30.762958)
+
+The citation is also available from R with `citation("splicelogic")`.
+
 # Feedback
 
 We would love to hear your feedback. Please post to an [Issue on
