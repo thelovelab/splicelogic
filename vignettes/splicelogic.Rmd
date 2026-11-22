@@ -7,11 +7,15 @@ author:
       orcid: 0000-0001-8401-0545
 date: "`r format(Sys.time(), '%m/%d/%Y')`"
 output: rmarkdown::html_document
+bibliography: references.bib
 vignette: |
   %\VignetteIndexEntry{Introduction to `splicelogic`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+If you use *splicelogic* in your research, please cite
+@campillo2026splicelogic.
 
 # Introduction
 
@@ -933,6 +937,10 @@ Instead, it works from two groups of transcripts (either an explicit partition
 or transcript-level DTU results already mapped onto exon structures) and
 directly classifies the type of splicing event from the comparison of the two
 groups.
+
+# References
+
+<div id="refs"></div>
 
 # Session info
 

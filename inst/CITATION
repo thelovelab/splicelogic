@@ -1,0 +1,13 @@
+bibentry(
+  bibtype = "Article",
+  key = "campillo2026splicelogic",
+  title = "Deducing splicing events from transcript sets with splicelogic",
+  author = c(
+    person("Beatriz", "Campillo"),
+    person(c("Michael", "I."), "Love")
+  ),
+  journal = "bioRxiv",
+  year = "2026",
+  doi = "10.64898/2026.10.30.762958",
+  url = "https://www.biorxiv.org/content/10.64898/2026.10.30.762958v1"
+)
